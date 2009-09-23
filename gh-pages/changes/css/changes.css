@@ -1,0 +1,78 @@
+/*
+ * This is a common dao with basic CRUD operations and is not limited to any 
+ * persistent layer implementation
+ * 
+ * Copyright (C) 2008  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+body {
+    width: 950px;
+    text-align: center;
+}
+iframe {
+    width: 975px;
+    border: none;
+    margin: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
+}
+table {
+    width: 100%;
+    text-align: center;
+}
+a {
+    text-decoration: none;
+    color: blue;
+    font-size: 12px;
+}
+a:hover {
+    color: brown;
+}
+a:visited {
+    color: blue;
+}
+#container {
+    text-align: left;
+}
+#currentChanges {
+    height: auto;
+}
+#changeComment {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+#mainLink {
+    float: left;
+}
+#secondaryLink {
+    font-size: 8px;
+    float: right;
+}
+#secondaryLink a{
+    font-size: 8px;
+}
+#author {
+    padding-left: 15px;
+    border-left-style:solid;
+    border-left-width: thin;
+    font-size: 10px;
+    font-style: italic;
+    text-align: left;
+}
+#date {
+    padding-right: 15px;
+    border-right-style:solid;
+    border-right-width: thin;
+    font-size: 8px;
+}
