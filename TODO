@@ -1,0 +1,8 @@
+TODO List
+---------
+
+1. Create a content definition schema
+2. Create a content API
+3. Create content CRUD API
+4. Add local and remote Search API for content
+
