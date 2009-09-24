@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *
+ * This is a simple Content Management System (CMS)
+ * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<project>
+		<parent>
+				<artifactId>smart-cms</artifactId>
+				<groupId>com.smartitengineering</groupId>
+				<version>0.1-SNAPSHOT</version>
+		</parent>
+		<modelVersion>4.0.0</modelVersion>
+		<groupId>com.smartitengineering.smart-cms</groupId>
+		<artifactId>content-api</artifactId>
+		<name>content-api</name>
+		<description><![CDATA[
+The module is responsible for defining a API for the CMS. It will not contain
+any implementation except for content type definition parsing.
+]]>
+		</description>
+		<build>
+				<plugins>
+						<plugin>
+								<groupId>org.apache.maven.plugins</groupId>
+								<artifactId>maven-assembly-plugin</artifactId>
+								<version>${assembly.version}</version>
+						</plugin>
+				</plugins>
+		</build>
+		<dependencies>
+				<dependency>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+						<version>${junit.version}</version>
+						<scope>test</scope>
+				</dependency>
+		</dependencies>
+</project>
