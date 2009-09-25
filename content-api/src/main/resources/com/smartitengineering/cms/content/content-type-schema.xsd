@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *
+ * This is a simple Content Management System (CMS)
+ * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+xmlns:cur="http://www.smartitengineering.com/smart-cms/content/content-type-schema"
+targetNamespace="http://www.smartitengineering.com/smart-cms/content/content-type-schema"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd"
+>
+		<xs:simpleType name="smartDate">
+				<xs:restriction base="xs:dateTime">
+						<xs:pattern value="[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-2][0-9]:[0-5][0-9]:[0-5][0-9]([+-][0-2][0-9]:[0-5][0-9])"/>
+				</xs:restriction>
+		</xs:simpleType>
+		<xs:complexType name="value">
+				<xs:sequence>
+						<xs:choice>
+								<xs:element name="content" minOccurs="1" maxOccurs="1">
+										<xs:complexType>
+												<xs:sequence>
+														<xs:element name="typeName" type="xs:string" minOccurs="0" maxOccurs="1"/>
+												</xs:sequence>
+										</xs:complexType>
+								</xs:element>
+								<xs:element name="long" minOccurs="1" maxOccurs="1" />
+								<xs:element name="integer" minOccurs="1" maxOccurs="1" />
+								<xs:element name="double" minOccurs="1" maxOccurs="1" />
+								<xs:element name="boolean" minOccurs="1" maxOccurs="1" />
+								<xs:element name="datetime" minOccurs="1" maxOccurs="1" />
+								<xs:element name="string" minOccurs="1" maxOccurs="1">
+										<xs:complexType>
+												<xs:sequence>
+														<xs:choice>
+																<xs:element name="plain" minOccurs="1" maxOccurs="1"/>
+																<xs:element name="xml" minOccurs="1" maxOccurs="1"/>
+														</xs:choice>
+												</xs:sequence>
+										</xs:complexType>
+								</xs:element>
+								<xs:element name="collection" minOccurs="1" maxOccurs="1">
+										<xs:complexType>
+												<xs:sequence>
+														<xs:element name="item" type="cur:value" minOccurs="1" maxOccurs="1"/>
+														<xs:element name="size" type="xs:integer" minOccurs="0" maxOccurs="1"/>
+												</xs:sequence>
+										</xs:complexType>
+								</xs:element>
+						</xs:choice>
+				</xs:sequence>
+		</xs:complexType>
+		<xs:complexType name="fields">
+				<xs:sequence>
+						<xs:element name="field" minOccurs="1" maxOccurs="unbounded">
+								<xs:complexType>
+										<xs:sequence>
+												<xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+												<xs:element name="value" type="cur:value" minOccurs="1" maxOccurs="1"/>
+										</xs:sequence>
+								</xs:complexType>
+						</xs:element>
+				</xs:sequence>
+		</xs:complexType>
+		<xs:complexType name="textual">
+				<xs:sequence>
+						<xs:element name="fields" type="cur:fields" />
+				</xs:sequence>
+		</xs:complexType>
+		<xs:complexType name="binary">
+				<xs:sequence>
+						<xs:element name="mimeType" type="xs:string" minOccurs="1" maxOccurs="1" />
+						<xs:element name="fields" type="cur:fields" minOccurs="0" maxOccurs="1" />
+				</xs:sequence>
+		</xs:complexType>
+		<xs:complexType name="contentType">
+				<xs:sequence>
+						<xs:element name="name" type="xs:string"/>
+						<xs:element name="type">
+								<xs:complexType>
+										<xs:sequence>
+												<xs:choice>
+														<xs:element name="textual" type="cur:textual"></xs:element>
+														<xs:element name="binary" type="cur:binary"></xs:element>
+												</xs:choice>
+										</xs:sequence>
+								</xs:complexType>
+						</xs:element>
+				</xs:sequence>
+				<xs:attribute name="namespace" type="xs:string" use="required" />
+		</xs:complexType>
+		<xs:element name="contentTypes">
+				<xs:complexType>
+						<xs:sequence>
+								<xs:element name="contentType" type="cur:contentType" minOccurs="1" maxOccurs="unbounded" />
+						</xs:sequence>
+				</xs:complexType>
+		</xs:element>
+</xs:schema>
