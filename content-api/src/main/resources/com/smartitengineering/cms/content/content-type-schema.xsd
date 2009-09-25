@@ -108,9 +108,16 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
 								<xs:complexType>
 										<xs:sequence>
 												<xs:choice>
-														<xs:element name="textual" type="cur:textual"></xs:element>
-														<xs:element name="binary" type="cur:binary"></xs:element>
+														<xs:element name="textual" type="cur:textual" />
+														<xs:element name="binary" type="cur:binary" />
 												</xs:choice>
+										</xs:sequence>
+								</xs:complexType>
+						</xs:element>
+						<xs:element name="status" minOccurs="1" maxOccurs="unbounded">
+								<xs:complexType>
+										<xs:sequence>
+												<xs:element name="value" minOccurs="1" maxOccurs="unbounded" />
 										</xs:sequence>
 								</xs:complexType>
 						</xs:element>
