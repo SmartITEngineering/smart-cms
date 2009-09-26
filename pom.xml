@@ -512,5 +512,6 @@
 		</properties>
 		<modules>
 				<module>content-api</module>
+				<module>content-api-impl</module>
 		</modules>
 </project>
