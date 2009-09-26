@@ -16,16 +16,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.content.api;
+package com.smartitengineering.cms.content.type;
+
+import java.io.File;
+import org.w3c.dom.Document;
 
 /**
- * Hello world!
- *
+ * An API for validating content type
+ * @author imyousuf
+ * @since 0.1
  */
-public class App 
-{
-    public static void main( String[] args )
-    {
-        System.out.println( "Hello World!" );
-    }
+public interface TypeValidator {
+
+		/**
+		 * Validate the specified content type definition.
+		 * @param contentTypeDef File to validate
+		 * @return True if valid else false
+		 * @throws java.lang.Exception If any error in validating
+		 */
+		public boolean isValid(File contentTypeDef)
+						throws Exception;
+
+		/**
+		 * Validate the specified content type definition.
+		 * @param document XML {@link Document} to validate
+		 * @return True if valid else false
+		 * @throws Exception If any error in validating
+		 */
+		public boolean isValid(Document document)
+						throws Exception;
 }

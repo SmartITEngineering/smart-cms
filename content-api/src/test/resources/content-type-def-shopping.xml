@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *
+ * This is a simple Content Management System (CMS)
+ * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!--
+    Document   : content-type-def-product.xml
+    Created on : September 25, 2009, 5:20 PM
+    Author     : imyousuf
+    Description:
+        A sample content type definition in context of smart shopping
+-->
+<ns:contentTypes  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:ns='http://www.smartitengineering.com/smart-cms/content/content-type-schema'
+   xsi:schemaLocation='http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../main/resources/com/smartitengineering/cms/content/content-type-schema.xsd'>
+		<contentType namespace="com.smartitengineering.smart-shopping.content">
+				<name>Product</name>
+				<type>
+						<textual>
+								<fields>
+										<field>
+												<name>manufactureID</name>
+												<value>
+														<string>
+																<plain />
+														</string>
+												</value>
+												<required>true</required>
+										</field>
+										<field>
+												<name>name</name>
+												<value>
+														<string>
+																<plain />
+														</string>
+												</value>
+												<required>true</required>
+										</field>
+										<field>
+												<name>description</name>
+												<value>
+														<string>
+																<xml />
+														</string>
+												</value>
+										</field>
+								</fields>
+						</textual>
+				</type>
+				<status>
+						<value>draft</value>
+						<value>marketed</value>
+						<value>withdrawn</value>
+						<value>obselete</value>
+				</status>
+		</contentType>
+
+		<contentType namespace="com.smartitengineering.smart-shopping.content">
+				<name>Book</name>
+				<type>
+						<textual>
+								<parentTypeNS>com.smartitengineering.smart-shopping.content</parentTypeNS>
+								<parentTypeName>Product</parentTypeName>
+								<fields>
+										<field>
+												<name>isbn</name>
+												<value>
+														<string>
+																<plain />
+														</string>
+												</value>
+												<required>true</required>
+										</field>
+										<field>
+												<name>publishers</name>
+												<value>
+														<collection>
+																<item>
+																		<content>
+																				<typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+																				<typeName>Publisher</typeName>
+																		</content>
+																</item>
+														</collection>
+												</value>
+												<required>true</required>
+										</field>
+										<field>
+												<name>authors</name>
+												<value>
+														<collection>
+																<item>
+																		<content>
+																				<typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+																				<typeName>Author</typeName>
+																		</content>
+																</item>
+														</collection>
+												</value>
+												<required>true</required>
+										</field>
+								</fields>
+						</textual>
+				</type>
+				<status>
+						<value>draft</value>
+						<value>marketed</value>
+						<value>obselete</value>
+				</status>
+		</contentType>
+
+		<contentType namespace="com.smartitengineering.smart-shopping.content">
+				<name>Publisher</name>
+				<type>
+						<textual>
+								<fields>
+										<field>
+												<name>name</name>
+												<value>
+														<string>
+																<plain />
+														</string>
+												</value>
+												<required>true</required>
+										</field>
+										<field>
+												<name>publicationHouse</name>
+												<value>
+														<content>
+																<typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+																<typeName>PublicationHouse</typeName>
+														</content>
+												</value>
+												<required>true</required>
+										</field>
+								</fields>
+						</textual>
+				</type>
+				<status>
+						<value>draft</value>
+						<value>marketed</value>
+						<value>obselete</value>
+				</status>
+		</contentType>
+
+		<contentType namespace="com.smartitengineering.smart-shopping.content">
+				<name>PublicationHouse</name>
+				<type>
+						<textual>
+								<fields>
+										<field>
+												<name>name</name>
+												<value>
+														<string>
+																<plain />
+														</string>
+												</value>
+												<required>true</required>
+										</field>
+										<field>
+												<name>adress</name>
+												<value>
+														<content>
+																<typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+																<typeName>Address</typeName>
+														</content>
+												</value>
+												<required>true</required>
+										</field>
+								</fields>
+						</textual>
+				</type>
+				<status>
+						<value>draft</value>
+						<value>marketed</value>
+						<value>obselete</value>
+				</status>
+		</contentType>
+
+		<contentType namespace="com.smartitengineering.smart-shopping.content">
+				<name>Address</name>
+				<type>
+						<textual>
+								<fields>
+										<field>
+												<name>streetAddress</name>
+												<value>
+														<string>
+																<plain />
+														</string>
+												</value>
+										</field>
+										<field>
+												<name>state</name>
+												<value>
+														<string>
+																<plain />
+														</string>
+												</value>
+										</field>
+										<field>
+												<name>city</name>
+												<value>
+														<string>
+																<plain />
+														</string>
+												</value>
+										</field>
+										<field>
+												<name>country</name>
+												<value>
+														<string>
+																<plain />
+														</string>
+												</value>
+										</field>
+										<field>
+												<name>zipCode</name>
+												<value>
+														<string>
+																<plain />
+														</string>
+												</value>
+										</field>
+								</fields>
+						</textual>
+				</type>
+				<status>
+						<value>published</value>
+				</status>
+		</contentType>
+		
+		<contentType namespace="com.smartitengineering.smart-shopping.content">
+				<name>Author</name>
+				<type>
+						<textual>
+								<fields>
+										<field>
+												<name>name</name>
+												<value>
+														<string>
+																<plain />
+														</string>
+												</value>
+										</field>										
+								</fields>
+						</textual>
+				</type>
+				<status>
+						<value>draft</value>
+						<value>published</value>
+				</status>
+		</contentType>
+</ns:contentTypes>

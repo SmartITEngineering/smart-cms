@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *
+ * This is a simple Content Management System (CMS)
+ * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!--
+    Document   : content-type-def-1.xml
+    Created on : September 25, 2009, 1:10 PM
+    Author     : imyousuf
+    Description:
+        Test content type definition.
+-->
+<ns:contentTypes  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:ns='http://www.smartitengineering.com/smart-cms/content/content-type-schema'
+   xsi:schemaLocation='http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../main/resources/com/smartitengineering/cms/content/content-type-schema.xsd'>
+		<contentType namespace="asdfasdf1">
+				<name>XYZ</name>
+				<type>
+						<textual>
+								<fields>
+										<field>
+												<name>x</name>
+												<value>
+														<integer />
+												</value>
+										</field>
+										<field>
+												<name>y</name>
+												<value>
+														<boolean />
+												</value>
+										</field>
+										<field>
+												<name>y</name>
+												<value>
+														<string>
+																<plain />
+														</string>
+												</value>
+										</field>
+								</fields>
+						</textual>
+				</type>
+				<status>
+						<value>draft</value>
+						<value>marketed</value>
+						<value>obselete</value>
+				</status>
+		</contentType>
+		<contentType namespace="jpeg">
+				<name>RST</name>
+				<type>
+						<binary>
+								<mimeType>image/jpeg</mimeType>
+						</binary>
+				</type>
+				<status>
+						<value>draft</value>
+						<value>marketed</value>
+						<value>obselete</value>
+				</status>
+		</contentType>
+		<contentType namespace="asdfasdf2">
+				<name>ABC</name>
+				<type>
+						<textual>
+								<fields>
+										<field>
+												<name>x</name>
+												<value>
+														<integer />
+												</value>
+										</field>
+										<field>
+												<name>y</name>
+												<value>
+														<boolean />
+												</value>
+										</field>
+										<field>
+												<name>z</name>
+												<value>
+														<content>
+																
+														</content>
+												</value>
+										</field>
+										<field>
+												<name>a</name>
+												<value>
+														<content>
+																<typeNS>asdfasdf2</typeNS>
+																<typeName>XYZ</typeName>
+														</content>
+												</value>
+										</field>
+										<field>
+												<name>b</name>
+												<value>
+														<collection>
+																<item>
+																		<content>
+																				<typeNS>asdfasdf1</typeNS>
+																				<typeName>XYZ</typeName>
+																		</content>
+																</item>
+														</collection>
+												</value>
+										</field>
+										<field>
+												<name>c</name>
+												<value>
+														<collection>
+																<item>
+																		<content>
+																				<typeNS>asdfasdf1</typeNS>
+																				<typeName>XYZ</typeName>
+																		</content>
+																</item>
+																<size>2</size>
+														</collection>
+												</value>
+										</field>
+										<field>
+												<name>d</name>
+												<value>
+														<string>
+																<xml />
+														</string>
+												</value>
+										</field>
+								</fields>
+						</textual>
+				</type>
+				<status>
+						<value>draft</value>
+						<value>marketed</value>
+						<value>obselete</value>
+				</status>
+		</contentType>
+		<contentType namespace="asdfasdf2">
+				<name>DEF</name>
+				<type>
+						<textual>
+								<parentTypeNS>asdfasdf2</parentTypeNS>
+								<parentTypeName>ABC</parentTypeName>
+								<fields>
+										<field>
+												<name>e</name>
+												<value>
+														<string>
+																<xml />
+														</string>
+												</value>
+										</field>
+								</fields>
+						</textual>
+				</type>
+				<status>
+						<value>draft</value>
+						<value>marketed</value>
+						<value>obselete</value>
+				</status>
+		</contentType>
+		<contentType namespace="asdfasdf2">
+				<name>png-images</name>
+				<type>
+						<binary>
+								<mimeType>image/png</mimeType>
+								<fields>
+										<field>
+												<name>fileName</name>
+												<value>
+														<string>
+																<plain />
+														</string>
+												</value>
+										</field>
+										<field>
+												<name>copyright</name>
+												<value>
+														<string>
+																<plain />
+														</string>
+												</value>
+										</field>
+								</fields>
+						</binary>
+				</type>
+				<status>
+						<value>draft</value>
+						<value>marketed</value>
+						<value>obselete</value>
+				</status>
+		</contentType>
+</ns:contentTypes>
