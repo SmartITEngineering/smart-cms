@@ -19,13 +19,26 @@
 package com.smartitengineering.cms.content.api;
 
 /**
- * Hello world!
- *
+ * Defines the datatype for representing collection
+ * @author imyousuf
+ * @since 0.1
  */
-public class App 
-{
-    public static void main( String[] args )
-    {
-        System.out.println( "Hello World!" );
-    }
+public interface CollectionDataType
+				extends DataType {
+
+		/**
+		 * Retrieve the definition of the collection's items. Since currently
+		 * collection only supports homogeneous types so it will return only a
+		 * definite existing content type definition.
+		 * @return Definition of collection's items.
+		 */
+		public DataType getItemDataType();
+
+		/**
+		 * Retrieve the maximum size of the collection. If it is a non positive
+		 * number, it will indicate that the upper bound of the collection
+		 * is infinity.
+		 * @return the maximum size
+		 */
+		public int getSize();
 }
