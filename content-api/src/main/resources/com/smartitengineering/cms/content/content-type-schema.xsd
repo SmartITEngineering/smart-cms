@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-xmlns:cur="http://www.smartitengineering.com/smart-cms/content/content-type-schema"
+xmlns="http://www.smartitengineering.com/smart-cms/content/content-type-schema"
 targetNamespace="http://www.smartitengineering.com/smart-cms/content/content-type-schema"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd"
@@ -28,106 +28,138 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
 						<xs:pattern value="[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-2][0-9]:[0-5][0-9]:[0-5][0-9]([+-][0-2][0-9]:[0-5][0-9])"/>
 				</xs:restriction>
 		</xs:simpleType>
+		<xs:element name="typeNS" type="xs:string" />
+		<xs:element name="typeName" type="xs:string" />
 		<xs:group name="contentTypeGrp">
 				<xs:sequence>
-						<xs:element name="typeNS" type="xs:string" />
-						<xs:element name="typeName" type="xs:string" />
+						<xs:element ref="typeNS" minOccurs="1" maxOccurs="1" />
+						<xs:element ref="typeName" minOccurs="1" maxOccurs="1" />
 				</xs:sequence>
 		</xs:group>
-		<xs:complexType name="value">
-				<xs:sequence>
-						<xs:choice>
-								<xs:element name="content" minOccurs="1" maxOccurs="1">
-										<xs:complexType>
-												<xs:sequence>
-														<xs:group ref="cur:contentTypeGrp" minOccurs="0" maxOccurs="1" />
-												</xs:sequence>
-										</xs:complexType>
-								</xs:element>
-								<xs:element name="long" minOccurs="1" maxOccurs="1" />
-								<xs:element name="integer" minOccurs="1" maxOccurs="1" />
-								<xs:element name="double" minOccurs="1" maxOccurs="1" />
-								<xs:element name="boolean" minOccurs="1" maxOccurs="1" />
-								<xs:element name="datetime" minOccurs="1" maxOccurs="1" />
-								<xs:element name="string" minOccurs="1" maxOccurs="1">
-										<xs:complexType>
-												<xs:sequence>
-														<xs:choice>
-																<xs:element name="plain" minOccurs="1" maxOccurs="1"/>
-																<xs:element name="xml" minOccurs="1" maxOccurs="1"/>
-														</xs:choice>
-												</xs:sequence>
-										</xs:complexType>
-								</xs:element>
-								<xs:element name="collection" minOccurs="1" maxOccurs="1">
-										<xs:complexType>
-												<xs:sequence>
-														<xs:element name="item" type="cur:value" minOccurs="1" maxOccurs="1"/>
-														<xs:element name="size" type="xs:integer" minOccurs="0" maxOccurs="1"/>
-												</xs:sequence>
-										</xs:complexType>
-								</xs:element>
-						</xs:choice>
-				</xs:sequence>
-		</xs:complexType>
-		<xs:complexType name="fields">
-				<xs:sequence>
-						<xs:element name="field" minOccurs="1" maxOccurs="unbounded">
-								<xs:complexType>
-										<xs:sequence>
-												<xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
-												<xs:element name="value" type="cur:value" minOccurs="1" maxOccurs="1"/>
-												<xs:element name="required" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
-										</xs:sequence>
-								</xs:complexType>
-						</xs:element>
-				</xs:sequence>
-		</xs:complexType>
+		<xs:element name="content">
+				<xs:complexType>
+						<xs:sequence>
+								<xs:group ref="contentTypeGrp" minOccurs="0" maxOccurs="1" />
+						</xs:sequence>
+				</xs:complexType>
+		</xs:element>
+		<xs:element name="long" />
+		<xs:element name="integer" />
+		<xs:element name="double" />
+		<xs:element name="boolean" />
+		<xs:element name="datetime" />
+		<xs:element name="plain" />
+		<xs:element name="xml" />
+		<xs:element name="string">
+				<xs:complexType>
+						<xs:sequence>
+								<xs:choice>
+										<xs:element ref="plain" minOccurs="1" maxOccurs="1"/>
+										<xs:element ref="xml" minOccurs="1" maxOccurs="1"/>
+								</xs:choice>
+						</xs:sequence>
+				</xs:complexType>
+		</xs:element>
+		<xs:element name="size" type="xs:integer" />
+		<xs:element name="collection">
+				<xs:complexType>
+						<xs:sequence>
+								<xs:element ref="value" minOccurs="1" maxOccurs="1"/>
+								<xs:element ref="size" minOccurs="0" maxOccurs="1"/>
+						</xs:sequence>
+				</xs:complexType>
+		</xs:element>
+		<xs:element name="value">
+				<xs:complexType>
+						<xs:sequence>
+								<xs:choice>
+										<xs:element ref="content" minOccurs="1" maxOccurs="1" />
+										<xs:element ref="long" minOccurs="1" maxOccurs="1" />
+										<xs:element ref="integer" minOccurs="1" maxOccurs="1" />
+										<xs:element ref="double" minOccurs="1" maxOccurs="1" />
+										<xs:element ref="boolean" minOccurs="1" maxOccurs="1" />
+										<xs:element ref="datetime" minOccurs="1" maxOccurs="1" />
+										<xs:element ref="string" minOccurs="1" maxOccurs="1" />
+										<xs:element ref="collection" minOccurs="1" maxOccurs="1" />
+								</xs:choice>
+						</xs:sequence>
+				</xs:complexType>
+		</xs:element>
+		<xs:element name="required" type="xs:boolean" />
+		<xs:element name="field">
+				<xs:complexType>
+						<xs:sequence>
+								<xs:element ref="name" minOccurs="1" maxOccurs="1"/>
+								<xs:element ref="value" minOccurs="1" maxOccurs="1"/>
+								<xs:element ref="required" minOccurs="0" maxOccurs="1"/>
+						</xs:sequence>
+				</xs:complexType>
+		</xs:element>
+		<xs:element name="fields">
+				<xs:complexType>
+						<xs:sequence>
+								<xs:element ref="field" minOccurs="1" maxOccurs="unbounded" />
+						</xs:sequence>
+				</xs:complexType>
+		</xs:element>
+		<xs:element name="parentTypeNS" type="xs:string" />
+		<xs:element name="parentTypeName" type="xs:string" />
 		<xs:group name="parentType">
 				<xs:sequence>
-						<xs:element name="parentTypeNS" type="xs:string" />
-						<xs:element name="parentTypeName" type="xs:string" />
+						<xs:element ref="parentTypeNS" minOccurs="1" maxOccurs="1" />
+						<xs:element ref="parentTypeName" minOccurs="1" maxOccurs="1" />
 				</xs:sequence>
 		</xs:group>
-		<xs:complexType name="textual">
-				<xs:sequence>
-						<xs:group ref="cur:parentType" minOccurs="0" maxOccurs="1" />
-						<xs:element name="fields" type="cur:fields" minOccurs="1" maxOccurs="1" />
-				</xs:sequence>
-		</xs:complexType>
-		<xs:complexType name="binary">
-				<xs:sequence>
-						<xs:element name="mimeType" type="xs:string" minOccurs="1" maxOccurs="1" />
-						<xs:element name="fields" type="cur:fields" minOccurs="0" maxOccurs="1" />
-				</xs:sequence>
-		</xs:complexType>
-		<xs:complexType name="contentType">
-				<xs:sequence>
-						<xs:element name="name" type="xs:string"/>
-						<xs:element name="type">
-								<xs:complexType>
-										<xs:sequence>
-												<xs:choice>
-														<xs:element name="textual" type="cur:textual" />
-														<xs:element name="binary" type="cur:binary" />
-												</xs:choice>
-										</xs:sequence>
-								</xs:complexType>
-						</xs:element>
-						<xs:element name="status" minOccurs="1" maxOccurs="unbounded">
-								<xs:complexType>
-										<xs:sequence>
-												<xs:element name="value" minOccurs="1" maxOccurs="unbounded" />
-										</xs:sequence>
-								</xs:complexType>
-						</xs:element>
-				</xs:sequence>
-				<xs:attribute name="namespace" type="xs:string" use="required" />
-		</xs:complexType>
+		<xs:element name="textual">
+				<xs:complexType>
+						<xs:sequence>
+								<xs:group ref="parentType" minOccurs="0" maxOccurs="1" />
+								<xs:element ref="fields" minOccurs="1" maxOccurs="1" />
+						</xs:sequence>
+				</xs:complexType>
+		</xs:element>
+		<xs:element name="mimeType" type="xs:string" />
+		<xs:element name="binary">
+				<xs:complexType>
+						<xs:sequence>
+								<xs:element ref="mimeType" minOccurs="1" maxOccurs="1" />
+								<xs:element ref="fields" minOccurs="0" maxOccurs="1" />
+						</xs:sequence>
+				</xs:complexType>
+		</xs:element>
+		<xs:element name="name" type="xs:string" />
+		<xs:element name="type">
+				<xs:complexType>
+						<xs:sequence>
+								<xs:choice>
+										<xs:element ref="textual" />
+										<xs:element ref="binary" />
+								</xs:choice>
+						</xs:sequence>
+				</xs:complexType>
+		</xs:element>
+		<xs:element name="statusName" />
+		<xs:element name="status">
+				<xs:complexType>
+						<xs:sequence>
+								<xs:element ref="statusName" minOccurs="1" maxOccurs="unbounded" />
+						</xs:sequence>
+				</xs:complexType>
+		</xs:element>
+		<xs:element name="contentType">
+				<xs:complexType>
+						<xs:sequence>
+								<xs:element ref="name" minOccurs="1" />
+								<xs:element ref="type" minOccurs="1" />
+								<xs:element ref="status" minOccurs="1" maxOccurs="1" />
+						</xs:sequence>
+						<xs:attribute name="namespace" type="xs:string" use="required" />
+				</xs:complexType>
+		</xs:element>
 		<xs:element name="contentTypes">
 				<xs:complexType>
 						<xs:sequence>
-								<xs:element name="contentType" type="cur:contentType" minOccurs="1" maxOccurs="unbounded" />
+								<xs:element ref="contentType" minOccurs="1" maxOccurs="unbounded" />
 						</xs:sequence>
 				</xs:complexType>
 		</xs:element>

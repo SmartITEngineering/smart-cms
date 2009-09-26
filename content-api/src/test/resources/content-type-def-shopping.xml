@@ -24,9 +24,9 @@
     Description:
         A sample content type definition in context of smart shopping
 -->
-<ns:contentTypes  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-   xmlns:ns='http://www.smartitengineering.com/smart-cms/content/content-type-schema'
-   xsi:schemaLocation='http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../main/resources/com/smartitengineering/cms/content/content-type-schema.xsd'>
+<contentTypes xmlns="http://www.smartitengineering.com/smart-cms/content/content-type-schema"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../main/resources/com/smartitengineering/cms/content/content-type-schema.xsd">
 		<contentType namespace="com.smartitengineering.smart-shopping.content">
 				<name>Product</name>
 				<type>
@@ -62,10 +62,10 @@
 						</textual>
 				</type>
 				<status>
-						<value>draft</value>
-						<value>marketed</value>
-						<value>withdrawn</value>
-						<value>obselete</value>
+						<statusName>draft</statusName>
+						<statusName>marketed</statusName>
+						<statusName>withdrawn</statusName>
+						<statusName>obselete</statusName>
 				</status>
 		</contentType>
 
@@ -89,12 +89,12 @@
 												<name>publishers</name>
 												<value>
 														<collection>
-																<item>
+																<value>
 																		<content>
 																				<typeNS>com.smartitengineering.smart-shopping.content</typeNS>
 																				<typeName>Publisher</typeName>
 																		</content>
-																</item>
+																</value>
 														</collection>
 												</value>
 												<required>true</required>
@@ -103,12 +103,12 @@
 												<name>authors</name>
 												<value>
 														<collection>
-																<item>
+																<value>
 																		<content>
 																				<typeNS>com.smartitengineering.smart-shopping.content</typeNS>
 																				<typeName>Author</typeName>
 																		</content>
-																</item>
+																</value>
 														</collection>
 												</value>
 												<required>true</required>
@@ -117,9 +117,9 @@
 						</textual>
 				</type>
 				<status>
-						<value>draft</value>
-						<value>marketed</value>
-						<value>obselete</value>
+						<statusName>draft</statusName>
+						<statusName>marketed</statusName>
+						<statusName>obselete</statusName>
 				</status>
 		</contentType>
 
@@ -151,9 +151,9 @@
 						</textual>
 				</type>
 				<status>
-						<value>draft</value>
-						<value>marketed</value>
-						<value>obselete</value>
+						<statusName>draft</statusName>
+						<statusName>marketed</statusName>
+						<statusName>obselete</statusName>
 				</status>
 		</contentType>
 
@@ -185,9 +185,9 @@
 						</textual>
 				</type>
 				<status>
-						<value>draft</value>
-						<value>marketed</value>
-						<value>obselete</value>
+						<statusName>draft</statusName>
+						<statusName>marketed</statusName>
+						<statusName>obselete</statusName>
 				</status>
 		</contentType>
 
@@ -240,7 +240,7 @@
 						</textual>
 				</type>
 				<status>
-						<value>published</value>
+						<statusName>published</statusName>
 				</status>
 		</contentType>
 		
@@ -261,8 +261,8 @@
 						</textual>
 				</type>
 				<status>
-						<value>draft</value>
-						<value>published</value>
+						<statusName>draft</statusName>
+						<statusName>published</statusName>
 				</status>
 		</contentType>
-</ns:contentTypes>
+</contentTypes>

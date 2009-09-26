@@ -24,8 +24,8 @@
     Description:
         Test content type definition.
 -->
-<ns:contentTypes  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-   xmlns:ns='http://www.smartitengineering.com/smart-cms/content/content-type-schema'
+<contentTypes  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns='http://www.smartitengineering.com/smart-cms/content/content-type-schema'
    xsi:schemaLocation='http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../main/resources/com/smartitengineering/cms/content/content-type-schema.xsd'>
 		<contentType namespace="asdfasdf1">
 				<name>XYZ</name>
@@ -56,9 +56,9 @@
 						</textual>
 				</type>
 				<status>
-						<value>draft</value>
-						<value>marketed</value>
-						<value>obselete</value>
+						<statusName>draft</statusName>
+						<statusName>marketed</statusName>
+						<statusName>obselete</statusName>
 				</status>
 		</contentType>
 		<contentType namespace="jpeg">
@@ -69,9 +69,9 @@
 						</binary>
 				</type>
 				<status>
-						<value>draft</value>
-						<value>marketed</value>
-						<value>obselete</value>
+						<statusName>draft</statusName>
+						<statusName>marketed</statusName>
+						<statusName>obselete</statusName>
 				</status>
 		</contentType>
 		<contentType namespace="asdfasdf2">
@@ -112,12 +112,12 @@
 												<name>b</name>
 												<value>
 														<collection>
-																<item>
+																<value>
 																		<content>
 																				<typeNS>asdfasdf1</typeNS>
 																				<typeName>XYZ</typeName>
 																		</content>
-																</item>
+																</value>
 														</collection>
 												</value>
 										</field>
@@ -125,12 +125,12 @@
 												<name>c</name>
 												<value>
 														<collection>
-																<item>
+																<value>
 																		<content>
 																				<typeNS>asdfasdf1</typeNS>
 																				<typeName>XYZ</typeName>
 																		</content>
-																</item>
+																</value>
 																<size>2</size>
 														</collection>
 												</value>
@@ -147,9 +147,9 @@
 						</textual>
 				</type>
 				<status>
-						<value>draft</value>
-						<value>marketed</value>
-						<value>obselete</value>
+						<statusName>draft</statusName>
+						<statusName>marketed</statusName>
+						<statusName>obselete</statusName>
 				</status>
 		</contentType>
 		<contentType namespace="asdfasdf2">
@@ -171,9 +171,9 @@
 						</textual>
 				</type>
 				<status>
-						<value>draft</value>
-						<value>marketed</value>
-						<value>obselete</value>
+						<statusName>draft</statusName>
+						<statusName>marketed</statusName>
+						<statusName>obselete</statusName>
 				</status>
 		</contentType>
 		<contentType namespace="asdfasdf2">
@@ -202,9 +202,9 @@
 						</binary>
 				</type>
 				<status>
-						<value>draft</value>
-						<value>marketed</value>
-						<value>obselete</value>
+						<statusName>draft</statusName>
+						<statusName>marketed</statusName>
+						<statusName>obselete</statusName>
 				</status>
 		</contentType>
-</ns:contentTypes>
+</contentTypes>
