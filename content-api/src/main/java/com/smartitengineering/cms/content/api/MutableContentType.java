@@ -21,39 +21,34 @@ package com.smartitengineering.cms.content.api;
 import java.util.Collection;
 
 /**
- * Defines a specific type of content identified by {@link ContentTypeID}.
- * This is the generalized form of content definition.
+ * A mutable version of {@link ContentType}. It should be used attained using a
+ * factory.
  * @author imyousuf
  * @since 0.1
  */
-public interface ContentType
-				extends XMLContent {
+public interface MutableContentType
+				extends PersistentWriter,
+								ContentType {
 
 		/**
-		 * Retrieve the unique ID of the content type to be used for relating
-		 * this content type to other objects.
-		 * @return the id represtation of the content type
+		 * Set the content type identifier for the content type.
+		 * @param contentTypeID The content type identifier
+		 * @throws IllegalArgumentException If contentTypeID is null
 		 */
-		public ContentTypeID getContentTypeID();
-
-		/**
-		 * Retrive the category of the content type. This type may be used
-		 * for specialization of content type.
-		 * @return category of the content type.
-		 */
-		public ContentDefinitionType getType();
+		public void setContentTypeID(ContentTypeID contentTypeID)
+						throws IllegalArgumentException;
 
 		/**
 		 * Retrieve the statuses available for the workflow of contents of
-		 * this type. The colleciton returned could be unmodifieable.
-		 * @return {@link Collection} of statuses of this content type
+		 * this type in a mutable {@link Collection}
+		 * @return Mutable collection fo statuses, could be empty if no status
 		 */
-		public Collection<ContentStatus> getStatuses();
+		public Collection<ContentStatus> getMutableStatuses();
 
 		/**
-		 * Retrieve the defined fields for this content type. The colleciton
-		 * returned could be unmodifieable.
-		 * @return defined fields
+		 * Retrieve the defined fields for this content type in a mutable
+		 * {@link Collection}
+		 * @return Mutable collection of fields, could be empty if not field
 		 */
-		public Collection<FieldDef> getFields();
+		public Collection<FieldDef> getMutableFields();
 }
