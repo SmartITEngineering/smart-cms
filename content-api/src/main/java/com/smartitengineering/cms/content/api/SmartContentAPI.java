@@ -20,6 +20,7 @@ package com.smartitengineering.cms.content.api;
 
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
+import com.smartitengineering.util.bean.annotations.InjectableField;
 
 /**
  * The single point of entry to the APIs' of Smart CMS. All other APIs will be
@@ -56,5 +57,16 @@ public final class SmartContentAPI {
 						api = new SmartContentAPI();
 				}
 				return api;
+		}
+
+		/**
+		 * The API for loading all DTOs related to {@link ContentType}. Use the name
+		 * 'apiContentTypeLoader' as the bean's name to be injected to it.
+		 */
+		@InjectableField(beanName="apiContentTypeLoader")
+		protected ContentTypeLoader contentTypeLoader;
+
+		public ContentTypeLoader getContentTypeLoader() {
+				return contentTypeLoader;
 		}
 }

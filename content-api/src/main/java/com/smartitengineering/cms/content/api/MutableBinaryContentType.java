@@ -23,7 +23,7 @@ package com.smartitengineering.cms.content.api;
  * @author imyousuf
  * @since 0.1
  */
-public interface MutualBinaryContentType
+public interface MutableBinaryContentType
 				extends BinaryContentType,
 								MutableContentType {
 
