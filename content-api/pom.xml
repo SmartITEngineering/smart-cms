@@ -43,6 +43,11 @@ any implementation except for content type definition parsing.
 		</build>
 		<dependencies>
 				<dependency>
+						<groupId>com.smartitengineering.smart-util</groupId>
+						<artifactId>smart-bean-util</artifactId>
+						<version>${smart-util.version}</version>
+				</dependency>
+				<dependency>
 						<groupId>junit</groupId>
 						<artifactId>junit</artifactId>
 						<version>${junit.version}</version>
