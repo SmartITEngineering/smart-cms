@@ -18,10 +18,11 @@
  */
 package com.smartitengineering.cms.content.lock;
 
-import java.util.Hashtable;
-import java.util.Map;
+import com.smartitengineering.cms.content.api.SmartContentAPI;
+import com.smartitengineering.util.bean.BeanFactoryRegistrar;
+import com.smartitengineering.util.bean.annotations.Aggregator;
+import com.smartitengineering.util.bean.annotations.InjectableField;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A class for managing instances of locks being used by concrete objects to
@@ -29,16 +30,37 @@ import java.util.concurrent.locks.ReentrantLock;
  * equal should share the same {@link Lock} accross every instance and thread.
  * That they their mutual exclusive operations such as CRUD operations can be
  * performed in a synchronous manner. All objects intending to avail this lock
- * facility should implement {@link Key}.
+ * facility should implement {@link Key}. Use {@link LockManager#SPI_CONTEXT} for
+ * bean factory key to be used in {@link BeanFactoryRegistrar}
  * @author imyousuf
  * @since 0.1
  */
+@Aggregator(contextName = LockManager.SPI_CONTEXT)
 public class LockManager {
 
-		private static Map<String, LockProvider> locks;
+		public static final String SPI_CONTEXT = SmartContentAPI.CONTEXT_NAME +
+																						 ".spi";
+		/**
+		 * The lock handler implementation to be used to receive lock implementations.
+		 * Use "lockHandler" as bean name to be injected here.
+		 */
+		@InjectableField
+		protected LockHandler lockHandler;
 
-		static {
-				locks = new Hashtable<String, LockProvider>();
+		private LockManager() {
+		}
+
+		public LockHandler getLockHandler() {
+				return lockHandler;
+		}
+		private static LockManager lockManager;
+
+		private synchronized static LockManager getInstance() {
+				if (lockManager == null) {
+						lockManager = new LockManager();
+						BeanFactoryRegistrar.aggregate(lockManager);
+				}
+				return lockManager;
 		}
 
 		/**
@@ -48,13 +70,10 @@ public class LockManager {
 		 * return it.
 		 * @param key Key to register lock against
 		 * @return Lock for the key.
+		 * @see {@link LockHandler#register(com.smartitengineering.cms.content.lock.Key)}
 		 */
 		public static synchronized Lock register(Key key) {
-				if (!locks.containsKey(key.getKeyStringRep())) {
-						locks.put(new String(key.getKeyStringRep()), new LockProvider(
-										new ReentrantLock()));
-				}
-				return locks.get(key.getKeyStringRep()).get();
+				return getInstance().getLockHandler().register(key);
 		}
 
 		/**
@@ -62,39 +81,9 @@ public class LockManager {
 		 * the key/lock will be removed from the registrar. They will be removed if
 		 * and only if register and unregister invocation is equal.
 		 * @param key Key to unregister
+		 * @see {@link LockHandler#unregister(com.smartitengineering.cms.content.lock.Key)}
 		 */
 		public static synchronized void unregister(Key key) {
-				if(locks.containsKey(key.getKeyStringRep())) {
-						LockProvider provider = locks.get(key.getKeyStringRep());
-						if(provider != null) {
-								provider.decreateCount();
-								if(provider.getRegisterCount() < 1) {
-										locks.remove(key.getKeyStringRep());
-								}
-						}
-				}
-		}
-
-		private static class LockProvider {
-
-				private int registerCount = 0;
-				private Lock lock;
-
-				public LockProvider(Lock lock) {
-						this.lock = lock;
-				}
-
-				public Lock get() {
-						registerCount += 1;
-						return lock;
-				}
-
-				public void decreateCount() {
-						registerCount -= 1;
-				}
-
-				public int getRegisterCount() {
-						return registerCount;
-				}
+				getInstance().getLockHandler().unregister(key);
 		}
 }
