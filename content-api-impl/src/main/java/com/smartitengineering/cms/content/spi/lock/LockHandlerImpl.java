@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.content.lock;
+package com.smartitengineering.cms.content.spi.lock;
 
 import java.util.Hashtable;
 import java.util.Map;

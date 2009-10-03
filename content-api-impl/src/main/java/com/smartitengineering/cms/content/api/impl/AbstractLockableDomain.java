@@ -18,8 +18,8 @@
  */
 package com.smartitengineering.cms.content.api.impl;
 
-import com.smartitengineering.cms.content.lock.Key;
-import com.smartitengineering.cms.content.lock.LockManager;
+import com.smartitengineering.cms.content.spi.lock.Key;
+import com.smartitengineering.cms.content.spi.lock.LockManager;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
