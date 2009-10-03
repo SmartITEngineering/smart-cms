@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.content.spi.lock;
 
 import com.smartitengineering.cms.content.api.SmartContentAPI;
+import com.smartitengineering.cms.content.spi.SmartSPI;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
 import com.smartitengineering.util.bean.annotations.InjectableField;
@@ -35,11 +36,9 @@ import java.util.concurrent.locks.Lock;
  * @author imyousuf
  * @since 0.1
  */
-@Aggregator(contextName = LockManager.SPI_CONTEXT)
-public class LockManager {
+@Aggregator(contextName = SmartSPI.SPI_CONTEXT)
+public final class LockManager {
 
-		public static final String SPI_CONTEXT = SmartContentAPI.CONTEXT_NAME +
-																						 ".spi";
 		/**
 		 * The lock handler implementation to be used to receive lock implementations.
 		 * Use "lockHandler" as bean name to be injected here.

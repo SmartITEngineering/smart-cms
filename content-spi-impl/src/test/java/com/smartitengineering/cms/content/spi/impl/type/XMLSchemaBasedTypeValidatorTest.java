@@ -16,8 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.content.spi.type;
+package com.smartitengineering.cms.content.spi.impl.type;
 
+import com.smartitengineering.cms.content.spi.type.*;
 import java.io.File;
 import java.net.URL;
 import junit.framework.TestCase;

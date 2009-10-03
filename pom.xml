@@ -513,5 +513,7 @@
 		<modules>
 				<module>content-api</module>
 				<module>content-api-impl</module>
+				<module>content-spi</module>
+				<module>content-spi-impl</module>
 		</modules>
 </project>
