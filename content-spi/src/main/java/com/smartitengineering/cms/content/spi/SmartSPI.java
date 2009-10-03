@@ -20,6 +20,7 @@ package com.smartitengineering.cms.content.spi;
 
 import com.smartitengineering.cms.content.api.SmartContentAPI;
 import com.smartitengineering.cms.content.spi.lock.LockHandler;
+import com.smartitengineering.cms.content.spi.type.TypeValidator;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
 import com.smartitengineering.util.bean.annotations.InjectableField;
@@ -35,10 +36,22 @@ public final class SmartSPI {
 																						 ".spi";
 		/**
 		 * The lock handler implementation to be used to receive lock implementations.
-		 * Use "lockHandler" as bean name to be injected here.
+		 * Use <tt>lockHandler</tt> as bean name to be injected here.
 		 */
 		@InjectableField
 		protected LockHandler lockHandler;
+
+		/**
+		 * The type validator implementation which validatates a content type
+		 * definition file source. Use <tt>typeValidator</tt> as the bean name in
+		 * bean factory to be injected here.
+		 */
+		@InjectableField
+		protected TypeValidator typeValidator;
+
+		public TypeValidator getTypeValidator() {
+				return typeValidator;
+		}
 
 		public LockHandler getLockHandler() {
 				return lockHandler;
