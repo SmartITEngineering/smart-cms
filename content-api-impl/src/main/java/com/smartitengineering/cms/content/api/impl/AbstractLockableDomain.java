@@ -35,7 +35,11 @@ public abstract class AbstractLockableDomain
 									 Key {
 
 		protected Lock lock;
+		private boolean lockAttained;
 
+		/**
+		 * Gets the lock for the concrete class invoking this constructor
+		 */
 		protected AbstractLockableDomain() {
 				lock = LockManager.register(this);
 		}
@@ -49,6 +53,9 @@ public abstract class AbstractLockableDomain
 
 		public void lock() {
 				lock.lock();
+				synchronized(this) {
+						setLockAttained(true);
+				}
 		}
 
 		public void lockInterruptibly()
@@ -57,20 +64,33 @@ public abstract class AbstractLockableDomain
 		}
 
 		public boolean tryLock() {
-				return lock.tryLock();
+				setLockAttained(lock.tryLock());
+				return isLockAttained();
 		}
 
 		public boolean tryLock(long time,
 													 TimeUnit unit)
 						throws InterruptedException {
-				return lock.tryLock(time, unit);
+				setLockAttained(lock.tryLock(time, unit));
+				return isLockAttained();
 		}
 
 		public void unlock() {
 				lock.unlock();
+				synchronized(this) {
+						setLockAttained(false);
+				}
 		}
 
 		public Condition newCondition() {
 				return lock.newCondition();
+		}
+
+		protected boolean isLockAttained() {
+				return lockAttained;
+		}
+
+		private void setLockAttained(boolean lockAttained) {
+				this.lockAttained = lockAttained;
 		}
 }
