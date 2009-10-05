@@ -18,8 +18,12 @@
  */
 package com.smartitengineering.cms.content.spi;
 
+import com.smartitengineering.cms.content.api.MutableContentType;
+import com.smartitengineering.cms.content.api.PersistentWriter;
 import com.smartitengineering.cms.content.api.SmartContentAPI;
 import com.smartitengineering.cms.content.spi.lock.LockHandler;
+import com.smartitengineering.cms.content.spi.persistence.PersistentService;
+import com.smartitengineering.cms.content.spi.persistence.PersistentServiceRegistrar;
 import com.smartitengineering.cms.content.spi.type.TypeValidator;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
@@ -48,6 +52,31 @@ public final class SmartSPI {
 		 */
 		@InjectableField
 		protected TypeValidator typeValidator;
+
+		/**
+		 * The registrar for aggregating different implementations of
+		 * {@link PersistentService} for diffent domain types. Use the bean name
+		 * <tt>persistentServiceRegistrar</tt> for injecting it here.
+		 */
+		@InjectableField
+		protected PersistentServiceRegistrar persistentServiceRegistrar;
+
+		private PersistentServiceRegistrar getPersistentServiceRegistrar() {
+				return persistentServiceRegistrar;
+		}
+
+		/**
+		 * An operation for retrieving the concrete implementation of persistent
+		 * service implementaion for the given persistable API bean.
+		 * @param <T> Should represent the class to be used in concrete SPI
+		 *					  implementations. For example, {@link MutableContentType}
+		 * @param writerClass The class to look for in the registrar.
+		 * @return Service for persisting the bean.
+		 * @see PersistentServiceRegistrar#getPersistentService(java.lang.Class) 
+		 */
+		public <T extends PersistentWriter> PersistentService<T> getPersistentService(Class<T> writerClass) {
+				return getPersistentServiceRegistrar().getPersistentService(writerClass);
+		}
 
 		public TypeValidator getTypeValidator() {
 				return typeValidator;
