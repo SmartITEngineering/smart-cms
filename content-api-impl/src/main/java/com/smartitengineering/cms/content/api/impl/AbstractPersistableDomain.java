@@ -28,7 +28,7 @@ import java.io.IOException;
  * implementations of {@link PersistentWriter}.
  * @author imyousuf
  */
-public abstract class AbstractPersistableDomain<T extends AbstractPersistableDomain>
+public abstract class AbstractPersistableDomain<T extends PersistentWriter>
 				extends AbstractLockableDomain
 				implements PersistentWriter {
 
