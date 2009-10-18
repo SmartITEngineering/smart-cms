@@ -18,8 +18,8 @@
  */
 package com.smartitengineering.cms.spi;
 
+import com.smartitengineering.cms.api.common.PersistentWriter;
 import com.smartitengineering.cms.api.type.MutableContentType;
-import com.smartitengineering.cms.api.type.PersistentWriter;
 import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistentService;

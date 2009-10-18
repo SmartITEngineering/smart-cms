@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.spi.persistence;
 
-import com.smartitengineering.cms.api.type.PersistentWriter;
+import com.smartitengineering.cms.api.common.PersistentWriter;
 
 /**
  * A service API for performing the C, U, D of <tt>CRUD</tt> operations. This

@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.api.impl;
 
-import com.smartitengineering.cms.api.type.PersistentWriter;
+import com.smartitengineering.cms.api.common.PersistentWriter;
 import com.smartitengineering.cms.spi.SmartSPI;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import java.io.IOException;

@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.spi.persistence;
 
-import com.smartitengineering.cms.api.type.PersistentWriter;
+import com.smartitengineering.cms.api.common.PersistentWriter;
 import com.smartitengineering.cms.spi.SmartSPI;
 import java.util.Collections;
 import java.util.HashMap;

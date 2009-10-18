@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import com.smartitengineering.cms.api.common.PersistentWriter;
 import java.util.Collection;
 
 /**
