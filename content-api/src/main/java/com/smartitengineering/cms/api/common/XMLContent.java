@@ -32,4 +32,10 @@ public interface XMLContent {
 		 * @return xml document
 		 */
 		public Document getXMLDocument();
+
+    /**
+     * Returns the current content's XML version
+     * @return XML {@link CharSequence} of the current content.
+     */
+    public CharSequence toXml();
 }
