@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.spi.lock;
 
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The SPI used the implementation to achieve locks.
@@ -27,14 +27,14 @@ import java.util.concurrent.locks.Lock;
 public interface LockHandler {
 
 		/**
-		 * Registers a {@link Key} and returns its respective {@link Lock}. If the
-		 * key was already present then it will return the same lock instance as for
-		 * other instances of the key or else it will create a lock for the key and
-		 * return it.
+		 * Registers a {@link Key} and returns its respective 
+     * {@link ReentrantLock lock}. If the key was already present then it will
+     * return the same lock instance as for other instances of the key or else
+     * it will create a lock for the key and return it.
 		 * @param key Key to register lock against
 		 * @return Lock for the key.
 		 */
-		public Lock register(Key key);
+		public ReentrantLock register(Key key);
 
 		/**
 		 * Unregister a key from the registrar. It does not necessarily mean that

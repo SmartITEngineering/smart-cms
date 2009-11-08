@@ -199,7 +199,7 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
 				 */
 				public V perform()
 								throws IOException {
-						boolean attainLock = !isLockAttained();
+						boolean attainLock = isLockOwned();
 						if (attainLock) {
 								if (!waitToAttain && !tryLock()) {
 										throw new IOException("Lock could be attained!");

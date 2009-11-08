@@ -19,7 +19,6 @@
 package com.smartitengineering.cms.api.common;
 
 import java.io.IOException;
-import java.util.concurrent.locks.Lock;
 
 /**
  * Any object wanting to perform write operations on thyself should implement it.

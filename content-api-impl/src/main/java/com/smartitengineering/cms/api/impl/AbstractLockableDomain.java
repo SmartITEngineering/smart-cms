@@ -18,11 +18,11 @@
  */
 package com.smartitengineering.cms.api.impl;
 
+import com.smartitengineering.cms.api.common.Lock;
 import com.smartitengineering.cms.spi.lock.Key;
 import com.smartitengineering.cms.spi.lock.LockManager;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
 
 /**
  * Integrates lock implementation for domain objects needing locking support. It
@@ -31,66 +31,55 @@ import java.util.concurrent.locks.Lock;
  * @since 0.1
  */
 public abstract class AbstractLockableDomain
-				implements Lock,
-									 Key {
+        implements Lock,
+                   Key {
 
-		protected Lock lock;
-		private boolean lockAttained;
+  protected java.util.concurrent.locks.ReentrantLock lock;
 
-		/**
-		 * Gets the lock for the concrete class invoking this constructor
-		 */
-		protected AbstractLockableDomain() {
-				lock = LockManager.register(this);
-		}
+  /**
+   * Gets the lock for the concrete class invoking this constructor
+   */
+  protected AbstractLockableDomain() {
+    lock = LockManager.register(this);
+  }
 
-		@Override
-		protected void finalize()
-						throws Throwable {
-				LockManager.unregister(this);
-				super.finalize();
-		}
+  @Override
+  protected void finalize()
+          throws Throwable {
+    LockManager.unregister(this);
+    super.finalize();
+  }
 
-		public void lock() {
-				lock.lock();
-				synchronized(this) {
-						setLockAttained(true);
-				}
-		}
+  public boolean isLockOwned() {
+    return lock.isHeldByCurrentThread();
+  }
 
-		public void lockInterruptibly()
-						throws InterruptedException {
-				lock.lockInterruptibly();
-		}
+  public void lock() {
+    lock.lock();
+  }
 
-		public boolean tryLock() {
-				setLockAttained(lock.tryLock());
-				return isLockAttained();
-		}
+  public void lockInterruptibly()
+          throws InterruptedException {
+    lock.lockInterruptibly();
+  }
 
-		public boolean tryLock(long time,
-													 TimeUnit unit)
-						throws InterruptedException {
-				setLockAttained(lock.tryLock(time, unit));
-				return isLockAttained();
-		}
+  public boolean tryLock() {
+    boolean locked = lock.tryLock();
+    return locked;
+  }
 
-		public void unlock() {
-				lock.unlock();
-				synchronized(this) {
-						setLockAttained(false);
-				}
-		}
+  public boolean tryLock(long time,
+                         TimeUnit unit)
+          throws InterruptedException {
+    boolean locked = lock.tryLock(time, unit);
+    return locked;
+  }
 
-		public Condition newCondition() {
-				return lock.newCondition();
-		}
+  public void unlock() {
+    lock.unlock();
+  }
 
-		protected boolean isLockAttained() {
-				return lockAttained;
-		}
-
-		private void setLockAttained(boolean lockAttained) {
-				this.lockAttained = lockAttained;
-		}
+  public Condition newCondition() {
+    return lock.newCondition();
+  }
 }
