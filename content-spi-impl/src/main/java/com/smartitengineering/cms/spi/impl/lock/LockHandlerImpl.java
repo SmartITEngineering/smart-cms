@@ -21,7 +21,6 @@ package com.smartitengineering.cms.spi.impl.lock;
 import com.smartitengineering.cms.spi.lock.*;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -37,7 +36,7 @@ public class LockHandlerImpl
 				locks = new Hashtable<String, LockProvider>();
 		}
 
-		public synchronized Lock register(Key key) {
+		public synchronized ReentrantLock register(Key key) {
 				if (!locks.containsKey(key.getKeyStringRep())) {
 						locks.put(new String(key.getKeyStringRep()), new LockProvider(
 										new ReentrantLock()));
@@ -66,7 +65,7 @@ public class LockHandlerImpl
 						this.lock = lock;
 				}
 
-				public Lock get() {
+				public ReentrantLock get() {
 						registerCount += 1;
 						return lock;
 				}
