@@ -83,12 +83,12 @@
         <name>publishers</name>
         <value>
           <collection>
-            <value>
+            <simple-value>
               <content>
                 <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
                 <typeName>Publisher</typeName>
               </content>
-            </value>
+            </simple-value>
           </collection>
         </value>
         <required>true</required>
@@ -97,12 +97,13 @@
         <name>authors</name>
         <value>
           <collection>
-            <value>
+            <simple-value>
               <content>
                 <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
                 <typeName>Author</typeName>
+                <bidirectional>books</bidirectional>
               </content>
-            </value>
+            </simple-value>
           </collection>
         </value>
         <required>true</required>
@@ -233,6 +234,20 @@
           <string>
             <mimeType>text/plain</mimeType>
           </string>
+        </value>
+      </field>
+      <field>
+        <name>books</name>
+        <value>
+          <collection>
+            <simple-value>
+              <content>
+                <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+                <typeName>Book</typeName>
+                <bidirectional>authors</bidirectional>
+              </content>
+            </simple-value>
+          </collection>
         </value>
       </field>
     </fields>

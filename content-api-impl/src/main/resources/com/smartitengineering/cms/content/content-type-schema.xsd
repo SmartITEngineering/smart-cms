@@ -70,12 +70,29 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
   <xs:element name="collection">
     <xs:complexType>
       <xs:sequence>
-        <xs:element ref="value" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="simple-value" minOccurs="1" maxOccurs="1"/>
         <xs:element ref="size" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="value">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:element ref="content" minOccurs="1" maxOccurs="1" />
+          <xs:element ref="long" minOccurs="1" maxOccurs="1" />
+          <xs:element ref="integer" minOccurs="1" maxOccurs="1" />
+          <xs:element ref="double" minOccurs="1" maxOccurs="1" />
+          <xs:element ref="boolean" minOccurs="1" maxOccurs="1" />
+          <xs:element ref="datetime" minOccurs="1" maxOccurs="1" />
+          <xs:element ref="string" minOccurs="1" maxOccurs="1" />
+          <xs:element ref="other" minOccurs="1" maxOccurs="1" />
+          <xs:element ref="collection" minOccurs="1" maxOccurs="1" />
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="simple-value">
     <xs:complexType>
       <xs:sequence>
         <xs:choice>

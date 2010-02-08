@@ -43,9 +43,9 @@
         <name>fieldB</name>
         <value>
           <collection>
-            <value>
+            <simple-value>
               <integer />
-            </value>
+            </simple-value>
           </collection>
         </value>
       </field>
@@ -53,12 +53,12 @@
         <name>fieldB</name>
         <value>
           <collection>
-            <value>
+            <simple-value>
               <content>
                 <typeNS>jpeg</typeNS>
                 <typeName>RST</typeName>
               </content>
-            </value>
+            </simple-value>
           </collection>
         </value>
       </field>
