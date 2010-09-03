@@ -67,8 +67,10 @@
 
   <contentType namespace="com.smartitengineering.smart-shopping.content">
     <name>Book</name>
-    <parentTypeNS>com.smartitengineering.smart-shopping.content</parentTypeNS>
-    <parentTypeName>Product</parentTypeName>
+    <parent>
+      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+      <typeName>Product</typeName>
+    </parent>
     <fields>
       <field>
         <name>isbn</name>
@@ -85,8 +87,10 @@
           <collection>
             <simple-value>
               <content>
-                <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-                <typeName>Publisher</typeName>
+                <definition>
+                  <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+                  <typeName>Publisher</typeName>
+                </definition>
               </content>
             </simple-value>
           </collection>
@@ -99,8 +103,10 @@
           <collection>
             <simple-value>
               <content>
-                <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-                <typeName>Author</typeName>
+                <definition>
+                  <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+                  <typeName>Author</typeName>
+                </definition>
                 <bidirectional>books</bidirectional>
               </content>
             </simple-value>
@@ -132,8 +138,10 @@
         <name>publicationHouse</name>
         <value>
           <content>
-            <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-            <typeName>PublicationHouse</typeName>
+            <definition>
+              <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+              <typeName>PublicationHouse</typeName>
+            </definition>
           </content>
         </value>
         <required>true</required>
@@ -162,8 +170,10 @@
         <name>adress</name>
         <value>
           <content>
-            <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-            <typeName>Address</typeName>
+            <definition>
+              <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+              <typeName>Address</typeName>
+            </definition>
           </content>
         </value>
         <required>true</required>
@@ -242,8 +252,10 @@
           <collection>
             <simple-value>
               <content>
-                <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-                <typeName>Book</typeName>
+                <definition>
+                  <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+                  <typeName>Book</typeName>
+                </definition>
                 <bidirectional>authors</bidirectional>
               </content>
             </simple-value>

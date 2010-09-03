@@ -32,17 +32,20 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
   <xs:element name="name" type="xs:string" />
   <xs:element name="typeNS" type="xs:string" />
   <xs:element name="typeName" type="xs:string" />
-  <xs:element name="bidirectional" type="xs:string" />
-  <xs:group name="contentTypeGrp">
+  <xs:element name="workspaceName" type="xs:string" />
+  <xs:complexType name="contentPointer">
     <xs:sequence>
+      <xs:element ref="workspaceName" minOccurs="0" maxOccurs="1" />
       <xs:element ref="typeNS" minOccurs="1" maxOccurs="1" />
       <xs:element ref="typeName" minOccurs="1" maxOccurs="1" />
     </xs:sequence>
-  </xs:group>
+  </xs:complexType>
+  <xs:element name="definition" type="contentPointer" />
+  <xs:element name="bidirectional" type="xs:string" />
   <xs:element name="content">
     <xs:complexType>
       <xs:sequence>
-        <xs:group ref="contentTypeGrp" minOccurs="1" maxOccurs="1" />
+        <xs:element ref="definition" minOccurs="1" maxOccurs="1" />
         <xs:element ref="bidirectional" minOccurs="0" maxOccurs="1" />
       </xs:sequence>
     </xs:complexType>
@@ -197,14 +200,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:element name="parentTypeNS" type="xs:string" />
-  <xs:element name="parentTypeName" type="xs:string" />
-  <xs:group name="parentType">
-    <xs:sequence>
-      <xs:element ref="parentTypeNS" minOccurs="1" maxOccurs="1" />
-      <xs:element ref="parentTypeName" minOccurs="1" maxOccurs="1" />
-    </xs:sequence>
-  </xs:group>
+  <xs:element name="parent" type="contentPointer" />
   <xs:element name="statusName" type="xs:string" />
   <xs:element name="status">
     <xs:complexType>
@@ -217,7 +213,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="name" minOccurs="1" maxOccurs="1" />
-        <xs:group ref="parentType" minOccurs="0" maxOccurs="1" />
+        <xs:element ref="parent" minOccurs="0" maxOccurs="1" />
         <xs:element ref="fields" minOccurs="1" />
         <xs:element ref="status" minOccurs="1" maxOccurs="1" />
         <xs:element ref="representations" minOccurs="0" maxOccurs="1" />

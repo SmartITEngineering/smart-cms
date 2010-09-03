@@ -34,8 +34,10 @@
         <name>fieldA</name>
         <value>
           <content>
-            <typeNS>asdfasdf1</typeNS>
-            <typeName>XYZ</typeName>
+            <definition>
+              <typeNS>asdfasdf1</typeNS>
+              <typeName>XYZ</typeName>
+            </definition>
           </content>
         </value>
         <variations>
@@ -83,8 +85,10 @@
           <collection>
             <simple-value>
               <content>
-                <typeNS>jpeg</typeNS>
-                <typeName>RST</typeName>
+                <definition>
+                  <typeNS>jpeg</typeNS>
+                  <typeName>RST</typeName>
+                </definition>
               </content>
             </simple-value>
           </collection>
