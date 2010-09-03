@@ -104,7 +104,6 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
           <xs:element ref="datetime" minOccurs="1" maxOccurs="1" />
           <xs:element ref="string" minOccurs="1" maxOccurs="1" />
           <xs:element ref="other" minOccurs="1" maxOccurs="1" />
-          <xs:element ref="collection" minOccurs="1" maxOccurs="1" />
         </xs:choice>
       </xs:sequence>
     </xs:complexType>
