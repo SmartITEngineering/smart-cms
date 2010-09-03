@@ -38,6 +38,26 @@
             <typeName>XYZ</typeName>
           </content>
         </value>
+        <variations>
+          <variation>
+            <name>avar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>velocity</templateType>
+            <uri>
+              <external>http://some/uri</external>
+            </uri>
+          </variation>
+          <variation>
+            <name>anothervar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>javascript</templateType>
+            <uri>
+              <internal>
+                <name>internalvar</name>
+              </internal>
+            </uri>
+          </variation>
+        </variations>
       </field>
       <field>
         <name>fieldB</name>
@@ -86,5 +106,25 @@
       <statusName>marketed</statusName>
       <statusName>obselete</statusName>
     </status>
+    <representations>
+      <representation>
+        <name>arep</name>
+        <mimeType>some/type</mimeType>
+        <templateType>velocity</templateType>
+        <uri>
+          <external>http://some/uri</external>
+        </uri>
+      </representation>
+      <representation>
+        <name>anotherrep</name>
+        <mimeType>some/type</mimeType>
+        <templateType>ruby</templateType>
+        <uri>
+          <internal>
+            <name>internalrep</name>
+          </internal>
+        </uri>
+      </representation>
+    </representations>
   </contentType>
 </contentTypes>

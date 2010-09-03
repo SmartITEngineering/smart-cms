@@ -28,6 +28,8 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
       <xs:pattern value="[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-2][0-9]:[0-5][0-9]:[0-5][0-9]([+-][0-2][0-9]:[0-5][0-9])"/>
     </xs:restriction>
   </xs:simpleType>
+  <xs:element name="mimeType" type="xs:string" />
+  <xs:element name="name" type="xs:string" />
   <xs:element name="typeNS" type="xs:string" />
   <xs:element name="typeName" type="xs:string" />
   <xs:element name="bidirectional" type="xs:string" />
@@ -109,12 +111,65 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
     </xs:complexType>
   </xs:element>
   <xs:element name="required" type="xs:boolean" />
+  <xs:element name="internal">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="name" minOccurs="1" maxOccurs="1" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="external" type="xs:string" />
+  <xs:element name="uri">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:element ref="internal" minOccurs="1" maxOccurs="1" />
+          <xs:element ref="external" minOccurs="1" maxOccurs="1" />
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="templateType">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+        <xs:enumeration value="velocity" />
+        <xs:enumeration value="ruby" />
+        <xs:enumeration value="javascript" />
+        <xs:enumeration value="groovy" />
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:complexType name="resource">
+    <xs:sequence>
+      <xs:element ref="name" minOccurs="1" maxOccurs="1" />
+      <xs:element ref="mimeType" minOccurs="1" maxOccurs="1" />
+      <xs:element ref="templateType" minOccurs="1" maxOccurs="1" />
+      <xs:element ref="uri" minOccurs="1" maxOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="variation" type="resource" />
+  <xs:element name="representation" type="resource" />
+  <xs:element name="representations">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="representation" minOccurs="1" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="variations">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="variation" minOccurs="1" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
   <xs:element name="field">
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="name" minOccurs="1" maxOccurs="1"/>
         <xs:element ref="value" minOccurs="1" maxOccurs="1"/>
         <xs:element ref="required" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="variations" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -133,8 +188,6 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
       <xs:element ref="parentTypeName" minOccurs="1" maxOccurs="1" />
     </xs:sequence>
   </xs:group>
-  <xs:element name="mimeType" type="xs:string" />
-  <xs:element name="name" type="xs:string" />
   <xs:element name="statusName" type="xs:string" />
   <xs:element name="status">
     <xs:complexType>
@@ -150,6 +203,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
         <xs:group ref="parentType" minOccurs="0" maxOccurs="1" />
         <xs:element ref="fields" minOccurs="1" />
         <xs:element ref="status" minOccurs="1" maxOccurs="1" />
+        <xs:element ref="representations" minOccurs="0" maxOccurs="1" />
       </xs:sequence>
       <xs:attribute name="namespace" type="xs:string" use="required" />
     </xs:complexType>
