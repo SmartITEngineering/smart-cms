@@ -123,6 +123,16 @@
           <store>false</store>
           <boost>a</boost>
         </search>
+        <update-standalone>true</update-standalone>
+      </field>
+      <field>
+        <name>altText</name>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+        <update-standalone>true</update-standalone>
       </field>
     </fields>
     <status>

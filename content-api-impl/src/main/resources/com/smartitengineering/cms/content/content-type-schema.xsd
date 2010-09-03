@@ -201,6 +201,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+  <xs:element name="update-standalone" type="tBoolean" />
   <xs:element name="field">
     <xs:complexType>
       <xs:sequence>
@@ -210,6 +211,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
         <xs:element ref="variations" minOccurs="0" maxOccurs="1"/>
         <xs:element ref="validator" minOccurs="0" maxOccurs="1"/>
         <xs:element ref="search" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="update-standalone" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
