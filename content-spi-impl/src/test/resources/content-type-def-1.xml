@@ -109,6 +109,7 @@
   </contentType>
   <contentType namespace="jpeg">
     <name>RST</name>
+    <displayName>JPEG Image</displayName>
     <fields>
       <field>
         <name>image</name>
