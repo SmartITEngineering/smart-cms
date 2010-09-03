@@ -183,6 +183,24 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+  <xs:simpleType name="tBoolean">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="true" />
+      <xs:enumeration value="false" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="index" type="tBoolean" />
+  <xs:element name="store" type="tBoolean" />
+  <xs:element name="boost" type="xs:string" />
+  <xs:element name="search">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="index" minOccurs="1" maxOccurs="1" />
+        <xs:element ref="store" minOccurs="0" maxOccurs="1" />
+        <xs:element ref="boost" minOccurs="0" maxOccurs="1" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
   <xs:element name="field">
     <xs:complexType>
       <xs:sequence>
@@ -191,6 +209,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
         <xs:element ref="required" minOccurs="0" maxOccurs="1"/>
         <xs:element ref="variations" minOccurs="0" maxOccurs="1"/>
         <xs:element ref="validator" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="search" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>

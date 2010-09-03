@@ -118,6 +118,11 @@
             <mimeType>image/jpeg</mimeType>
           </other>
         </value>
+        <search>
+          <index>true</index>
+          <store>false</store>
+          <boost>a</boost>
+        </search>
       </field>
     </fields>
     <status>
