@@ -139,6 +139,22 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
       </xs:restriction>
     </xs:simpleType>
   </xs:element>
+  <xs:element name="validatorType">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+        <xs:enumeration value="ruby" />
+        <xs:enumeration value="javascript" />
+        <xs:enumeration value="groovy" />
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:complexType name="validator">
+    <xs:sequence>
+      <xs:element ref="validatorType" minOccurs="1" maxOccurs="1" />
+      <xs:element ref="uri" minOccurs="1" maxOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="validator" type="validator" />
   <xs:complexType name="resource">
     <xs:sequence>
       <xs:element ref="name" minOccurs="1" maxOccurs="1" />
@@ -170,6 +186,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
         <xs:element ref="value" minOccurs="1" maxOccurs="1"/>
         <xs:element ref="required" minOccurs="0" maxOccurs="1"/>
         <xs:element ref="variations" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="validator" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>

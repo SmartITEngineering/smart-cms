@@ -68,6 +68,14 @@
             </simple-value>
           </collection>
         </value>
+        <validator>
+          <validatorType>javascript</validatorType>
+          <uri>
+            <internal>
+              <name>internalvar</name>
+            </internal>
+          </uri>
+        </validator>
       </field>
       <field>
         <name>fieldC</name>
@@ -81,6 +89,12 @@
             </simple-value>
           </collection>
         </value>
+        <validator>
+          <validatorType>groovy</validatorType>
+          <uri>
+            <external>http://some/uri</external>
+          </uri>
+        </validator>
       </field>
     </fields>
     <status>
