@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.type;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Defines a specific type of content identified by {@link ContentTypeID}.
@@ -40,18 +41,18 @@ public interface ContentType {
    * this type. The collection returned could be unmodifiable.
    * @return {@link Collection} of statuses of this content type
    */
-  public Collection<ContentStatus> getStatuses();
+  public Map<String, ContentStatus> getStatuses();
 
   /**
    * Retrieve the defined fields for this content type. The collection
    * returned could be unmodifiable.
    * @return defined fields
    */
-  public Collection<FieldDef> getFields();
+  public Map<String, FieldDef> getFields();
 
   public ContentTypeID getParent();
 
   public String getDisplayName();
 
-  public Collection<RepresentationDef> getRepresentations();
+  public Map<String, RepresentationDef> getRepresentations();
 }
