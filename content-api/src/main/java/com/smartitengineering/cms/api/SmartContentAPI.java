@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api;
 
+import com.smartitengineering.cms.api.content.ContentLoader;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
@@ -36,38 +37,42 @@ import com.smartitengineering.util.bean.annotations.InjectableField;
 @Aggregator(contextName = SmartContentAPI.CONTEXT_NAME)
 public final class SmartContentAPI {
 
-		/**
-		 * Name of the context to bind all the beans to be injected into this
-		 * class.
-		 */
-		public static final String CONTEXT_NAME = "com.smartitnengineering.smart-cms";
+  /**
+   * Name of the context to bind all the beans to be injected into this
+   * class.
+   */
+  public static final String CONTEXT_NAME = "com.smartitnengineering.smart-cms";
+  private static SmartContentAPI api;
 
-		private static SmartContentAPI api;
+  private SmartContentAPI() {
+    BeanFactoryRegistrar.aggregate(this);
+  }
 
-		private SmartContentAPI() {
-				BeanFactoryRegistrar.aggregate(this);
-		}
+  /**
+   * Retrieves the singleton instance of the API entry point. The API will
+   * have all its beans injected before returning itself.
+   * @return The API entry point
+   */
+  public static final SmartContentAPI getInstance() {
+    if (api == null) {
+      api = new SmartContentAPI();
+    }
+    return api;
+  }
+  /**
+   * The API for loading all DTOs related to {@link ContentType}. Use the name
+   * 'apiContentTypeLoader' as the bean's name to be injected to it.
+   */
+  @InjectableField(beanName = "apiContentTypeLoader")
+  protected ContentTypeLoader contentTypeLoader;
+  @InjectableField(beanName = "apiContentLoader")
+  protected ContentLoader contentLoader;
 
-		/**
-		 * Retrieves the singleton instance of the API entry point. The API will
-		 * have all its beans injected before returning itself.
-		 * @return The API entry point
-		 */
-		public static final SmartContentAPI getInstance() {
-				if (api == null) {
-						api = new SmartContentAPI();
-				}
-				return api;
-		}
+  public ContentTypeLoader getContentTypeLoader() {
+    return contentTypeLoader;
+  }
 
-		/**
-		 * The API for loading all DTOs related to {@link ContentType}. Use the name
-		 * 'apiContentTypeLoader' as the bean's name to be injected to it.
-		 */
-		@InjectableField(beanName="apiContentTypeLoader")
-		protected ContentTypeLoader contentTypeLoader;
-
-		public ContentTypeLoader getContentTypeLoader() {
-				return contentTypeLoader;
-		}
+  public ContentLoader getContentLoader() {
+    return contentLoader;
+  }
 }

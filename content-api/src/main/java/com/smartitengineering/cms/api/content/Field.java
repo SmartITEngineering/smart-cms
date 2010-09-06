@@ -21,8 +21,12 @@ package com.smartitengineering.cms.api.content;
 /**
  *
  * @author imyousuf
- * @since 0.1
  */
-public interface ContentFieldValue
-        extends FieldValue<ContentId> {
+public interface Field {
+
+  public String getName();
+
+  public Variation getVariation(String varName);
+
+  public FieldValue getValue();
 }

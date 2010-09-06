@@ -21,8 +21,10 @@ package com.smartitengineering.cms.api.content;
 /**
  *
  * @author imyousuf
- * @since 0.1
  */
-public interface ContentFieldValue
-        extends FieldValue<ContentId> {
+public interface MutableField extends Field {
+
+  public void setValue(MutableFieldValue fieldValue);
+
+  public void setName(String name);
 }

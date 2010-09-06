@@ -15,14 +15,11 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-package com.smartitengineering.cms.api.content;
+ */package com.smartitengineering.cms.api.content;
 
 /**
  *
  * @author imyousuf
- * @since 0.1
  */
-public interface ContentFieldValue
-        extends FieldValue<ContentId> {
+public interface MutableOtherFieldValue extends MutableFieldValue<byte[]>, OtherFieldValue {
 }

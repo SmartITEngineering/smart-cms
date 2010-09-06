@@ -18,11 +18,23 @@
  */
 package com.smartitengineering.cms.api.content;
 
+import com.smartitengineering.cms.api.common.PersistentWriter;
+import com.smartitengineering.cms.api.type.ContentStatus;
+import com.smartitengineering.cms.api.type.ContentType;
+
 /**
  *
  * @author imyousuf
- * @since 0.1
  */
-public interface ContentFieldValue
-        extends FieldValue<ContentId> {
+public interface MutableContent extends PersistentWriter {
+
+  public void setParentId(ContentId contentId);
+
+  public void setContentDefinition(ContentType contentType);
+
+  public void setField(String fieldName, Field field);
+
+  public void removeField(String fieldName);
+
+  public void setStatus(ContentStatus contentStatus);
 }

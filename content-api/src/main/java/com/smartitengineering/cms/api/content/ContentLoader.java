@@ -18,11 +18,25 @@
  */
 package com.smartitengineering.cms.api.content;
 
+import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.type.ContentDataType;
+import com.smartitengineering.cms.api.type.FieldDef;
+
 /**
  *
  * @author imyousuf
- * @since 0.1
  */
-public interface ContentFieldValue
-        extends FieldValue<ContentId> {
+public interface ContentLoader {
+
+  MutableField createMutableField(FieldDef fieldDef);
+
+  MutableField createMutableField(Field field);
+
+  MutableContentFieldValue createDateTimeFieldValue(ContentDataType contentDataType);
+
+  MutableContentFieldValue createDateTimeFieldValue(ContentFieldValue contentFieldValue);
+
+  ContentId createContentId(WorkspaceId workspaceId, byte[] id);
+
+  Content loadContent(ContentId contentId);
 }
