@@ -24,13 +24,15 @@ package com.smartitengineering.cms.api.type;
  * @since 0.1
  */
 public interface MutableContentDataType
-				extends ContentDataType {
+    extends ContentDataType {
 
-		/**
-		 * Sets the limiting definition of the content type, i.e. what type of
-		 * content may be related using this {@link DataType}. If null that means
-		 * any content type is allowed.
-		 * @param typeDef The type name to restrict on, if null no restriction.
-		 */
-		public void setTypeDef(ContentTypeID typeDef);
+  /**
+   * Sets the limiting definition of the content type, i.e. what type of
+   * content may be related using this {@link DataType}. If null that means
+   * any content type is allowed.
+   * @param typeDef The type name to restrict on, if null no restriction.
+   */
+  public void setTypeDef(ContentTypeID typeDef);
+
+  public void setBiBidirectionalFieldName(String fieldName);
 }

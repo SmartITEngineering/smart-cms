@@ -24,20 +24,17 @@ package com.smartitengineering.cms.api.type;
  * @since 0.1
  */
 public interface MutableCollectionDataType
-				extends CollectionDataType {
+    extends CollectionDataType {
 
-		/**
-		 * Set the maximum size of the collection. If non-positive that means there
-		 * is no upper bound.
-		 * @param maxSize The new maximum size of the collection.
-		 */
-		public void setSize(int maxSize);
+  /**
+   * The new data type of collection's items.
+   * @param newDataType New data type
+   * @throws IllegalArgumentException If newDataType is null.
+   */
+  public void setItemDataType(DataType newDataType)
+      throws IllegalArgumentException;
 
-		/**
-		 * The new data type of collection's items.
-		 * @param newDataType New data type
-		 * @throws IllegalArgumentException If newDataType is null.
-		 */
-		public void setItemDataType(DataType newDataType)
-						throws IllegalArgumentException;
+  public void setMaxSize(int maxSize);
+
+  public void setMinSeize(int minSize);
 }

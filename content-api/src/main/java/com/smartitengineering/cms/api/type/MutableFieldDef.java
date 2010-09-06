@@ -18,33 +18,37 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.util.Collection;
+
 /**
  * Editable version of {@link FieldDef}
  * @author imyousuf
  * @since 0.1
  */
 public interface MutableFieldDef
-				extends FieldDef {
+    extends FieldDef {
 
-		/**
-		 * Sets the new name of the field.
-		 * @param newFieldName New name - a non-blank string
-		 * @throws IllegalArgumentException If field name is blank
-		 */
-		public void setName(String newFieldName)
-						throws IllegalArgumentException;
+  /**
+   * Sets the new name of the field.
+   * @param newFieldName New name - a non-blank string
+   * @throws IllegalArgumentException If field name is blank
+   */
+  public void setName(String newFieldName)
+      throws IllegalArgumentException;
 
-		/**
-		 * Sets whether the field is required or not
-		 * @param required True if required else false
-		 */
-		public void setRequired(boolean required);
+  /**
+   * Sets whether the field is required or not
+   * @param required True if required else false
+   */
+  public void setRequired(boolean required);
 
-		/**
-		 * Sets the new data type for this field definition
-		 * @param dataType The new data type
-		 * @throws IllegalArgumentException If dataType is null
-		 */
-		public void setDataType(DataType dataType)
-						throws IllegalArgumentException;
+  public void setValueDef(DataType dataType);
+
+  public void setVariations(Collection<VariationDef> variationDefs);
+
+  public void getCustomValidator(ValidatorDef validatorDef);
+
+  public void setSearchDefinition(SearchDef searchDef);
+
+  public void setFieldStandaloneUpdateAble(boolean standaloneUpdateAble);
 }
