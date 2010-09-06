@@ -18,11 +18,29 @@
  */
 package com.smartitengineering.cms.api.content;
 
+import com.smartitengineering.cms.api.type.ContentStatus;
+import com.smartitengineering.cms.api.type.ContentType;
+import java.util.Map;
+
 /**
  *
  * @author imyousuf
- * @since 0.1
  */
-public interface ContentFieldValue
-        extends FieldValue<ContentId> {
+public interface Content {
+
+  public ContentId getContentId();
+
+  public ContentId getParentId();
+
+  public Content getParent();
+
+  public ContentType getContentDefinition();
+
+  public Map<String, Field> getFields();
+
+  public Field getField(String fieldName);
+
+  public ContentStatus getStatus();
+
+  public Representation getRepresentation(String repName);
 }

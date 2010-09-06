@@ -18,14 +18,12 @@
  */
 package com.smartitengineering.cms.api.content;
 
-import java.net.URI;
-
 /**
  *
  * @author imyousuf
  * @since 0.1
  */
 public interface MutableContentFieldValue
-        extends MutableFieldValue<URI>,
+        extends MutableFieldValue<ContentId>,
                 ContentFieldValue {
 }

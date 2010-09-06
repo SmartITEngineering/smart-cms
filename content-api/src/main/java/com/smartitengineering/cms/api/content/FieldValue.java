@@ -29,7 +29,5 @@ public interface FieldValue<V> {
 
   public FieldValueType getDataType();
 
-  public CharSequence getValueAsString();
-
   public V getValue();
 }

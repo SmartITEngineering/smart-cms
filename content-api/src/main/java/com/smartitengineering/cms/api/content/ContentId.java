@@ -18,11 +18,15 @@
  */
 package com.smartitengineering.cms.api.content;
 
+import com.smartitengineering.cms.api.WorkspaceId;
+
 /**
  *
  * @author imyousuf
- * @since 0.1
  */
-public interface ContentFieldValue
-        extends FieldValue<ContentId> {
+public interface ContentId {
+
+  public WorkspaceId getWorkspaceId();
+
+  public byte[] getId();
 }
