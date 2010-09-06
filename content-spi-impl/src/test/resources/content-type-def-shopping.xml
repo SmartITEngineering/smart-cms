@@ -93,6 +93,7 @@
                 </definition>
               </content>
             </simple-value>
+            <maxSize>30</maxSize>
           </collection>
         </value>
         <required>true</required>

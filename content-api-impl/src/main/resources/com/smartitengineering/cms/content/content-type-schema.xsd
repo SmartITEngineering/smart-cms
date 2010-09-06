@@ -73,11 +73,14 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
     </xs:complexType>
   </xs:element>
   <xs:element name="size" type="xs:integer" />
+  <xs:element name="minSize" type="xs:integer" />
+  <xs:element name="maxSize" type="xs:integer" />
   <xs:element name="collection">
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="simple-value" minOccurs="1" maxOccurs="1"/>
-        <xs:element ref="size" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="minSize" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="maxSize" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>

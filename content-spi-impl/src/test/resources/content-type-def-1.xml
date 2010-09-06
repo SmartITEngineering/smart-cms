@@ -91,6 +91,7 @@
                 </definition>
               </content>
             </simple-value>
+            <minSize>2</minSize>
           </collection>
         </value>
         <validator>
