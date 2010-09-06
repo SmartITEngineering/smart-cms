@@ -28,7 +28,7 @@ public interface ResourceDef {
 
   public String getMIMEType();
 
-  public String name();
+  public String getName();
 
   public ResourceUri getResourceUri();
 }
