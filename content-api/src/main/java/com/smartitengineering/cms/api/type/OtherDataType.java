@@ -19,19 +19,10 @@
 package com.smartitengineering.cms.api.type;
 
 /**
- * Editable version of {@link BinaryContentType}
+ *
  * @author imyousuf
- * @since 0.1
  */
-public interface MutableBinaryContentType
-				extends BinaryContentType,
-								MutableContentType {
+public interface OtherDataType {
 
-		/**
-		 * Sets the new mime type for this binary content type.
-		 * @param newMimeType New mime type
-		 * @throws IllegalArgumentException If new mime type is blank string
-		 */
-		public void setMimeType(String newMimeType)
-						throws IllegalArgumentException;
+  public String getMIMEType();
 }

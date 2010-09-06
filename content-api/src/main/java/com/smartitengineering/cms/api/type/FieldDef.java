@@ -18,28 +18,38 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.util.Collection;
+
 /**
- * Represents the difinition of the fields of the {@link ContentType}
+ * Represents the definition of the fields of the {@link ContentType}
  * @author imyousuf
  * @since 0.1
  */
 public interface FieldDef {
 
-		/**
-		 * Retrives the name of this field
-		 * @return the name
-		 */
-		public String getName();
+  /**
+   * Retrieves the name of this field
+   * @return the name
+   */
+  public String getName();
 
-		/**
-		 * Retrieve the definition of the data type of this field
-		 * @return difinition of the data type
-		 */
-		public DataType getValueDef();
+  /**
+   * Retrieve the definition of the data type of this field
+   * @return definition of the data type
+   */
+  public DataType getValueDef();
 
-		/**
-		 * Returns whether the field is required or not
-		 * @return whether the field is required or not
-		 */
-		public boolean isRequired();
+  /**
+   * Returns whether the field is required or not
+   * @return whether the field is required or not
+   */
+  public boolean isRequired();
+
+  public Collection<VariationDef> getVariations();
+
+  public ValidatorDef getCustomValidator();
+
+  public SearchDef getSearchDefinition();
+
+  public boolean isFieldStandaloneUpdateAble();
 }

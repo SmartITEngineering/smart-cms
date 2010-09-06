@@ -19,16 +19,12 @@
 package com.smartitengineering.cms.api.type;
 
 /**
- * Specialized form of {@link ContentType} for textual contents
+ *
  * @author imyousuf
- * @since 0.1
  */
-public interface TextualContentType
-				extends ContentType {
-
-		/**
-		 * Retrieve the {@link ContentType} of the parent of this {@link ContentType}
-		 * @return the parent {@link ContentType}
-		 */
-		public ContentTypeID getParentContentType();
+public enum TemplateType {
+  VELOCITY,
+  RUBY,
+  GROOVY,
+  JAVASCRIPT
 }

@@ -18,27 +18,15 @@
  */
 package com.smartitengineering.cms.api.type;
 
-import com.smartitengineering.cms.api.WorkspaceId;
-
 /**
- * Represents the unique identifier for a {@link ContentType}, specified by its
- * namespace, similar to that of package of java, and its name.
+ *
  * @author imyousuf
- * @since 0.1
  */
-public interface ContentTypeID {
-  
-  public WorkspaceId getWorkspace();
+public interface SearchDef {
 
-  /**
-   * Retrieve the name of the {@link ContentType}
-   * @return a non-empty string
-   */
-  public String getName();
+  public boolean isIndexed();
 
-  /**
-   * Retrieve the namespace of the {@link ContentType}
-   * @return a non-null string, but may be empty
-   */
-  public String getNamespace();
+  public boolean isStored();
+
+  public String getBoostConfig();
 }

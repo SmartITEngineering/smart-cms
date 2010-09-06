@@ -18,7 +18,6 @@
  */
 package com.smartitengineering.cms.api.type;
 
-import com.smartitengineering.cms.api.common.XMLContent;
 import java.util.Collection;
 
 /**
@@ -27,34 +26,32 @@ import java.util.Collection;
  * @author imyousuf
  * @since 0.1
  */
-public interface ContentType
-				extends XMLContent {
+public interface ContentType {
 
-		/**
-		 * Retrieve the unique ID of the content type to be used for relating
-		 * this content type to other objects.
-		 * @return the id represtation of the content type
-		 */
-		public ContentTypeID getContentTypeID();
+  /**
+   * Retrieve the unique ID of the content type to be used for relating
+   * this content type to other objects.
+   * @return the id representation of the content type
+   */
+  public ContentTypeID getContentTypeID();
 
-		/**
-		 * Retrive the category of the content type. This type may be used
-		 * for specialization of content type.
-		 * @return category of the content type.
-		 */
-		public ContentDefinitionType getType();
+  /**
+   * Retrieve the statuses available for the workflow of contents of
+   * this type. The collection returned could be unmodifiable.
+   * @return {@link Collection} of statuses of this content type
+   */
+  public Collection<ContentStatus> getStatuses();
 
-		/**
-		 * Retrieve the statuses available for the workflow of contents of
-		 * this type. The colleciton returned could be unmodifieable.
-		 * @return {@link Collection} of statuses of this content type
-		 */
-		public Collection<ContentStatus> getStatuses();
+  /**
+   * Retrieve the defined fields for this content type. The collection
+   * returned could be unmodifiable.
+   * @return defined fields
+   */
+  public Collection<FieldDef> getFields();
 
-		/**
-		 * Retrieve the defined fields for this content type. The colleciton
-		 * returned could be unmodifieable.
-		 * @return defined fields
-		 */
-		public Collection<FieldDef> getFields();
+  public ContentTypeID getParent();
+
+  public String getDisplayName();
+
+  public Collection<RepresentationDef> getRepresentations();
 }

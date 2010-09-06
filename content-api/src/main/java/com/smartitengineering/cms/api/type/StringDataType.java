@@ -24,39 +24,7 @@ package com.smartitengineering.cms.api.type;
  * @since 0.1
  */
 public interface StringDataType
-				extends DataType {
+    extends OtherDataType {
 
-		/**
-		 * represents the plain string {@link DataType}
-		 */
-		public static final StringDataType PLAIN = new StringDataType() {
-
-				public FieldValueType getStringType() {
-						return FieldValueType.STRING_PLAIN;
-				}
-
-				public FieldValueType getType() {
-						return FieldValueType.STRING;
-				}
-		};
-
-		/**
-		 * represents the xml string {@link DataType}
-		 */
-		public static final StringDataType XML = new StringDataType() {
-
-				public FieldValueType getStringType() {
-						return FieldValueType.STRING_XML;
-				}
-
-				public FieldValueType getType() {
-						return FieldValueType.STRING;
-				}
-		};
-
-		/**
-		 * Retrieves the type of string {@link DataType}
-		 * @return
-		 */
-		public FieldValueType getStringType();
+  public String getEncoding();
 }

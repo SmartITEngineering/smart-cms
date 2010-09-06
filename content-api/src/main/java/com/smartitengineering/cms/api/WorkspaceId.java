@@ -16,29 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.type;
-
-import com.smartitengineering.cms.api.WorkspaceId;
+package com.smartitengineering.cms.api;
 
 /**
- * Represents the unique identifier for a {@link ContentType}, specified by its
- * namespace, similar to that of package of java, and its name.
+ *
  * @author imyousuf
- * @since 0.1
  */
-public interface ContentTypeID {
-  
-  public WorkspaceId getWorkspace();
+public interface WorkspaceId {
 
-  /**
-   * Retrieve the name of the {@link ContentType}
-   * @return a non-empty string
-   */
+  public String getGlobalNamespace();
+
   public String getName();
-
-  /**
-   * Retrieve the namespace of the {@link ContentType}
-   * @return a non-null string, but may be empty
-   */
-  public String getNamespace();
 }

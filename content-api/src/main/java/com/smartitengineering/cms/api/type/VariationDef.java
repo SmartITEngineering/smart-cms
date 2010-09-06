@@ -19,19 +19,8 @@
 package com.smartitengineering.cms.api.type;
 
 /**
- * Editable version of {@link TextualContentType}.
+ *
  * @author imyousuf
- * @since 0.1
  */
-public interface MutableTextualContentType
-				extends TextualContentType,
-								MutableContentType {
-
-		/**
-		 * Sets the content type id of the parent content type. It may be to indicate
-		 * that there is no parent. If content type id is invalid there could be
-		 * error during write operation.
-		 * @param contentTypeID ID of the parent content type
-		 */
-		public void setParentContentTypeID(ContentTypeID contentTypeID);
+public interface VariationDef extends ResourceDef {
 }

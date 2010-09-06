@@ -19,12 +19,12 @@
 package com.smartitengineering.cms.api.type;
 
 /**
- * Constants representing the specialized forms of {@link ContentType}
+ *
  * @author imyousuf
- * @since 0.1
  */
-public enum ContentDefinitionType {
+public interface ValidatorDef {
 
-		TEXTUAL,
-		BINARY;
+  public ValidatorType geType();
+
+  public ResourceUri getUri();
 }

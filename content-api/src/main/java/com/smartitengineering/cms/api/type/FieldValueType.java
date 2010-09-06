@@ -34,5 +34,6 @@ public enum FieldValueType {
 		STRING_XML,
 		STRING,
 		CONTENT,
-		COLLECTION
+		COLLECTION,
+    OTHER
 }

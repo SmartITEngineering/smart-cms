@@ -40,5 +40,7 @@ public interface CollectionDataType
 		 * is infinity.
 		 * @return the maximum size
 		 */
-		public int getSize();
+		public int getMaxSize();
+
+    public int getMinSize();
 }

@@ -24,11 +24,13 @@ package com.smartitengineering.cms.api.type;
  * @since 0.1
  */
 public interface ContentDataType
-				extends DataType {
+    extends DataType {
 
-		/**
-		 * Retrieve the definition of the content type limited for this association.
-		 * @return Definition of collection's items.
-		 */
-		public ContentTypeID getTypeDef();
+  /**
+   * Retrieve the definition of the content type limited for this association.
+   * @return Definition of collection's items.
+   */
+  public ContentTypeID getTypeDef();
+
+  public String getBidirectionalFieldName();
 }

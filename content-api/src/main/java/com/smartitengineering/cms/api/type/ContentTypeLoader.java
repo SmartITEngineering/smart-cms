@@ -55,22 +55,6 @@ public interface ContentTypeLoader {
 									 IOException;
 
 		/**
-		 * Get the mutable version of the textual content type.
-		 * @param contentType Content type to get the mutable version for
-		 * @return Editable textual content type
-		 */
-		public MutableTextualContentType getMutableTextualContentType(
-						TextualContentType contentType);
-
-		/**
-		 * Get the mutable version of the binary content type.
-		 * @param contentType Content type to get the mutable version for
-		 * @return Editable binary content type
-		 */
-		public MutableBinaryContentType getMutableBinaryContentType(
-						BinaryContentType contentType);
-
-		/**
 		 * Get the mutable version of the content data type.
 		 * @param contentDataType Content data type to get the mutable version for
 		 * @return Editable content data type
@@ -139,15 +123,4 @@ public interface ContentTypeLoader {
 		 */
 		public MutableFieldDef createMutableFieldDef();
 
-		/**
-		 * Create a editable textual content type
-		 * @return new textual content type
-		 */
-		public MutableTextualContentType createMutableTextualContentType();
-
-		/**
-		 * Create a editable binary content type
-		 * @return New binary content type
-		 */
-		public MutableBinaryContentType createMutableBinaryContentType();
 }

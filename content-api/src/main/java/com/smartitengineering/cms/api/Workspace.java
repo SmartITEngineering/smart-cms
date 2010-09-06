@@ -16,19 +16,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.type;
+package com.smartitengineering.cms.api;
+
+import com.smartitengineering.cms.api.type.VariationDef;
+import com.smartitengineering.cms.api.type.RepresentationDef;
+import com.smartitengineering.cms.api.type.ContentType;
+import java.util.Collection;
 
 /**
- * Specialized form of {@link ContentType} for binary contents
+ *
  * @author imyousuf
- * @since 0.1
  */
-public interface BinaryContentType
-				extends ContentType {
+public interface Workspace {
 
-		/**
-		 * Retrive the mime-type of the binary content.
-		 * @return 
-		 */
-		public String getMimeType();
+  public WorkspaceId getName();
+
+  public Collection<ContentType> getContentDefintions();
+
+  public Collection<WorkspaceId> getFriendlies();
+
+  public Collection<RepresentationDef> getRepresentations();
+
+  public Collection<VariationDef> getVariations();
 }
