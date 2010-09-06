@@ -31,15 +31,6 @@
 The module is responsible for Implementing the SPI for the CMS.
 ]]>
 		</description>
-		<build>
-				<plugins>
-						<plugin>
-								<groupId>org.apache.maven.plugins</groupId>
-								<artifactId>maven-assembly-plugin</artifactId>
-								<version>${assembly.version}</version>
-						</plugin>
-				</plugins>
-		</build>
 		<dependencies>
 				<dependency>
 						<groupId>com.smartitengineering.smart-cms</groupId>
@@ -55,8 +46,6 @@ The module is responsible for Implementing the SPI for the CMS.
 				<dependency>
 						<groupId>junit</groupId>
 						<artifactId>junit</artifactId>
-						<version>${junit.version}</version>
-						<scope>test</scope>
 				</dependency>
 		</dependencies>
 </project>
