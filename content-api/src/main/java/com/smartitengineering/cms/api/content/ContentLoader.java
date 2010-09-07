@@ -36,6 +36,30 @@ public interface ContentLoader {
 
   MutableContentFieldValue createDateTimeFieldValue(ContentFieldValue contentFieldValue);
 
+  MutableContentFieldValue createBooleanFieldValue(ContentDataType contentDataType);
+
+  MutableContentFieldValue createBooleanFieldValue(ContentFieldValue contentFieldValue);
+
+  MutableContentFieldValue createCollectionFieldValue(ContentDataType contentDataType);
+
+  MutableContentFieldValue createCollectionFieldValue(ContentFieldValue contentFieldValue);
+
+  MutableContentFieldValue createContentFieldValue(ContentDataType contentDataType);
+
+  MutableContentFieldValue createContentFieldValue(ContentFieldValue contentFieldValue);
+
+  MutableContentFieldValue createNumberFieldValue(ContentDataType contentDataType);
+
+  MutableContentFieldValue createNumberFieldValue(ContentFieldValue contentFieldValue);
+
+  MutableContentFieldValue createOtherFieldValue(ContentDataType contentDataType);
+
+  MutableContentFieldValue createOtherFieldValue(ContentFieldValue contentFieldValue);
+
+  MutableContentFieldValue createStringFieldValue(ContentDataType contentDataType);
+
+  MutableContentFieldValue createStringFieldValue(ContentFieldValue contentFieldValue);
+
   ContentId createContentId(WorkspaceId workspaceId, byte[] id);
 
   Content loadContent(ContentId contentId);
