@@ -52,4 +52,6 @@ public interface FieldDef {
   public SearchDef getSearchDefinition();
 
   public boolean isFieldStandaloneUpdateAble();
+
+  public String getSearchFieldName();
 }
