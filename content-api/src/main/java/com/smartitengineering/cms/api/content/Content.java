@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.content;
 
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -43,4 +44,8 @@ public interface Content {
   public ContentStatus getStatus();
 
   public Representation getRepresentation(String repName);
+
+  public Date getCreationDate();
+
+  public Date getLastModifiedDate();
 }

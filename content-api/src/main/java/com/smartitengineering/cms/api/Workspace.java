@@ -22,6 +22,7 @@ import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ContentType;
 import java.util.Collection;
+import java.util.Date;
 
 /**
  *
@@ -38,4 +39,6 @@ public interface Workspace {
   public Collection<RepresentationDef> getRepresentations();
 
   public Collection<VariationDef> getVariations();
+
+  public Date getCreationDate();
 }

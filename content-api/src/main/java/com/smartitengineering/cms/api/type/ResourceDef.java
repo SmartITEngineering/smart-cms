@@ -18,6 +18,8 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.util.Date;
+
 /**
  *
  * @author imyousuf
@@ -31,4 +33,8 @@ public interface ResourceDef {
   public String getName();
 
   public ResourceUri getResourceUri();
+
+  public Date getCreationDate();
+
+  public Date getLastModifiedDate();
 }

@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.type;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -55,4 +56,8 @@ public interface ContentType {
   public String getDisplayName();
 
   public Map<String, RepresentationDef> getRepresentations();
+
+  public Date getCreationDate();
+
+  public Date getLastModifiedDate();
 }
