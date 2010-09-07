@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.OtherDataType;
 import com.smartitengineering.cms.api.type.StringDataType;
+import java.util.Set;
 
 /**
  *
@@ -67,4 +68,6 @@ public interface ContentLoader {
   ContentId createContentId(WorkspaceId workspaceId, byte[] id);
 
   Content loadContent(ContentId contentId);
+
+  Set<Content> search(Filter filter);
 }
