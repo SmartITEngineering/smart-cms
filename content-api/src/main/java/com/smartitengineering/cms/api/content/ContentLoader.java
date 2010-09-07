@@ -19,8 +19,12 @@
 package com.smartitengineering.cms.api.content;
 
 import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
+import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.type.OtherDataType;
+import com.smartitengineering.cms.api.type.StringDataType;
 
 /**
  *
@@ -32,33 +36,33 @@ public interface ContentLoader {
 
   MutableField createMutableField(Field field);
 
-  MutableContentFieldValue createDateTimeFieldValue(ContentDataType contentDataType);
+  MutableDateTimeFieldValue createDateTimeFieldValue(DataType dataType);
 
-  MutableContentFieldValue createDateTimeFieldValue(ContentFieldValue contentFieldValue);
+  MutableDateTimeFieldValue createDateTimeFieldValue(DateTimeFieldValue fieldValue);
 
-  MutableContentFieldValue createBooleanFieldValue(ContentDataType contentDataType);
+  MutableBooleanFieldValue createBooleanFieldValue(DataType dataType);
 
-  MutableContentFieldValue createBooleanFieldValue(ContentFieldValue contentFieldValue);
+  MutableBooleanFieldValue createBooleanFieldValue(BooleanFieldValue fieldValue);
 
-  MutableContentFieldValue createCollectionFieldValue(ContentDataType contentDataType);
+  MutableCollectionFieldValue createCollectionFieldValue(CollectionDataType dataType);
 
-  MutableContentFieldValue createCollectionFieldValue(ContentFieldValue contentFieldValue);
+  MutableCollectionFieldValue createCollectionFieldValue(CollectionFieldValue fieldValue);
 
-  MutableContentFieldValue createContentFieldValue(ContentDataType contentDataType);
+  MutableContentFieldValue createContentFieldValue(ContentDataType dataType);
 
-  MutableContentFieldValue createContentFieldValue(ContentFieldValue contentFieldValue);
+  MutableContentFieldValue createContentFieldValue(ContentFieldValue fieldValue);
 
-  MutableContentFieldValue createNumberFieldValue(ContentDataType contentDataType);
+  MutableNumberFieldValue createNumberFieldValue(DataType dataType);
 
-  MutableContentFieldValue createNumberFieldValue(ContentFieldValue contentFieldValue);
+  MutableNumberFieldValue createNumberFieldValue(NumberFieldValue fieldValue);
 
-  MutableContentFieldValue createOtherFieldValue(ContentDataType contentDataType);
+  MutableOtherFieldValue createOtherFieldValue(OtherDataType dataType);
 
-  MutableContentFieldValue createOtherFieldValue(ContentFieldValue contentFieldValue);
+  MutableOtherFieldValue createOtherFieldValue(OtherFieldValue fieldValue);
 
-  MutableContentFieldValue createStringFieldValue(ContentDataType contentDataType);
+  MutableStringFieldValue createStringFieldValue(StringDataType dataType);
 
-  MutableContentFieldValue createStringFieldValue(ContentFieldValue contentFieldValue);
+  MutableStringFieldValue createStringFieldValue(StringFieldValue fieldValue);
 
   ContentId createContentId(WorkspaceId workspaceId, byte[] id);
 
