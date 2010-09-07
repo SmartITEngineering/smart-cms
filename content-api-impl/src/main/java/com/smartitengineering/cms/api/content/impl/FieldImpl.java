@@ -20,38 +20,38 @@ package com.smartitengineering.cms.api.content.impl;
 
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
-import com.smartitengineering.cms.api.content.MutableFieldValue;
+import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.content.Variation;
 
 /**
  *
  * @author kaisar
  */
-public class FieldImpl implements Field{
+public class FieldImpl implements Field, MutableField {
+
   private String fieldName;
   private String varName;
   private Variation variation;
   private FieldValue fieldValue;
-  private MutableFieldValue mutableFieldValue;
 
-  public void setValue(MutableFieldValue fieldValue){
-    this.mutableFieldValue=fieldValue;
+  public void setValue(FieldValue fieldValue) {
+    this.fieldValue = fieldValue;
   }
 
-  public void setName(String name){
-    this.fieldName=name;
+  public void setName(String name) {
+    this.fieldName = name;
   }
 
-  public String getName(){
+  public String getName() {
     return this.fieldName;
   }
 
-  public Variation getVariation(String varName){
-    this.varName=varName;
+  public Variation getVariation(String varName) {
+    this.varName = varName;
     return this.variation;
   }
 
-  public FieldValue getValue(){
+  public FieldValue getValue() {
     return this.fieldValue;
   }
 }

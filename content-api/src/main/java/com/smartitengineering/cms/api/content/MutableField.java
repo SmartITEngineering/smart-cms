@@ -24,7 +24,7 @@ package com.smartitengineering.cms.api.content;
  */
 public interface MutableField extends Field {
 
-  public void setValue(MutableFieldValue fieldValue);
+  public void setValue(FieldValue fieldValue);
 
   public void setName(String name);
 }

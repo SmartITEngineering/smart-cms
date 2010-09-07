@@ -18,12 +18,16 @@
  */
 package com.smartitengineering.cms.api.content.impl;
 
+import com.smartitengineering.cms.api.WorkspaceId;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
+import com.smartitengineering.cms.api.content.MutableContent;
 import com.smartitengineering.cms.api.content.Representation;
+import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,77 +36,114 @@ import java.util.Map;
  *
  * @author kaisar
  */
-public class ContentImpl implements Content{
+public class ContentImpl extends AbstractPersistableDomain<MutableContent> implements MutableContent {
 
   private ContentId contentId;
   private ContentId parentId;
   private Content parentContent;
   private ContentType contentDef;
-  private Field field;
   private ContentStatus contentStatus;
-  private Representation representation;
   private Date creationDate;
   private Date lastModifiedDate;
-  private String fieldName;
-  private String repName;
-  private Map map= new HashMap();
+  private Map<String, Field> map = new HashMap<String, Field>();
+  private Map<String, Representation> representations = new HashMap<String, Representation>();
 
+  public ContentImpl() {
+    super(MutableContent.class);
+  }
+
+  @Override
   public void setParentId(ContentId contentId) {
     this.parentId = contentId;
   }
 
+  @Override
   public void setContentDefinition(ContentType contentType) {
     this.contentDef = contentType;
   }
 
-  public void setField(String fieldName, Field field) {
-    this.fieldName = fieldName;
-    this.field = field;
+  @Override
+  public void setField(Field field) {
+    map.put(field.getName(), field);
   }
 
-//  public void removeField(String fieldName);
+  @Override
   public void setStatus(ContentStatus contentStatus) {
     this.contentStatus = contentStatus;
   }
 
+  @Override
   public ContentId getContentId() {
     return this.contentId;
   }
 
+  @Override
   public ContentId getParentId() {
     return this.parentId;
   }
 
+  @Override
   public Content getParent() {
     return this.parentContent;
   }
 
+  @Override
   public ContentType getContentDefinition() {
     return this.contentDef;
   }
 
-  public Map<String, Field> getFields(){
-    return this.map;
-  }
-  public Field getField(String fieldName) {
-    this.fieldName = fieldName;
-    return this.field;
+  @Override
+  public Map<String, Field> getFields() {
+    return Collections.unmodifiableMap(this.map);
   }
 
+  @Override
+  public Field getField(String fieldName) {
+    return map.get(fieldName);
+  }
+
+  @Override
   public ContentStatus getStatus() {
     return this.contentStatus;
   }
 
+  @Override
   public Representation getRepresentation(String repName) {
-    this.repName = repName;
-    return this.representation;
+    return representations.get(repName);
   }
 
+  @Override
   public Date getCreationDate() {
     return this.creationDate;
   }
 
+  @Override
   public Date getLastModifiedDate() {
     return this.lastModifiedDate;
+  }
+
+  @Override
+  public boolean isPersisted() {
+    return contentId != null;
+  }
+
+  @Override
+  public String getKeyStringRep() {
+    StringBuilder builder = new StringBuilder();
+    if (isPersisted()) {
+      WorkspaceId workspaceId = contentId.getWorkspaceId();
+      builder.append(workspaceId.getGlobalNamespace()).append(':').append(workspaceId.getName()).append(':').
+          append(new String(contentId.getId()));
+    }
+    return builder.toString();
+  }
+
+  @Override
+  public void removeField(String fieldName) {
+    map.remove(fieldName);
+  }
+
+  public Map<String, Representation> getRepresentations() {
+    return representations;
   }
 }

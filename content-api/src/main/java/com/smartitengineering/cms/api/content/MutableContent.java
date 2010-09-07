@@ -26,13 +26,13 @@ import com.smartitengineering.cms.api.type.ContentType;
  *
  * @author imyousuf
  */
-public interface MutableContent extends PersistentWriter {
+public interface MutableContent extends PersistentWriter, Content {
 
   public void setParentId(ContentId contentId);
 
   public void setContentDefinition(ContentType contentType);
 
-  public void setField(String fieldName, Field field);
+  public void setField(Field field);
 
   public void removeField(String fieldName);
 
