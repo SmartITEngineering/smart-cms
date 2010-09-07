@@ -42,10 +42,20 @@ public final class MediaType {
   public static final Pattern MEDIA_TYPE_REGEX = Pattern.compile(
       "([\\S&&[^/]]+)/([\\S&&[^;]]+)(;([\\S&&[^=]]+)=([\\S&&[^;]]+))*");
   public static final MediaType WILDCARD = new MediaType();
-  public static final MediaType APPLICATION_XML = new MediaType("application", "xml");
   public static final MediaType TEXT_XML = new MediaType("text", "xml");
   public static final MediaType TEXT_HTML = new MediaType("text", "html");
   public static final MediaType TEXT_PLAIN = new MediaType("text", "plain");
+  public static final MediaType IMAGE_JPEG = new MediaType("image", "jpeg");
+  public static final MediaType IMAGE_PNG = new MediaType("image", "png");
+  public static final MediaType IMAGE_GIF = new MediaType("image", "gif");
+  public static final MediaType IMAGE_SVG = new MediaType("image", "svg+xml");
+  public static final MediaType VIDEO_FLV = new MediaType("video", "x-flv");
+  public static final MediaType VIDEO_3GP = new MediaType("video", "3gpp");
+  public static final MediaType VIDEO_AVI = new MediaType("video", "x-msvideo");
+  public static final MediaType VIDEO_MPEG = new MediaType("video", "mpeg");
+  public static final MediaType VIDEO_WMV = new MediaType("video", "x-ms-wmv");
+  public static final MediaType AUDIO_MP3 = new MediaType("audio", "mpeg");
+  public static final MediaType APPLICATION_XML = new MediaType("application", "xml");
   public static final MediaType APPLICATION_JSON = new MediaType("application", "json");
   public static final MediaType APPLICATION_ATOM_XML = new MediaType("application", "atom+xml");
   public static final MediaType APPLICATION_ATOM_XML_ENTRY = new MediaType("application", "atom+xml", Collections.
@@ -140,7 +150,7 @@ public final class MediaType {
     }
     MediaType other = (MediaType) obj;
     return (this.type.equalsIgnoreCase(other.type) && this.subtype.equalsIgnoreCase(other.subtype) && this.parameters.
-            equals(other.parameters));
+        equals(other.parameters));
   }
 
   @Override
