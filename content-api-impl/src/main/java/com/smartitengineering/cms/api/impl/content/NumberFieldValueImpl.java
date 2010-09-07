@@ -18,11 +18,11 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
-import com.smartitengineering.cms.api.content.NumberFieldValue;
+import com.smartitengineering.cms.api.content.MutableNumberFieldValue;
 
 /**
  *
  * @author imyousuf
  */
-public class NumberFieldValueImpl extends FieldValueImpl<Number> implements NumberFieldValue {
+public class NumberFieldValueImpl extends FieldValueImpl<Number> implements MutableNumberFieldValue {
 }
