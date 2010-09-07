@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,13 @@ package com.smartitengineering.cms.api.common;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -35,6 +38,9 @@ public final class MediaType {
   private final String subtype;
   private final Map<String, String> parameters;
   private static final String MEDIA_TYPE_WILDCARD = "*";
+  private static final Pattern WHITESPACE_OR_QUOTE = Pattern.compile("[\\s\"]");
+  public static final Pattern MEDIA_TYPE_REGEX = Pattern.compile(
+      "([\\S&&[^/]]+)/([\\S&&[^;]]+)(;([\\S&&[^=]]+)=([\\S&&[^;]]+))*");
   public static final MediaType WILDCARD = new MediaType();
   public static final MediaType APPLICATION_XML = new MediaType("application", "xml");
   public static final MediaType TEXT_XML = new MediaType("text", "xml");
@@ -42,6 +48,46 @@ public final class MediaType {
   public static final MediaType TEXT_PLAIN = new MediaType("text", "plain");
   public static final MediaType APPLICATION_JSON = new MediaType("application", "json");
   public static final MediaType APPLICATION_ATOM_XML = new MediaType("application", "atom+xml");
+  public static final MediaType APPLICATION_ATOM_XML_ENTRY = new MediaType("application", "atom+xml", Collections.
+      singletonMap("type", "entry"));
+  private static final Map<String, MediaType> parseResult = new WeakHashMap<String, MediaType>();
+  public static int hitCount;
+
+  public static MediaType fromString(String mediaType) {
+    if (StringUtils.isBlank(mediaType)) {
+      return MediaType.WILDCARD;
+    }
+    MediaType cacheResult = parseResult.get(mediaType);
+    if (cacheResult != null) {
+      return cacheResult;
+    }
+    Matcher matcher = MEDIA_TYPE_REGEX.matcher(mediaType);
+    if (matcher.matches()) {
+      String type = matcher.group(1);
+      String subtype = matcher.group(2);
+      final int endOfSubtype = matcher.end(2);
+      Map<String, String> params = new HashMap<String, String>();
+      if (endOfSubtype < mediaType.length()) {
+        String paramsStr = mediaType.substring(endOfSubtype);
+        if (StringUtils.isNotBlank(paramsStr)) {
+          String[] parameters = paramsStr.split(";");
+          for (String parameter : parameters) {
+            final int indexOfEquals = parameter.indexOf('=');
+            if (indexOfEquals >= 0) {
+              params.put(parameter.substring(0, indexOfEquals), indexOfEquals < parameter.length() - 1 ? parameter.
+                  substring(indexOfEquals + 1) : "");
+            }
+          }
+        }
+      }
+      final MediaType result = new MediaType(type, subtype, params);
+      parseResult.put(mediaType, result);
+      return result;
+    }
+    else {
+      return MediaType.WILDCARD;
+    }
+  }
 
   public MediaType() {
     this(null, null);
@@ -112,13 +158,12 @@ public final class MediaType {
     }
     return builder.toString();
   }
-  private static Pattern whitespaceOrQuote = Pattern.compile("[\\s\"]");
 
   private static void escapeValueForWhitespaceOrQuotes(StringBuilder builder, String value) {
     if (value == null) {
       return;
     }
-    Matcher m = whitespaceOrQuote.matcher(value);
+    Matcher m = WHITESPACE_OR_QUOTE.matcher(value);
     boolean quote = m.find();
     if (quote) {
       builder.append('"');
