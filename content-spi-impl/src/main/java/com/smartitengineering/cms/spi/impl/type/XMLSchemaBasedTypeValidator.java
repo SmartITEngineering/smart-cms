@@ -20,6 +20,7 @@ package com.smartitengineering.cms.spi.impl.type;
 
 import com.smartitengineering.cms.spi.type.*;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.xml.XMLConstants;
@@ -42,73 +43,77 @@ import org.xml.sax.SAXParseException;
  * @author imyousuf
  * @since 0.1
  */
-public class XMLSchemaBasedTypeValidator
-				implements TypeValidator {
+public class XMLSchemaBasedTypeValidator implements TypeValidator {
 
-		public static final String CONTENT_TYPE_SCHEMA_URI =
-															 "http://www.smartitengineering.com/smart-cms/content/content-type-schema";
-		public static final String XSD_LOCATION =
-															 "com/smartitengineering/cms/content/content-type-schema.xsd";
+  public static final String CONTENT_TYPE_SCHEMA_URI =
+                             "http://www.smartitengineering.com/smart-cms/content/content-type-schema";
+  public static final String XSD_LOCATION =
+                             "com/smartitengineering/cms/content/content-type-schema.xsd";
 
-		public boolean isValid(File contentTypeDef)
-						throws Exception {
-				if (contentTypeDef == null) {
-						return false;
-				}
-				Document document = getDocumentForSource(contentTypeDef);
-				return isValid(document);
-		}
+  public boolean isValid(File contentTypeDef)
+      throws Exception {
+    if (contentTypeDef == null || !contentTypeDef.exists()) {
+      return false;
+    }
+    return isValid(new FileInputStream(contentTypeDef));
+  }
 
-		public boolean isValid(Document document)
-						throws Exception {
-				// create a SchemaFactory capable of understanding WXS schemas
-				SchemaFactory factory = SchemaFactory.newInstance(
-								XMLConstants.W3C_XML_SCHEMA_NS_URI);
-				final InputStream xsdStream = getClass().getClassLoader().
-								getResourceAsStream(XSD_LOCATION);
-				// load a WXS schema, represented by a Schema instance
-				Source schemaFile = new StreamSource(xsdStream);
-				schemaFile.setSystemId(CONTENT_TYPE_SCHEMA_URI);
-				Schema schema = factory.newSchema(schemaFile);
-				// create a Validator instance, which can be used to validate an instance document
-				Validator validator = schema.newValidator();
-				// validate the DOM tree
-				try {
-						validator.validate(new DOMSource(document));
-						return true;
-				}
-				catch (SAXException e) {
-						e.printStackTrace();
-						return false;
-				}
-		}
+  @Override
+  public boolean isValid(InputStream documentStream) throws Exception {
+    Document document = getDocumentForSource(documentStream);
+    return isValid(document);
+  }
 
-		private Document getDocumentForSource(File contentTypeDef)
-						throws SAXException,
-									 ParserConfigurationException,
-									 IOException {
-				final DocumentBuilderFactory docBuilderFactor =
-																		 DocumentBuilderFactory.newInstance();
-				docBuilderFactor.setNamespaceAware(true);
-				DocumentBuilder parser = docBuilderFactor.newDocumentBuilder();
-				parser.setErrorHandler(new ErrorHandler() {
+  protected boolean isValid(Document document)
+      throws Exception {
+    // create a SchemaFactory capable of understanding WXS schemas
+    SchemaFactory factory = SchemaFactory.newInstance(
+        XMLConstants.W3C_XML_SCHEMA_NS_URI);
+    final InputStream xsdStream = getClass().getClassLoader().
+        getResourceAsStream(XSD_LOCATION);
+    // load a WXS schema, represented by a Schema instance
+    Source schemaFile = new StreamSource(xsdStream);
+    schemaFile.setSystemId(CONTENT_TYPE_SCHEMA_URI);
+    Schema schema = factory.newSchema(schemaFile);
+    // create a Validator instance, which can be used to validate an instance document
+    Validator validator = schema.newValidator();
+    // validate the DOM tree
+    try {
+      validator.validate(new DOMSource(document));
+      return true;
+    }
+    catch (SAXException e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
 
-						public void warning(SAXParseException exception)
-										throws SAXException {
-								throw exception;
-						}
+  private Document getDocumentForSource(InputStream contentTypeDef)
+      throws SAXException,
+             ParserConfigurationException,
+             IOException {
+    final DocumentBuilderFactory docBuilderFactor =
+                                 DocumentBuilderFactory.newInstance();
+    docBuilderFactor.setNamespaceAware(true);
+    DocumentBuilder parser = docBuilderFactor.newDocumentBuilder();
+    parser.setErrorHandler(new ErrorHandler() {
 
-						public void error(SAXParseException exception)
-										throws SAXException {
-								throw exception;
-						}
+      public void warning(SAXParseException exception)
+          throws SAXException {
+        throw exception;
+      }
 
-						public void fatalError(SAXParseException exception)
-										throws SAXException {
-								throw exception;
-						}
-				});
-				Document document = parser.parse(contentTypeDef);
-				return document;
-		}
+      public void error(SAXParseException exception)
+          throws SAXException {
+        throw exception;
+      }
+
+      public void fatalError(SAXParseException exception)
+          throws SAXException {
+        throw exception;
+      }
+    });
+    Document document = parser.parse(contentTypeDef);
+    return document;
+  }
 }

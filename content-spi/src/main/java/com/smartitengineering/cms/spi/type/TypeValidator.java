@@ -19,7 +19,7 @@
 package com.smartitengineering.cms.spi.type;
 
 import java.io.File;
-import org.w3c.dom.Document;
+import java.io.InputStream;
 
 /**
  * An API for validating content type
@@ -39,10 +39,10 @@ public interface TypeValidator {
 
 		/**
 		 * Validate the specified content type definition.
-		 * @param document XML {@link Document} to validate
+		 * @param documentStream  The stream on the content type definition descriptor
 		 * @return True if valid else false
 		 * @throws Exception If any error in validating
 		 */
-		public boolean isValid(Document document)
+		public boolean isValid(InputStream documentStream)
 						throws Exception;
 }
