@@ -16,30 +16,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.content.impl;
+package com.smartitengineering.cms.api.impl.content;
+
+import com.smartitengineering.cms.api.content.Field;
+import com.smartitengineering.cms.api.content.FieldValue;
+import com.smartitengineering.cms.api.content.MutableField;
+import com.smartitengineering.cms.api.content.Variation;
 
 /**
  *
  * @author kaisar
  */
-public class VariationImpl {
+public class FieldImpl implements Field, MutableField {
 
-  private String name;
-  private byte[] variation;
+  private String fieldName;
+  private String varName;
+  private Variation variation;
+  private FieldValue fieldValue;
 
-  public String getName() {
-    return this.name;
-  }
-
-  public byte[] getVariation() {
-    return this.variation;
+  public void setValue(FieldValue fieldValue) {
+    this.fieldValue = fieldValue;
   }
 
   public void setName(String name) {
-    this.name = name;
+    this.fieldName = name;
   }
 
-  public void setVariation(byte[] variation) {
-    this.variation = variation;
+  public String getName() {
+    return this.fieldName;
+  }
+
+  public Variation getVariation(String varName) {
+    this.varName = varName;
+    return this.variation;
+  }
+
+  public FieldValue getValue() {
+    return this.fieldValue;
   }
 }

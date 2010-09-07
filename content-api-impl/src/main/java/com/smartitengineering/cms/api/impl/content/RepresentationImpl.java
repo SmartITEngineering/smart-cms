@@ -16,33 +16,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.content.impl;
+package com.smartitengineering.cms.api.impl.content;
 
-import com.smartitengineering.cms.api.content.FieldValue;
-import com.smartitengineering.cms.api.content.MutableFieldValue;
-import com.smartitengineering.cms.api.type.FieldValueType;
+import com.smartitengineering.cms.api.content.Representation;
 
 /**
  *
  * @author kaisar
  */
-public class FieldValueImpl<V> implements FieldValue<V>, MutableFieldValue<V> {
+public class RepresentationImpl implements Representation {
 
-  private FieldValueType fieldValueType;
-  private V value;
+  private String name;
+  private byte[] representation;
 
-  @Override
-  public void setValue(V newV) {
-    this.value = newV;
+  public void setName(String name) {
+    this.name = name;
   }
 
-  @Override
-  public FieldValueType getDataType() {
-    return this.fieldValueType;
+  public void setRepresentation(byte[] representation) {
+    this.representation = representation;
   }
 
-  @Override
-  public V getValue() {
-    return value;
+  public String getName() {
+    return this.name;
+  }
+
+  public byte[] getRepresentation() {
+    return this.representation;
   }
 }

@@ -16,32 +16,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.content.impl;
+package com.smartitengineering.cms.api.impl.content;
 
-import com.smartitengineering.cms.api.content.Representation;
+import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.content.ContentId;
 
 /**
  *
  * @author kaisar
  */
-public class RepresentationImpl implements Representation {
+public class ContentIdImpl implements ContentId {
 
-  private String name;
-  private byte[] representation;
+  private WorkspaceId workspaceIdI;
+  private byte[] id;
 
-  public void setName(String name) {
-    this.name = name;
+  public void setWorkspaceId(WorkspaceId workspaceId){
+    this.workspaceIdI=workspaceId;
   }
 
-  public void setRepresentation(byte[] representation) {
-    this.representation = representation;
+  public void setId(byte[] id){
+    this.id=id;
   }
 
-  public String getName() {
-    return this.name;
+  public WorkspaceId getWorkspaceId() {
+    return this.workspaceIdI;
   }
 
-  public byte[] getRepresentation() {
-    return this.representation;
+  public byte[] getId() {
+    return this.id;
   }
 }

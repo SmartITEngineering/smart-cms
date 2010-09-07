@@ -16,33 +16,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.content.impl;
-
-import com.smartitengineering.cms.api.WorkspaceId;
-import com.smartitengineering.cms.api.content.ContentId;
+package com.smartitengineering.cms.api.impl.content;
 
 /**
  *
  * @author kaisar
  */
-public class ContentIdImpl implements ContentId {
+public class VariationImpl {
 
-  private WorkspaceId workspaceIdI;
-  private byte[] id;
+  private String name;
+  private byte[] variation;
 
-  public void setWorkspaceId(WorkspaceId workspaceId){
-    this.workspaceIdI=workspaceId;
+  public String getName() {
+    return this.name;
   }
 
-  public void setId(byte[] id){
-    this.id=id;
+  public byte[] getVariation() {
+    return this.variation;
   }
 
-  public WorkspaceId getWorkspaceId() {
-    return this.workspaceIdI;
+  public void setName(String name) {
+    this.name = name;
   }
 
-  public byte[] getId() {
-    return this.id;
+  public void setVariation(byte[] variation) {
+    this.variation = variation;
   }
 }
