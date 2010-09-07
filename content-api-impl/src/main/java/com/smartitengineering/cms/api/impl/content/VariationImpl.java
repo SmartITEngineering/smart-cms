@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,22 +18,16 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
+import com.smartitengineering.cms.api.content.Variation;
+
 /**
  *
  * @author kaisar
  */
-public class VariationImpl {
+public class VariationImpl implements Variation {
 
   private String name;
   private byte[] variation;
-
-  public String getName() {
-    return this.name;
-  }
-
-  public byte[] getVariation() {
-    return this.variation;
-  }
 
   public void setName(String name) {
     this.name = name;
@@ -41,5 +35,15 @@ public class VariationImpl {
 
   public void setVariation(byte[] variation) {
     this.variation = variation;
+  }
+
+  @Override
+  public String getName() {
+    return this.name;
+  }
+
+  @Override
+  public byte[] getVariation() {
+    return this.variation;
   }
 }

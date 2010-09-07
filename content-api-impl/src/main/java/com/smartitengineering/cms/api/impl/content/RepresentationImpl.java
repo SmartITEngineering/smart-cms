@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,10 +37,12 @@ public class RepresentationImpl implements Representation {
     this.representation = representation;
   }
 
+  @Override
   public String getName() {
     return this.name;
   }
 
+  @Override
   public byte[] getRepresentation() {
     return this.representation;
   }

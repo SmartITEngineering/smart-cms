@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
-import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.MutableFieldValue;
 import com.smartitengineering.cms.api.type.FieldValueType;
 
@@ -26,7 +25,7 @@ import com.smartitengineering.cms.api.type.FieldValueType;
  *
  * @author kaisar
  */
-public class FieldValueImpl<V> implements FieldValue<V>, MutableFieldValue<V> {
+public class FieldValueImpl<V> implements MutableFieldValue<V> {
 
   private FieldValueType fieldValueType;
   private V value;

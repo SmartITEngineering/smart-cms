@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,18 +30,20 @@ public class ContentIdImpl implements ContentId {
   private WorkspaceId workspaceIdI;
   private byte[] id;
 
-  public void setWorkspaceId(WorkspaceId workspaceId){
-    this.workspaceIdI=workspaceId;
+  public void setWorkspaceId(WorkspaceId workspaceId) {
+    this.workspaceIdI = workspaceId;
   }
 
-  public void setId(byte[] id){
-    this.id=id;
+  public void setId(byte[] id) {
+    this.id = id;
   }
 
+  @Override
   public WorkspaceId getWorkspaceId() {
     return this.workspaceIdI;
   }
 
+  @Override
   public byte[] getId() {
     return this.id;
   }

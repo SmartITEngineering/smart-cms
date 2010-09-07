@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
-import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.content.Variation;
@@ -27,30 +26,35 @@ import com.smartitengineering.cms.api.content.Variation;
  *
  * @author kaisar
  */
-public class FieldImpl implements Field, MutableField {
+public class FieldImpl implements MutableField {
 
   private String fieldName;
   private String varName;
   private Variation variation;
   private FieldValue fieldValue;
 
+  @Override
   public void setValue(FieldValue fieldValue) {
     this.fieldValue = fieldValue;
   }
 
+  @Override
   public void setName(String name) {
     this.fieldName = name;
   }
 
+  @Override
   public String getName() {
     return this.fieldName;
   }
 
+  @Override
   public Variation getVariation(String varName) {
     this.varName = varName;
     return this.variation;
   }
 
+  @Override
   public FieldValue getValue() {
     return this.fieldValue;
   }
