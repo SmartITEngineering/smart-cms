@@ -35,7 +35,7 @@ public interface ContentStatus {
 		 * Retrieve the identifier for the associated content type.
 		 * @return associated content type
 		 */
-		public ContentTypeID getContentType();
+		public ContentTypeId getContentType();
 
 		/**
 		 * Retrive the name of the status. It has to be a non-empty string.

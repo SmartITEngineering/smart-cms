@@ -47,6 +47,6 @@ public interface MutableContentStatus
 		 * @param typeId Content Type's identifier for this status
 		 * @throws IllegalArgumentException If typeId is null
 		 */
-		public void setContentTypeID(ContentTypeID typeId)
+		public void setContentTypeID(ContentTypeId typeId)
 						throws IllegalArgumentException;
 }

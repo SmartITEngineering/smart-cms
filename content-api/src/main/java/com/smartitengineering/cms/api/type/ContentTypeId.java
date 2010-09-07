@@ -26,7 +26,7 @@ import com.smartitengineering.cms.api.WorkspaceId;
  * @author imyousuf
  * @since 0.1
  */
-public interface ContentTypeID {
+public interface ContentTypeId {
   
   public WorkspaceId getWorkspace();
 

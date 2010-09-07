@@ -37,7 +37,7 @@ public interface ContentTypeLoader {
 		 *					exists.
 		 * @throws NullPointerException If contentTypeID parameter is null
 		 */
-		public ContentType loadContentType(ContentTypeID contentTypeID)
+		public ContentType loadContentType(ContentTypeId contentTypeID)
 						throws NullPointerException;
 
 		/**
@@ -84,7 +84,7 @@ public interface ContentTypeLoader {
 		 * @return Editable content type id
 		 */
 		public MutableContentTypeID getMutableContentTypeID(
-						ContentTypeID contentTypeID);
+						ContentTypeId contentTypeID);
 
 		/**
 		 * Get the mutable version of the field definition

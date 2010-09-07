@@ -35,7 +35,7 @@ public interface ContentType {
    * this content type to other objects.
    * @return the id representation of the content type
    */
-  public ContentTypeID getContentTypeID();
+  public ContentTypeId getContentTypeID();
 
   /**
    * Retrieve the statuses available for the workflow of contents of
@@ -51,7 +51,7 @@ public interface ContentType {
    */
   public Map<String, FieldDef> getFields();
 
-  public ContentTypeID getParent();
+  public ContentTypeId getParent();
 
   public String getDisplayName();
 

@@ -36,7 +36,7 @@ public interface MutableContentType
 		 * @param contentTypeID The content type identifier
 		 * @throws IllegalArgumentException If contentTypeID is null
 		 */
-		public void setContentTypeID(ContentTypeID contentTypeID)
+		public void setContentTypeID(ContentTypeId contentTypeID)
 						throws IllegalArgumentException;
 
 		/**

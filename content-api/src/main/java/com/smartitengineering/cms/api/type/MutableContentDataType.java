@@ -32,7 +32,7 @@ public interface MutableContentDataType
    * any content type is allowed.
    * @param typeDef The type name to restrict on, if null no restriction.
    */
-  public void setTypeDef(ContentTypeID typeDef);
+  public void setTypeDef(ContentTypeId typeDef);
 
   public void setBiBidirectionalFieldName(String fieldName);
 }

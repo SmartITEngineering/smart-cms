@@ -30,7 +30,7 @@ public interface ContentDataType
    * Retrieve the definition of the content type limited for this association.
    * @return Definition of collection's items.
    */
-  public ContentTypeID getTypeDef();
+  public ContentTypeId getTypeDef();
 
   public String getBidirectionalFieldName();
 }

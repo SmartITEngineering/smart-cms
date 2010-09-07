@@ -26,7 +26,7 @@ import com.smartitengineering.cms.api.WorkspaceId;
  * @since 0.1
  */
 public interface MutableContentTypeID
-    extends ContentTypeID {
+    extends ContentTypeId {
 
   /**
    * Sets the new namespace of the content type. If null it will be treated as
