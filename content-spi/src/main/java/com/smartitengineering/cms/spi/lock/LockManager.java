@@ -18,12 +18,11 @@
  */
 package com.smartitengineering.cms.spi.lock;
 
+import com.smartitengineering.cms.api.common.Lock;
 import com.smartitengineering.cms.spi.SmartSPI;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
 import com.smartitengineering.util.bean.annotations.InjectableField;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A class for managing instances of locks being used by concrete objects to
@@ -71,7 +70,7 @@ public final class LockManager {
 		 * @return Lock for the key.
 		 * @see {@link LockHandler#register(com.smartitengineering.cms.content.lock.Key)}
 		 */
-		public static synchronized ReentrantLock register(Key key) {
+		public static synchronized Lock register(Key key) {
 				return getInstance().getLockHandler().register(key);
 		}
 

@@ -22,7 +22,6 @@ import com.smartitengineering.cms.api.common.Lock;
 import com.smartitengineering.cms.spi.lock.Key;
 import com.smartitengineering.cms.spi.lock.LockManager;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
 
 /**
  * Integrates lock implementation for domain objects needing locking support. It
@@ -34,7 +33,7 @@ public abstract class AbstractLockableDomain
         implements Lock,
                    Key {
 
-  protected java.util.concurrent.locks.ReentrantLock lock;
+  protected Lock lock;
 
   /**
    * Gets the lock for the concrete class invoking this constructor
@@ -50,24 +49,23 @@ public abstract class AbstractLockableDomain
     super.finalize();
   }
 
+  @Override
   public boolean isLockOwned() {
-    return lock.isHeldByCurrentThread();
+    return lock.isLockOwned();
   }
 
+  @Override
   public void lock() {
     lock.lock();
   }
 
-  public void lockInterruptibly()
-          throws InterruptedException {
-    lock.lockInterruptibly();
-  }
-
+  @Override
   public boolean tryLock() {
     boolean locked = lock.tryLock();
     return locked;
   }
 
+  @Override
   public boolean tryLock(long time,
                          TimeUnit unit)
           throws InterruptedException {
@@ -75,11 +73,9 @@ public abstract class AbstractLockableDomain
     return locked;
   }
 
+  @Override
   public void unlock() {
     lock.unlock();
   }
 
-  public Condition newCondition() {
-    return lock.newCondition();
-  }
 }

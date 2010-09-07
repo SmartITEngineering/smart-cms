@@ -18,6 +18,8 @@
  */
 package com.smartitengineering.cms.api.common;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Represents the lock of the CMS API. The lock basically extends the
  * {@link java.util.concurrent.locks.Lock} by adding capabilities of detecting
@@ -25,8 +27,15 @@ package com.smartitengineering.cms.api.common;
  * @author imyousuf
  * @since 0.1
  */
-public interface Lock
-        extends java.util.concurrent.locks.Lock {
+public interface Lock {
 
   public boolean isLockOwned();
+
+  public void lock();
+
+  public boolean tryLock();
+
+  public boolean tryLock(long time, TimeUnit unit) throws InterruptedException;
+
+  public void unlock();
 }
