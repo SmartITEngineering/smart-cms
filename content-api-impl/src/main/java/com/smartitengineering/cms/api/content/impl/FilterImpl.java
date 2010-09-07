@@ -36,34 +36,42 @@ public class FilterImpl implements Filter {
   private QueryParameter<String>[] parameters;
   private ContentStatus[] status;
 
+  @Override
   public void addContentTypeToFilter(ContentTypeId... types) {
     this.types = types;
   }
 
+  @Override
   public void removeContentTypeFromFilter(ContentTypeId... types) {
     this.types = types;
   }
 
+  @Override
   public void setCreationDateFilter(QueryParameter<Date> creationDateParam) {
     this.creationDateParameter = creationDateParam;
   }
 
+  @Override
   public void setLastModifiedDateFilter(QueryParameter<Date> modifiedDateParam) {
     this.modifiedDateParameter = modifiedDateParam;
   }
 
+  @Override
   public void addFieldFilter(QueryParameter... parameters) {
     this.parameters = parameters;
   }
 
+  @Override
   public void removeFieldFilter(QueryParameter... parameters) {
     this.parameters = parameters;
   }
 
+  @Override
   public void addStatusFilter(ContentStatus... status) {
     this.status = status;
   }
 
+  @Override
   public void removeStatusFilter(ContentStatus... status) {
     this.status = status;
   }

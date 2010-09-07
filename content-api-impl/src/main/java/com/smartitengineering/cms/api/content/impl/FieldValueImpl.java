@@ -19,23 +19,30 @@
 package com.smartitengineering.cms.api.content.impl;
 
 import com.smartitengineering.cms.api.content.FieldValue;
+import com.smartitengineering.cms.api.content.MutableFieldValue;
 import com.smartitengineering.cms.api.type.FieldValueType;
-import java.util.Collection;
 
 /**
  *
  * @author kaisar
  */
-public class FieldValueImpl<V> implements FieldValue<V> {
+public class FieldValueImpl<V> implements FieldValue<V>, MutableFieldValue<V> {
 
   private FieldValueType fieldValueType;
+  private V value;
 
-  public void setValue(V newV);
-   public FieldValueType getDataType(){
-     return this.fieldValueType;
-   }
-  public V getValue(){
-
+  @Override
+  public void setValue(V newV) {
+    this.value = newV;
   }
 
+  @Override
+  public FieldValueType getDataType() {
+    return this.fieldValueType;
+  }
+
+  @Override
+  public V getValue() {
+    return value;
+  }
 }
