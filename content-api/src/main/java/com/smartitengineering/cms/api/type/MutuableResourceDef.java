@@ -18,31 +18,18 @@
  */
 package com.smartitengineering.cms.api.type;
 
-import com.smartitengineering.cms.api.WorkspaceId;
-
 /**
- * A {@link ContentTypeID} that can be edited.
- * @author imyousuf
- * @since 0.1
+ *
+ * @author kaisar
  */
-public interface MutableContentTypeID
-    extends ContentTypeId {
+public interface MutuableResourceDef extends ResourceDef{
 
-  /**
-   * Sets the new namespace of the content type. If null it will be treated as
-   * blank.
-   * @param newNamespace The new namespace for the content type
-   */
-  public void setNamespace(String newNamespace);
+  public void setTemplateType(TemplateType templateType);
 
-  /**
-   * Sets the new name for this content type. Blank string is not accepted as
-   * name of the content type.
-   * @param newContentTypeName The new name of the content type
-   * @throws IllegalArgumentException If the new name is empty or null
-   */
-  public void setName(String newContentTypeName)
-      throws IllegalArgumentException;
+  public void setMIMEType(String mimeType);
 
-  public void setWorkspace(WorkspaceId workspaceId);
+  public void setName(String name);
+
+  public void setResourceUri(ResourceUri resourceUri);
+
 }

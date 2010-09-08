@@ -22,9 +22,9 @@ package com.smartitengineering.cms.api.type;
  *
  * @author kaisar
  */
-public interface MutuableResourseUri extends ResourceUri{
+public interface MutuableResourceUri extends ResourceUri{
 
-  public void getType(Type type);
+  public void setType(Type type);
 
-  public void getValue(String value);
+  public void setValue(String value);
 }
