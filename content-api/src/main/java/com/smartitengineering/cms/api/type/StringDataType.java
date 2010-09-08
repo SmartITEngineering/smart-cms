@@ -24,7 +24,7 @@ package com.smartitengineering.cms.api.type;
  * @since 0.1
  */
 public interface StringDataType
-    extends OtherDataType {
+    extends MutableOtherDataType {
 
   public String getEncoding();
 }

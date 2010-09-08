@@ -30,6 +30,7 @@ public interface DataType {
 		 */
 		public static final DataType INTEGER = new DataType() {
 
+    @Override
 				public FieldValueType getType() {
 						return FieldValueType.INTEGER;
 				}
@@ -40,6 +41,7 @@ public interface DataType {
 		 */
 		public static final DataType BOOLEAN = new DataType() {
 
+    @Override
 				public FieldValueType getType() {
 						return FieldValueType.BOOLEAN;
 				}
@@ -50,6 +52,7 @@ public interface DataType {
 		 */
 		public static final DataType DOUBLE = new DataType() {
 
+    @Override
 				public FieldValueType getType() {
 						return FieldValueType.DOUBLE;
 				}
@@ -60,6 +63,7 @@ public interface DataType {
 		 */
 		public static final DataType DATE_TIME = new DataType() {
 
+    @Override
 				public FieldValueType getType() {
 						return FieldValueType.DATE_TIME;
 				}
@@ -70,6 +74,7 @@ public interface DataType {
 		 */
 		public static final DataType LONG = new DataType() {
 
+    @Override
 				public FieldValueType getType() {
 						return FieldValueType.LONG;
 				}

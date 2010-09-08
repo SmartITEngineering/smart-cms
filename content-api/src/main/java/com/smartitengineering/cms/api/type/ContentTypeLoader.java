@@ -83,7 +83,7 @@ public interface ContentTypeLoader {
 		 * @param contentTypeID content type id to get the mutable version for
 		 * @return Editable content type id
 		 */
-		public MutableContentTypeID getMutableContentTypeID(
+		public MutableContentTypeId getMutableContentTypeID(
 						ContentTypeId contentTypeID);
 
 		/**
@@ -115,7 +115,7 @@ public interface ContentTypeLoader {
 		 * Create a new editable content type id.
 		 * @return New content type id
 		 */
-		public MutableContentTypeID createMutableContentTypeID();
+		public MutableContentTypeId createMutableContentTypeID();
 
 		/**
 		 * Create a new editable field definition
