@@ -27,6 +27,7 @@ import com.smartitengineering.cms.api.content.Representation;
 import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.spi.SmartSPI;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,7 +47,6 @@ public class ContentImpl extends AbstractPersistableDomain<MutableContent> imple
   private Date creationDate;
   private Date lastModifiedDate;
   private Map<String, Field> map = new HashMap<String, Field>();
-  private Map<String, Representation> representations = new HashMap<String, Representation>();
 
   public ContentImpl() {
     super(MutableContent.class);
@@ -99,7 +99,13 @@ public class ContentImpl extends AbstractPersistableDomain<MutableContent> imple
 
   @Override
   public Field getField(String fieldName) {
-    return map.get(fieldName);
+    if (map.containsKey(fieldName)) {
+      return map.get(fieldName);
+    }
+    if (getParent() == null) {
+      return null;
+    }
+    return getParent().getField(fieldName);
   }
 
   @Override
@@ -109,7 +115,7 @@ public class ContentImpl extends AbstractPersistableDomain<MutableContent> imple
 
   @Override
   public Representation getRepresentation(String repName) {
-    return representations.get(repName);
+    return SmartSPI.getInstance().getRepresentationProvider().getRepresentation(repName, getContentDefinition(), this);
   }
 
   @Override
@@ -143,7 +149,19 @@ public class ContentImpl extends AbstractPersistableDomain<MutableContent> imple
     map.remove(fieldName);
   }
 
-  public Map<String, Representation> getRepresentations() {
-    return representations;
+  public void setContentId(ContentId contentId) {
+    this.contentId = contentId;
+  }
+
+  public void setCreationDate(Date creationDate) {
+    this.creationDate = creationDate;
+  }
+
+  public void setLastModifiedDate(Date lastModifiedDate) {
+    this.lastModifiedDate = lastModifiedDate;
+  }
+
+  public void setParentContent(Content parentContent) {
+    this.parentContent = parentContent;
   }
 }
