@@ -21,6 +21,8 @@ package com.smartitengineering.cms.api.impl.content;
 import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.content.Variation;
+import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.spi.SmartSPI;
 
 /**
  *
@@ -30,8 +32,8 @@ public class FieldImpl implements MutableField {
 
   private String fieldName;
   private String varName;
-  private Variation variation;
   private FieldValue fieldValue;
+  private FieldDef fieldDef;
 
   @Override
   public void setValue(FieldValue fieldValue) {
@@ -50,12 +52,20 @@ public class FieldImpl implements MutableField {
 
   @Override
   public Variation getVariation(String varName) {
-    this.varName = varName;
-    return this.variation;
+    return SmartSPI.getInstance().getVariationProvider().getVariation(varName, fieldDef, this);
   }
 
   @Override
   public FieldValue getValue() {
     return this.fieldValue;
+  }
+
+  @Override
+  public FieldDef getFieldDef() {
+    return fieldDef;
+  }
+
+  public void setFieldDef(FieldDef fieldDef) {
+    this.fieldDef = fieldDef;
   }
 }

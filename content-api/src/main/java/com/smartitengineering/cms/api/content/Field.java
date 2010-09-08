@@ -18,11 +18,15 @@
  */
 package com.smartitengineering.cms.api.content;
 
+import com.smartitengineering.cms.api.type.FieldDef;
+
 /**
  *
  * @author imyousuf
  */
 public interface Field {
+
+  public FieldDef getFieldDef();
 
   public String getName();
 
