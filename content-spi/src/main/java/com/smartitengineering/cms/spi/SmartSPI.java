@@ -21,10 +21,12 @@ package com.smartitengineering.cms.spi;
 import com.smartitengineering.cms.api.common.PersistentWriter;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.SmartContentAPI;
+import com.smartitengineering.cms.spi.content.RepresentationProvider;
+import com.smartitengineering.cms.spi.content.VariationProvider;
 import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar;
-import com.smartitengineering.cms.spi.type.TypeValidator;
+import com.smartitengineering.cms.spi.type.TypeValidators;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
 import com.smartitengineering.util.bean.annotations.InjectableField;
@@ -36,65 +38,75 @@ import com.smartitengineering.util.bean.annotations.InjectableField;
 @Aggregator(contextName = SmartSPI.SPI_CONTEXT)
 public final class SmartSPI {
 
-		public static final String SPI_CONTEXT = SmartContentAPI.CONTEXT_NAME +
-																						 ".spi";
-		/**
-		 * The lock handler implementation to be used to receive lock implementations.
-		 * Use <tt>lockHandler</tt> as bean name to be injected here.
-		 */
-		@InjectableField
-		protected LockHandler lockHandler;
+  public static final String SPI_CONTEXT = SmartContentAPI.CONTEXT_NAME +
+      ".spi";
+  /**
+   * The lock handler implementation to be used to receive lock implementations.
+   * Use <tt>lockHandler</tt> as bean name to be injected here.
+   */
+  @InjectableField
+  protected LockHandler lockHandler;
+  /**
+   * The type validator implementation which validatates a content type
+   * definition file source. Use <tt>typeValidator</tt> as the bean name in
+   * bean factory to be injected here.
+   */
+  @InjectableField
+  protected TypeValidators typeValidators;
+  @InjectableField
+  protected RepresentationProvider representationProvider;
+  @InjectableField
+  protected VariationProvider variationProvider;
+  /**
+   * The registrar for aggregating different implementations of
+   * {@link PersistentService} for diffent domain types. Use the bean name
+   * <tt>persistentServiceRegistrar</tt> for injecting it here.
+   */
+  @InjectableField
+  protected PersistentServiceRegistrar persistentServiceRegistrar;
 
-		/**
-		 * The type validator implementation which validatates a content type
-		 * definition file source. Use <tt>typeValidator</tt> as the bean name in
-		 * bean factory to be injected here.
-		 */
-		@InjectableField
-		protected TypeValidator typeValidator;
+  private PersistentServiceRegistrar getPersistentServiceRegistrar() {
+    return persistentServiceRegistrar;
+  }
 
-		/**
-		 * The registrar for aggregating different implementations of
-		 * {@link PersistentService} for diffent domain types. Use the bean name
-		 * <tt>persistentServiceRegistrar</tt> for injecting it here.
-		 */
-		@InjectableField
-		protected PersistentServiceRegistrar persistentServiceRegistrar;
+  /**
+   * An operation for retrieving the concrete implementation of persistent
+   * service implementaion for the given persistable API bean.
+   * @param <T> Should represent the class to be used in concrete SPI
+   *					  implementations. For example, {@link MutableContentType}
+   * @param writerClass The class to look for in the registrar.
+   * @return Service for persisting the bean.
+   * @see PersistentServiceRegistrar#getPersistentService(java.lang.Class)
+   */
+  public <T extends PersistentWriter> PersistentService<T> getPersistentService(Class<T> writerClass) {
+    return getPersistentServiceRegistrar().getPersistentService(writerClass);
+  }
 
-		private PersistentServiceRegistrar getPersistentServiceRegistrar() {
-				return persistentServiceRegistrar;
-		}
+  public TypeValidators getTypeValidators() {
+    return typeValidators;
+  }
 
-		/**
-		 * An operation for retrieving the concrete implementation of persistent
-		 * service implementaion for the given persistable API bean.
-		 * @param <T> Should represent the class to be used in concrete SPI
-		 *					  implementations. For example, {@link MutableContentType}
-		 * @param writerClass The class to look for in the registrar.
-		 * @return Service for persisting the bean.
-		 * @see PersistentServiceRegistrar#getPersistentService(java.lang.Class) 
-		 */
-		public <T extends PersistentWriter> PersistentService<T> getPersistentService(Class<T> writerClass) {
-				return getPersistentServiceRegistrar().getPersistentService(writerClass);
-		}
+  public LockHandler getLockHandler() {
+    return lockHandler;
+  }
 
-		public TypeValidator getTypeValidator() {
-				return typeValidator;
-		}
+  public RepresentationProvider getRepresentationProvider() {
+    return representationProvider;
+  }
 
-		public LockHandler getLockHandler() {
-				return lockHandler;
-		}
+  public VariationProvider getVariationProvider() {
+    return variationProvider;
+  }
 
-		private SmartSPI() {
-		}
-		private static SmartSPI spi;
+  private SmartSPI() {
+  }
+  private static SmartSPI spi;
 
-		public static SmartSPI getInstance() {
-				if (spi == null) {
-						spi = new SmartSPI();
-						BeanFactoryRegistrar.aggregate(spi);
-				}
-				return spi;
-		}
+  public static SmartSPI getInstance() {
+    if (spi == null) {
+      spi = new SmartSPI();
+      BeanFactoryRegistrar.aggregate(spi);
+    }
+    return spi;
+  }
 }
