@@ -21,7 +21,9 @@ package com.smartitengineering.cms.api.content;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
 /**
  *
@@ -33,15 +35,25 @@ public interface Filter {
 
   void removeContentTypeFromFilter(ContentTypeId... types);
 
+  Set<ContentTypeId> getContentTypeFilters();
+
   void setCreationDateFilter(QueryParameter<Date> creationDateParam);
 
+  QueryParameter<Date> getCreationDateFilter();
+
   void setLastModifiedDateFilter(QueryParameter<Date> creationDateParam);
+
+  QueryParameter<Date> getLastModifiedDateFilter();
 
   void addFieldFilter(QueryParameter... parameters);
 
   void removeFieldFilter(QueryParameter... parameters);
 
+  Collection<QueryParameter> getFieldFilters();
+
   void addStatusFilter(ContentStatus... status);
 
   void removeStatusFilter(ContentStatus... status);
+
+  Set<ContentStatus> getStatusFilters();
 }

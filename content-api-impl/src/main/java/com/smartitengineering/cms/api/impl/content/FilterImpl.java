@@ -22,7 +22,14 @@ import com.smartitengineering.cms.api.content.Filter;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -30,20 +37,24 @@ import java.util.Date;
  */
 public class FilterImpl implements Filter {
 
-  private ContentTypeId[] types;
+  private final Set<ContentTypeId> types = new HashSet<ContentTypeId>();
   private QueryParameter<Date> modifiedDateParameter;
   private QueryParameter<Date> creationDateParameter;
-  private QueryParameter<String>[] parameters;
-  private ContentStatus[] status;
+  private final List<QueryParameter> parameters = new ArrayList<QueryParameter>();
+  private final Set<ContentStatus> statuses = new HashSet<ContentStatus>();
 
   @Override
   public void addContentTypeToFilter(ContentTypeId... types) {
-    this.types = types;
+    if (types != null) {
+      this.types.addAll(Arrays.asList(types));
+    }
   }
 
   @Override
   public void removeContentTypeFromFilter(ContentTypeId... types) {
-    this.types = types;
+    if (types != null) {
+      this.types.removeAll(Arrays.asList(types));
+    }
   }
 
   @Override
@@ -58,21 +69,54 @@ public class FilterImpl implements Filter {
 
   @Override
   public void addFieldFilter(QueryParameter... parameters) {
-    this.parameters = parameters;
+    if (parameters != null) {
+      this.parameters.addAll(Arrays.asList(parameters));
+    }
   }
 
   @Override
   public void removeFieldFilter(QueryParameter... parameters) {
-    this.parameters = parameters;
+    if (parameters != null) {
+      this.parameters.removeAll(Arrays.asList(parameters));
+    }
   }
 
   @Override
   public void addStatusFilter(ContentStatus... status) {
-    this.status = status;
+    if (status != null) {
+      this.statuses.addAll(Arrays.asList(status));
+    }
   }
 
   @Override
   public void removeStatusFilter(ContentStatus... status) {
-    this.status = status;
+    if (status != null) {
+      this.statuses.removeAll(Arrays.asList(status));
+    }
+  }
+
+  @Override
+  public Set<ContentTypeId> getContentTypeFilters() {
+    return Collections.unmodifiableSet(types);
+  }
+
+  @Override
+  public QueryParameter<Date> getCreationDateFilter() {
+    return creationDateParameter;
+  }
+
+  @Override
+  public QueryParameter<Date> getLastModifiedDateFilter() {
+    return modifiedDateParameter;
+  }
+
+  @Override
+  public Collection<QueryParameter> getFieldFilters() {
+    return Collections.unmodifiableCollection(parameters);
+  }
+
+  @Override
+  public Set<ContentStatus> getStatusFilters() {
+    return Collections.unmodifiableSet(statuses);
   }
 }

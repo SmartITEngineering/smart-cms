@@ -69,5 +69,7 @@ public interface ContentLoader {
 
   Content loadContent(ContentId contentId);
 
+  Filter craeteFilter();
+
   Set<Content> search(Filter filter);
 }
