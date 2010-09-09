@@ -23,6 +23,7 @@ import com.smartitengineering.cms.api.type.MutableFieldDef;
 import com.smartitengineering.cms.api.type.SearchDef;
 import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.VariationDef;
+import com.smartitengineering.cms.spi.SmartSPI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,7 +60,10 @@ public class FieldDefImpl implements MutableFieldDef {
   @Override
   public void setVariations(Collection<VariationDef> variationDefs) {
     if (variationDefs != null) {
-      this.variationDefs = variationDefs;
+      this.variationDefs.addAll(variationDefs);
+    }
+    else {
+      variationDefs.clear();
     }
   }
 
@@ -115,6 +119,6 @@ public class FieldDefImpl implements MutableFieldDef {
 
   @Override
   public String getSearchFieldName() {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return SmartSPI.getInstance().getSearchFieldNameGenerator().getSearchFieldName(this);
   }
 }

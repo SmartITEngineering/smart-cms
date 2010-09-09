@@ -26,6 +26,7 @@ import com.smartitengineering.cms.spi.content.VariationProvider;
 import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar;
+import com.smartitengineering.cms.spi.type.SearchFieldNameGenerator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
@@ -57,6 +58,8 @@ public final class SmartSPI {
   protected RepresentationProvider representationProvider;
   @InjectableField
   protected VariationProvider variationProvider;
+  @InjectableField
+  private SearchFieldNameGenerator searchFieldNameGenerator;
   /**
    * The registrar for aggregating different implementations of
    * {@link PersistentService} for diffent domain types. Use the bean name
@@ -80,6 +83,10 @@ public final class SmartSPI {
    */
   public <T extends PersistentWriter> PersistentService<T> getPersistentService(Class<T> writerClass) {
     return getPersistentServiceRegistrar().getPersistentService(writerClass);
+  }
+
+  public SearchFieldNameGenerator getSearchFieldNameGenerator() {
+    return searchFieldNameGenerator;
   }
 
   public TypeValidators getTypeValidators() {
