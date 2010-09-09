@@ -2,23 +2,23 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.smartitengineering.cms.api.impl.type;
 
+import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableStringDataType;
 
 /**
  *
  * @author kaisar
  */
-public class StringDataTypeImpl implements MutableStringDataType{
+public class StringDataTypeImpl implements MutableStringDataType {
 
   private String encoding;
   private String mimeType;
 
   @Override
   public void setEncoding(String encoding) {
-    this.encoding=encoding;
+    this.encoding = encoding;
   }
 
   @Override
@@ -28,7 +28,7 @@ public class StringDataTypeImpl implements MutableStringDataType{
 
   @Override
   public void setMIMEType(String mimeType) {
-    this.mimeType=mimeType;
+    this.mimeType = mimeType;
   }
 
   @Override
@@ -36,4 +36,8 @@ public class StringDataTypeImpl implements MutableStringDataType{
     return this.mimeType;
   }
 
+  @Override
+  public FieldValueType getType() {
+    return FieldValueType.STRING;
+  }
 }

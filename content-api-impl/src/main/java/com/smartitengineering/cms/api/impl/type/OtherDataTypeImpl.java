@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
+import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableOtherDataType;
 
 /**
@@ -36,5 +37,10 @@ public class OtherDataTypeImpl implements MutableOtherDataType {
   @Override
   public String getMIMEType() {
     return this.mimeType;
+  }
+
+  @Override
+  public FieldValueType getType() {
+    return FieldValueType.OTHER;
   }
 }

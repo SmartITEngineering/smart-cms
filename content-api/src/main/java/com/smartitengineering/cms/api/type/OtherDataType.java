@@ -22,7 +22,7 @@ package com.smartitengineering.cms.api.type;
  *
  * @author imyousuf
  */
-public interface OtherDataType {
+public interface OtherDataType extends DataType {
 
   public String getMIMEType();
 }
