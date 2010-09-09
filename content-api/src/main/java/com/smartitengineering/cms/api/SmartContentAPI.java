@@ -67,6 +67,8 @@ public final class SmartContentAPI {
   protected ContentTypeLoader contentTypeLoader;
   @InjectableField(beanName = "apiContentLoader")
   protected ContentLoader contentLoader;
+  @InjectableField(beanName = "apiWorkspaceApi")
+  protected WorkspaceAPI workspaceApi;
 
   public ContentTypeLoader getContentTypeLoader() {
     return contentTypeLoader;
@@ -74,5 +76,9 @@ public final class SmartContentAPI {
 
   public ContentLoader getContentLoader() {
     return contentLoader;
+  }
+
+  public WorkspaceAPI getWorkspaceApi() {
+    return workspaceApi;
   }
 }
