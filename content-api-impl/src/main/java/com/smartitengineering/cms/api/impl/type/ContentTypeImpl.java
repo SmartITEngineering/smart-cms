@@ -18,38 +18,39 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
+import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author kaisar
  */
-public class ContentTypeImpl implements MutableContentType {
+public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentType> implements MutableContentType {
 
+  public ContentTypeImpl() {
+    super(MutableContentType.class);
+  }
   private ContentTypeId contentTypeId;
   private final List<ContentStatus> contentStatus = new ArrayList<ContentStatus>();
-  private Collection<FieldDef> fieldDef = new ArrayList<FieldDef>();
-  private ContentTypeId contentParent;
+  private final List<FieldDef> fieldDefs = new ArrayList<FieldDef>();
+  private final List<RepresentationDef> representationDefs = new ArrayList<RepresentationDef>();
+  private ContentTypeId parentTypeId;
   private String displayName;
-  private final Map<String, ContentStatus> statusMap = new HashMap<String, ContentStatus>();
-  private final Map<String, RepresentationDef> representationDefMap = new HashMap<String, RepresentationDef>();
-  private final Map<String, FieldDef> fieldDefMap = new HashMap<String, FieldDef>();
   private Date creationDate;
   private Date lastModifiedDate;
-  private boolean lock;
+  private boolean fromPersistentStorage;
 
   @Override
   public void setContentTypeID(ContentTypeId contentTypeID) throws IllegalArgumentException {
@@ -65,7 +66,7 @@ public class ContentTypeImpl implements MutableContentType {
 
   @Override
   public Collection<FieldDef> getMutableFields() {
-    return this.fieldDef;
+    return this.fieldDefs;
   }
 
   @Override
@@ -75,28 +76,40 @@ public class ContentTypeImpl implements MutableContentType {
 
   @Override
   public Map<String, ContentStatus> getStatuses() {
-    return Collections.unmodifiableMap(this.statusMap);
+    Map<String, ContentStatus> statusMap = new LinkedHashMap<String, ContentStatus>(contentStatus.size());
+    for (ContentStatus status : contentStatus) {
+      statusMap.put(status.getName(), status);
+    }
+    return Collections.unmodifiableMap(statusMap);
   }
 
   @Override
   public Map<String, FieldDef> getFields() {
-    return Collections.unmodifiableMap(this.fieldDefMap);
+    Map<String, FieldDef> fieldDefMap = new LinkedHashMap<String, FieldDef>(fieldDefs.size());
+    for (FieldDef fieldDef : fieldDefs) {
+      fieldDefMap.put(fieldDef.getName(), fieldDef);
+    }
+    return Collections.unmodifiableMap(fieldDefMap);
+  }
 
+  @Override
+  public Map<String, RepresentationDef> getRepresentations() {
+    Map<String, RepresentationDef> representationDefMap = new LinkedHashMap<String, RepresentationDef>(representationDefs.
+        size());
+    for (RepresentationDef representationDef : representationDefs) {
+      representationDefMap.put(representationDef.getName(), representationDef);
+    }
+    return Collections.unmodifiableMap(representationDefMap);
   }
 
   @Override
   public ContentTypeId getParent() {
-    return this.contentParent;
+    return this.parentTypeId;
   }
 
   @Override
   public String getDisplayName() {
     return this.displayName;
-  }
-
-  @Override
-  public Map<String, RepresentationDef> getRepresentations() {
-    return Collections.unmodifiableMap(this.representationDefMap);
   }
 
   @Override
@@ -111,43 +124,52 @@ public class ContentTypeImpl implements MutableContentType {
 
   }
 
-  @Override
-  public void create() throws IOException {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public boolean isFromPersistentStorage() {
+    return fromPersistentStorage;
+  }
+
+  public void setFromPersistentStorage(boolean fromPersistentStorage) {
+    this.fromPersistentStorage = fromPersistentStorage;
+  }
+
+  public void setCreationDate(Date creationDate) {
+    this.creationDate = creationDate;
+  }
+
+  public void setLastModifiedDate(Date lastModifiedDate) {
+    this.lastModifiedDate = lastModifiedDate;
   }
 
   @Override
-  public void update() throws IOException {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public boolean isPersisted() {
+    return isFromPersistentStorage();
   }
 
   @Override
-  public void delete() throws IOException {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public String getKeyStringRep() {
+    StringBuilder keyString = new StringBuilder();
+    if (contentTypeId != null) {
+      WorkspaceId workspaceId = contentTypeId.getWorkspace();
+      if (workspaceId != null) {
+        keyString.append(workspaceId.getGlobalNamespace()).append(':').append(workspaceId.getName()).append(':');
+      }
+      keyString.append(contentTypeId.getNamespace()).append(':').append(contentTypeId.getName());
+    }
+    return keyString.toString();
   }
 
   @Override
-  public boolean isLockOwned() {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public Collection<RepresentationDef> getMutableRepresentationDefs() {
+    return representationDefs;
   }
 
   @Override
-  public void lock() {
-    this.lock = true;
+  public void setParent(ContentTypeId parentId) {
+    this.parentTypeId = parentId;
   }
 
   @Override
-  public boolean tryLock() {
-    return this.lock;
-  }
-
-  @Override
-  public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
-  public void unlock() {
-    this.lock = false;
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 }

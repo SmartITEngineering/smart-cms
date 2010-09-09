@@ -52,4 +52,10 @@ public interface MutableContentType
 		 * @return Mutable collection of fields, could be empty if not field
 		 */
 		public Collection<FieldDef> getMutableFields();
+
+    public Collection<RepresentationDef> getMutableRepresentationDefs();
+
+    public void setParent(ContentTypeId parentId);
+
+    public void setDisplayName(String displayName);
 }
