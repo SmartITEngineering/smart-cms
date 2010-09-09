@@ -19,71 +19,10 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
-import com.smartitengineering.cms.api.type.ResourceUri;
-import com.smartitengineering.cms.api.type.TemplateType;
-import java.util.Date;
 
 /**
  *
  * @author kaisar
  */
-public class RepresentationDefImpl implements MutableRepresentationDef{
-
-  private TemplateType templateType;
-  private String mimeType;
-  private String name;
-  private ResourceUri resourceUri;
-  private Date creationDate;
-  private Date lastModifiedDate;
-
-  @Override
-  public void setTemplateType(TemplateType templateType) {
-    this.templateType=templateType;
-  }
-
-  @Override
-  public void setMIMEType(String mimeType) {
-    this.mimeType=mimeType;
-  }
-
-  @Override
-  public void setName(String name) {
-    this.name=name;
-  }
-
-  @Override
-  public void setResourceUri(ResourceUri resourceUri) {
-    this.resourceUri=resourceUri;
-  }
-
-  @Override
-  public TemplateType getTemplateType() {
-    return this.templateType;
-  }
-
-  @Override
-  public String getMIMEType() {
-    return this.mimeType;
-  }
-
-  @Override
-  public String getName() {
-    return this.name;
-  }
-
-  @Override
-  public ResourceUri getResourceUri() {
-    return this.resourceUri;
-  }
-
-  @Override
-  public Date getCreationDate() {
-    return this.creationDate;
-  }
-
-  @Override
-  public Date getLastModifiedDate() {
-    return this.lastModifiedDate;
-  }
-
+public class RepresentationDefImpl extends ResourceDefImpl implements MutableRepresentationDef {
 }

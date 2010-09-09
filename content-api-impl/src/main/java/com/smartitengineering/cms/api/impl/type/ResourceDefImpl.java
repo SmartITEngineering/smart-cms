@@ -85,4 +85,12 @@ public class ResourceDefImpl implements MutuableResourceDef {
   public Date getLastModifiedDate() {
     return this.lastModifiedDate;
   }
+
+  public void setCreationDate(Date creationDate) {
+    this.creationDate = creationDate;
+  }
+
+  public void setLastModifiedDate(Date lastModifiedDate) {
+    this.lastModifiedDate = lastModifiedDate;
+  }
 }
