@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.MutuableResourceDef;
+import com.smartitengineering.cms.api.type.ResourceDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.type.TemplateType;
 import java.util.Date;
@@ -27,7 +28,7 @@ import java.util.Date;
  *
  * @author kaisar
  */
-public class ResourceDefImpl implements MutuableResourceDef {
+public class ResourceDefImpl implements MutuableResourceDef, ResourceDef {
 
   private TemplateType templateType;
   private String mimeType;

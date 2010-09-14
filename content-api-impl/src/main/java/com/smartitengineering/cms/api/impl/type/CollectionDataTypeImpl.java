@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
+import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableCollectionDataType;
@@ -26,7 +27,7 @@ import com.smartitengineering.cms.api.type.MutableCollectionDataType;
  *
  * @author kaisar
  */
-public class CollectionDataTypeImpl implements MutableCollectionDataType {
+public class CollectionDataTypeImpl implements CollectionDataType,MutableCollectionDataType {
 
   private DataType dataType;
   private int maxSize;

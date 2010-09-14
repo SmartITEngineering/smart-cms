@@ -6,12 +6,13 @@ package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableStringDataType;
+import com.smartitengineering.cms.api.type.StringDataType;
 
 /**
  *
  * @author kaisar
  */
-public class StringDataTypeImpl implements MutableStringDataType {
+public class StringDataTypeImpl implements MutableStringDataType, StringDataType {
 
   private String encoding;
   private String mimeType;

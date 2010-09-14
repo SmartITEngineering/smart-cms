@@ -21,6 +21,7 @@ package com.smartitengineering.cms.api.impl.type;
 import com.smartitengineering.cms.api.WorkspaceId;
 import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;
 import com.smartitengineering.cms.api.type.ContentStatus;
+import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentType;
@@ -37,7 +38,8 @@ import java.util.Map;
  *
  * @author kaisar
  */
-public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentType> implements MutableContentType {
+public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentType> implements MutableContentType,
+                                                                                              ContentType {
 
   public ContentTypeImpl() {
     super(MutableContentType.class);

@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
+import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableContentDataType;
@@ -26,7 +27,7 @@ import com.smartitengineering.cms.api.type.MutableContentDataType;
  *
  * @author kaisar
  */
-public class ContentDataTypeImpl implements MutableContentDataType {
+public class ContentDataTypeImpl implements MutableContentDataType,ContentDataType {
 
   private ContentTypeId contentTypeId;
   private String bidirectionalFieldName;

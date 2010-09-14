@@ -46,7 +46,7 @@ public interface MutableFieldDef
 
   public void setVariations(Collection<VariationDef> variationDefs);
 
-  public void getCustomValidator(ValidatorDef validatorDef);
+  public void setCustomValidator(ValidatorDef validatorDef);
 
   public void setSearchDefinition(SearchDef searchDef);
 

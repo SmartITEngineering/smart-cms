@@ -19,24 +19,25 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.MutuableResourceUri;
+import com.smartitengineering.cms.api.type.ResourceUri;
 
 /**
  *
  * @author kaisar
  */
-public class ResourceUriImpl implements MutuableResourceUri {
+public class ResourceUriImpl implements MutuableResourceUri, ResourceUri {
 
   private Type type;
   private String value;
 
   @Override
   public void setType(Type type) {
-    this.type=type;
+    this.type = type;
   }
 
   @Override
   public void setValue(String value) {
-    this.value=value;
+    this.value = value;
   }
 
   @Override

@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
+import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 
@@ -25,7 +26,7 @@ import com.smartitengineering.cms.api.type.MutableContentStatus;
  *
  * @author kaisar
  */
-public class ContentStatusImpl implements MutableContentStatus {
+public class ContentStatusImpl implements MutableContentStatus,ContentStatus {
 
   private int id;
   private ContentTypeId contentTypeId;
