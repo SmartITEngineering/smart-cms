@@ -22,7 +22,7 @@ package com.smartitengineering.cms.api.type;
  *
  * @author kaisar
  */
-public interface MutableVallidatorDef extends ValidatorDef {
+public interface MutableValidatorDef extends ValidatorDef {
 
   public void seType(ValidatorType validatorType);
 
