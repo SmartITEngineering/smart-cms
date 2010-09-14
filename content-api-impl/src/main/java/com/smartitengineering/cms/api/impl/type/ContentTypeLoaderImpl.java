@@ -56,19 +56,30 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
 
   @Override
   public MutableContentDataType getMutableContentDataType(ContentDataType contentDataType) {
-    ContentDataTypeImpl contentDataTypeImpl = new ContentDataTypeImpl();
-    contentDataTypeImpl.setTypeDef(contentDataType.getTypeDef());
-    contentDataTypeImpl.setBiBidirectionalFieldName(contentDataType.getBidirectionalFieldName());
-    return contentDataTypeImpl;
+    if (contentDataType.getTypeDef() != null) {
+      ContentDataTypeImpl contentDataTypeImpl = new ContentDataTypeImpl();
+      contentDataTypeImpl.setTypeDef(contentDataType.getTypeDef());
+      contentDataTypeImpl.setBiBidirectionalFieldName(contentDataType.getBidirectionalFieldName());
+      return contentDataTypeImpl;
+    }
+    else {
+      throw new IllegalArgumentException("Argument can not be null.");
+    }
   }
 
   @Override
   public MutableCollectionDataType getMutableCollectionDataType(CollectionDataType collectionDataType) {
-    CollectionDataTypeImpl collectionDataTypeImpl = new CollectionDataTypeImpl();
-    collectionDataTypeImpl.setItemDataType(collectionDataType.getItemDataType());
-    collectionDataTypeImpl.setMaxSize(collectionDataType.getMaxSize());
-    collectionDataTypeImpl.setMinSeize(collectionDataType.getMinSize());
-    return collectionDataTypeImpl;
+    if (collectionDataType.getItemDataType() != null && collectionDataType.getMinSize() >= 0 && collectionDataType.
+        getMaxSize() >= collectionDataType.getMinSize()) {
+      CollectionDataTypeImpl collectionDataTypeImpl = new CollectionDataTypeImpl();
+      collectionDataTypeImpl.setItemDataType(collectionDataType.getItemDataType());
+      collectionDataTypeImpl.setMaxSize(collectionDataType.getMaxSize());
+      collectionDataTypeImpl.setMinSeize(collectionDataType.getMinSize());
+      return collectionDataTypeImpl;
+    }
+    else {
+      throw new IllegalArgumentException("Argument can not be null.");
+    }
   }
 
   @Override
@@ -91,14 +102,19 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
 
   @Override
   public MutableFieldDef getMutableFieldDef(FieldDef fieldDef) {
-    FieldDefImpl fieldDefImpl = new FieldDefImpl();
-    fieldDefImpl.setName(fieldDef.getName());
-    fieldDefImpl.setSearchDefinition(fieldDef.getSearchDefinition());
-    fieldDefImpl.setValueDef(fieldDef.getValueDef());
-    fieldDefImpl.setVariations(fieldDef.getVariations());
-    fieldDefImpl.setFieldStandaloneUpdateAble(true);
-    fieldDefImpl.setRequired(true);
-    return fieldDefImpl;
+    if (fieldDef != null) {
+      FieldDefImpl fieldDefImpl = new FieldDefImpl();
+      fieldDefImpl.setName(fieldDef.getName());
+      fieldDefImpl.setSearchDefinition(fieldDef.getSearchDefinition());
+      fieldDefImpl.setValueDef(fieldDef.getValueDef());
+      fieldDefImpl.setVariations(fieldDef.getVariations());
+      fieldDefImpl.setFieldStandaloneUpdateAble(true);
+      fieldDefImpl.setRequired(true);
+      return fieldDefImpl;
+    }
+    else {
+      throw new IllegalArgumentException("Argument can not be null.");
+    }
   }
 
   @Override
@@ -128,10 +144,15 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
 
   @Override
   public ContentTypeId createContentTypeId(WorkspaceId workspaceId, String namespace, String name) {
-    ContentTypeIdImpl contentTypeIdImpl = new ContentTypeIdImpl();
-    contentTypeIdImpl.setName(name);
-    contentTypeIdImpl.setNamespace(namespace);
-    contentTypeIdImpl.setWorkspace(workspaceId);
-    return contentTypeIdImpl;
+    if (workspaceId != null && namespace != null) {
+      ContentTypeIdImpl contentTypeIdImpl = new ContentTypeIdImpl();
+      contentTypeIdImpl.setName(name);
+      contentTypeIdImpl.setNamespace(namespace);
+      contentTypeIdImpl.setWorkspace(workspaceId);
+      return contentTypeIdImpl;
+    }
+    else {
+      throw new IllegalArgumentException("Argument can not be null.");
+    }
   }
 }

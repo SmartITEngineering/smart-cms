@@ -40,7 +40,6 @@ import com.smartitengineering.cms.api.content.NumberFieldValue;
 import com.smartitengineering.cms.api.content.OtherFieldValue;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.type.FieldDef;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -51,26 +50,42 @@ public class ContentLoaderImpl implements ContentLoader {
 
   @Override
   public MutableField createMutableField(FieldDef fieldDef) {
-    FieldImpl fieldImpl = new FieldImpl();
-    fieldImpl.setFieldDef(fieldDef);
-    fieldImpl.setName(fieldDef.getName());
-    return fieldImpl;
+    if (fieldDef != null) {
+      FieldImpl fieldImpl = new FieldImpl();
+      fieldImpl.setFieldDef(fieldDef);
+      fieldImpl.setName(fieldDef.getName());
+      return fieldImpl;
+    }
+    else {
+      throw new IllegalArgumentException("Argument can not be null.");
+
+    }
   }
 
   @Override
   public MutableField createMutableField(Field field) {
-    FieldImpl fieldImpl = new FieldImpl();
-    fieldImpl.setName(field.getName());
-    fieldImpl.setValue(field.getValue());
-    fieldImpl.setFieldDef(field.getFieldDef());
-    return fieldImpl;
+    if (field.getFieldDef() != null) {
+      FieldImpl fieldImpl = new FieldImpl();
+      fieldImpl.setName(field.getName());
+      fieldImpl.setValue(field.getValue());
+      fieldImpl.setFieldDef(field.getFieldDef());
+      return fieldImpl;
+    }
+    else {
+      throw new IllegalArgumentException("FieldDef can not be null.");
+    }
   }
 
   @Override
   public MutableDateTimeFieldValue createDateTimeFieldValue(DateTimeFieldValue fieldValue) {
-    DateTimeFieldValueImpl dateTimeFieldValueImpl = new DateTimeFieldValueImpl();
-    dateTimeFieldValueImpl.setValue(fieldValue.getValue());
-    return dateTimeFieldValueImpl;
+    if (fieldValue.getValue() != null) {
+      DateTimeFieldValueImpl dateTimeFieldValueImpl = new DateTimeFieldValueImpl();
+      dateTimeFieldValueImpl.setValue(fieldValue.getValue());
+      return dateTimeFieldValueImpl;
+    }
+    else {
+      throw new IllegalArgumentException("Argument can not be null.");
+    }
   }
 
   @Override
@@ -82,52 +97,80 @@ public class ContentLoaderImpl implements ContentLoader {
 
   @Override
   public MutableCollectionFieldValue createCollectionFieldValue(CollectionFieldValue fieldValue) {
-    CollectionFieldValueImpl collectionFieldValueImpl = new CollectionFieldValueImpl();
-    collectionFieldValueImpl.setValue(fieldValue.getValue());
-    return collectionFieldValueImpl;
+    if (fieldValue.getValue() != null) {
+      CollectionFieldValueImpl collectionFieldValueImpl = new CollectionFieldValueImpl();
+      collectionFieldValueImpl.setValue(fieldValue.getValue());
+      return collectionFieldValueImpl;
+    }
+    else {
+      throw new IllegalArgumentException("Argument can not be null.");
+    }
   }
 
   @Override
   public MutableContentFieldValue createContentFieldValue(ContentFieldValue fieldValue) {
-    ContentFieldValueImpl contentFieldValueImpl = new ContentFieldValueImpl();
-    contentFieldValueImpl.setValue(fieldValue.getValue());
-    return contentFieldValueImpl;
+    if (fieldValue.getValue() != null) {
+      ContentFieldValueImpl contentFieldValueImpl = new ContentFieldValueImpl();
+      contentFieldValueImpl.setValue(fieldValue.getValue());
+      return contentFieldValueImpl;
+    }
+    else {
+      throw new IllegalArgumentException("Argument can not be null.");
+    }
   }
 
   @Override
   public MutableNumberFieldValue createNumberFieldValue(NumberFieldValue fieldValue) {
-    NumberFieldValueImpl fieldValueImpl = new NumberFieldValueImpl();
-    fieldValueImpl.setValue(fieldValue.getValue());
-    return fieldValueImpl;
+    if (fieldValue.getValue() != null) {
+      NumberFieldValueImpl fieldValueImpl = new NumberFieldValueImpl();
+      fieldValueImpl.setValue(fieldValue.getValue());
+      return fieldValueImpl;
+    }
+    else {
+      throw new IllegalArgumentException("Argument can not be null.");
+    }
   }
 
   @Override
   public MutableOtherFieldValue createOtherFieldValue(OtherFieldValue fieldValue) {
-    OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
-    otherFieldValueImpl.setValue(fieldValue.getValue());
-    return otherFieldValueImpl;
+    if (fieldValue.getValue() != null) {
+      OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
+      otherFieldValueImpl.setValue(fieldValue.getValue());
+      return otherFieldValueImpl;
+    }
+    else {
+      throw new IllegalArgumentException("Argument can not be null.");
+    }
   }
 
   @Override
   public MutableStringFieldValue createStringFieldValue(StringFieldValue fieldValue) {
-    StringFieldValueImpl stringFieldValueImpl = new StringFieldValueImpl();
-    stringFieldValueImpl.setValue(fieldValue.getValue());
-    return stringFieldValueImpl;
+    if (fieldValue.getValue() != null) {
+      StringFieldValueImpl stringFieldValueImpl = new StringFieldValueImpl();
+      stringFieldValueImpl.setValue(fieldValue.getValue());
+      return stringFieldValueImpl;
+    }
+    else {
+      throw new IllegalArgumentException("Argument can not be null.");
+    }
   }
 
   @Override
   public ContentId createContentId(WorkspaceId workspaceId, byte[] id) {
-    ContentIdImpl contentIdImpl = new ContentIdImpl();
-    contentIdImpl.setId(id);
-    contentIdImpl.setWorkspaceId(workspaceId);
-    return contentIdImpl;
+    if (workspaceId != null && id != null) {
+      ContentIdImpl contentIdImpl = new ContentIdImpl();
+      contentIdImpl.setId(id);
+      contentIdImpl.setWorkspaceId(workspaceId);
+      return contentIdImpl;
+    }
+    else {
+      throw new IllegalArgumentException("Argument can not be null.");
+    }
   }
 
   @Override
   public Content loadContent(ContentId contentId) {
-    ContentImpl contentImpl = new ContentImpl();
-    contentImpl.setContentId(contentId);
-    return contentImpl;
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
@@ -137,7 +180,41 @@ public class ContentLoaderImpl implements ContentLoader {
 
   @Override
   public Set<Content> search(Filter filter) {
-    Set<Content> contents = new HashSet<Content>();
-    return contents;
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public MutableDateTimeFieldValue createDateTimeFieldValue() {
+    return new DateTimeFieldValueImpl();
+  }
+
+  @Override
+  public MutableBooleanFieldValue createBooleanFieldValue() {
+    return new BooleanFieldValueImpl();
+  }
+
+  @Override
+  public MutableCollectionFieldValue createCollectionFieldValue() {
+    return new CollectionFieldValueImpl();
+  }
+
+  @Override
+  public MutableContentFieldValue createContentFieldValue() {
+    return new ContentFieldValueImpl();
+  }
+
+  @Override
+  public MutableNumberFieldValue createNumberFieldValue() {
+    return new NumberFieldValueImpl();
+  }
+
+  @Override
+  public MutableOtherFieldValue createOtherFieldValue() {
+    return new OtherFieldValueImpl();
+  }
+
+  @Override
+  public MutableStringFieldValue createStringFieldValue() {
+    return new StringFieldValueImpl();
   }
 }
