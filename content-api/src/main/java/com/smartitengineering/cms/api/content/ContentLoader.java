@@ -32,17 +32,31 @@ public interface ContentLoader {
 
   MutableField createMutableField(Field field);
 
+  MutableDateTimeFieldValue createDateTimeFieldValue();
+
   MutableDateTimeFieldValue createDateTimeFieldValue(DateTimeFieldValue fieldValue);
+
+  MutableBooleanFieldValue createBooleanFieldValue();
 
   MutableBooleanFieldValue createBooleanFieldValue(BooleanFieldValue fieldValue);
 
+  MutableCollectionFieldValue createCollectionFieldValue();
+
   MutableCollectionFieldValue createCollectionFieldValue(CollectionFieldValue fieldValue);
+
+  MutableContentFieldValue createContentFieldValue();
 
   MutableContentFieldValue createContentFieldValue(ContentFieldValue fieldValue);
 
+  MutableNumberFieldValue createNumberFieldValue();
+
   MutableNumberFieldValue createNumberFieldValue(NumberFieldValue fieldValue);
 
+  MutableOtherFieldValue createOtherFieldValue();
+
   MutableOtherFieldValue createOtherFieldValue(OtherFieldValue fieldValue);
+
+  MutableStringFieldValue createStringFieldValue();
 
   MutableStringFieldValue createStringFieldValue(StringFieldValue fieldValue);
 
