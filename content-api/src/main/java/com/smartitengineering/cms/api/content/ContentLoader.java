@@ -19,12 +19,7 @@
 package com.smartitengineering.cms.api.content;
 
 import com.smartitengineering.cms.api.WorkspaceId;
-import com.smartitengineering.cms.api.type.CollectionDataType;
-import com.smartitengineering.cms.api.type.ContentDataType;
-import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
-import com.smartitengineering.cms.api.type.OtherDataType;
-import com.smartitengineering.cms.api.type.StringDataType;
 import java.util.Set;
 
 /**
@@ -37,31 +32,17 @@ public interface ContentLoader {
 
   MutableField createMutableField(Field field);
 
-  MutableDateTimeFieldValue createDateTimeFieldValue(DataType dataType);
-
   MutableDateTimeFieldValue createDateTimeFieldValue(DateTimeFieldValue fieldValue);
-
-  MutableBooleanFieldValue createBooleanFieldValue(DataType dataType);
 
   MutableBooleanFieldValue createBooleanFieldValue(BooleanFieldValue fieldValue);
 
-  MutableCollectionFieldValue createCollectionFieldValue(CollectionDataType dataType);
-
   MutableCollectionFieldValue createCollectionFieldValue(CollectionFieldValue fieldValue);
-
-  MutableContentFieldValue createContentFieldValue(ContentDataType dataType);
 
   MutableContentFieldValue createContentFieldValue(ContentFieldValue fieldValue);
 
-  MutableNumberFieldValue createNumberFieldValue(DataType dataType);
-
   MutableNumberFieldValue createNumberFieldValue(NumberFieldValue fieldValue);
 
-  MutableOtherFieldValue createOtherFieldValue(OtherDataType dataType);
-
   MutableOtherFieldValue createOtherFieldValue(OtherFieldValue fieldValue);
-
-  MutableStringFieldValue createStringFieldValue(StringDataType dataType);
 
   MutableStringFieldValue createStringFieldValue(StringFieldValue fieldValue);
 
