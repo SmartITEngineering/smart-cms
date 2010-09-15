@@ -20,14 +20,13 @@ package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.MutableValidatorDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
-import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.ValidatorType;
 
 /**
  *
  * @author kaisar
  */
-public class ValidatorDefImpl implements MutableValidatorDef, ValidatorDef {
+public class ValidatorDefImpl implements MutableValidatorDef {
 
   private ValidatorType validatorType;
   private ResourceUri uri;

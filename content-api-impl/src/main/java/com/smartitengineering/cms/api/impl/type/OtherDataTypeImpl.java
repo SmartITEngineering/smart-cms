@@ -20,13 +20,12 @@ package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableOtherDataType;
-import com.smartitengineering.cms.api.type.OtherDataType;
 
 /**
  *
  * @author kaisar
  */
-public class OtherDataTypeImpl implements MutableOtherDataType, OtherDataType {
+public class OtherDataTypeImpl implements MutableOtherDataType {
 
   private String mimeType;
 

@@ -19,14 +19,13 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.WorkspaceId;
-import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentTypeId;
 
 /**
  *
  * @author kaisar
  */
-public class ContentTypeIdImpl implements MutableContentTypeId, ContentTypeId {
+public class ContentTypeIdImpl implements MutableContentTypeId {
 
   private String newNamespace;
   private String newContentTypeName;

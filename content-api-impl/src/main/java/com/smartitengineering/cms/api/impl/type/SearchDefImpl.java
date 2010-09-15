@@ -19,13 +19,12 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.MutableSearchDef;
-import com.smartitengineering.cms.api.type.SearchDef;
 
 /**
  *
  * @author kaisar
  */
-public class SearchDefImpl implements MutableSearchDef, SearchDef {
+public class SearchDefImpl implements MutableSearchDef {
 
   private boolean indexed;
   private boolean stored;

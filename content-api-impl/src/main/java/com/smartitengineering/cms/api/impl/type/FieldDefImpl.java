@@ -19,7 +19,6 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.DataType;
-import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
 import com.smartitengineering.cms.api.type.SearchDef;
 import com.smartitengineering.cms.api.type.ValidatorDef;
@@ -33,7 +32,7 @@ import java.util.Collections;
  *
  * @author kaisar
  */
-public class FieldDefImpl implements MutableFieldDef, FieldDef {
+public class FieldDefImpl implements MutableFieldDef {
 
   private String newFieldName;
   private boolean required = false;

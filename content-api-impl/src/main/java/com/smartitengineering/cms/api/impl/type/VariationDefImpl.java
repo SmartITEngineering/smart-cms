@@ -19,11 +19,10 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.MutableVariationDef;
-import com.smartitengineering.cms.api.type.VariationDef;
 
 /**
  *
  * @author kaisar
  */
-public class VariationDefImpl extends ResourceDefImpl implements MutableVariationDef, VariationDef {
+public class VariationDefImpl extends ResourceDefImpl implements MutableVariationDef {
 }

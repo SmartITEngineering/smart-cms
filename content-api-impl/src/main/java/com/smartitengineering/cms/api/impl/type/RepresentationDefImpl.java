@@ -19,11 +19,10 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
-import com.smartitengineering.cms.api.type.RepresentationDef;
 
 /**
  *
  * @author kaisar
  */
-public class RepresentationDefImpl extends ResourceDefImpl implements MutableRepresentationDef, RepresentationDef {
+public class RepresentationDefImpl extends ResourceDefImpl implements MutableRepresentationDef {
 }
