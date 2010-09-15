@@ -50,7 +50,14 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
 
   @Override
   public ContentType loadContentType(ContentTypeId contentTypeID) throws NullPointerException {
-    return SmartSPI.getInstance().getContentTypeReader().readContentTypeFromPersistentStorage(contentTypeID);
+    final Collection<ContentType> reads =
+                      SmartSPI.getInstance().getContentTypeReader().readContentTypeFromPersistentStorage(contentTypeID);
+    if(reads.size() > 0) {
+      return reads.iterator().next();
+    }
+    else {
+      return null;
+    }
   }
 
   @Override

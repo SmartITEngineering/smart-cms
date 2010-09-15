@@ -20,6 +20,7 @@ package com.smartitengineering.cms.spi.type;
 
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import java.util.Collection;
 
 /**
  *
@@ -27,5 +28,5 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
  */
 public interface PersistentContentTypeReader {
 
-  public ContentType readContentTypeFromPersistentStorage(ContentTypeId contentTypeId);
+  public Collection<ContentType> readContentTypeFromPersistentStorage(ContentTypeId... contentTypeId);
 }
