@@ -60,8 +60,14 @@ public class XMLSchemaBasedTypeValidator implements TypeValidator {
 
   @Override
   public boolean isValid(InputStream documentStream) throws Exception {
+    if (!documentStream.markSupported()) {
+      throw new IOException("Only markeable input stream expected!");
+    }
+    documentStream.mark(Integer.MAX_VALUE);
     Document document = getDocumentForSource(documentStream);
-    return isValid(document);
+    final boolean valid = isValid(document);
+    documentStream.reset();
+    return valid;
   }
 
   protected boolean isValid(Document document)
