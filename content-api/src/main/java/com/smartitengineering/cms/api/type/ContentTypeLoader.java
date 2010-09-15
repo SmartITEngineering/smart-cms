@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.type;
 
 import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.common.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -50,8 +51,7 @@ public interface ContentTypeLoader {
    * @throws NullPointerException If contentTypeDefinition is null
    * @throws IOException If there is any error during parsing.
    */
-  public Collection<MutableContentType> parseContentTypes(
-      InputStream contentTypeDefinitionStream)
+  public Collection<MutableContentType> parseContentTypes(InputStream contentTypeDefinitionStream, MediaType mediaType)
       throws NullPointerException,
              IOException;
 

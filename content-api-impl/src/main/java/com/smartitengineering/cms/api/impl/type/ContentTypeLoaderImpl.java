@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
@@ -49,9 +50,8 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   }
 
   @Override
-  public Collection<MutableContentType> parseContentTypes(InputStream contentTypeDefinitionStream) throws
-      NullPointerException,
-      IOException {
+  public Collection<MutableContentType> parseContentTypes(InputStream contentTypeDefinitionStream, MediaType mediaType)
+      throws NullPointerException, IOException {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
