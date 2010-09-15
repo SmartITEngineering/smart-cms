@@ -29,190 +29,199 @@ import java.io.IOException;
  * @author imyousuf
  */
 public abstract class AbstractPersistableDomain<T extends PersistentWriter>
-				extends AbstractLockableDomain
-				implements PersistentWriter {
+    extends AbstractLockableDomain
+    implements PersistentWriter {
 
-		/**
-		 * The persistence service for this domain instance.
-		 * @see SmartSPI#getPersistentService(java.lang.Class) 
-		 */
-		protected PersistentService<T> service;
-		/**
-		 * Set whether to invoke {@link AbstractLockableDomain#lock} or
-		 * {@link AbstractLockableDomain#tryLock()} next time {@link LockPerformer}
-		 * is used. If true will use <tt>lock</tt> else <tt>tryLock</tt>. Defaults
-		 * to false.
-		 */
-		protected boolean nextPerformToWaitForLock;
+  /**
+   * The persistence service for this domain instance.
+   * @see SmartSPI#getPersistentService(java.lang.Class)
+   */
+  protected PersistentService<T> service;
+  /**
+   * Set whether to invoke {@link AbstractLockableDomain#lock} or
+   * {@link AbstractLockableDomain#tryLock()} next time {@link LockPerformer}
+   * is used. If true will use <tt>lock</tt> else <tt>tryLock</tt>. Defaults
+   * to false.
+   */
+  protected boolean nextPerformToWaitForLock;
 
-		/**
-		 * Initializes itself with the beans it requires
-		 * @param pesistenceRegistryClass Persistence class to look for in the
-		 *																	registry
-		 */
-		protected AbstractPersistableDomain(Class<T> pesistenceRegistryClass) {
-				super();
-				service = SmartSPI.getInstance().getPersistentService(
-								pesistenceRegistryClass);
-				nextPerformToWaitForLock = false;
-		}
+  /**
+   * Initializes itself with the beans it requires
+   * @param pesistenceRegistryClass Persistence class to look for in the
+   *																	registry
+   */
+  protected AbstractPersistableDomain(Class<T> pesistenceRegistryClass) {
+    super();
+    service = SmartSPI.getInstance().getPersistentService(
+        pesistenceRegistryClass);
+    nextPerformToWaitForLock = false;
+  }
 
-		/**
-		 * Retrieve the service instance for this instance from the registry.
-		 * @return Service instance being used by this instance
-		 */
-		public PersistentService<T> getService() {
-				return service;
-		}
+  /**
+   * Retrieve the service instance for this instance from the registry.
+   * @return Service instance being used by this instance
+   */
+  public PersistentService<T> getService() {
+    return service;
+  }
 
-		/**
-		 * Retrieves whether the next {@link LockPerformer} task should try for
-		 * lock or tryLock
-		 * @return If true then will be trying for lock else tryLock
-		 * @see AbstractPersistableDomain#nextPerformToWaitForLock
-		 */
-		protected boolean isNextPerformToWaitForLock() {
-				return nextPerformToWaitForLock;
-		}
+  /**
+   * Retrieves whether the next {@link LockPerformer} task should try for
+   * lock or tryLock
+   * @return If true then will be trying for lock else tryLock
+   * @see AbstractPersistableDomain#nextPerformToWaitForLock
+   */
+  protected boolean isNextPerformToWaitForLock() {
+    return nextPerformToWaitForLock;
+  }
 
-		/**
-		 * Sets what to use for next {@link LockPerformer} task,
-		 * @param nextPerformToWaitForLock If true lock will be used else tryLock
-		 * @see AbstractPersistableDomain#nextPerformToWaitForLock
-		 */
-		protected void setNextPerformToWaitForLock(boolean nextPerformToWaitForLock) {
-				this.nextPerformToWaitForLock = nextPerformToWaitForLock;
-		}
+  /**
+   * Sets what to use for next {@link LockPerformer} task,
+   * @param nextPerformToWaitForLock If true lock will be used else tryLock
+   * @see AbstractPersistableDomain#nextPerformToWaitForLock
+   */
+  protected void setNextPerformToWaitForLock(boolean nextPerformToWaitForLock) {
+    this.nextPerformToWaitForLock = nextPerformToWaitForLock;
+  }
 
-		public void create()
-						throws IOException {
-				try {
-						service.create((T) this);
-				}
-				catch (Exception ex) {
-						throw new IOException(ex);
-				}
-		}
+  @Override
+  public void put()
+      throws IOException {
+    if (isPersisted()) {
+      create();
+    }
+    else {
+      update();
+    }
+  }
 
-		public void update()
-						throws IOException {
-				new LockPerformer<Void>(isNextPerformToWaitForLock()) {
+  protected void create()
+      throws IOException {
+    try {
+      service.create((T) this);
+    }
+    catch (Exception ex) {
+      throw new IOException(ex);
+    }
+  }
 
-						@Override
-						protected Void run()
-										throws IOException {
-								if (!isPersisted()) {
-										throw new IOException(
-														"Can't update a domain not already persisted!");
-								}
-								try {
-										service.update((T) AbstractPersistableDomain.this);
-								}
-								catch (Exception ex) {
-										throw new IOException(ex);
-								}
-								return null;
-						}
-				}.perform();
-		}
+  protected void update() throws IOException {
+    new LockPerformer<Void>(isNextPerformToWaitForLock()) {
 
-		public void delete()
-						throws IOException {
-				new LockPerformer<Void>(isNextPerformToWaitForLock()) {
+      @Override
+      protected Void run() throws IOException {
+        if (!isPersisted()) {
+          throw new IOException("Can't update a domain not already persisted!");
+        }
+        try {
+          service.update((T) AbstractPersistableDomain.this);
+        }
+        catch (Exception ex) {
+          throw new IOException(ex);
+        }
+        return null;
+      }
+    }.perform();
+  }
 
-						@Override
-						protected Void run()
-										throws IOException {
-								if (!isPersisted()) {
-										throw new IOException(
-														"Can't delete a domain not already persisted!");
-								}
-								try {
-										service.delete((T) AbstractPersistableDomain.this);
-								}
-								catch (Exception ex) {
-										throw new IOException(ex);
-								}
-								return null;
-						}
-				}.perform();
-		}
+  @Override
+  public void delete()
+      throws IOException {
+    new LockPerformer<Void>(isNextPerformToWaitForLock()) {
 
-		/**
-		 * Retrieves whether the domain is from a persistence storage, i.e. it has
-		 * be created in the storage.
-		 * @return True if its been created else false, that is not from persistence
-		 *					storage or not yet created.
-		 */
-		public abstract boolean isPersisted();
+      @Override
+      protected Void run()
+          throws IOException {
+        if (!isPersisted()) {
+          throw new IOException(
+              "Can't delete a domain not already persisted!");
+        }
+        try {
+          service.delete((T) AbstractPersistableDomain.this);
+        }
+        catch (Exception ex) {
+          throw new IOException(ex);
+        }
+        return null;
+      }
+    }.perform();
+  }
 
-		/**
-		 * An abstract Lock attaining and releasing code block. This uses the
-		 * {@link AbstractPersistableDomain#nextPerformToWaitForLock} setting to
-		 * determine how to attain the lock if and only if lock is not attained. It
-		 * will only unclock a lock if and only if it attains it itself.
-		 * @param <V> What the lock performance task returns
-		 */
-		protected abstract class LockPerformer<V> {
+  /**
+   * Retrieves whether the domain is from a persistence storage, i.e. it has
+   * be created in the storage.
+   * @return True if its been created else false, that is not from persistence
+   *					storage or not yet created.
+   */
+  public abstract boolean isPersisted();
 
-				private boolean waitToAttain;
+  /**
+   * An abstract Lock attaining and releasing code block. This uses the
+   * {@link AbstractPersistableDomain#nextPerformToWaitForLock} setting to
+   * determine how to attain the lock if and only if lock is not attained. It
+   * will only unclock a lock if and only if it attains it itself.
+   * @param <V> What the lock performance task returns
+   */
+  protected abstract class LockPerformer<V> {
 
-				/**
-				 * Defaults to false.
-				 * @see LockPerformer#LockPerformer(boolean) 
-				 */
-				public LockPerformer() {
-						this(false);
-				}
+    private boolean waitToAttain;
 
-				/**
-				 * Initializes the lock performer with code whether to wait for lock or
-				 * not.
-				 * @param waitToAttain If true will wait to attain the lock.
-				 */
-				public LockPerformer(boolean waitToAttain) {
-						this.waitToAttain = waitToAttain;
-				}
+    /**
+     * Defaults to false.
+     * @see LockPerformer#LockPerformer(boolean)
+     */
+    public LockPerformer() {
+      this(false);
+    }
 
-				/**
-				 * This operation should be implemented by concrete implementations to
-				 * perform lock attaining tasks.
-				 * @return Anything required to return by the original task
-				 * @throws IOException If waiting for lock is disabled and lock could not
-				 *											be attained or if there is any error in the
-				 *											{@link LockPerformer#run()} implementation
-				 */
-				protected abstract V run()
-								throws IOException;
+    /**
+     * Initializes the lock performer with code whether to wait for lock or
+     * not.
+     * @param waitToAttain If true will wait to attain the lock.
+     */
+    public LockPerformer(boolean waitToAttain) {
+      this.waitToAttain = waitToAttain;
+    }
 
-				/**
-				 * Perform a specified task in lock mode. If lock is specified to be
-				 * waited for, it will do so. It uses {@link LockPerformer#run()} to
-				 * do the actual job while it focuses on attaining lock and unlocking it
-				 * once task is done; lock will be attempted to be attained or unlocked
-				 * if and only if it is already not attained. For this it will use
-				 * {@link AbstractLockableDomain#isLockAttained()}
-				 * @return Whatever is required by invoker.
-				 * @throws IOException If waiting for lock is disabled and lock could not
-				 *											be attained or if there is any error in the
-				 *											{@link LockPerformer#run()} implementation
-				 */
-				public V perform()
-								throws IOException {
-						boolean attainLock = isLockOwned();
-						if (attainLock) {
-								if (!waitToAttain && !tryLock()) {
-										throw new IOException("Lock could be attained!");
-								}
-								else {
-										lock();
-								}
-						}
-						V result = run();
-						if (attainLock) {
-								unlock();
-						}
-						return result;
-				}
-		}
+    /**
+     * This operation should be implemented by concrete implementations to
+     * perform lock attaining tasks.
+     * @return Anything required to return by the original task
+     * @throws IOException If waiting for lock is disabled and lock could not
+     *											be attained or if there is any error in the
+     *											{@link LockPerformer#run()} implementation
+     */
+    protected abstract V run()
+        throws IOException;
+
+    /**
+     * Perform a specified task in lock mode. If lock is specified to be
+     * waited for, it will do so. It uses {@link LockPerformer#run()} to
+     * do the actual job while it focuses on attaining lock and unlocking it
+     * once task is done; lock will be attempted to be attained or unlocked
+     * if and only if it is already not attained. For this it will use
+     * {@link AbstractLockableDomain#isLockAttained()}
+     * @return Whatever is required by invoker.
+     * @throws IOException If waiting for lock is disabled and lock could not
+     *											be attained or if there is any error in the
+     *											{@link LockPerformer#run()} implementation
+     */
+    public V perform()
+        throws IOException {
+      boolean attainLock = isLockOwned();
+      if (attainLock) {
+        if (!waitToAttain && !tryLock()) {
+          throw new IOException("Lock could be attained!");
+        }
+        else {
+          lock();
+        }
+      }
+      V result = run();
+      if (attainLock) {
+        unlock();
+      }
+      return result;
+    }
+  }
 }

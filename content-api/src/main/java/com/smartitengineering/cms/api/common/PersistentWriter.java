@@ -35,17 +35,10 @@ public interface PersistentWriter
 				extends Lock {
 
 		/**
-		 * Create this instance in the persistent storage.
+		 * Persist this instance in the persistent storage.
 		 * @throws IOException If there is any error in the persistent procedure.
 		 */
-		public void create()
-						throws IOException;
-
-		/**
-		 * Updates the current instance in its persistent storage.
-		 * @throws IOException If there is any error in the persistent procedure.
-		 */
-		public void update()
+		public void put()
 						throws IOException;
 
 		/**
