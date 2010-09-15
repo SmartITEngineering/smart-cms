@@ -27,6 +27,7 @@ import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParsers;
+import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.SearchFieldNameGenerator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
@@ -70,6 +71,12 @@ public final class SmartSPI {
   protected PersistentServiceRegistrar persistentServiceRegistrar;
   @InjectableField
   private ContentTypeDefinitionParsers contentTypeDefinitionParsers;
+  @InjectableField
+  private PersistentContentTypeReader contentTypeReader;
+
+  public PersistentContentTypeReader getContentTypeReader() {
+    return contentTypeReader;
+  }
 
   public ContentTypeDefinitionParsers getContentTypeDefinitionParsers() {
     return contentTypeDefinitionParsers;
