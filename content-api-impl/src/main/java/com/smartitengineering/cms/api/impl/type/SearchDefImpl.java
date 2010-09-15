@@ -59,4 +59,34 @@ public class SearchDefImpl implements MutableSearchDef {
   public String getBoostConfig() {
     return this.boostConfig;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final SearchDefImpl other = (SearchDefImpl) obj;
+    if (this.indexed != other.indexed) {
+      return false;
+    }
+    if (this.stored != other.stored) {
+      return false;
+    }
+    if ((this.boostConfig == null) ? (other.boostConfig != null) : !this.boostConfig.equals(other.boostConfig)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 5;
+    hash = 13 * hash + (this.indexed ? 1 : 0);
+    hash = 13 * hash + (this.stored ? 1 : 0);
+    hash = 13 * hash + (this.boostConfig != null ? this.boostConfig.hashCode() : 0);
+    return hash;
+  }
 }

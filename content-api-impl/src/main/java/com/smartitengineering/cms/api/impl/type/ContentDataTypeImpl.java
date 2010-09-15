@@ -55,4 +55,30 @@ public class ContentDataTypeImpl implements MutableContentDataType {
   public FieldValueType getType() {
     return FieldValueType.CONTENT;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final ContentDataTypeImpl other = (ContentDataTypeImpl) obj;
+    if (this.contentTypeId != other.contentTypeId &&
+        (this.contentTypeId == null || !this.contentTypeId.equals(other.contentTypeId))) {
+      return false;
+    }
+    if ((this.bidirectionalFieldName == null) ? (other.bidirectionalFieldName != null)
+        : !this.bidirectionalFieldName.equals(other.bidirectionalFieldName)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    return hash;
+  }
 }

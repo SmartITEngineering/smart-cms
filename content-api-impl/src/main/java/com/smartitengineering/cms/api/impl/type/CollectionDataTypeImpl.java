@@ -68,4 +68,34 @@ public class CollectionDataTypeImpl implements MutableCollectionDataType {
   public FieldValueType getType() {
     return FieldValueType.COLLECTION;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final CollectionDataTypeImpl other = (CollectionDataTypeImpl) obj;
+    if (this.dataType != other.dataType && (this.dataType == null || !this.dataType.equals(other.dataType))) {
+      return false;
+    }
+    if (this.maxSize != other.maxSize) {
+      return false;
+    }
+    if (this.minSize != other.minSize) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 89 * hash + (this.dataType != null ? this.dataType.hashCode() : 0);
+    hash = 89 * hash + this.maxSize;
+    hash = 89 * hash + this.minSize;
+    return hash;
+  }
 }

@@ -188,50 +188,14 @@ public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentTyp
         (this.contentTypeId == null || !this.contentTypeId.equals(other.contentTypeId))) {
       return false;
     }
-    if (this.contentStatus != other.contentStatus &&
-        (this.contentStatus == null || !this.contentStatus.equals(other.contentStatus))) {
-      return false;
-    }
-    if (this.fieldDefs != other.fieldDefs && (this.fieldDefs == null || !this.fieldDefs.equals(other.fieldDefs))) {
-      return false;
-    }
-    if (this.representationDefs != other.representationDefs &&
-        (this.representationDefs == null || !this.representationDefs.equals(other.representationDefs))) {
-      return false;
-    }
-    if (this.parentTypeId != other.parentTypeId &&
-        (this.parentTypeId == null || !this.parentTypeId.equals(other.parentTypeId))) {
-      return false;
-    }
-    if ((this.displayName == null) ? (other.displayName != null) : !this.displayName.equals(other.displayName)) {
-      return false;
-    }
-    if (this.creationDate != other.creationDate &&
-        (this.creationDate == null || !this.creationDate.equals(other.creationDate))) {
-      return false;
-    }
-    if (this.lastModifiedDate != other.lastModifiedDate &&
-        (this.lastModifiedDate == null || !this.lastModifiedDate.equals(other.lastModifiedDate))) {
-      return false;
-    }
-    if (this.fromPersistentStorage != other.fromPersistentStorage) {
-      return false;
-    }
     return true;
   }
 
   @Override
   public int hashCode() {
     int hash = 7;
-    hash = 89 * hash + (this.contentTypeId != null ? this.contentTypeId.hashCode() : 0);
-    hash = 89 * hash + (this.contentStatus != null ? this.contentStatus.hashCode() : 0);
-    hash = 89 * hash + (this.fieldDefs != null ? this.fieldDefs.hashCode() : 0);
-    hash = 89 * hash + (this.representationDefs != null ? this.representationDefs.hashCode() : 0);
-    hash = 89 * hash + (this.parentTypeId != null ? this.parentTypeId.hashCode() : 0);
-    hash = 89 * hash + (this.displayName != null ? this.displayName.hashCode() : 0);
-    hash = 89 * hash + (this.creationDate != null ? this.creationDate.hashCode() : 0);
-    hash = 89 * hash + (this.lastModifiedDate != null ? this.lastModifiedDate.hashCode() : 0);
-    hash = 89 * hash + (this.fromPersistentStorage ? 1 : 0);
+    hash = 61 * hash + (this.contentTypeId != null ? this.contentTypeId.hashCode() : 0);
     return hash;
   }
+
 }

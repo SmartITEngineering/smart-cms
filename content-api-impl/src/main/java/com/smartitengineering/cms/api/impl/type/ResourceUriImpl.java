@@ -48,4 +48,30 @@ public class ResourceUriImpl implements MutuableResourceUri {
   public String getValue() {
     return this.value;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final ResourceUriImpl other = (ResourceUriImpl) obj;
+    if (this.type != other.type) {
+      return false;
+    }
+    if ((this.value == null) ? (other.value != null) : !this.value.equals(other.value)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 89 * hash + (this.type != null ? this.type.hashCode() : 0);
+    hash = 89 * hash + (this.value != null ? this.value.hashCode() : 0);
+    return hash;
+  }
 }

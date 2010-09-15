@@ -50,4 +50,30 @@ public class ValidatorDefImpl implements MutableValidatorDef {
   public ResourceUri getUri() {
     return this.uri;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final ValidatorDefImpl other = (ValidatorDefImpl) obj;
+    if (this.validatorType != other.validatorType) {
+      return false;
+    }
+    if (this.uri != other.uri && (this.uri == null || !this.uri.equals(other.uri))) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 3;
+    hash = 19 * hash + (this.validatorType != null ? this.validatorType.hashCode() : 0);
+    hash = 19 * hash + (this.uri != null ? this.uri.hashCode() : 0);
+    return hash;
+  }
 }

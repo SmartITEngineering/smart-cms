@@ -43,4 +43,26 @@ public class OtherDataTypeImpl implements MutableOtherDataType {
   public FieldValueType getType() {
     return FieldValueType.OTHER;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final OtherDataTypeImpl other = (OtherDataTypeImpl) obj;
+    if ((this.mimeType == null) ? (other.mimeType != null) : !this.mimeType.equals(other.mimeType)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 5;
+    hash = 47 * hash + (this.mimeType != null ? this.mimeType.hashCode() : 0);
+    return hash;
+  }
 }

@@ -121,4 +121,27 @@ public class FieldDefImpl implements MutableFieldDef {
   public String getSearchFieldName() {
     return SmartSPI.getInstance().getSearchFieldNameGenerator().getSearchFieldName(this);
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final FieldDefImpl other = (FieldDefImpl) obj;
+    if ((this.newFieldName == null) ? (other.newFieldName != null) : !this.newFieldName.equals(other.newFieldName)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 3;
+    hash = 23 * hash + (this.newFieldName != null ? this.newFieldName.hashCode() : 0);
+    return hash;
+  }
+
 }

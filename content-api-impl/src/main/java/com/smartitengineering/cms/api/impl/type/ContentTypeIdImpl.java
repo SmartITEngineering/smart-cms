@@ -60,4 +60,36 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
   public String getNamespace() {
     return this.newNamespace;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final ContentTypeIdImpl other = (ContentTypeIdImpl) obj;
+    if ((this.newNamespace == null) ? (other.newNamespace != null) : !this.newNamespace.equals(other.newNamespace)) {
+      return false;
+    }
+    if ((this.newContentTypeName == null) ? (other.newContentTypeName != null)
+        : !this.newContentTypeName.equals(other.newContentTypeName)) {
+      return false;
+    }
+    if (this.workspaceId != other.workspaceId &&
+        (this.workspaceId == null || !this.workspaceId.equals(other.workspaceId))) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 43 * hash + (this.newNamespace != null ? this.newNamespace.hashCode() : 0);
+    hash = 43 * hash + (this.newContentTypeName != null ? this.newContentTypeName.hashCode() : 0);
+    hash = 43 * hash + (this.workspaceId != null ? this.workspaceId.hashCode() : 0);
+    return hash;
+  }
 }
