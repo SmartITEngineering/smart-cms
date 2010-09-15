@@ -39,7 +39,10 @@ import com.smartitengineering.cms.spi.type.TypeValidator;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -51,8 +54,9 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   @Override
   public ContentType loadContentType(ContentTypeId contentTypeID) throws NullPointerException {
     final Collection<ContentType> reads =
-                      SmartSPI.getInstance().getContentTypeReader().readContentTypeFromPersistentStorage(contentTypeID);
-    if(reads.size() > 0) {
+                                  SmartSPI.getInstance().getContentTypeReader().readContentTypeFromPersistentStorage(
+        contentTypeID);
+    if (reads.size() > 0) {
       return reads.iterator().next();
     }
     else {
@@ -76,11 +80,42 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       if (!validator.isValid(contentTypeDefinitionStream)) {
         throw new IOException("Content does not meet definition!");
       }
-      return parser.parseStream(contentTypeDefinitionStream);
+      final Collection<MutableContentType> types = parser.parseStream(contentTypeDefinitionStream);
+      List<ContentTypeImpl> resultingTypes = mergeWithStoredContentTypes(types);
+      return Collections.<MutableContentType>unmodifiableCollection(resultingTypes);
     }
     catch (Exception ex) {
       throw new IOException(ex);
     }
+  }
+
+  protected List<ContentTypeImpl> mergeWithStoredContentTypes(final Collection<MutableContentType> types) throws
+      IllegalArgumentException {
+    final List<ContentTypeImpl> resultingTypes =
+                                new ArrayList<ContentTypeImpl>(types.size());
+    final Collection<ContentType> storedContentTypes;
+    final ContentTypeId[] ids = new ContentTypeId[types.size()];
+    int i = 0;
+    for (ContentType type : types) {
+      ids[i++] = type.getContentTypeID();
+    }
+    storedContentTypes =
+    SmartSPI.getInstance().getContentTypeReader().readContentTypeFromPersistentStorage(ids);
+    for (ContentType type : storedContentTypes) {
+      final ContentTypeImpl contentTypeImpl = getContentTypeImpl(type);
+      contentTypeImpl.setFromPersistentStorage(true);
+      resultingTypes.add(contentTypeImpl);
+    }
+    for (MutableContentType type : types) {
+      int index = resultingTypes.indexOf(type);
+      if (index >= 0) {
+        merge(resultingTypes.get(index), type);
+      }
+      else {
+        resultingTypes.add(getContentTypeImpl(type));
+      }
+    }
+    return resultingTypes;
   }
 
   @Override
@@ -189,25 +224,32 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   @Override
   public MutableContentType getMutableContentType(ContentType contentType) {
     if (contentType != null) {
-      ContentTypeImpl typeImpl = new ContentTypeImpl();
-      merge(typeImpl, contentType);
-      return typeImpl;
+      return getContentTypeImpl(contentType);
     }
     else {
       throw new IllegalArgumentException("Argument can not be null.");
     }
   }
 
+  protected ContentTypeImpl getContentTypeImpl(ContentType contentType) throws IllegalArgumentException {
+    ContentTypeImpl typeImpl = new ContentTypeImpl();
+    merge(typeImpl, contentType);
+    return typeImpl;
+  }
+
   protected void merge(ContentTypeImpl typeImpl, ContentType contentType) throws IllegalArgumentException {
     typeImpl.setContentTypeID(contentType.getContentTypeID());
     typeImpl.setCreationDate(contentType.getCreationDate());
     typeImpl.setDisplayName(contentType.getDisplayName());
-    typeImpl.setFromPersistentStorage(contentType instanceof ContentTypeImpl
-        ? ((ContentTypeImpl) contentType).isFromPersistentStorage() : false);
+    typeImpl.setFromPersistentStorage(contentType instanceof ContentTypeImpl ? ((ContentTypeImpl) contentType).
+        isFromPersistentStorage() : false);
     typeImpl.setLastModifiedDate(contentType.getLastModifiedDate());
     typeImpl.setParent(contentType.getParent());
+    typeImpl.getMutableFields().clear();
     typeImpl.getMutableFields().addAll(contentType.getFields().values());
+    typeImpl.getMutableRepresentationDefs().clear();
     typeImpl.getMutableRepresentationDefs().addAll(contentType.getRepresentations().values());
+    typeImpl.getMutableStatuses().clear();
     typeImpl.getMutableStatuses().addAll(contentType.getStatuses().values());
   }
 }

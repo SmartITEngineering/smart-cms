@@ -180,12 +180,12 @@ public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentTyp
     if (obj == null) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
+    if (!ContentType.class.isAssignableFrom(obj.getClass())) {
       return false;
     }
-    final ContentTypeImpl other = (ContentTypeImpl) obj;
-    if (this.contentTypeId != other.contentTypeId &&
-        (this.contentTypeId == null || !this.contentTypeId.equals(other.contentTypeId))) {
+    final ContentType other = (ContentType) obj;
+    if (this.contentTypeId != other.getContentTypeID() &&
+        (this.contentTypeId == null || !this.contentTypeId.equals(other.getContentTypeID()))) {
       return false;
     }
     return true;
