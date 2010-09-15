@@ -55,6 +55,8 @@ public interface ContentTypeLoader {
       throws NullPointerException,
              IOException;
 
+  public MutableContentType getMutableContentType(ContentType contentType);
+
   /**
    * Get the mutable version of the content data type.
    * @param contentDataType Content data type to get the mutable version for

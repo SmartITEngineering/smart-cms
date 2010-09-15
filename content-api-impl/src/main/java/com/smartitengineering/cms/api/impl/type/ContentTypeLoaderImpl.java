@@ -178,4 +178,29 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       throw new IllegalArgumentException("Any of arguments can not be null or blank.");
     }
   }
+
+  @Override
+  public MutableContentType getMutableContentType(ContentType contentType) {
+    if (contentType != null) {
+      ContentTypeImpl typeImpl = new ContentTypeImpl();
+      merge(typeImpl, contentType);
+      return typeImpl;
+    }
+    else {
+      throw new IllegalArgumentException("Argument can not be null.");
+    }
+  }
+
+  protected void merge(ContentTypeImpl typeImpl, ContentType contentType) throws IllegalArgumentException {
+    typeImpl.setContentTypeID(contentType.getContentTypeID());
+    typeImpl.setCreationDate(contentType.getCreationDate());
+    typeImpl.setDisplayName(contentType.getDisplayName());
+    typeImpl.setFromPersistentStorage(contentType instanceof ContentTypeImpl
+        ? ((ContentTypeImpl) contentType).isFromPersistentStorage() : false);
+    typeImpl.setLastModifiedDate(contentType.getLastModifiedDate());
+    typeImpl.setParent(contentType.getParent());
+    typeImpl.getMutableFields().addAll(contentType.getFields().values());
+    typeImpl.getMutableRepresentationDefs().addAll(contentType.getRepresentations().values());
+    typeImpl.getMutableStatuses().addAll(contentType.getStatuses().values());
+  }
 }
