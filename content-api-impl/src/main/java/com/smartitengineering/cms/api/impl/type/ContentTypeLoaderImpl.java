@@ -35,6 +35,7 @@ import com.smartitengineering.cms.api.type.MutableFieldDef;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -78,7 +79,8 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       return collectionDataTypeImpl;
     }
     else {
-      throw new IllegalArgumentException("Argument can not be null.");
+      throw new IllegalArgumentException("Argument can not be null or min size has to be non-negative or max size can" +
+          " not be smaller than min zie.");
     }
   }
 
@@ -144,7 +146,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
 
   @Override
   public ContentTypeId createContentTypeId(WorkspaceId workspaceId, String namespace, String name) {
-    if (workspaceId != null && namespace != null) {
+    if (workspaceId != null && StringUtils.isNotBlank(namespace) && StringUtils.isNotBlank(name)) {
       ContentTypeIdImpl contentTypeIdImpl = new ContentTypeIdImpl();
       contentTypeIdImpl.setName(name);
       contentTypeIdImpl.setNamespace(namespace);
@@ -152,7 +154,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       return contentTypeIdImpl;
     }
     else {
-      throw new IllegalArgumentException("Argument can not be null.");
+      throw new IllegalArgumentException("Any of arguments can not be null or blank.");
     }
   }
 }
