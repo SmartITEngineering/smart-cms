@@ -33,6 +33,10 @@ import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.type.MutableContentTypeId;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
+import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
+import com.smartitengineering.cms.spi.type.TypeValidator;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -46,13 +50,30 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
 
   @Override
   public ContentType loadContentType(ContentTypeId contentTypeID) throws NullPointerException {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return SmartSPI.getInstance().getContentTypeReader().readContentTypeFromPersistentStorage(contentTypeID);
   }
 
   @Override
   public Collection<MutableContentType> parseContentTypes(InputStream contentTypeDefinitionStream, MediaType mediaType)
       throws NullPointerException, IOException {
-    throw new UnsupportedOperationException("Not supported yet.");
+    TypeValidator validator = SmartSPI.getInstance().getTypeValidators().getValidators().get(mediaType);
+    ContentTypeDefinitionParser parser = SmartSPI.getInstance().getContentTypeDefinitionParsers().getParsers().get(
+        mediaType);
+    if (validator == null || parser == null) {
+      throw new IOException("Media type " + mediaType.toString() + " is not supported!");
+    }
+    if (!contentTypeDefinitionStream.markSupported()) {
+      contentTypeDefinitionStream = new BufferedInputStream(contentTypeDefinitionStream);
+    }
+    try {
+      if (!validator.isValid(contentTypeDefinitionStream)) {
+        throw new IOException("Content does not meet definition!");
+      }
+      return parser.parseStream(contentTypeDefinitionStream);
+    }
+    catch (Exception ex) {
+      throw new IOException(ex);
+    }
   }
 
   @Override
