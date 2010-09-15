@@ -36,7 +36,7 @@ public final class TypeValidators {
   }
 
   public void setValidators(Map<MediaType, TypeValidator> validators) {
-    if (validators == null || validators.isEmpty()) {
+    if (validators == null) {
       return;
     }
     this.validators.clear();
