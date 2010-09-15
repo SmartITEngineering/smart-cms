@@ -19,6 +19,8 @@
 package com.smartitengineering.cms.spi.impl.type;
 
 import com.smartitengineering.cms.spi.type.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -33,6 +35,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -55,7 +58,7 @@ public class XMLSchemaBasedTypeValidator implements TypeValidator {
     if (contentTypeDef == null || !contentTypeDef.exists()) {
       return false;
     }
-    return isValid(new FileInputStream(contentTypeDef));
+    return isValid(new BufferedInputStream(new FileInputStream(contentTypeDef)));
   }
 
   @Override
@@ -64,10 +67,10 @@ public class XMLSchemaBasedTypeValidator implements TypeValidator {
       throw new IOException("Only markeable input stream expected!");
     }
     documentStream.mark(Integer.MAX_VALUE);
-    Document document = getDocumentForSource(documentStream);
-    final boolean valid = isValid(document);
+    InputStream cloneStream = new ByteArrayInputStream(IOUtils.toByteArray(documentStream));
     documentStream.reset();
-    return valid;
+    Document document = getDocumentForSource(cloneStream);
+    return isValid(document);
   }
 
   protected boolean isValid(Document document)
