@@ -40,6 +40,10 @@ import com.smartitengineering.cms.api.content.NumberFieldValue;
 import com.smartitengineering.cms.api.content.OtherFieldValue;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.spi.SmartSPI;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -170,7 +174,12 @@ public class ContentLoaderImpl implements ContentLoader {
 
   @Override
   public Content loadContent(ContentId contentId) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    final Collection<Content> contents =
+                              SmartSPI.getInstance().getContentReader().readContentsFromPersistentStorage(contentId);
+    if (contents == null || contents.isEmpty()) {
+      return null;
+    }
+    return contents.iterator().next();
   }
 
   @Override
@@ -180,7 +189,8 @@ public class ContentLoaderImpl implements ContentLoader {
 
   @Override
   public Set<Content> search(Filter filter) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return Collections.unmodifiableSet(new LinkedHashSet<Content>(SmartSPI.getInstance().getContentReader().search(
+        filter)));
   }
 
   @Override

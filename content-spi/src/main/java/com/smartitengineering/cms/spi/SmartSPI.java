@@ -21,6 +21,7 @@ package com.smartitengineering.cms.spi;
 import com.smartitengineering.cms.api.common.PersistentWriter;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.SmartContentAPI;
+import com.smartitengineering.cms.spi.content.PersistentContentReader;
 import com.smartitengineering.cms.spi.content.RepresentationProvider;
 import com.smartitengineering.cms.spi.content.VariationProvider;
 import com.smartitengineering.cms.spi.lock.LockHandler;
@@ -73,6 +74,12 @@ public final class SmartSPI {
   private ContentTypeDefinitionParsers contentTypeDefinitionParsers;
   @InjectableField
   private PersistentContentTypeReader contentTypeReader;
+  @InjectableField
+  private PersistentContentReader contentReader;
+
+  public PersistentContentReader getContentReader() {
+    return contentReader;
+  }
 
   public PersistentContentTypeReader getContentTypeReader() {
     return contentTypeReader;
