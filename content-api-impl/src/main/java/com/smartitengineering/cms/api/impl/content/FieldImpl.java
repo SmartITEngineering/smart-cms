@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
+import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.content.Variation;
@@ -31,7 +32,6 @@ import com.smartitengineering.cms.spi.SmartSPI;
 public class FieldImpl implements MutableField {
 
   private String fieldName;
-  private String varName;
   private FieldValue fieldValue;
   private FieldDef fieldDef;
 
@@ -67,5 +67,27 @@ public class FieldImpl implements MutableField {
 
   public void setFieldDef(FieldDef fieldDef) {
     this.fieldDef = fieldDef;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (!Field.class.isAssignableFrom(obj.getClass())) {
+      return false;
+    }
+    final Field other = (Field) obj;
+    if ((this.fieldName == null) ? (other.getName() != null) : !this.fieldName.equals(other.getName())) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 5;
+    hash = 97 * hash + (this.fieldName != null ? this.fieldName.hashCode() : 0);
+    return hash;
   }
 }

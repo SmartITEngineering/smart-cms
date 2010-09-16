@@ -164,4 +164,27 @@ public class ContentImpl extends AbstractPersistableDomain<MutableContent> imple
   public void setParentContent(Content parentContent) {
     this.parentContent = parentContent;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (!Content.class.isAssignableFrom(obj.getClass())) {
+      return false;
+    }
+    final Content other = (Content) obj;
+    if (this.contentId != other.getContentId() && (this.contentId == null ||
+                                                   !this.contentId.equals(other.getContentId()))) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 29 * hash + (this.contentId != null ? this.contentId.hashCode() : 0);
+    return hash;
+  }
 }
