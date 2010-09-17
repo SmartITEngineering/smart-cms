@@ -30,7 +30,11 @@ public interface WorkspaceAPI {
 
   WorkspaceId createWorkspace(String name);
 
+  WorkspaceId createWorkspace(WorkspaceId workspaceId);
+
   WorkspaceId getWorkspaceIdIfExists(String name);
+
+  WorkspaceId getWorkspaceIdIfExists(WorkspaceId workspaceId);
 
   Workspace getWorkspace(WorkspaceId workspaceId);
 

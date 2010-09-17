@@ -20,7 +20,9 @@ package com.smartitengineering.cms.binder.guice;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
+import com.smartitengineering.cms.api.WorkspaceAPI;
 import com.smartitengineering.cms.api.content.ContentLoader;
+import com.smartitengineering.cms.api.impl.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.content.ContentLoaderImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
@@ -31,5 +33,6 @@ public class APIModule extends AbstractModule {
   protected void configure() {
     bind(ContentTypeLoader.class).annotatedWith(Names.named("apiContentTypeLoader")).to(ContentTypeLoaderImpl.class);
     bind(ContentLoader.class).annotatedWith(Names.named("apiContentLoader")).to(ContentLoaderImpl.class);
+    bind(WorkspaceAPI.class).annotatedWith(Names.named("apiWorkspaceApi")).to(WorkspaceAPIImpl.class);
   }
 }
