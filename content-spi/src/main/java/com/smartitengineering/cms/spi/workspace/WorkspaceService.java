@@ -16,29 +16,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api;
+package com.smartitengineering.cms.spi.workspace;
 
-import com.smartitengineering.cms.api.type.VariationDef;
-import com.smartitengineering.cms.api.type.RepresentationDef;
+import com.smartitengineering.cms.api.Workspace;
+import com.smartitengineering.cms.api.WorkspaceId;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.RepresentationDef;
+import com.smartitengineering.cms.api.type.VariationDef;
 import java.util.Collection;
-import java.util.Date;
 
 /**
  *
  * @author imyousuf
  */
-public interface Workspace {
+public interface WorkspaceService {
 
-  public WorkspaceId getId();
+  public Workspace create(WorkspaceId workspaceId) throws IllegalArgumentException;
 
-  public Collection<ContentType> getContentDefintions();
+  public Workspace load(WorkspaceId workspaceId);
 
-  public Collection<WorkspaceId> getFriendlies();
+  public Workspace delete(WorkspaceId workspaceId);
 
-  public Collection<RepresentationDef> getRepresentations();
+  public Collection<Workspace> getWorkspaces();
 
-  public Collection<VariationDef> getVariations();
+  public Collection<ContentType> getContentDefintions(WorkspaceId workspaceId);
 
-  public Date getCreationDate();
+  public Collection<WorkspaceId> getFriendlies(WorkspaceId workspaceId);
+
+  public Collection<RepresentationDef> getRepresentations(WorkspaceId workspaceId);
+
+  public Collection<VariationDef> getVariations(WorkspaceId workspaceId);
 }

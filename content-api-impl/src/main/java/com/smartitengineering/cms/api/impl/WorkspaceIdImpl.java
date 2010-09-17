@@ -16,29 +16,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api;
+package com.smartitengineering.cms.api.impl;
 
-import com.smartitengineering.cms.api.type.VariationDef;
-import com.smartitengineering.cms.api.type.RepresentationDef;
-import com.smartitengineering.cms.api.type.ContentType;
-import java.util.Collection;
-import java.util.Date;
+import com.smartitengineering.cms.api.WorkspaceId;
 
 /**
  *
  * @author imyousuf
  */
-public interface Workspace {
+public class WorkspaceIdImpl implements WorkspaceId {
 
-  public WorkspaceId getId();
+  private String globalNamespace;
+  private String name;
 
-  public Collection<ContentType> getContentDefintions();
+  public void setGlobalNamespace(String globalNamespace) {
+    this.globalNamespace = globalNamespace;
+  }
 
-  public Collection<WorkspaceId> getFriendlies();
+  public void setName(String name) {
+    this.name = name;
+  }
 
-  public Collection<RepresentationDef> getRepresentations();
+  @Override
+  public String getGlobalNamespace() {
+    return globalNamespace;
+  }
 
-  public Collection<VariationDef> getVariations();
-
-  public Date getCreationDate();
+  @Override
+  public String getName() {
+    return name;
+  }
 }

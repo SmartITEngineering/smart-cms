@@ -31,6 +31,7 @@ import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParsers;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.SearchFieldNameGenerator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
+import com.smartitengineering.cms.spi.workspace.WorkspaceService;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
 import com.smartitengineering.util.bean.annotations.InjectableField;
@@ -76,6 +77,12 @@ public final class SmartSPI {
   private PersistentContentTypeReader contentTypeReader;
   @InjectableField
   private PersistentContentReader contentReader;
+  @InjectableField
+  private WorkspaceService workspaceService;
+
+  public WorkspaceService getWorkspaceService() {
+    return workspaceService;
+  }
 
   public PersistentContentReader getContentReader() {
     return contentReader;
