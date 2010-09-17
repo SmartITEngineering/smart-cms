@@ -20,7 +20,10 @@ package com.smartitengineering.cms.binder.guice;
 
 import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.persistence.PersistentService;
+import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import junit.framework.TestCase;
 
 public class InjectionTest extends TestCase {
@@ -42,5 +45,11 @@ public class InjectionTest extends TestCase {
     assertNotNull(SmartSPI.getInstance().getTypeValidators().getValidators().get(MediaType.APPLICATION_XML));
     assertNotNull(SmartSPI.getInstance().getContentTypeDefinitionParsers());
     assertNotNull(SmartSPI.getInstance().getPersistentServiceRegistrar());
+    final PersistentContentTypeReader contentTypeReader = SmartSPI.getInstance().getContentTypeReader();
+    assertNotNull(contentTypeReader);
+    final PersistentService<MutableContentType> persistentService =
+                                                SmartSPI.getInstance().getPersistentService(MutableContentType.class);
+    assertNotNull(persistentService);
+    assertSame( contentTypeReader, persistentService);
   }
 }
