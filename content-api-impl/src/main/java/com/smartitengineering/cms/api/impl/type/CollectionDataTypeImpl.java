@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
+import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableCollectionDataType;
@@ -74,17 +75,17 @@ public class CollectionDataTypeImpl implements MutableCollectionDataType {
     if (obj == null) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
+    if (!CollectionDataType.class.isAssignableFrom(obj.getClass())) {
       return false;
     }
-    final CollectionDataTypeImpl other = (CollectionDataTypeImpl) obj;
-    if (this.dataType != other.dataType && (this.dataType == null || !this.dataType.equals(other.dataType))) {
+    final CollectionDataType other = (CollectionDataType) obj;
+    if (this.dataType != other.getItemDataType() && (this.dataType == null || !this.dataType.equals(other.getItemDataType()))) {
       return false;
     }
-    if (this.maxSize != other.maxSize) {
+    if (this.maxSize != other.getMaxSize()) {
       return false;
     }
-    if (this.minSize != other.minSize) {
+    if (this.minSize != other.getMinSize()) {
       return false;
     }
     return true;

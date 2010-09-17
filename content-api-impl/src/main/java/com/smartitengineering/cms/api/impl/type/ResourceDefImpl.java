@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.MutuableResourceDef;
+import com.smartitengineering.cms.api.type.ResourceDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.type.TemplateType;
 import java.util.Date;
@@ -99,11 +100,11 @@ public class ResourceDefImpl implements MutuableResourceDef {
     if (obj == null) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
+    if (ResourceDef.class.isAssignableFrom(obj.getClass())) {
       return false;
     }
-    final ResourceDefImpl other = (ResourceDefImpl) obj;
-    if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
+    final ResourceDef other = (ResourceDef) obj;
+    if ((this.name == null) ? (other.getName() != null) : !this.name.equals(other.getName())) {
       return false;
     }
     return true;
@@ -115,5 +116,4 @@ public class ResourceDefImpl implements MutuableResourceDef {
     hash = 11 * hash + (this.name != null ? this.name.hashCode() : 0);
     return hash;
   }
-
 }

@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
+import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableContentDataType;
@@ -61,16 +62,16 @@ public class ContentDataTypeImpl implements MutableContentDataType {
     if (obj == null) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
+    if (!ContentDataType.class.isAssignableFrom(obj.getClass())) {
       return false;
     }
-    final ContentDataTypeImpl other = (ContentDataTypeImpl) obj;
-    if (this.contentTypeId != other.contentTypeId &&
-        (this.contentTypeId == null || !this.contentTypeId.equals(other.contentTypeId))) {
+    final ContentDataType other = (ContentDataType) obj;
+    if (this.contentTypeId != other.getTypeDef() &&
+        (this.contentTypeId == null || !this.contentTypeId.equals(other.getTypeDef()))) {
       return false;
     }
-    if ((this.bidirectionalFieldName == null) ? (other.bidirectionalFieldName != null)
-        : !this.bidirectionalFieldName.equals(other.bidirectionalFieldName)) {
+    if ((this.bidirectionalFieldName == null) ? (other.getBidirectionalFieldName() != null)
+        : !this.bidirectionalFieldName.equals(other.getBidirectionalFieldName())) {
       return false;
     }
     return true;

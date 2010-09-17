@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.MutuableResourceUri;
+import com.smartitengineering.cms.api.type.ResourceUri;
 
 /**
  *
@@ -54,14 +55,14 @@ public class ResourceUriImpl implements MutuableResourceUri {
     if (obj == null) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
+    if (ResourceUri.class.isAssignableFrom(obj.getClass())) {
       return false;
     }
-    final ResourceUriImpl other = (ResourceUriImpl) obj;
-    if (this.type != other.type) {
+    final ResourceUri other = (ResourceUri) obj;
+    if (this.type != other.getType()) {
       return false;
     }
-    if ((this.value == null) ? (other.value != null) : !this.value.equals(other.value)) {
+    if ((this.value == null) ? (other.getValue() != null) : !this.value.equals(other.getValue())) {
       return false;
     }
     return true;

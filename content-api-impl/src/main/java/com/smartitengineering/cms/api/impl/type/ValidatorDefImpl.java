@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.MutableValidatorDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
+import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.ValidatorType;
 
 /**
@@ -56,14 +57,14 @@ public class ValidatorDefImpl implements MutableValidatorDef {
     if (obj == null) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
+    if (ValidatorDef.class.isAssignableFrom(obj.getClass())) {
       return false;
     }
-    final ValidatorDefImpl other = (ValidatorDefImpl) obj;
-    if (this.validatorType != other.validatorType) {
+    final ValidatorDef other = (ValidatorDef) obj;
+    if (this.validatorType != other.geType()) {
       return false;
     }
-    if (this.uri != other.uri && (this.uri == null || !this.uri.equals(other.uri))) {
+    if (this.uri != other.getUri() && (this.uri == null || !this.uri.equals(other.getUri()))) {
       return false;
     }
     return true;

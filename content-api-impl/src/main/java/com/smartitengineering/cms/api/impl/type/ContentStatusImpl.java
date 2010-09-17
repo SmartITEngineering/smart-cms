@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
+import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 
@@ -69,11 +70,11 @@ public class ContentStatusImpl implements MutableContentStatus {
     if (obj == null) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
+    if (!ContentStatus.class.isAssignableFrom(obj.getClass())) {
       return false;
     }
-    final ContentStatusImpl other = (ContentStatusImpl) obj;
-    if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
+    final ContentStatus other = (ContentStatus) obj;
+    if ((this.name == null) ? (other.getName() != null) : !this.name.equals(other.getName())) {
       return false;
     }
     return true;

@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.DataType;
+import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
 import com.smartitengineering.cms.api.type.SearchDef;
 import com.smartitengineering.cms.api.type.ValidatorDef;
@@ -127,11 +128,11 @@ public class FieldDefImpl implements MutableFieldDef {
     if (obj == null) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
+    if (FieldDef.class.isAssignableFrom(obj.getClass())) {
       return false;
     }
-    final FieldDefImpl other = (FieldDefImpl) obj;
-    if ((this.newFieldName == null) ? (other.newFieldName != null) : !this.newFieldName.equals(other.newFieldName)) {
+    final FieldDef other = (FieldDef) obj;
+    if ((this.newFieldName == null) ? (other.getName() != null) : !this.newFieldName.equals(other.getName())) {
       return false;
     }
     return true;

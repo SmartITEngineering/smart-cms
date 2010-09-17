@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.MutableSearchDef;
+import com.smartitengineering.cms.api.type.SearchDef;
 
 /**
  *
@@ -65,17 +66,17 @@ public class SearchDefImpl implements MutableSearchDef {
     if (obj == null) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
+    if (SearchDef.class.isAssignableFrom(obj.getClass())) {
       return false;
     }
-    final SearchDefImpl other = (SearchDefImpl) obj;
-    if (this.indexed != other.indexed) {
+    final SearchDef other = (SearchDef) obj;
+    if (this.indexed != other.isIndexed()) {
       return false;
     }
-    if (this.stored != other.stored) {
+    if (this.stored != other.isStored()) {
       return false;
     }
-    if ((this.boostConfig == null) ? (other.boostConfig != null) : !this.boostConfig.equals(other.boostConfig)) {
+    if ((this.boostConfig == null) ? (other.getBoostConfig() != null) : !this.boostConfig.equals(other.getBoostConfig())) {
       return false;
     }
     return true;

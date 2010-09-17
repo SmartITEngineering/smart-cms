@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableOtherDataType;
+import com.smartitengineering.cms.api.type.OtherDataType;
 
 /**
  *
@@ -49,11 +50,11 @@ public class OtherDataTypeImpl implements MutableOtherDataType {
     if (obj == null) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
+    if (OtherDataType.class.isAssignableFrom(obj.getClass())) {
       return false;
     }
-    final OtherDataTypeImpl other = (OtherDataTypeImpl) obj;
-    if ((this.mimeType == null) ? (other.mimeType != null) : !this.mimeType.equals(other.mimeType)) {
+    final OtherDataType other = (OtherDataType) obj;
+    if ((this.mimeType == null) ? (other.getMIMEType() != null) : !this.mimeType.equals(other.getMIMEType())) {
       return false;
     }
     return true;

@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentTypeId;
 
 /**
@@ -66,19 +67,19 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
     if (obj == null) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
+    if (!ContentTypeId.class.isAssignableFrom(obj.getClass())) {
       return false;
     }
-    final ContentTypeIdImpl other = (ContentTypeIdImpl) obj;
-    if ((this.newNamespace == null) ? (other.newNamespace != null) : !this.newNamespace.equals(other.newNamespace)) {
+    final ContentTypeId other = (ContentTypeId) obj;
+    if ((this.newNamespace == null) ? (other.getNamespace() != null) : !this.newNamespace.equals(other.getNamespace())) {
       return false;
     }
-    if ((this.newContentTypeName == null) ? (other.newContentTypeName != null)
-        : !this.newContentTypeName.equals(other.newContentTypeName)) {
+    if ((this.newContentTypeName == null) ? (other.getName() != null)
+        : !this.newContentTypeName.equals(other.getName())) {
       return false;
     }
-    if (this.workspaceId != other.workspaceId &&
-        (this.workspaceId == null || !this.workspaceId.equals(other.workspaceId))) {
+    if (this.workspaceId != other.getWorkspace() &&
+        (this.workspaceId == null || !this.workspaceId.equals(other.getWorkspace()))) {
       return false;
     }
     return true;
