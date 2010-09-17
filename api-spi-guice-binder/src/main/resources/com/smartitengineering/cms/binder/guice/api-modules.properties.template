@@ -1,0 +1,3 @@
+contextName=com.smartitnengineering.smart-cms
+modules=com.smartitengineering.cms.binder.guice.APIModule
+ignoreMissingDependency=true
