@@ -19,46 +19,13 @@
 package com.smartitengineering.cms.spi.type;
 
 import com.smartitengineering.cms.api.common.MediaType;
-import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
  * @author imyousuf
  */
-public final class ContentTypeDefinitionParsers {
+public interface ContentTypeDefinitionParsers {
 
-  private final Map<MediaType, ContentTypeDefinitionParser> parsers =
-                                                            new ConcurrentHashMap<MediaType, ContentTypeDefinitionParser>();
-
-  public Map<MediaType, ContentTypeDefinitionParser> getParsers() {
-    return Collections.unmodifiableMap(parsers);
-  }
-
-  public void setParsers(Map<MediaType, ContentTypeDefinitionParser> parsers) {
-    if (parsers == null) {
-      return;
-    }
-    this.parsers.clear();
-    this.parsers.putAll(parsers);
-  }
-
-  public void addParser(ContentTypeDefinitionParser parser) {
-    if (parser != null) {
-      for (MediaType type : parser.getSupportedTypes()) {
-        this.parsers.put(type, parser);
-      }
-    }
-  }
-
-  public void removeParser(ContentTypeDefinitionParser parser) {
-    if (parser != null) {
-      for (MediaType type : parser.getSupportedTypes()) {
-        if (this.parsers.get(type).equals(parser)) {
-          this.parsers.remove(type);
-        }
-      }
-    }
-  }
+  public Map<MediaType, ContentTypeDefinitionParser> getParsers();
 }

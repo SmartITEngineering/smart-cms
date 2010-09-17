@@ -89,7 +89,7 @@ public final class SmartSPI {
     return contentTypeDefinitionParsers;
   }
 
-  private PersistentServiceRegistrar getPersistentServiceRegistrar() {
+  public PersistentServiceRegistrar getPersistentServiceRegistrar() {
     return persistentServiceRegistrar;
   }
 

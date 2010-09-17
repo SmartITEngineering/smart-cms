@@ -42,6 +42,10 @@ The module is responsible for Implementing the SPI for the CMS.
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
       <artifactId>content-api-impl</artifactId>
       <version>${project.version}</version>

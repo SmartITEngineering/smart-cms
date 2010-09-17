@@ -16,11 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.persistence;
+package com.smartitengineering.cms.spi.impl.content;
 
+import com.google.inject.Inject;
 import com.smartitengineering.cms.api.common.PersistentWriter;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.persistence.PersistentService;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -28,7 +31,17 @@ import java.util.Map;
  * bean persistence service providers in this registrar.
  * @author imyousuf
  */
-public interface PersistentServiceRegistrar {
+public class PersistentServiceRegistrar implements com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar {
+
+  private Map<Class, PersistentService> register;
+
+  @Inject
+  /**
+   * Initializes the registry keeper.
+   */
+  public PersistentServiceRegistrar(Map<Class, PersistentService> register) {
+    this.register = register;
+  }
 
   /**
    * An operation for retrieving the concrete implementation of persistent
@@ -39,12 +52,32 @@ public interface PersistentServiceRegistrar {
    * @return Service for persisting the bean.
    * @see SmartSPI#getPersistentService(java.lang.Class)
    */
-  public <T extends PersistentWriter> PersistentService<T> getPersistentService(Class<T> writerClass);
+  @Override
+  public <T extends PersistentWriter> PersistentService<T> getPersistentService(
+      Class<T> writerClass) {
+    return register.get(writerClass);
+  }
 
   /**
    * Retrieve the registry of all persistent service implementations for
    * configured PersistentWriter children.
    * @return An unmodifieable version of the registry.
    */
-  public Map<Class, PersistentService> getRegister();
+  @Override
+  public Map<Class, PersistentService> getRegister() {
+    return Collections.unmodifiableMap(register);
+  }
+
+  /**
+   * Resets the registry with the new registry. If the new registry is NULL or
+   * empty the registry will achieve empty state but never NULL.
+   * @param register The new registry.
+   */
+  public void setRegister(
+      final Map<Class<? extends PersistentWriter>, PersistentService> register) {
+    this.register.clear();
+    if (register != null && !register.isEmpty()) {
+      this.register.putAll(register);
+    }
+  }
 }

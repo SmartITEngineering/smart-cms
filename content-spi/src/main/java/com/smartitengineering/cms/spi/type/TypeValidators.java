@@ -19,35 +19,13 @@
 package com.smartitengineering.cms.spi.type;
 
 import com.smartitengineering.cms.api.common.MediaType;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
  *
  * @author imyousuf
  */
-public final class TypeValidators {
+public interface TypeValidators {
 
-  private final Map<MediaType, TypeValidator> validators = new HashMap<MediaType, TypeValidator>();
-
-  public Map<MediaType, TypeValidator> getValidators() {
-    return Collections.unmodifiableMap(validators);
-  }
-
-  public void setValidators(Map<MediaType, TypeValidator> validators) {
-    if (validators == null) {
-      return;
-    }
-    this.validators.clear();
-    this.validators.putAll(validators);
-  }
-
-  public void addValidator(MediaType mediaType, TypeValidator validator) {
-    this.validators.put(mediaType, validator);
-  }
-
-  public void removeValidator(MediaType mediaType) {
-    this.validators.remove(mediaType);
-  }
+  public Map<MediaType, TypeValidator> getValidators();
 }
