@@ -20,6 +20,7 @@ package com.smartitengineering.cms.binder.guice;
 
 import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.spi.SmartSPI;
 import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
@@ -50,7 +51,7 @@ public class InjectionTest extends TestCase {
     assertNotNull(contentTypeReader);
     final PersistentService<MutableContentType> persistentService =
                                                 SmartSPI.getInstance().getPersistentService(MutableContentType.class);
-    if(ContentTypePersistentService.class.isAssignableFrom(persistentService.getClass())) {
+    if (ContentTypePersistentService.class.isAssignableFrom(persistentService.getClass())) {
       ContentTypePersistentService service = (ContentTypePersistentService) persistentService;
       assertNotNull(service.getCommonReadDao());
       assertNotNull(service.getCommonWriteDao());
@@ -60,6 +61,11 @@ public class InjectionTest extends TestCase {
       fail("Could cast to expected instance!");
     }
     assertNotNull(persistentService);
-    assertSame( contentTypeReader, persistentService);
+    assertSame(contentTypeReader, persistentService);
+  }
+
+  public void testPersistenceServiceLookup() {
+    ContentTypeImpl typeImpl = new ContentTypeImpl();
+    assertNotNull(typeImpl.getService());
   }
 }
