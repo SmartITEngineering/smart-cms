@@ -29,9 +29,10 @@ import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
 import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
-import com.smartitengineering.cms.spi.impl.type.ContentTypeSchemaBaseConfigProvider;
+import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeSchemaBaseConfigProvider;
 import com.smartitengineering.cms.spi.impl.type.PersistableContentType;
 import com.smartitengineering.cms.spi.impl.type.XMLSchemaBasedTypeValidator;
+import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeFilterConfigsProvider;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
@@ -43,6 +44,7 @@ import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.dao.impl.hbase.CommonDao;
 import com.smartitengineering.dao.impl.hbase.spi.AsyncExecutorService;
+import com.smartitengineering.dao.impl.hbase.spi.FilterConfigs;
 import com.smartitengineering.dao.impl.hbase.spi.ObjectRowConverter;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import com.smartitengineering.dao.impl.hbase.spi.impl.MixedExecutorServiceImpl;
@@ -76,6 +78,8 @@ public class SPIModule extends AbstractModule {
     });
     bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistableContentType>>() {
     }).toProvider(ContentTypeSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<FilterConfigs<PersistableContentType>>() {
+    }).toProvider(ContentTypeFilterConfigsProvider.class).in(Scopes.SINGLETON);
     bind(new TypeLiteral<GenericAdapter<MutableContentType, PersistableContentType>>() {
     }).to(new TypeLiteral<GenericAdapterImpl<MutableContentType, PersistableContentType>>() {
     }).in(Scopes.SINGLETON);

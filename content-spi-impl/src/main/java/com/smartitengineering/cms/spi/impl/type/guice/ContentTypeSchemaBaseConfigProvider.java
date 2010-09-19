@@ -16,10 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.impl.type;
+package com.smartitengineering.cms.spi.impl.type.guice;
 
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.smartitengineering.cms.spi.impl.type.PersistableContentType;
 import com.smartitengineering.dao.impl.hbase.spi.impl.JsonConfigLoader;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
 import java.io.IOException;
