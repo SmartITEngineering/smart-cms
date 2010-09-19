@@ -20,7 +20,10 @@ package com.smartitengineering.cms.spi.impl.type;
 
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.smartitengineering.dao.impl.hbase.spi.impl.JsonConfigLoader;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  *
@@ -32,7 +35,13 @@ public class ContentTypeSchemaBaseConfigProvider implements
 
   @Override
   public SchemaInfoProviderBaseConfig<PersistableContentType> get() {
-    SchemaInfoProviderBaseConfig<PersistableContentType> config = new SchemaInfoProviderBaseConfig();
-    return config;
+    try {
+      final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(
+          "com/smartitengineering/cms/spi/impl/type/ContentTypeSchemaBaseConfig.json");
+      return JsonConfigLoader.parseJsonAsBaseConfig(resourceAsStream);
+    }
+    catch (IOException ex) {
+      throw new RuntimeException(ex);
+    }
   }
 }

@@ -20,10 +20,9 @@ package com.smartitengineering.cms.spi.impl.type;
 
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.smartitengineering.dao.impl.hbase.spi.FilterConfig;
 import com.smartitengineering.dao.impl.hbase.spi.FilterConfigs;
-import java.util.HashMap;
-import java.util.Map;
+import com.smartitengineering.dao.impl.hbase.spi.impl.JsonConfigLoader;
+import java.io.IOException;
 
 /**
  *
@@ -34,9 +33,12 @@ public class ContentTypeFilterConfigsProvider implements Provider<FilterConfigs<
 
   @Override
   public FilterConfigs<PersistableContentType> get() {
-    FilterConfigs<PersistableContentType> configs = new FilterConfigs<PersistableContentType>();
-    Map<String, FilterConfig> map = new HashMap<String, FilterConfig>();
-    configs.setConfigs(map);
-    return configs;
+    try {
+      return JsonConfigLoader.parseJsonAsFilterConfigMap(getClass().getClassLoader().
+          getResourceAsStream("com/smartitengineering/cms/spi/impl/type/ContentTypeFilterConfigs.json"));
+    }
+    catch (IOException ex) {
+      throw new RuntimeException(ex);
+    }
   }
 }
