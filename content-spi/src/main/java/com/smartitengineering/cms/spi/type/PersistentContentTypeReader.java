@@ -28,5 +28,5 @@ import java.util.Collection;
  */
 public interface PersistentContentTypeReader {
 
-  public Collection<ContentType> readContentTypeFromPersistentStorage(ContentTypeId... contentTypeId);
+  public Collection<? extends ContentType> readContentTypeFromPersistentStorage(ContentTypeId... contentTypeId);
 }

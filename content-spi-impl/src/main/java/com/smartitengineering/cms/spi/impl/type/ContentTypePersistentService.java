@@ -28,7 +28,10 @@ import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -58,21 +61,26 @@ public class ContentTypePersistentService implements PersistentService<MutableCo
 
   @Override
   public void create(MutableContentType bean) throws Exception {
-    throw new UnsupportedOperationException("Not supported yet.");
+    commonWriteDao.save(getAdapter().convert(bean));
   }
 
   @Override
   public void update(MutableContentType bean) throws Exception {
-    throw new UnsupportedOperationException("Not supported yet.");
+    commonWriteDao.update(getAdapter().convert(bean));
   }
 
   @Override
   public void delete(MutableContentType bean) throws Exception {
-    throw new UnsupportedOperationException("Not supported yet.");
+    commonWriteDao.delete(getAdapter().convert(bean));
   }
 
   @Override
-  public Collection<ContentType> readContentTypeFromPersistentStorage(ContentTypeId... contentTypeId) {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public Collection<? extends ContentType> readContentTypeFromPersistentStorage(ContentTypeId... contentTypeId) {
+    List<String> list = new ArrayList<String>();
+    for (ContentTypeId id : contentTypeId) {
+      list.add(id.toString());
+    }
+    final Set<PersistableContentType> byIds = commonReadDao.getByIds(list);
+    return getAdapter().convertInversely(byIds.toArray(new PersistableContentType[byIds.size()]));
   }
 }

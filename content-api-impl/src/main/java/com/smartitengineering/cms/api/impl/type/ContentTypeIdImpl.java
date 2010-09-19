@@ -74,8 +74,7 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
     if ((this.newNamespace == null) ? (other.getNamespace() != null) : !this.newNamespace.equals(other.getNamespace())) {
       return false;
     }
-    if ((this.newContentTypeName == null) ? (other.getName() != null)
-        : !this.newContentTypeName.equals(other.getName())) {
+    if ((this.newContentTypeName == null) ? (other.getName() != null) : !this.newContentTypeName.equals(other.getName())) {
       return false;
     }
     if (this.workspaceId != other.getWorkspace() &&
@@ -92,5 +91,11 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
     hash = 43 * hash + (this.newContentTypeName != null ? this.newContentTypeName.hashCode() : 0);
     hash = 43 * hash + (this.workspaceId != null ? this.workspaceId.hashCode() : 0);
     return hash;
+  }
+
+  @Override
+  public String toString() {
+    return new StringBuilder(workspaceId.getGlobalNamespace()).append(':').append(workspaceId.getName()).append(':').
+        append(newNamespace).append(':').append(newContentTypeName).toString();
   }
 }

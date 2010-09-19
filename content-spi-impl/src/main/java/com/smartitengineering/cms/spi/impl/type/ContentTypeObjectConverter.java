@@ -18,11 +18,8 @@
  */
 package com.smartitengineering.cms.spi.impl.type;
 
-import com.google.inject.Inject;
-import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.ObjectRowConverter;
-import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import java.util.LinkedHashMap;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
@@ -33,9 +30,6 @@ import org.apache.hadoop.hbase.client.Result;
  * @author imyousuf
  */
 public class ContentTypeObjectConverter implements ObjectRowConverter<PersistableContentType> {
-
-  @Inject
-  private SchemaInfoProvider<PersistableContentType> contentTypeInfoProvider;
 
   @Override
   public LinkedHashMap<String, Put> objectToRows(PersistableContentType instance) {

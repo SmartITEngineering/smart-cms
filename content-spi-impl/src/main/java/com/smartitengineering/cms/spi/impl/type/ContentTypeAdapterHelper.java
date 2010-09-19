@@ -29,17 +29,17 @@ public class ContentTypeAdapterHelper extends AbstractAdapterHelper<MutableConte
 
   @Override
   protected PersistableContentType newTInstance() {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return new PersistableContentType();
   }
 
   @Override
   protected void mergeFromF2T(MutableContentType fromBean, PersistableContentType toBean) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    toBean.setMutableContentType(fromBean);
   }
 
   @Override
   protected MutableContentType convertFromT2F(PersistableContentType toBean) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return toBean.getMutableContentType();
   }
 
 }

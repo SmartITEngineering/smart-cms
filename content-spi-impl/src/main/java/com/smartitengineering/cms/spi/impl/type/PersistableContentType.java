@@ -18,7 +18,9 @@
  */
 package com.smartitengineering.cms.spi.impl.type;
 
+import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.domain.AbstractGenericPersistentDTO;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -26,8 +28,28 @@ import com.smartitengineering.domain.AbstractGenericPersistentDTO;
  */
 public class PersistableContentType extends AbstractGenericPersistentDTO<PersistableContentType, String, Long> {
 
+  private MutableContentType mutableContentType;
+
+  public PersistableContentType() {
+  }
+
+  public MutableContentType getMutableContentType() {
+    return mutableContentType;
+  }
+
+  public void setMutableContentType(MutableContentType mutableContentType) {
+    this.mutableContentType = mutableContentType;
+  }
+
   @Override
   public boolean isValid() {
+    if (mutableContentType == null || mutableContentType.getContentTypeID() == null || StringUtils.isBlank(mutableContentType.
+        getContentTypeID().getName()) || StringUtils.isBlank(mutableContentType.getContentTypeID().getNamespace()) || mutableContentType.
+        getFields().isEmpty() || mutableContentType.getStatuses().isEmpty() || mutableContentType.getContentTypeID().
+        getWorkspace() == null || StringUtils.isBlank(mutableContentType.getContentTypeID().getWorkspace().
+        getGlobalNamespace()) || StringUtils.isBlank(mutableContentType.getContentTypeID().getWorkspace().getName())) {
+      return false;
+    }
     return true;
   }
 }

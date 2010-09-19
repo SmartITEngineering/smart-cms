@@ -53,7 +53,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
 
   @Override
   public ContentType loadContentType(ContentTypeId contentTypeID) throws NullPointerException {
-    final Collection<ContentType> reads =
+    final Collection<? extends ContentType> reads =
                                   SmartSPI.getInstance().getContentTypeReader().readContentTypeFromPersistentStorage(
         contentTypeID);
     if (reads.size() > 0) {
@@ -93,7 +93,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       IllegalArgumentException {
     final List<ContentTypeImpl> resultingTypes =
                                 new ArrayList<ContentTypeImpl>(types.size());
-    final Collection<ContentType> storedContentTypes;
+    final Collection<? extends ContentType> storedContentTypes;
     final ContentTypeId[] ids = new ContentTypeId[types.size()];
     int i = 0;
     for (ContentType type : types) {
