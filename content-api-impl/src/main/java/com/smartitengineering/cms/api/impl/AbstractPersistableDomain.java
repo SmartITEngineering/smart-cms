@@ -22,6 +22,7 @@ import com.smartitengineering.cms.api.common.PersistentWriter;
 import com.smartitengineering.cms.spi.SmartSPI;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 
 /**
  * An abstract implementation providing persistence operations for concrete
@@ -50,10 +51,11 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
    * @param pesistenceRegistryClass Persistence class to look for in the
    *																	registry
    */
-  protected AbstractPersistableDomain(Class<T> pesistenceRegistryClass) {
-    super();
-    service = SmartSPI.getInstance().getPersistentService(
-        pesistenceRegistryClass);
+  protected AbstractPersistableDomain() {
+    Class<T> pesistenceRegistryClass =
+                       (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).
+        getActualTypeArguments()[0];
+    service = SmartSPI.getInstance().getPersistentService(pesistenceRegistryClass);
     nextPerformToWaitForLock = false;
   }
 

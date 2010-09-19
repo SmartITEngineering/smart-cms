@@ -41,9 +41,6 @@ import java.util.Set;
 public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentType> implements MutableContentType,
                                                                                               ContentType {
 
-  public ContentTypeImpl() {
-    super(MutableContentType.class);
-  }
   private ContentTypeId contentTypeId;
   private final Set<ContentStatus> contentStatus = new LinkedHashSet<ContentStatus>();
   private final Set<FieldDef> fieldDefs = new LinkedHashSet<FieldDef>();

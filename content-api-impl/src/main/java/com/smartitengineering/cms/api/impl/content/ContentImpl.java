@@ -48,10 +48,6 @@ public class ContentImpl extends AbstractPersistableDomain<MutableContent> imple
   private Date lastModifiedDate;
   private Map<String, Field> map = new HashMap<String, Field>();
 
-  public ContentImpl() {
-    super(MutableContent.class);
-  }
-
   @Override
   public void setParentId(ContentId contentId) {
     this.parentId = contentId;
