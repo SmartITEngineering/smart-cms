@@ -22,6 +22,7 @@ import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import junit.framework.TestCase;
@@ -49,6 +50,15 @@ public class InjectionTest extends TestCase {
     assertNotNull(contentTypeReader);
     final PersistentService<MutableContentType> persistentService =
                                                 SmartSPI.getInstance().getPersistentService(MutableContentType.class);
+    if(ContentTypePersistentService.class.isAssignableFrom(persistentService.getClass())) {
+      ContentTypePersistentService service = (ContentTypePersistentService) persistentService;
+      assertNotNull(service.getCommonReadDao());
+      assertNotNull(service.getCommonWriteDao());
+      assertSame(service.getCommonReadDao(), service.getCommonWriteDao());
+    }
+    else {
+      fail("Could cast to expected instance!");
+    }
     assertNotNull(persistentService);
     assertSame( contentTypeReader, persistentService);
   }

@@ -25,10 +25,10 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
-import com.smartitengineering.dao.impl.hbase.CommonDao;
+import com.smartitengineering.dao.common.CommonReadDao;
+import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import java.util.Collection;
-
 
 /**
  *
@@ -39,9 +39,22 @@ public class ContentTypePersistentService implements PersistentService<MutableCo
 
   @Inject
   private GenericAdapter<MutableContentType, PersistableContentType> adapter;
-
   @Inject
-  private CommonDao<PersistableContentType, String> commonDao;
+  private CommonReadDao<PersistableContentType, String> commonReadDao;
+  @Inject
+  private CommonWriteDao<PersistableContentType> commonWriteDao;
+
+  public GenericAdapter<MutableContentType, PersistableContentType> getAdapter() {
+    return adapter;
+  }
+
+  public CommonReadDao<PersistableContentType, String> getCommonReadDao() {
+    return commonReadDao;
+  }
+
+  public CommonWriteDao<PersistableContentType> getCommonWriteDao() {
+    return commonWriteDao;
+  }
 
   @Override
   public void create(MutableContentType bean) throws Exception {

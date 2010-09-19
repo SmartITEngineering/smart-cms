@@ -19,16 +19,17 @@
 package com.smartitengineering.cms.binder.guice;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.type.MutableContentType;
-import com.smartitengineering.cms.spi.impl.InjectableCommonDao;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
 import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
+import com.smartitengineering.cms.spi.impl.type.ContentTypeSchemaBaseConfigProvider;
 import com.smartitengineering.cms.spi.impl.type.PersistableContentType;
 import com.smartitengineering.cms.spi.impl.type.XMLSchemaBasedTypeValidator;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
@@ -38,12 +39,16 @@ import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParsers;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
+import com.smartitengineering.dao.common.CommonReadDao;
+import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.dao.impl.hbase.CommonDao;
 import com.smartitengineering.dao.impl.hbase.spi.AsyncExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.ObjectRowConverter;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import com.smartitengineering.dao.impl.hbase.spi.impl.MixedExecutorServiceImpl;
+import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
+import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
 
@@ -52,21 +57,34 @@ public class SPIModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(AsyncExecutorService.class).to(MixedExecutorServiceImpl.class).in(Singleton.class);
+    /*
+     * Start injection specific to common dao of content type
+     */
     bind(new TypeLiteral<ObjectRowConverter<PersistableContentType>>() {
     }).to(ContentTypeObjectConverter.class).in(Singleton.class);
-    bind(new TypeLiteral<CommonDao<PersistableContentType, String>>() {
-    }).to(new TypeLiteral<InjectableCommonDao<PersistableContentType, String>>() {
+    bind(new TypeLiteral<CommonReadDao<PersistableContentType, String>>() {
+    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistableContentType, String>>() {
     }).in(Singleton.class);
-    SchemaInfoProviderImpl<PersistableContentType> contentTypeInfoProvider =
-                                                   new SchemaInfoProviderImpl<PersistableContentType>();
+    bind(new TypeLiteral<CommonWriteDao<PersistableContentType>>() {
+    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistableContentType, String>>() {
+    }).in(Singleton.class);
+    bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistableContentType, String>>() {
+    }).to(new TypeLiteral<CommonDao<PersistableContentType, String>>() {
+    }).in(Singleton.class);
     bind(new TypeLiteral<SchemaInfoProvider<PersistableContentType>>() {
-    }).toInstance(contentTypeInfoProvider);
-    GenericAdapterImpl<MutableContentType, PersistableContentType> adapter =
-                                                                   new GenericAdapterImpl<MutableContentType, PersistableContentType>();
-    adapter.setHelper(new ContentTypeAdapterHelper());
+    }).to(new TypeLiteral<SchemaInfoProviderImpl<PersistableContentType>>() {
+    });
+    bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistableContentType>>() {
+    }).toProvider(ContentTypeSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);
     bind(new TypeLiteral<GenericAdapter<MutableContentType, PersistableContentType>>() {
-    }).toInstance(adapter);
+    }).to(new TypeLiteral<GenericAdapterImpl<MutableContentType, PersistableContentType>>() {
+    }).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<AbstractAdapterHelper<MutableContentType, PersistableContentType>>() {
+    }).to(ContentTypeAdapterHelper.class).in(Scopes.SINGLETON);
     bind(Integer.class).annotatedWith(Names.named("maxRows")).toInstance(new Integer(50));
+    /*
+     * End injection specific to common dao of content type
+     */
     MapBinder<MediaType, TypeValidator> validatorBinder = MapBinder.newMapBinder(binder(), MediaType.class,
                                                                                  TypeValidator.class);
     validatorBinder.addBinding(MediaType.APPLICATION_XML).to(XMLSchemaBasedTypeValidator.class);
