@@ -19,8 +19,7 @@
 package com.smartitengineering.cms.spi.impl.type;
 
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
-import com.smartitengineering.dao.impl.hbase.spi.ObjectRowConverter;
-import java.util.LinkedHashMap;
+import com.smartitengineering.dao.impl.hbase.spi.impl.AbstactObjectRowConverter;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -29,15 +28,20 @@ import org.apache.hadoop.hbase.client.Result;
  *
  * @author imyousuf
  */
-public class ContentTypeObjectConverter implements ObjectRowConverter<PersistableContentType> {
+public class ContentTypeObjectConverter extends AbstactObjectRowConverter<PersistableContentType> {
 
   @Override
-  public LinkedHashMap<String, Put> objectToRows(PersistableContentType instance) {
+  protected String[] getTablesToAttainLock() {
+    return new String[]{getInfoProvider().getMainTableName()};
+  }
+
+  @Override
+  protected void getPutForTable(PersistableContentType instance, ExecutorService service, Put put) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public LinkedHashMap<String, Delete> objectToDeleteableRows(PersistableContentType instance) {
+  protected void getDeleteForTable(PersistableContentType instance, ExecutorService service, Delete put) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
