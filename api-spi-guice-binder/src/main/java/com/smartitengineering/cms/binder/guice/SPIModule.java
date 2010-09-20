@@ -26,6 +26,7 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
 import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
@@ -33,6 +34,7 @@ import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeSchemaBaseConfi
 import com.smartitengineering.cms.spi.impl.type.PersistableContentType;
 import com.smartitengineering.cms.spi.impl.type.XMLSchemaBasedTypeValidator;
 import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeFilterConfigsProvider;
+import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
@@ -53,12 +55,16 @@ import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
+import java.util.concurrent.TimeUnit;
 
 public class SPIModule extends AbstractModule {
 
   @Override
   protected void configure() {
     bind(AsyncExecutorService.class).to(MixedExecutorServiceImpl.class).in(Singleton.class);
+    bind(Integer.class).annotatedWith(Names.named("maxRows")).toInstance(new Integer(50));
+    bind(Long.class).annotatedWith(Names.named("waitTime")).toInstance(new Long(10));
+    bind(TimeUnit.class).annotatedWith(Names.named("unit")).toInstance(TimeUnit.SECONDS);
     /*
      * Start injection specific to common dao of content type
      */
@@ -85,7 +91,6 @@ public class SPIModule extends AbstractModule {
     }).in(Scopes.SINGLETON);
     bind(new TypeLiteral<AbstractAdapterHelper<MutableContentType, PersistableContentType>>() {
     }).to(ContentTypeAdapterHelper.class).in(Scopes.SINGLETON);
-    bind(Integer.class).annotatedWith(Names.named("maxRows")).toInstance(new Integer(50));
     /*
      * End injection specific to common dao of content type
      */
@@ -104,5 +109,6 @@ public class SPIModule extends AbstractModule {
     bind(ContentTypeDefinitionParsers.class).to(
         com.smartitengineering.cms.spi.impl.type.ContentTypeDefinitionParsers.class);
     bind(PersistentContentTypeReader.class).to(ContentTypePersistentService.class);
+    bind(LockHandler.class).to(DefaultLockHandler.class).in(Scopes.SINGLETON);
   }
 }
