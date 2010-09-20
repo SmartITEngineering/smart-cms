@@ -19,8 +19,14 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.impl.Utils;
+import com.smartitengineering.cms.api.impl.WorkspaceIdImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentTypeId;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -28,22 +34,32 @@ import com.smartitengineering.cms.api.type.MutableContentTypeId;
  */
 public class ContentTypeIdImpl implements MutableContentTypeId {
 
+  public static final String STANDARD_ERROR_MSG = "%s can not be blank or contain ':'";
   private String newNamespace;
   private String newContentTypeName;
   private WorkspaceId workspaceId;
 
   @Override
   public void setNamespace(String newNamespace) {
+    if (StringUtils.isBlank(newNamespace) || StringUtils.containsAny(newNamespace, new char[]{':'})) {
+      throw new IllegalArgumentException(String.format(STANDARD_ERROR_MSG, "Namespace"));
+    }
     this.newNamespace = newNamespace;
   }
 
   @Override
   public void setName(String newContentTypeName) throws IllegalArgumentException {
+    if (StringUtils.isBlank(newContentTypeName) || StringUtils.containsAny(newContentTypeName, new char[]{':'})) {
+      throw new IllegalArgumentException(String.format(STANDARD_ERROR_MSG, "Content Type Name"));
+    }
     this.newContentTypeName = newContentTypeName;
   }
 
   @Override
   public void setWorkspace(WorkspaceId workspaceId) {
+    if (workspaceId == null) {
+      throw new IllegalArgumentException(String.format(STANDARD_ERROR_MSG, "Workspace Id"));
+    }
     this.workspaceId = workspaceId;
   }
 
@@ -95,7 +111,32 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
 
   @Override
   public String toString() {
-    return new StringBuilder(workspaceId.getGlobalNamespace()).append(':').append(workspaceId.getName()).append(':').
+    return new StringBuilder().append(workspaceId).append(':').
         append(newNamespace).append(':').append(newContentTypeName).toString();
+  }
+
+  @Override
+  public void writeExternal(DataOutput output) throws IOException {
+    output.write(toString().getBytes("UTF-8"));
+  }
+
+  @Override
+  public void readExternal(DataInput input) throws IOException, ClassNotFoundException {
+    String idString = Utils.readStringInUTF8(input);
+    if (StringUtils.isBlank(idString)) {
+      throw new IOException("No content!");
+    }
+    String[] params = idString.split(":");
+    if (params == null || params.length != 4) {
+      throw new IOException(
+          "Object should have been in the format globalNamespace:workspace-name:type-namespace:type-name!");
+    }
+    WorkspaceIdImpl workspaceIdImpl = new WorkspaceIdImpl();
+    workspaceIdImpl.setGlobalNamespace(params[0]);
+    workspaceIdImpl.setName(params[1]);
+    setWorkspace(workspaceIdImpl);
+    setNamespace(params[2]);
+    setName(params[3]);
+
   }
 }

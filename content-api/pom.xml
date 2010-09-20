@@ -41,6 +41,10 @@ any implementation except for content type definition parsing.
 						<groupId>com.smartitengineering</groupId>
 						<artifactId>smart-dao-queryparam</artifactId>
 				</dependency>
+        <dependency>
+						<groupId>com.smartitengineering.smart-dao</groupId>
+						<artifactId>smart-hbase-dao-spi</artifactId>
+				</dependency>
 				<dependency>
 						<groupId>junit</groupId>
 						<artifactId>junit</artifactId>

@@ -18,11 +18,13 @@
  */
 package com.smartitengineering.cms.api;
 
+import com.smartitengineering.dao.impl.hbase.spi.Externalizable;
+
 /**
  *
  * @author imyousuf
  */
-public interface WorkspaceId {
+public interface WorkspaceId extends Externalizable {
 
   public String getGlobalNamespace();
 

@@ -32,6 +32,10 @@ The module is responsible for Implementing the API for the CMS.
 ]]>
 		</description>
 		<dependencies>
+        <dependency>
+          <groupId>commons-io</groupId>
+          <artifactId>commons-io</artifactId>
+        </dependency>
 				<dependency>
 						<groupId>com.smartitengineering.smart-cms</groupId>
 						<artifactId>content-api</artifactId>

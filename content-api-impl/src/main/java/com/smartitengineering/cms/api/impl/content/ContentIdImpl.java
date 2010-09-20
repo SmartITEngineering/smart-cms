@@ -20,6 +20,14 @@ package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.WorkspaceId;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.impl.Utils;
+import com.smartitengineering.cms.api.impl.WorkspaceIdImpl;
+import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
+import com.smartitengineering.cms.spi.SmartSPI;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -27,24 +35,59 @@ import com.smartitengineering.cms.api.content.ContentId;
  */
 public class ContentIdImpl implements ContentId {
 
-  private WorkspaceId workspaceIdI;
+  private WorkspaceId workspaceId;
   private byte[] id;
 
   public void setWorkspaceId(WorkspaceId workspaceId) {
-    this.workspaceIdI = workspaceId;
+    if (workspaceId == null) {
+      throw new IllegalArgumentException(String.format(ContentTypeIdImpl.STANDARD_ERROR_MSG, "Workspace Id"));
+    }
+    this.workspaceId = workspaceId;
   }
 
   public void setId(byte[] id) {
+    if (id == null || id.length <= 0) {
+      throw new IllegalArgumentException(String.format(ContentTypeIdImpl.STANDARD_ERROR_MSG, "Content Id"));
+    }
     this.id = id;
   }
 
   @Override
   public WorkspaceId getWorkspaceId() {
-    return this.workspaceIdI;
+    return this.workspaceId;
   }
 
   @Override
   public byte[] getId() {
     return this.id;
+  }
+
+  @Override
+  public String toString() {
+    return new StringBuilder().append(workspaceId).append(SmartSPI.getInstance().getContentIdProcessor().getIdAsString(
+        id)).toString();
+  }
+
+  @Override
+  public void writeExternal(DataOutput output) throws IOException {
+    output.write(toString().getBytes("UTF-8"));
+  }
+
+  @Override
+  public void readExternal(DataInput input) throws IOException, ClassNotFoundException {
+    String idString = Utils.readStringInUTF8(input);
+    if (StringUtils.isBlank(idString)) {
+      throw new IOException("No content!");
+    }
+    String[] params = idString.split(":");
+    if (params == null || params.length != 4) {
+      throw new IOException(
+          "Object should have been in the format globalNamespace:workspace-name:type-namespace:type-name!");
+    }
+    WorkspaceIdImpl workspaceIdImpl = new WorkspaceIdImpl();
+    workspaceIdImpl.setGlobalNamespace(params[0]);
+    workspaceIdImpl.setName(params[1]);
+    setWorkspaceId(workspaceIdImpl);
+    setId(SmartSPI.getInstance().getContentIdProcessor().getStringAsId(params[2]));
   }
 }

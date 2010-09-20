@@ -19,6 +19,8 @@
 package com.smartitengineering.cms.api.type;
 
 import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.dao.impl.hbase.spi.Externalizable;
+import java.io.Serializable;
 
 /**
  * Represents the unique identifier for a {@link ContentType}, specified by its
@@ -26,8 +28,8 @@ import com.smartitengineering.cms.api.WorkspaceId;
  * @author imyousuf
  * @since 0.1
  */
-public interface ContentTypeId {
-  
+public interface ContentTypeId extends Externalizable {
+
   public WorkspaceId getWorkspace();
 
   /**

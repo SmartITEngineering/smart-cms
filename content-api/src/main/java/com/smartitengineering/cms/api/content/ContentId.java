@@ -19,12 +19,13 @@
 package com.smartitengineering.cms.api.content;
 
 import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.dao.impl.hbase.spi.Externalizable;
 
 /**
  *
  * @author imyousuf
  */
-public interface ContentId {
+public interface ContentId extends Externalizable {
 
   public WorkspaceId getWorkspaceId();
 
