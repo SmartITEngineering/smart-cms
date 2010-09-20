@@ -90,4 +90,15 @@ public class ContentIdImpl implements ContentId {
     setWorkspaceId(workspaceIdImpl);
     setId(SmartSPI.getInstance().getContentIdProcessor().getStringAsId(params[2]));
   }
+
+  @Override
+  public int compareTo(ContentId o) {
+    if (o == null) {
+      return 1;
+    }
+    if (equals(o)) {
+      return 0;
+    }
+    return toString().compareTo(o.toString());
+  }
 }

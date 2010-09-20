@@ -25,9 +25,17 @@ import com.smartitengineering.dao.impl.hbase.spi.Externalizable;
  *
  * @author imyousuf
  */
-public interface ContentId extends Externalizable {
+public interface ContentId extends Externalizable, Comparable<ContentId> {
 
   public WorkspaceId getWorkspaceId();
 
   public byte[] getId();
+
+  /**
+   * Override the toString so that it could be used to compare to ids of this instance. It should represent the state
+   * of the Id.
+   * @return String representation, i.e. state, of the id
+   */
+  @Override
+  public String toString();
 }

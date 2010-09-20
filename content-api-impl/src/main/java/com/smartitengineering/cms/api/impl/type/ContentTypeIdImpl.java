@@ -139,4 +139,15 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
     setName(params[3]);
 
   }
+
+  @Override
+  public int compareTo(ContentTypeId o) {
+    if (o == null) {
+      return 1;
+    }
+    if (equals(o)) {
+      return 0;
+    }
+    return toString().compareTo(o.toString());
+  }
 }

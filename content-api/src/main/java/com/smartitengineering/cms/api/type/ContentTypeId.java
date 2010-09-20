@@ -28,7 +28,7 @@ import java.io.Serializable;
  * @author imyousuf
  * @since 0.1
  */
-public interface ContentTypeId extends Externalizable {
+public interface ContentTypeId extends Externalizable, Comparable<ContentTypeId> {
 
   public WorkspaceId getWorkspace();
 
@@ -43,4 +43,12 @@ public interface ContentTypeId extends Externalizable {
    * @return a non-null string, but may be empty
    */
   public String getNamespace();
+
+  /**
+   * Override the toString so that it could be used to compare to ids of this instance. It should represent the state
+   * of the Id.
+   * @return String representation, i.e. state, of the id
+   */
+  @Override
+  public String toString();
 }

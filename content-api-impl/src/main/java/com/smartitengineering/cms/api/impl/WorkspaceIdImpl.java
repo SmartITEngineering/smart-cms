@@ -109,4 +109,15 @@ public class WorkspaceIdImpl implements WorkspaceId {
     hash = 31 * hash + (this.name != null ? this.name.hashCode() : 0);
     return hash;
   }
+
+  @Override
+  public int compareTo(WorkspaceId o) {
+    if (o == null) {
+      return 1;
+    }
+    if (equals(o)) {
+      return 0;
+    }
+    return toString().compareTo(o.toString());
+  }
 }
