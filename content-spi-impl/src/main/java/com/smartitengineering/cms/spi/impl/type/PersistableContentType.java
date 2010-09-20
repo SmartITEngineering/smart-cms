@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.type;
 
+import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.domain.AbstractGenericPersistentDTO;
 import org.apache.commons.lang.StringUtils;
@@ -26,7 +27,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author imyousuf
  */
-public class PersistableContentType extends AbstractGenericPersistentDTO<PersistableContentType, String, Long> {
+public class PersistableContentType extends AbstractGenericPersistentDTO<PersistableContentType, ContentTypeId, Long> {
 
   private MutableContentType mutableContentType;
 
@@ -51,5 +52,19 @@ public class PersistableContentType extends AbstractGenericPersistentDTO<Persist
       return false;
     }
     return true;
+  }
+
+  @Override
+  public ContentTypeId getId() {
+    if (getMutableContentType() == null) {
+      return null;
+    }
+    return getMutableContentType().getContentTypeID();
+  }
+
+  @Override
+  @Deprecated
+  public void setId(ContentTypeId id) {
+    throw new UnsupportedOperationException("Do not use this operation!");
   }
 }
