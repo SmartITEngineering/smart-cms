@@ -33,7 +33,7 @@ import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.type.MutableContentTypeId;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
-import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import java.io.BufferedInputStream;
@@ -54,7 +54,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   @Override
   public ContentType loadContentType(ContentTypeId contentTypeID) throws NullPointerException {
     final Collection<? extends ContentType> reads =
-                                  SmartSPI.getInstance().getContentTypeReader().readContentTypeFromPersistentStorage(
+                                  SmartContentSPI.getInstance().getContentTypeReader().readContentTypeFromPersistentStorage(
         contentTypeID);
     if (reads.size() > 0) {
       return reads.iterator().next();
@@ -67,8 +67,8 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   @Override
   public Collection<MutableContentType> parseContentTypes(InputStream contentTypeDefinitionStream, MediaType mediaType)
       throws NullPointerException, IOException {
-    TypeValidator validator = SmartSPI.getInstance().getTypeValidators().getValidators().get(mediaType);
-    ContentTypeDefinitionParser parser = SmartSPI.getInstance().getContentTypeDefinitionParsers().getParsers().get(
+    TypeValidator validator = SmartContentSPI.getInstance().getTypeValidators().getValidators().get(mediaType);
+    ContentTypeDefinitionParser parser = SmartContentSPI.getInstance().getContentTypeDefinitionParsers().getParsers().get(
         mediaType);
     if (validator == null || parser == null) {
       throw new IOException("Media type " + mediaType.toString() + " is not supported!");
@@ -100,7 +100,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       ids[i++] = type.getContentTypeID();
     }
     storedContentTypes =
-    SmartSPI.getInstance().getContentTypeReader().readContentTypeFromPersistentStorage(ids);
+    SmartContentSPI.getInstance().getContentTypeReader().readContentTypeFromPersistentStorage(ids);
     for (ContentType type : storedContentTypes) {
       final ContentTypeImpl contentTypeImpl = getContentTypeImpl(type);
       contentTypeImpl.setFromPersistentStorage(true);

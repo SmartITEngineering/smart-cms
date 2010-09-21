@@ -27,7 +27,7 @@ import com.smartitengineering.cms.api.content.Representation;
 import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
-import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -111,7 +111,7 @@ public class ContentImpl extends AbstractPersistableDomain<MutableContent> imple
 
   @Override
   public Representation getRepresentation(String repName) {
-    return SmartSPI.getInstance().getRepresentationProvider().getRepresentation(repName, getContentDefinition(), this);
+    return SmartContentSPI.getInstance().getRepresentationProvider().getRepresentation(repName, getContentDefinition(), this);
   }
 
   @Override

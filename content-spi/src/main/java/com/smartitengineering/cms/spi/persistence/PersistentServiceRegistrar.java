@@ -20,7 +20,7 @@ package com.smartitengineering.cms.spi.persistence;
 
 import com.smartitengineering.cms.api.common.PersistentWriter;
 import com.smartitengineering.cms.api.type.MutableContentType;
-import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.util.Map;
 
 /**

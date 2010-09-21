@@ -40,7 +40,7 @@ import com.smartitengineering.cms.api.content.NumberFieldValue;
 import com.smartitengineering.cms.api.content.OtherFieldValue;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.type.FieldDef;
-import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -175,7 +175,7 @@ public class ContentLoaderImpl implements ContentLoader {
   @Override
   public Content loadContent(ContentId contentId) {
     final Collection<Content> contents =
-                              SmartSPI.getInstance().getContentReader().readContentsFromPersistentStorage(contentId);
+                              SmartContentSPI.getInstance().getContentReader().readContentsFromPersistentStorage(contentId);
     if (contents == null || contents.isEmpty()) {
       return null;
     }
@@ -189,7 +189,7 @@ public class ContentLoaderImpl implements ContentLoader {
 
   @Override
   public Set<Content> search(Filter filter) {
-    return Collections.unmodifiableSet(new LinkedHashSet<Content>(SmartSPI.getInstance().getContentReader().search(
+    return Collections.unmodifiableSet(new LinkedHashSet<Content>(SmartContentSPI.getInstance().getContentReader().search(
         filter)));
   }
 

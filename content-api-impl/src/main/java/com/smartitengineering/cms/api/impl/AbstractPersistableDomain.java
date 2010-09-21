@@ -19,7 +19,7 @@
 package com.smartitengineering.cms.api.impl;
 
 import com.smartitengineering.cms.api.common.PersistentWriter;
-import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
@@ -55,7 +55,7 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
     Class<T> pesistenceRegistryClass =
                        (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).
         getActualTypeArguments()[0];
-    service = SmartSPI.getInstance().getPersistentService(pesistenceRegistryClass);
+    service = SmartContentSPI.getInstance().getPersistentService(pesistenceRegistryClass);
     nextPerformToWaitForLock = false;
   }
 

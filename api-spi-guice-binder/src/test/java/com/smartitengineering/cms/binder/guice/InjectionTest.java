@@ -22,7 +22,7 @@ import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
 import com.smartitengineering.cms.api.type.MutableContentType;
-import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
@@ -42,15 +42,15 @@ public class InjectionTest extends TestCase {
   }
 
   public void testSpi() {
-    assertNotNull(SmartSPI.getInstance().getTypeValidators());
-    assertEquals(1, SmartSPI.getInstance().getTypeValidators().getValidators().size());
-    assertNotNull(SmartSPI.getInstance().getTypeValidators().getValidators().get(MediaType.APPLICATION_XML));
-    assertNotNull(SmartSPI.getInstance().getContentTypeDefinitionParsers());
-    assertNotNull(SmartSPI.getInstance().getPersistentServiceRegistrar());
-    final PersistentContentTypeReader contentTypeReader = SmartSPI.getInstance().getContentTypeReader();
+    assertNotNull(SmartContentSPI.getInstance().getTypeValidators());
+    assertEquals(1, SmartContentSPI.getInstance().getTypeValidators().getValidators().size());
+    assertNotNull(SmartContentSPI.getInstance().getTypeValidators().getValidators().get(MediaType.APPLICATION_XML));
+    assertNotNull(SmartContentSPI.getInstance().getContentTypeDefinitionParsers());
+    assertNotNull(SmartContentSPI.getInstance().getPersistentServiceRegistrar());
+    final PersistentContentTypeReader contentTypeReader = SmartContentSPI.getInstance().getContentTypeReader();
     assertNotNull(contentTypeReader);
     final PersistentService<MutableContentType> persistentService =
-                                                SmartSPI.getInstance().getPersistentService(MutableContentType.class);
+                                                SmartContentSPI.getInstance().getPersistentService(MutableContentType.class);
     if (ContentTypePersistentService.class.isAssignableFrom(persistentService.getClass())) {
       ContentTypePersistentService service = (ContentTypePersistentService) persistentService;
       assertNotNull(service.getCommonReadDao());

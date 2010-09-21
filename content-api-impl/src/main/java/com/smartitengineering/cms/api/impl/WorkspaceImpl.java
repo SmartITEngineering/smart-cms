@@ -23,7 +23,7 @@ import com.smartitengineering.cms.api.WorkspaceId;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.VariationDef;
-import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.util.Collection;
 import java.util.Date;
 
@@ -56,21 +56,21 @@ public class WorkspaceImpl implements Workspace {
 
   @Override
   public Collection<ContentType> getContentDefintions() {
-    return SmartSPI.getInstance().getWorkspaceService().getContentDefintions(getId());
+    return SmartContentSPI.getInstance().getWorkspaceService().getContentDefintions(getId());
   }
 
   @Override
   public Collection<WorkspaceId> getFriendlies() {
-    return SmartSPI.getInstance().getWorkspaceService().getFriendlies(getId());
+    return SmartContentSPI.getInstance().getWorkspaceService().getFriendlies(getId());
   }
 
   @Override
   public Collection<RepresentationDef> getRepresentations() {
-    return SmartSPI.getInstance().getWorkspaceService().getRepresentations(getId());
+    return SmartContentSPI.getInstance().getWorkspaceService().getRepresentations(getId());
   }
 
   @Override
   public Collection<VariationDef> getVariations() {
-    return SmartSPI.getInstance().getWorkspaceService().getVariations(getId());
+    return SmartContentSPI.getInstance().getWorkspaceService().getVariations(getId());
   }
 }

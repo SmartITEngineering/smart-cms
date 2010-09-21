@@ -24,7 +24,7 @@ import com.smartitengineering.cms.api.type.MutableFieldDef;
 import com.smartitengineering.cms.api.type.SearchDef;
 import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.VariationDef;
-import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -120,7 +120,7 @@ public class FieldDefImpl implements MutableFieldDef {
 
   @Override
   public String getSearchFieldName() {
-    return SmartSPI.getInstance().getSearchFieldNameGenerator().getSearchFieldName(this);
+    return SmartContentSPI.getInstance().getSearchFieldNameGenerator().getSearchFieldName(this);
   }
 
   @Override

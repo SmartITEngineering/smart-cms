@@ -21,7 +21,7 @@ package com.smartitengineering.cms.spi.impl.content;
 import com.google.inject.Inject;
 import com.smartitengineering.cms.api.common.PersistentWriter;
 import com.smartitengineering.cms.api.type.MutableContentType;
-import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import java.util.Collections;
 import java.util.Map;

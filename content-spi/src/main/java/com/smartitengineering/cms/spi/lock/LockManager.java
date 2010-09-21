@@ -19,7 +19,7 @@
 package com.smartitengineering.cms.spi.lock;
 
 import com.smartitengineering.cms.api.common.Lock;
-import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
 import com.smartitengineering.util.bean.annotations.InjectableField;
@@ -35,7 +35,7 @@ import com.smartitengineering.util.bean.annotations.InjectableField;
  * @author imyousuf
  * @since 0.1
  */
-@Aggregator(contextName = SmartSPI.SPI_CONTEXT)
+@Aggregator(contextName = SmartContentSPI.SPI_CONTEXT)
 public final class LockManager {
 
 		/**

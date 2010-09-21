@@ -42,8 +42,8 @@ import com.smartitengineering.util.bean.annotations.InjectableField;
  * All SPI collection for SPI implementations.
  *
  */
-@Aggregator(contextName = SmartSPI.SPI_CONTEXT)
-public final class SmartSPI {
+@Aggregator(contextName = SmartContentSPI.SPI_CONTEXT)
+public final class SmartContentSPI {
 
   public static final String SPI_CONTEXT = SmartContentAPI.CONTEXT_NAME +
       ".spi";
@@ -147,13 +147,13 @@ public final class SmartSPI {
     return variationProvider;
   }
 
-  private SmartSPI() {
+  private SmartContentSPI() {
   }
-  private static SmartSPI spi;
+  private static SmartContentSPI spi;
 
-  public static SmartSPI getInstance() {
+  public static SmartContentSPI getInstance() {
     if (spi == null) {
-      spi = new SmartSPI();
+      spi = new SmartContentSPI();
       BeanFactoryRegistrar.aggregate(spi);
     }
     return spi;

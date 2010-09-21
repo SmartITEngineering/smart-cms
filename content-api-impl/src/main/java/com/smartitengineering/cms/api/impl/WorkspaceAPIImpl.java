@@ -22,7 +22,7 @@ import com.google.inject.Inject;
 import com.smartitengineering.cms.api.Workspace;
 import com.smartitengineering.cms.api.WorkspaceAPI;
 import com.smartitengineering.cms.api.WorkspaceId;
-import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.util.Collection;
 
 /**
@@ -51,7 +51,7 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
 
   @Override
   public WorkspaceId createWorkspace(WorkspaceId workspaceId) {
-    SmartSPI.getInstance().getWorkspaceService().create(workspaceId);
+    SmartContentSPI.getInstance().getWorkspaceService().create(workspaceId);
     return workspaceId;
   }
 
@@ -79,11 +79,11 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
 
   @Override
   public Workspace getWorkspace(WorkspaceId workspaceId) {
-    return SmartSPI.getInstance().getWorkspaceService().load(workspaceId);
+    return SmartContentSPI.getInstance().getWorkspaceService().load(workspaceId);
   }
 
   @Override
   public Collection<Workspace> getWorkspaces() {
-    return SmartSPI.getInstance().getWorkspaceService().getWorkspaces();
+    return SmartContentSPI.getInstance().getWorkspaceService().getWorkspaces();
   }
 }

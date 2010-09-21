@@ -23,7 +23,7 @@ import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.impl.Utils;
 import com.smartitengineering.cms.api.impl.WorkspaceIdImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
-import com.smartitengineering.cms.spi.SmartSPI;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -64,7 +64,7 @@ public class ContentIdImpl implements ContentId {
 
   @Override
   public String toString() {
-    return new StringBuilder().append(workspaceId).append(SmartSPI.getInstance().getContentIdProcessor().getIdAsString(
+    return new StringBuilder().append(workspaceId).append(SmartContentSPI.getInstance().getContentIdProcessor().getIdAsString(
         id)).toString();
   }
 
@@ -88,7 +88,7 @@ public class ContentIdImpl implements ContentId {
     workspaceIdImpl.setGlobalNamespace(params[0]);
     workspaceIdImpl.setName(params[1]);
     setWorkspaceId(workspaceIdImpl);
-    setId(SmartSPI.getInstance().getContentIdProcessor().getStringAsId(params[2]));
+    setId(SmartContentSPI.getInstance().getContentIdProcessor().getStringAsId(params[2]));
   }
 
   @Override
