@@ -18,10 +18,10 @@
  */
 package com.smartitengineering.cms.spi.impl.type;
 
-import com.google.inject.Inject;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
+import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.OtherDataType;
@@ -31,10 +31,10 @@ import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.type.SearchDef;
 import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.VariationDef;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.impl.Utils;
 import com.smartitengineering.cms.spi.type.PersistableContentType;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
-import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import com.smartitengineering.dao.impl.hbase.spi.impl.AbstactObjectRowConverter;
 import java.io.IOException;
 import java.util.Collection;
@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author imyousuf
  */
-public class ContentTypeObjectConverter extends AbstactObjectRowConverter<PersistentContentType> {
+public class ContentTypeObjectConverter extends AbstactObjectRowConverter<PersistentContentType, ContentTypeId> {
 
   public final static byte[] FAMILY_SIMPLE = Bytes.toBytes("simple");
   public final static byte[] FAMILY_FIELDS = Bytes.toBytes("fields");
@@ -85,8 +85,6 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
   public final static byte[] CELL_FIELD_OTHER_MIME_TYPE = Bytes.toBytes("mimeType");
   public final static byte[] COLON = Bytes.toBytes(":");
   private final Logger logger = LoggerFactory.getLogger(getClass());
-  @Inject
-  private SchemaInfoProvider<PersistentContentType> schemaInfoProvider;
 
   @Override
   protected String[] getTablesToAttainLock() {
@@ -122,14 +120,13 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         creationDate = date;
       }
       if (instance.getMutableContentType() instanceof com.smartitengineering.cms.spi.type.PersistableContentType) {
-        PersistableContentType typeImpl = (PersistableContentType) instance.
-            getMutableContentType();
+        PersistableContentType typeImpl = (PersistableContentType) instance.getMutableContentType();
         typeImpl.setCreationDate(creationDate);
         typeImpl.setLastModifiedDate(lastModifiedDate);
       }
       put.add(FAMILY_SIMPLE, CELL_CREATION_DATE, Utils.toBytes(creationDate));
       if (instance.getMutableContentType().getParent() != null) {
-        put.add(FAMILY_SIMPLE, CELL_PARENT_ID, schemaInfoProvider.getRowIdFromId(instance.getMutableContentType().
+        put.add(FAMILY_SIMPLE, CELL_PARENT_ID, getInfoProvider().getRowIdFromId(instance.getMutableContentType().
             getParent()));
       }
       /*
@@ -223,7 +220,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
               getBidirectionalFieldName()));
         }
         put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_COLLECTION_ITEM_TYPE),
-                schemaInfoProvider.getRowIdFromId(contentDataType.getTypeDef()));
+                getInfoProvider().getRowIdFromId(contentDataType.getTypeDef()));
         break;
       case OTHER:
       case STRING:
@@ -253,6 +250,15 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
 
   @Override
   public PersistentContentType rowsToObject(Result startRow, ExecutorService executorService) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    PersistableContentType contentType = SmartContentSPI.getInstance().getPersistableDomainFactory().
+        createPersistableContentType();
+    PersistentContentType persistentContentType = new PersistentContentType();
+    persistentContentType.setMutableContentType(contentType);
+    persistentContentType.setVersion(0l);
+    byte[] displayName = startRow.getValue(FAMILY_SIMPLE, CELL_DISPLAY_NAME);
+    if(displayName != null) {
+      contentType.setDisplayName(Bytes.toString(displayName));
+    }
+    return persistentContentType;
   }
 }

@@ -25,7 +25,9 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
+import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
@@ -48,6 +50,7 @@ import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.dao.impl.hbase.CommonDao;
 import com.smartitengineering.dao.impl.hbase.spi.AsyncExecutorService;
+import com.smartitengineering.dao.impl.hbase.spi.DomainIdInstanceProvider;
 import com.smartitengineering.dao.impl.hbase.spi.FilterConfigs;
 import com.smartitengineering.dao.impl.hbase.spi.ObjectRowConverter;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
@@ -72,18 +75,21 @@ public class SPIModule extends AbstractModule {
      */
     bind(new TypeLiteral<ObjectRowConverter<PersistentContentType>>() {
     }).to(ContentTypeObjectConverter.class).in(Singleton.class);
-    bind(new TypeLiteral<CommonReadDao<PersistentContentType, String>>() {
-    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, String>>() {
+    bind(new TypeLiteral<CommonReadDao<PersistentContentType, ContentTypeId>>() {
+    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, ContentTypeId>>() {
     }).in(Singleton.class);
     bind(new TypeLiteral<CommonWriteDao<PersistentContentType>>() {
-    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, String>>() {
+    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, ContentTypeId>>() {
     }).in(Singleton.class);
-    bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, String>>() {
-    }).to(new TypeLiteral<CommonDao<PersistentContentType, String>>() {
+    bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, ContentTypeId>>() {
+    }).to(new TypeLiteral<CommonDao<PersistentContentType, ContentTypeId>>() {
     }).in(Singleton.class);
-    bind(new TypeLiteral<SchemaInfoProvider<PersistentContentType>>() {
-    }).to(new TypeLiteral<SchemaInfoProviderImpl<PersistentContentType>>() {
-    });
+    final TypeLiteral<SchemaInfoProviderImpl<PersistentContentType, ContentTypeId>> typeLiteral = new TypeLiteral<SchemaInfoProviderImpl<PersistentContentType, ContentTypeId>>() {
+    };
+    bind(new TypeLiteral<Class<ContentTypeId>>() {
+    }).toInstance(ContentTypeId.class);
+    bind(new TypeLiteral<SchemaInfoProvider<PersistentContentType, ContentTypeId>>() {
+    }).to(typeLiteral).in(Singleton.class);
     bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistentContentType>>() {
     }).toProvider(ContentTypeSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);
     bind(new TypeLiteral<FilterConfigs<PersistentContentType>>() {
@@ -113,5 +119,6 @@ public class SPIModule extends AbstractModule {
     bind(PersistentContentTypeReader.class).to(ContentTypePersistentService.class);
     bind(LockHandler.class).to(DefaultLockHandler.class).in(Scopes.SINGLETON);
     bind(PersistableDomainFactory.class).to(PersistableDomainFactoryImpl.class).in(Scopes.SINGLETON);
+    bind(DomainIdInstanceProvider.class).to(DomainIdInstanceProviderImpl.class).in(Scopes.SINGLETON);
   }
 }

@@ -28,9 +28,8 @@ import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -43,7 +42,7 @@ public class ContentTypePersistentService implements PersistentService<MutableCo
   @Inject
   private GenericAdapter<MutableContentType, PersistentContentType> adapter;
   @Inject
-  private CommonReadDao<PersistentContentType, String> commonReadDao;
+  private CommonReadDao<PersistentContentType, ContentTypeId> commonReadDao;
   @Inject
   private CommonWriteDao<PersistentContentType> commonWriteDao;
 
@@ -51,7 +50,7 @@ public class ContentTypePersistentService implements PersistentService<MutableCo
     return adapter;
   }
 
-  public CommonReadDao<PersistentContentType, String> getCommonReadDao() {
+  public CommonReadDao<PersistentContentType, ContentTypeId> getCommonReadDao() {
     return commonReadDao;
   }
 
@@ -76,11 +75,7 @@ public class ContentTypePersistentService implements PersistentService<MutableCo
 
   @Override
   public Collection<? extends ContentType> readContentTypeFromPersistentStorage(ContentTypeId... contentTypeId) {
-    List<String> list = new ArrayList<String>();
-    for (ContentTypeId id : contentTypeId) {
-      list.add(id.toString());
-    }
-    final Set<PersistentContentType> byIds = commonReadDao.getByIds(list);
+    final Set<PersistentContentType> byIds = commonReadDao.getByIds(Arrays.asList(contentTypeId));
     return getAdapter().convertInversely(byIds.toArray(new PersistentContentType[byIds.size()]));
   }
 }

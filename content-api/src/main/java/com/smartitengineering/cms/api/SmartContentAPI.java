@@ -45,7 +45,6 @@ public final class SmartContentAPI {
   private static SmartContentAPI api;
 
   private SmartContentAPI() {
-    BeanFactoryRegistrar.aggregate(this);
   }
 
   /**
@@ -56,6 +55,8 @@ public final class SmartContentAPI {
   public static final SmartContentAPI getInstance() {
     if (api == null) {
       api = new SmartContentAPI();
+      System.out.println("GNG FOR AGGREGATION!");
+      BeanFactoryRegistrar.aggregate(api);
     }
     return api;
   }
