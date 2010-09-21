@@ -30,8 +30,6 @@ public enum FieldValueType {
 		DOUBLE,
 		BOOLEAN,
 		DATE_TIME,
-		STRING_PLAIN,
-		STRING_XML,
 		STRING,
 		CONTENT,
 		COLLECTION,
