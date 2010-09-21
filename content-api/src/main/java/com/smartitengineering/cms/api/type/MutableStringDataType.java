@@ -22,7 +22,7 @@ package com.smartitengineering.cms.api.type;
  *
  * @author kaisar
  */
-public interface MutableStringDataType extends StringDataType {
+public interface MutableStringDataType extends StringDataType, MutableOtherDataType {
 
   public void setEncoding(String encoding);
 }
