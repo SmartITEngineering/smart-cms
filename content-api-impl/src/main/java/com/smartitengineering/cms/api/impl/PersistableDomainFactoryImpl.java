@@ -16,30 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.impl.type;
+package com.smartitengineering.cms.api.impl;
 
-import com.smartitengineering.cms.api.type.MutableContentType;
-import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
+import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
+import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
+import com.smartitengineering.cms.spi.type.PersistableContentType;
 
 /**
  *
  * @author imyousuf
  */
-public class ContentTypeAdapterHelper extends AbstractAdapterHelper<MutableContentType, PersistentContentType>{
+public class PersistableDomainFactoryImpl implements PersistableDomainFactory {
 
   @Override
-  protected PersistentContentType newTInstance() {
-    return new PersistentContentType();
+  public PersistableContentType createPersistableContentType() {
+    return new ContentTypeImpl();
   }
-
-  @Override
-  protected void mergeFromF2T(MutableContentType fromBean, PersistentContentType toBean) {
-    toBean.setMutableContentType(fromBean);
-  }
-
-  @Override
-  protected MutableContentType convertFromT2F(PersistentContentType toBean) {
-    return toBean.getMutableContentType();
-  }
-
 }

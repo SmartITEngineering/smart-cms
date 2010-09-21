@@ -26,6 +26,7 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
+import com.smartitengineering.cms.spi.type.PersistableContentType;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -38,8 +39,7 @@ import java.util.Set;
  *
  * @author kaisar
  */
-public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentType> implements MutableContentType,
-                                                                                              ContentType {
+public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentType> implements PersistableContentType {
 
   private ContentTypeId contentTypeId;
   private final Set<ContentStatus> contentStatus = new LinkedHashSet<ContentStatus>();
@@ -123,18 +123,22 @@ public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentTyp
 
   }
 
+  @Override
   public boolean isFromPersistentStorage() {
     return fromPersistentStorage;
   }
 
+  @Override
   public void setFromPersistentStorage(boolean fromPersistentStorage) {
     this.fromPersistentStorage = fromPersistentStorage;
   }
 
+  @Override
   public void setCreationDate(Date creationDate) {
     this.creationDate = creationDate;
   }
 
+  @Override
   public void setLastModifiedDate(Date lastModifiedDate) {
     this.lastModifiedDate = lastModifiedDate;
   }
@@ -194,5 +198,4 @@ public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentTyp
     hash = 61 * hash + (this.contentTypeId != null ? this.contentTypeId.hashCode() : 0);
     return hash;
   }
-
 }

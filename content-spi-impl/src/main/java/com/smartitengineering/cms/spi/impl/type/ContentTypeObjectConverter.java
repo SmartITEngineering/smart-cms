@@ -19,7 +19,6 @@
 package com.smartitengineering.cms.spi.impl.type;
 
 import com.google.inject.Inject;
-import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
@@ -33,6 +32,7 @@ import com.smartitengineering.cms.api.type.SearchDef;
 import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.spi.impl.Utils;
+import com.smartitengineering.cms.spi.type.PersistableContentType;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import com.smartitengineering.dao.impl.hbase.spi.impl.AbstactObjectRowConverter;
@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author imyousuf
  */
-public class ContentTypeObjectConverter extends AbstactObjectRowConverter<PersistableContentType> {
+public class ContentTypeObjectConverter extends AbstactObjectRowConverter<PersistentContentType> {
 
   public final static byte[] FAMILY_SIMPLE = Bytes.toBytes("simple");
   public final static byte[] FAMILY_FIELDS = Bytes.toBytes("fields");
@@ -86,7 +86,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
   public final static byte[] COLON = Bytes.toBytes(":");
   private final Logger logger = LoggerFactory.getLogger(getClass());
   @Inject
-  private SchemaInfoProvider<PersistableContentType> schemaInfoProvider;
+  private SchemaInfoProvider<PersistentContentType> schemaInfoProvider;
 
   @Override
   protected String[] getTablesToAttainLock() {
@@ -94,7 +94,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
   }
 
   @Override
-  protected void getPutForTable(PersistableContentType instance, ExecutorService service, Put put) {
+  protected void getPutForTable(PersistentContentType instance, ExecutorService service, Put put) {
     if (logger.isInfoEnabled()) {
       logger.info("Put formation for content type id " + instance.getId());
     }
@@ -121,8 +121,9 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         logger.debug("Setting new creation date");
         creationDate = date;
       }
-      if (instance.getMutableContentType() instanceof ContentTypeImpl) {
-        ContentTypeImpl typeImpl = (ContentTypeImpl) instance.getMutableContentType();
+      if (instance.getMutableContentType() instanceof com.smartitengineering.cms.spi.type.PersistableContentType) {
+        PersistableContentType typeImpl = (PersistableContentType) instance.
+            getMutableContentType();
         typeImpl.setCreationDate(creationDate);
         typeImpl.setLastModifiedDate(lastModifiedDate);
       }
@@ -246,12 +247,12 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
   }
 
   @Override
-  protected void getDeleteForTable(PersistableContentType instance, ExecutorService service, Delete put) {
+  protected void getDeleteForTable(PersistentContentType instance, ExecutorService service, Delete put) {
     // No further implementation is supposed to needed.
   }
 
   @Override
-  public PersistableContentType rowsToObject(Result startRow, ExecutorService executorService) {
+  public PersistentContentType rowsToObject(Result startRow, ExecutorService executorService) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 }

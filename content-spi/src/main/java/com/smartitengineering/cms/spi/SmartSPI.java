@@ -26,6 +26,7 @@ import com.smartitengineering.cms.spi.content.PersistentContentReader;
 import com.smartitengineering.cms.spi.content.RepresentationProvider;
 import com.smartitengineering.cms.spi.content.VariationProvider;
 import com.smartitengineering.cms.spi.lock.LockHandler;
+import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParsers;
@@ -82,6 +83,12 @@ public final class SmartSPI {
   private WorkspaceService workspaceService;
   @InjectableField
   private ContentIdProcessor contentIdProcessor;
+  @InjectableField
+  private PersistableDomainFactory persistableDomainFactory;
+
+  public PersistableDomainFactory getPersistableDomainFactory() {
+    return persistableDomainFactory;
+  }
 
   public ContentIdProcessor getContentIdProcessor() {
     return contentIdProcessor;

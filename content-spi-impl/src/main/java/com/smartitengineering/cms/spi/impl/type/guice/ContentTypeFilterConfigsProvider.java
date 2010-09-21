@@ -20,7 +20,7 @@ package com.smartitengineering.cms.spi.impl.type.guice;
 
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.smartitengineering.cms.spi.impl.type.PersistableContentType;
+import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.dao.impl.hbase.spi.FilterConfigs;
 import com.smartitengineering.dao.impl.hbase.spi.impl.JsonConfigLoader;
 import java.io.IOException;
@@ -30,10 +30,10 @@ import java.io.IOException;
  * @author imyousuf
  */
 @Singleton
-public class ContentTypeFilterConfigsProvider implements Provider<FilterConfigs<PersistableContentType>> {
+public class ContentTypeFilterConfigsProvider implements Provider<FilterConfigs<PersistentContentType>> {
 
   @Override
-  public FilterConfigs<PersistableContentType> get() {
+  public FilterConfigs<PersistentContentType> get() {
     try {
       return JsonConfigLoader.parseJsonAsFilterConfigMap(getClass().getClassLoader().
           getResourceAsStream("com/smartitengineering/cms/spi/impl/type/ContentTypeFilterConfigs.json"));

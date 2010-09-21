@@ -27,11 +27,11 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author imyousuf
  */
-public class PersistableContentType extends AbstractGenericPersistentDTO<PersistableContentType, ContentTypeId, Long> {
+public class PersistentContentType extends AbstractGenericPersistentDTO<PersistentContentType, ContentTypeId, Long> {
 
   private MutableContentType mutableContentType;
 
-  public PersistableContentType() {
+  public PersistentContentType() {
   }
 
   public MutableContentType getMutableContentType() {

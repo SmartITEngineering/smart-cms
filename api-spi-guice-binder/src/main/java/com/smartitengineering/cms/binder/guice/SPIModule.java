@@ -25,16 +25,18 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
 import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
 import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeSchemaBaseConfigProvider;
-import com.smartitengineering.cms.spi.impl.type.PersistableContentType;
+import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.cms.spi.impl.type.XMLSchemaBasedTypeValidator;
 import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeFilterConfigsProvider;
 import com.smartitengineering.cms.spi.lock.LockHandler;
+import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
@@ -68,28 +70,28 @@ public class SPIModule extends AbstractModule {
     /*
      * Start injection specific to common dao of content type
      */
-    bind(new TypeLiteral<ObjectRowConverter<PersistableContentType>>() {
+    bind(new TypeLiteral<ObjectRowConverter<PersistentContentType>>() {
     }).to(ContentTypeObjectConverter.class).in(Singleton.class);
-    bind(new TypeLiteral<CommonReadDao<PersistableContentType, String>>() {
-    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistableContentType, String>>() {
+    bind(new TypeLiteral<CommonReadDao<PersistentContentType, String>>() {
+    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, String>>() {
     }).in(Singleton.class);
-    bind(new TypeLiteral<CommonWriteDao<PersistableContentType>>() {
-    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistableContentType, String>>() {
+    bind(new TypeLiteral<CommonWriteDao<PersistentContentType>>() {
+    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, String>>() {
     }).in(Singleton.class);
-    bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistableContentType, String>>() {
-    }).to(new TypeLiteral<CommonDao<PersistableContentType, String>>() {
+    bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, String>>() {
+    }).to(new TypeLiteral<CommonDao<PersistentContentType, String>>() {
     }).in(Singleton.class);
-    bind(new TypeLiteral<SchemaInfoProvider<PersistableContentType>>() {
-    }).to(new TypeLiteral<SchemaInfoProviderImpl<PersistableContentType>>() {
+    bind(new TypeLiteral<SchemaInfoProvider<PersistentContentType>>() {
+    }).to(new TypeLiteral<SchemaInfoProviderImpl<PersistentContentType>>() {
     });
-    bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistableContentType>>() {
+    bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistentContentType>>() {
     }).toProvider(ContentTypeSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);
-    bind(new TypeLiteral<FilterConfigs<PersistableContentType>>() {
+    bind(new TypeLiteral<FilterConfigs<PersistentContentType>>() {
     }).toProvider(ContentTypeFilterConfigsProvider.class).in(Scopes.SINGLETON);
-    bind(new TypeLiteral<GenericAdapter<MutableContentType, PersistableContentType>>() {
-    }).to(new TypeLiteral<GenericAdapterImpl<MutableContentType, PersistableContentType>>() {
+    bind(new TypeLiteral<GenericAdapter<MutableContentType, PersistentContentType>>() {
+    }).to(new TypeLiteral<GenericAdapterImpl<MutableContentType, PersistentContentType>>() {
     }).in(Scopes.SINGLETON);
-    bind(new TypeLiteral<AbstractAdapterHelper<MutableContentType, PersistableContentType>>() {
+    bind(new TypeLiteral<AbstractAdapterHelper<MutableContentType, PersistentContentType>>() {
     }).to(ContentTypeAdapterHelper.class).in(Scopes.SINGLETON);
     /*
      * End injection specific to common dao of content type
@@ -110,5 +112,6 @@ public class SPIModule extends AbstractModule {
         com.smartitengineering.cms.spi.impl.type.ContentTypeDefinitionParsers.class);
     bind(PersistentContentTypeReader.class).to(ContentTypePersistentService.class);
     bind(LockHandler.class).to(DefaultLockHandler.class).in(Scopes.SINGLETON);
+    bind(PersistableDomainFactory.class).to(PersistableDomainFactoryImpl.class).in(Scopes.SINGLETON);
   }
 }

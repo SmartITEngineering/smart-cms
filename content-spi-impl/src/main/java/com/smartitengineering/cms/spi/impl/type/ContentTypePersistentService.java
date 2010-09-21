@@ -41,21 +41,21 @@ import java.util.Set;
 public class ContentTypePersistentService implements PersistentService<MutableContentType>, PersistentContentTypeReader {
 
   @Inject
-  private GenericAdapter<MutableContentType, PersistableContentType> adapter;
+  private GenericAdapter<MutableContentType, PersistentContentType> adapter;
   @Inject
-  private CommonReadDao<PersistableContentType, String> commonReadDao;
+  private CommonReadDao<PersistentContentType, String> commonReadDao;
   @Inject
-  private CommonWriteDao<PersistableContentType> commonWriteDao;
+  private CommonWriteDao<PersistentContentType> commonWriteDao;
 
-  public GenericAdapter<MutableContentType, PersistableContentType> getAdapter() {
+  public GenericAdapter<MutableContentType, PersistentContentType> getAdapter() {
     return adapter;
   }
 
-  public CommonReadDao<PersistableContentType, String> getCommonReadDao() {
+  public CommonReadDao<PersistentContentType, String> getCommonReadDao() {
     return commonReadDao;
   }
 
-  public CommonWriteDao<PersistableContentType> getCommonWriteDao() {
+  public CommonWriteDao<PersistentContentType> getCommonWriteDao() {
     return commonWriteDao;
   }
 
@@ -80,7 +80,7 @@ public class ContentTypePersistentService implements PersistentService<MutableCo
     for (ContentTypeId id : contentTypeId) {
       list.add(id.toString());
     }
-    final Set<PersistableContentType> byIds = commonReadDao.getByIds(list);
-    return getAdapter().convertInversely(byIds.toArray(new PersistableContentType[byIds.size()]));
+    final Set<PersistentContentType> byIds = commonReadDao.getByIds(list);
+    return getAdapter().convertInversely(byIds.toArray(new PersistentContentType[byIds.size()]));
   }
 }

@@ -20,7 +20,7 @@ package com.smartitengineering.cms.spi.impl.type.guice;
 
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.smartitengineering.cms.spi.impl.type.PersistableContentType;
+import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.dao.impl.hbase.spi.impl.JsonConfigLoader;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
 import java.io.IOException;
@@ -32,10 +32,10 @@ import java.io.InputStream;
  */
 @Singleton
 public class ContentTypeSchemaBaseConfigProvider implements
-    Provider<SchemaInfoProviderBaseConfig<PersistableContentType>> {
+    Provider<SchemaInfoProviderBaseConfig<PersistentContentType>> {
 
   @Override
-  public SchemaInfoProviderBaseConfig<PersistableContentType> get() {
+  public SchemaInfoProviderBaseConfig<PersistentContentType> get() {
     try {
       final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(
           "com/smartitengineering/cms/spi/impl/type/ContentTypeSchemaBaseConfig.json");

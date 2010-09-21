@@ -16,30 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.impl.type;
+package com.smartitengineering.cms.spi.type;
 
 import com.smartitengineering.cms.api.type.MutableContentType;
-import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
+import java.util.Date;
 
 /**
  *
  * @author imyousuf
  */
-public class ContentTypeAdapterHelper extends AbstractAdapterHelper<MutableContentType, PersistentContentType>{
+public interface PersistableContentType extends MutableContentType {
 
-  @Override
-  protected PersistentContentType newTInstance() {
-    return new PersistentContentType();
-  }
+  public boolean isFromPersistentStorage();
 
-  @Override
-  protected void mergeFromF2T(MutableContentType fromBean, PersistentContentType toBean) {
-    toBean.setMutableContentType(fromBean);
-  }
+  public void setFromPersistentStorage(boolean fromPersistentStorage);
 
-  @Override
-  protected MutableContentType convertFromT2F(PersistentContentType toBean) {
-    return toBean.getMutableContentType();
-  }
+  public void setCreationDate(Date creationDate);
 
+  public void setLastModifiedDate(Date lastModifiedDate);
 }
