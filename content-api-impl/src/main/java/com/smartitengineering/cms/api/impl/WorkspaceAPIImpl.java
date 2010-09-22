@@ -50,14 +50,24 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   }
 
   @Override
+  public WorkspaceId createWorkspace(String globalNamespace, String name) {
+    return createWorkspace(createWorkspaceId(globalNamespace, name));
+  }
+
+  @Override
   public WorkspaceId createWorkspace(WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getWorkspaceService().create(workspaceId);
     return workspaceId;
   }
 
   protected WorkspaceId createWorkspaceId(String name) {
+    final String namespace = getGlobalNamespace();
+    return createWorkspaceId(namespace, name);
+  }
+
+  protected WorkspaceId createWorkspaceId(final String namespace, String name) {
     final WorkspaceIdImpl workspaceIdImpl = new WorkspaceIdImpl();
-    workspaceIdImpl.setGlobalNamespace(getGlobalNamespace());
+    workspaceIdImpl.setGlobalNamespace(namespace);
     workspaceIdImpl.setName(name);
     return workspaceIdImpl;
   }
