@@ -135,4 +135,6 @@ public interface ContentTypeLoader {
   public MutableValidatorDef createMutableValidatorDef();
 
   public MutableResourceUri createMutableResourceUri();
+
+  public MutableSearchDef createMutableSearchDef();
 }
