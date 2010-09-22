@@ -22,5 +22,5 @@ package com.smartitengineering.cms.api.type;
  *
  * @author kaisar
  */
-public interface MutableRepresentationDef extends MutuableResourceDef {
+public interface MutableRepresentationDef extends MutuableResourceDef, RepresentationDef {
 }

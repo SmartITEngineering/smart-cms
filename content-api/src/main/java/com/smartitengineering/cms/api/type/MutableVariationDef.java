@@ -22,5 +22,5 @@ package com.smartitengineering.cms.api.type;
  *
  * @author kaisar
  */
-public interface MutableVariationDef extends MutuableResourceDef {
+public interface MutableVariationDef extends MutuableResourceDef, VariationDef {
 }
