@@ -429,6 +429,19 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
            * Simple and data type
            */
           else {
+            byte[] qualifier = Bytes.toBytes(key.substring(fieldName.length() + 1));
+            if(Arrays.equals(CELL_FIELD_STANDALONE, qualifier)) {
+              fieldDef.setFieldStandaloneUpdateAble(Bytes.toBoolean(value));
+            }
+            else if(Arrays.equals(CELL_FIELD_REQUIRED, qualifier)) {
+              fieldDef.setRequired(Bytes.toBoolean(value));
+            }
+            /*
+             * Data type
+             */
+            else {
+
+            }
           }
         }
         fieldDef.setCustomValidator(validatorDef);
