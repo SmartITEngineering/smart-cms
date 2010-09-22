@@ -22,7 +22,7 @@ package com.smartitengineering.cms.api.type;
  *
  * @author kaisar
  */
-public interface MutuableResourceDef extends ResourceDef{
+public interface MutableResourceDef extends ResourceDef {
 
   public void setTemplateType(TemplateType templateType);
 
@@ -31,5 +31,4 @@ public interface MutuableResourceDef extends ResourceDef{
   public void setName(String name);
 
   public void setResourceUri(ResourceUri resourceUri);
-
 }

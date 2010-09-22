@@ -44,7 +44,7 @@ public interface MutableFieldDef
 
   public void setValueDef(DataType dataType);
 
-  public void setVariations(Collection<VariationDef> variationDefs);
+  public void setVariations(Collection<? extends VariationDef> variationDefs);
 
   public void setCustomValidator(ValidatorDef validatorDef);
 

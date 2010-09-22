@@ -25,9 +25,9 @@ import com.smartitengineering.cms.api.type.SearchDef;
 import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 
 /**
  *
@@ -38,7 +38,7 @@ public class FieldDefImpl implements MutableFieldDef {
   private String newFieldName;
   private boolean required = false;
   private DataType dataType;
-  private Collection<VariationDef> variationDefs = new ArrayList<VariationDef>();
+  private Collection<VariationDef> variationDefs = new LinkedHashSet<VariationDef>();
   private ValidatorDef validatorDef;
   private SearchDef searchDef;
   private boolean standaloneUpdateAble = false;
@@ -59,8 +59,9 @@ public class FieldDefImpl implements MutableFieldDef {
   }
 
   @Override
-  public void setVariations(Collection<VariationDef> variationDefs) {
+  public void setVariations(Collection<? extends VariationDef> variationDefs) {
     if (variationDefs != null) {
+      this.variationDefs.clear();
       this.variationDefs.addAll(variationDefs);
     }
     else {
@@ -144,5 +145,4 @@ public class FieldDefImpl implements MutableFieldDef {
     hash = 23 * hash + (this.newFieldName != null ? this.newFieldName.hashCode() : 0);
     return hash;
   }
-
 }

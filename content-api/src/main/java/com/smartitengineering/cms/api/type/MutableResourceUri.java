@@ -22,7 +22,7 @@ package com.smartitengineering.cms.api.type;
  *
  * @author kaisar
  */
-public interface MutableResourceUri extends ResourceUri{
+public interface MutableResourceUri extends ResourceUri {
 
   public void setType(Type type);
 
