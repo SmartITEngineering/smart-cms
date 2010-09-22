@@ -18,12 +18,14 @@
  */
 package com.smartitengineering.cms.spi.impl.type;
 
+import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.OtherDataType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceDef;
@@ -40,6 +42,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
@@ -194,6 +197,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
       }
     }
     catch (Exception ex) {
+      logger.warn("Error converting content type to Put throwing exception...", ex);
       throw new RuntimeException(ex);
     }
   }
@@ -250,15 +254,42 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
 
   @Override
   public PersistentContentType rowsToObject(Result startRow, ExecutorService executorService) {
-    PersistableContentType contentType = SmartContentSPI.getInstance().getPersistableDomainFactory().
-        createPersistableContentType();
-    PersistentContentType persistentContentType = new PersistentContentType();
-    persistentContentType.setMutableContentType(contentType);
-    persistentContentType.setVersion(0l);
-    byte[] displayName = startRow.getValue(FAMILY_SIMPLE, CELL_DISPLAY_NAME);
-    if(displayName != null) {
-      contentType.setDisplayName(Bytes.toString(displayName));
+    try {
+      PersistableContentType contentType =
+                             SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContentType();
+      PersistentContentType persistentContentType = new PersistentContentType();
+      persistentContentType.setMutableContentType(contentType);
+      persistentContentType.setVersion(0l);
+      contentType.setContentTypeID(getInfoProvider().getIdFromRowId(startRow.getRow()));
+      byte[] displayName = startRow.getValue(FAMILY_SIMPLE, CELL_DISPLAY_NAME);
+      if (displayName != null) {
+        contentType.setDisplayName(Bytes.toString(displayName));
+      }
+      contentType.setCreationDate(Utils.toDate(startRow.getValue(FAMILY_SIMPLE, CELL_CREATION_DATE)));
+      contentType.setLastModifiedDate(Utils.toDate(startRow.getValue(FAMILY_SIMPLE, CELL_LAST_MODIFIED_DATE)));
+      final byte[] parentId = startRow.getValue(FAMILY_SIMPLE, CELL_PARENT_ID);
+      if (parentId != null) {
+        contentType.setParent(getInfoProvider().getIdFromRowId(parentId));
+      }
+      /*
+       * Content status
+       */
+      NavigableMap<byte[], byte[]> statusMap = startRow.getFamilyMap(FAMILY_STATUSES);
+      int index = 0;
+      for (byte[] statusName : statusMap.navigableKeySet()) {
+        //Value not required as both are the same for status
+        MutableContentStatus contentStatus = SmartContentAPI.getInstance().getContentTypeLoader().
+            createMutableContentStatus();
+        contentStatus.setContentTypeID(contentType.getContentTypeID());
+        contentStatus.setId(++index);
+        contentStatus.setName(Bytes.toString(statusName));
+        contentType.getMutableStatuses().add(contentStatus);
+      }
+      return persistentContentType;
     }
-    return persistentContentType;
+    catch (Exception ex) {
+      logger.warn("Error converting result to content type, throwing exception...", ex);
+      throw new RuntimeException(ex);
+    }
   }
 }
