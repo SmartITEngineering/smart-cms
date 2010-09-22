@@ -26,11 +26,14 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
+import com.smartitengineering.cms.api.type.MutableRepresentationDef;
+import com.smartitengineering.cms.api.type.MutableResourceUri;
 import com.smartitengineering.cms.api.type.OtherDataType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.type.SearchDef;
+import com.smartitengineering.cms.api.type.TemplateType;
 import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
@@ -38,9 +41,13 @@ import com.smartitengineering.cms.spi.impl.Utils;
 import com.smartitengineering.cms.spi.type.PersistableContentType;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.impl.AbstactObjectRowConverter;
+import com.sun.org.apache.xalan.internal.xsltc.compiler.Template;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import org.apache.commons.lang.StringUtils;
@@ -285,6 +292,49 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         contentStatus.setName(Bytes.toString(statusName));
         contentType.getMutableStatuses().add(contentStatus);
       }
+      /*
+       * Representations
+       */
+      NavigableMap<byte[], byte[]> representationMap = startRow.getFamilyMap(FAMILY_REPRESENTATIONS);
+      Map<String, MutableRepresentationDef> reps = new HashMap<String, MutableRepresentationDef>();
+      for (byte[] keyBytes : representationMap.navigableKeySet()) {
+        final String key = Bytes.toString(keyBytes);
+        final int indexOfFirstColon = key.indexOf(':');
+        final String repName = key.substring(0, indexOfFirstColon);
+        final byte[] qualifier = Bytes.toBytes(key.substring(indexOfFirstColon + 1));
+        MutableRepresentationDef representationDef = reps.get(repName);
+        if (representationDef == null) {
+          representationDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableRepresentationDef();
+          reps.put(repName, representationDef);
+          representationDef.setName(repName);
+        }
+        if (Arrays.equals(qualifier, CELL_RSRC_MIME_TYPE)) {
+          representationDef.setMIMEType(Bytes.toString(representationMap.get(keyBytes)));
+        }
+        if (Arrays.equals(qualifier, CELL_RSRC_TEMPLATE)) {
+          representationDef.setTemplateType(TemplateType.valueOf(Bytes.toString(representationMap.get(keyBytes))));
+        }
+        if (Arrays.equals(qualifier, CELL_RSRC_URI_TYPE)) {
+          final ResourceUri.Type valueOf = ResourceUri.Type.valueOf(Bytes.toString(representationMap.get(keyBytes)));
+          MutableResourceUri uri = SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
+          uri.setType(valueOf);
+          final ResourceUri resourceUri = representationDef.getResourceUri();
+          if (resourceUri != null) {
+            uri.setValue(resourceUri.getValue());
+          }
+          representationDef.setResourceUri(uri);
+        }
+        if (Arrays.equals(qualifier, CELL_RSRC_URI_VAL)) {
+          MutableResourceUri uri = SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
+          final ResourceUri resourceUri = representationDef.getResourceUri();
+          if (resourceUri != null) {
+            uri.setType(resourceUri.getType());
+          }
+          uri.setValue(Bytes.toString(representationMap.get(keyBytes)));
+          representationDef.setResourceUri(uri);
+        }
+      }
+      contentType.getMutableRepresentationDefs().addAll(reps.values());
       return persistentContentType;
     }
     catch (Exception ex) {
