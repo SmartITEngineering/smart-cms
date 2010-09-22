@@ -64,7 +64,7 @@ public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentTyp
   }
 
   @Override
-  public Collection<FieldDef> getMutableFields() {
+  public Collection<FieldDef> getMutableFieldDefs() {
     return this.fieldDefs;
   }
 
@@ -83,7 +83,7 @@ public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentTyp
   }
 
   @Override
-  public Map<String, FieldDef> getFields() {
+  public Map<String, FieldDef> getFieldDefs() {
     Map<String, FieldDef> fieldDefMap = new LinkedHashMap<String, FieldDef>(fieldDefs.size());
     for (FieldDef fieldDef : fieldDefs) {
       fieldDefMap.put(fieldDef.getName(), fieldDef);
@@ -92,7 +92,7 @@ public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentTyp
   }
 
   @Override
-  public Map<String, RepresentationDef> getRepresentations() {
+  public Map<String, RepresentationDef> getRepresentationDefs() {
     Map<String, RepresentationDef> representationDefMap = new LinkedHashMap<String, RepresentationDef>(representationDefs.
         size());
     for (RepresentationDef representationDef : representationDefs) {

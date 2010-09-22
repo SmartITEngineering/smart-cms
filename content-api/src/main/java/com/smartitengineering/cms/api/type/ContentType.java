@@ -49,13 +49,13 @@ public interface ContentType {
    * returned could be unmodifiable.
    * @return defined fields
    */
-  public Map<String, FieldDef> getFields();
+  public Map<String, FieldDef> getFieldDefs();
 
   public ContentTypeId getParent();
 
   public String getDisplayName();
 
-  public Map<String, RepresentationDef> getRepresentations();
+  public Map<String, RepresentationDef> getRepresentationDefs();
 
   public Date getCreationDate();
 

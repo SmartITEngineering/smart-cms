@@ -51,7 +51,7 @@ public interface MutableContentType
 		 * {@link Collection}
 		 * @return Mutable collection of fields, could be empty if not field
 		 */
-		public Collection<FieldDef> getMutableFields();
+		public Collection<FieldDef> getMutableFieldDefs();
 
     public Collection<RepresentationDef> getMutableRepresentationDefs();
 

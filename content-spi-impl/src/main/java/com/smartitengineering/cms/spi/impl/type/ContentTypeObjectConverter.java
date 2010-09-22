@@ -26,6 +26,7 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
+import com.smartitengineering.cms.api.type.MutableFieldDef;
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
 import com.smartitengineering.cms.api.type.MutableResourceUri;
 import com.smartitengineering.cms.api.type.OtherDataType;
@@ -41,7 +42,6 @@ import com.smartitengineering.cms.spi.impl.Utils;
 import com.smartitengineering.cms.spi.type.PersistableContentType;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.impl.AbstactObjectRowConverter;
-import com.sun.org.apache.xalan.internal.xsltc.compiler.Template;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -149,7 +149,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
        * Representations
        */
       final byte[] repFamily = FAMILY_REPRESENTATIONS;
-      for (Entry<String, RepresentationDef> entry : instance.getMutableContentType().getRepresentations().entrySet()) {
+      for (Entry<String, RepresentationDef> entry : instance.getMutableContentType().getRepresentationDefs().entrySet()) {
         final RepresentationDef value = entry.getValue();
         final byte[] toBytes = Bytes.add(Bytes.toBytes(entry.getKey()), COLON);
         putResourceDef(put, repFamily, toBytes, value);
@@ -157,7 +157,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
       /*
        * Fields
        */
-      for (Entry<String, FieldDef> entry : instance.getMutableContentType().getFields().entrySet()) {
+      for (Entry<String, FieldDef> entry : instance.getMutableContentType().getFieldDefs().entrySet()) {
         final FieldDef value = entry.getValue();
         final byte[] toBytes = Bytes.add(Bytes.toBytes(entry.getKey()), COLON);
         /*
@@ -265,6 +265,9 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
       PersistableContentType contentType =
                              SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContentType();
       PersistentContentType persistentContentType = new PersistentContentType();
+      /*
+       * Simple fields
+       */
       persistentContentType.setMutableContentType(contentType);
       persistentContentType.setVersion(0l);
       contentType.setContentTypeID(getInfoProvider().getIdFromRowId(startRow.getRow()));
@@ -335,6 +338,16 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         }
       }
       contentType.getMutableRepresentationDefs().addAll(reps.values());
+      /*
+       * Fields
+       */
+      NavigableMap<byte[], byte[]> fieldMap = startRow.getFamilyMap(FAMILY_FIELDS);
+      Map<String, MutableFieldDef> fields = new HashMap<String, MutableFieldDef>();
+      for (byte[] keyBytes : fieldMap.navigableKeySet()) {
+        final String key = Bytes.toString(keyBytes);
+        final int indexOfFirstColon = key.indexOf(':');
+      }
+      contentType.getMutableFieldDefs().addAll(fields.values());
       return persistentContentType;
     }
     catch (Exception ex) {

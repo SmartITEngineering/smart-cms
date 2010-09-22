@@ -249,10 +249,10 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
         isFromPersistentStorage() : false);
     typeImpl.setLastModifiedDate(contentType.getLastModifiedDate());
     typeImpl.setParent(contentType.getParent());
-    typeImpl.getMutableFields().clear();
-    typeImpl.getMutableFields().addAll(contentType.getFields().values());
+    typeImpl.getMutableFieldDefs().clear();
+    typeImpl.getMutableFieldDefs().addAll(contentType.getFieldDefs().values());
     typeImpl.getMutableRepresentationDefs().clear();
-    typeImpl.getMutableRepresentationDefs().addAll(contentType.getRepresentations().values());
+    typeImpl.getMutableRepresentationDefs().addAll(contentType.getRepresentationDefs().values());
     typeImpl.getMutableStatuses().clear();
     typeImpl.getMutableStatuses().addAll(contentType.getStatuses().values());
   }
