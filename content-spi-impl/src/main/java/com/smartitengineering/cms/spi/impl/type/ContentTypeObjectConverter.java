@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
@@ -38,6 +39,7 @@ import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.type.SearchDef;
+import com.smartitengineering.cms.api.type.StringDataType;
 import com.smartitengineering.cms.api.type.TemplateType;
 import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.ValidatorType;
@@ -103,6 +105,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
   public final static byte[] CELL_FIELD_COLLECTION_MIN_SIZE = Bytes.toBytes("minSize");
   public final static byte[] CELL_FIELD_CONTENT_BIDIRECTIONAL = Bytes.toBytes("bidirectionalFieldName");
   public final static byte[] CELL_FIELD_CONTENT_TYPE_ID = Bytes.toBytes("typeId");
+  public final static byte[] CELL_FIELD_STRING_ENCODING = Bytes.toBytes("encoding");
   public final static byte[] CELL_FIELD_OTHER_MIME_TYPE = Bytes.toBytes("mimeType");
   public final static byte[] COLON = Bytes.toBytes(":");
   private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -244,8 +247,10 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_COLLECTION_ITEM_TYPE),
                 getInfoProvider().getRowIdFromId(contentDataType.getTypeDef()));
         break;
-      case OTHER:
       case STRING:
+        StringDataType stringDataType = (StringDataType) valueDef;
+        put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_OTHER_MIME_TYPE), Bytes.toBytes(stringDataType.getEncoding()));
+      case OTHER:
         OtherDataType otherDataType = (OtherDataType) valueDef;
         put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_OTHER_MIME_TYPE), Bytes.toBytes(otherDataType.getMIMEType()));
         break;
@@ -353,6 +358,8 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         final MutableFieldDef fieldDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableFieldDef();
         final MutableValidatorDef validatorDef = SmartContentAPI.getInstance().getContentTypeLoader().
             createMutableValidatorDef();
+        DataType mutableDataType = null;
+        FieldValueType valueType = null;
         fieldDef.setName(fieldName);
         Pattern validatorPattern = Pattern.compile(new StringBuilder(fieldName).append(':').append(CELL_FIELD_VALIDATOR).
             append(':').append("(.*)").toString());
@@ -430,19 +437,67 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
            */
           else {
             byte[] qualifier = Bytes.toBytes(key.substring(fieldName.length() + 1));
-            if(Arrays.equals(CELL_FIELD_STANDALONE, qualifier)) {
+            if (Arrays.equals(CELL_FIELD_STANDALONE, qualifier)) {
               fieldDef.setFieldStandaloneUpdateAble(Bytes.toBoolean(value));
             }
-            else if(Arrays.equals(CELL_FIELD_REQUIRED, qualifier)) {
+            else if (Arrays.equals(CELL_FIELD_REQUIRED, qualifier)) {
               fieldDef.setRequired(Bytes.toBoolean(value));
             }
             /*
              * Data type
              */
             else {
+              if (Arrays.equals(CELL_FIELD_VAL_TYPE, qualifier)) {
+                valueType = FieldValueType.valueOf(Bytes.toString(value));
+                switch (valueType) {
+                  case BOOLEAN:
+                    mutableDataType = DataType.BOOLEAN;
+                    break;
+                  case INTEGER:
+                    mutableDataType = DataType.INTEGER;
+                    break;
+                  case LONG:
+                    mutableDataType = DataType.LONG;
+                    break;
+                  case DOUBLE:
+                    mutableDataType = DataType.DOUBLE;
+                    break;
+                  case DATE_TIME:
+                    mutableDataType = DataType.DATE_TIME;
+                    break;
+                  case COLLECTION:
+                    mutableDataType = SmartContentAPI.getInstance().getContentTypeLoader().
+                        createMutableCollectionDataType();
+                    break;
+                  case CONTENT:
+                    mutableDataType =
+                    SmartContentAPI.getInstance().getContentTypeLoader().createMutableContentDataType();
+                    break;
+                  case STRING:
+                    mutableDataType = SmartContentAPI.getInstance().getContentTypeLoader().createMutableStringDataType();
+                    break;
+                  case OTHER:
+                  default:
+                    mutableDataType = SmartContentAPI.getInstance().getContentTypeLoader().createMutableOtherDataType();
+                    break;
+                }
+              }
+              /*
+               * Handle special fields
+               */
+              else {
 
+              }
             }
           }
+        }
+        if (mutableDataType != null) {
+          fieldDef.setValueDef(mutableDataType);
+        }
+        else {
+          final String msg = "Field value type can not be null!";
+          logger.error(msg);
+          throw new RuntimeException(msg);
         }
         fieldDef.setCustomValidator(validatorDef);
         fieldDef.setSearchDefinition(searchDef);

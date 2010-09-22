@@ -33,11 +33,13 @@ import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.type.MutableContentTypeId;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
+import com.smartitengineering.cms.api.type.MutableOtherDataType;
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
 import com.smartitengineering.cms.api.type.MutableSearchDef;
 import com.smartitengineering.cms.api.type.MutableValidatorDef;
 import com.smartitengineering.cms.api.type.MutableVariationDef;
 import com.smartitengineering.cms.api.type.MutableResourceUri;
+import com.smartitengineering.cms.api.type.MutableStringDataType;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.type.TypeValidator;
@@ -281,5 +283,13 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   @Override
   public MutableSearchDef createMutableSearchDef() {
     return new SearchDefImpl();
+  }
+  @Override
+  public MutableOtherDataType createMutableOtherDataType() {
+    return new OtherDataTypeImpl();
+  }
+  @Override
+  public MutableStringDataType createMutableStringDataType() {
+    return new StringDataTypeImpl();
   }
 }

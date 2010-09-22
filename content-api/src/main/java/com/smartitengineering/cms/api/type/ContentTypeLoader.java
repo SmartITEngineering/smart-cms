@@ -137,4 +137,8 @@ public interface ContentTypeLoader {
   public MutableResourceUri createMutableResourceUri();
 
   public MutableSearchDef createMutableSearchDef();
+
+  public MutableOtherDataType createMutableOtherDataType();
+
+  public MutableStringDataType createMutableStringDataType();
 }
