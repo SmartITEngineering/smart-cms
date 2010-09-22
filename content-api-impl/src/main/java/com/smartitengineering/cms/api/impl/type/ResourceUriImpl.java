@@ -18,14 +18,14 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
-import com.smartitengineering.cms.api.type.MutuableResourceUri;
+import com.smartitengineering.cms.api.type.MutableResourceUri;
 import com.smartitengineering.cms.api.type.ResourceUri;
 
 /**
  *
  * @author kaisar
  */
-public class ResourceUriImpl implements MutuableResourceUri {
+public class ResourceUriImpl implements MutableResourceUri {
 
   private Type type;
   private String value;

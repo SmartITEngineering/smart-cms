@@ -33,6 +33,10 @@ import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.type.MutableContentTypeId;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
+import com.smartitengineering.cms.api.type.MutableRepresentationDef;
+import com.smartitengineering.cms.api.type.MutableValidatorDef;
+import com.smartitengineering.cms.api.type.MutableVariationDef;
+import com.smartitengineering.cms.api.type.MutableResourceUri;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.type.TypeValidator;
@@ -251,5 +255,25 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
     typeImpl.getMutableRepresentationDefs().addAll(contentType.getRepresentations().values());
     typeImpl.getMutableStatuses().clear();
     typeImpl.getMutableStatuses().addAll(contentType.getStatuses().values());
+  }
+
+  @Override
+  public MutableRepresentationDef createMutableRepresentationDef() {
+    return new RepresentationDefImpl();
+  }
+
+  @Override
+  public MutableVariationDef createMutableVariationDef() {
+    return new VariationDefImpl();
+  }
+
+  @Override
+  public MutableValidatorDef createMutableValidatorDef() {
+    return new ValidatorDefImpl();
+  }
+
+  @Override
+  public MutableResourceUri createMutableResourceUri() {
+    return new ResourceUriImpl();
   }
 }

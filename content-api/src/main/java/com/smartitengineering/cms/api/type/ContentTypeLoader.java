@@ -127,4 +127,12 @@ public interface ContentTypeLoader {
   public MutableFieldDef createMutableFieldDef();
 
   public ContentTypeId createContentTypeId(WorkspaceId workspaceId, String namespace, String name);
+
+  public MutableRepresentationDef createMutableRepresentationDef();
+
+  public MutableVariationDef createMutableVariationDef();
+
+  public MutableValidatorDef createMutableValidatorDef();
+
+  public MutableResourceUri createMutableResourceUri();
 }
