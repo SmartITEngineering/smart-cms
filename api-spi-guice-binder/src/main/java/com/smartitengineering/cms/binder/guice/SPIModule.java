@@ -60,6 +60,8 @@ import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class SPIModule extends AbstractModule {
@@ -67,6 +69,7 @@ public class SPIModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(AsyncExecutorService.class).to(MixedExecutorServiceImpl.class).in(Singleton.class);
+    bind(ExecutorService.class).toInstance(Executors.newCachedThreadPool());
     bind(Integer.class).annotatedWith(Names.named("maxRows")).toInstance(new Integer(50));
     bind(Long.class).annotatedWith(Names.named("waitTime")).toInstance(new Long(10));
     bind(TimeUnit.class).annotatedWith(Names.named("unit")).toInstance(TimeUnit.SECONDS);
