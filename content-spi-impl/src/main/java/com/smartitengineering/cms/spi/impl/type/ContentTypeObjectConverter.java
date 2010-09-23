@@ -63,6 +63,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -249,7 +251,8 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         break;
       case STRING:
         StringDataType stringDataType = (StringDataType) valueDef;
-        put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_OTHER_MIME_TYPE), Bytes.toBytes(stringDataType.getEncoding()));
+        put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_OTHER_MIME_TYPE),
+                Bytes.toBytes(stringDataType.getEncoding()));
       case OTHER:
         OtherDataType otherDataType = (OtherDataType) valueDef;
         put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_OTHER_MIME_TYPE), Bytes.toBytes(otherDataType.getMIMEType()));
@@ -286,43 +289,68 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
        */
       persistentContentType.setMutableContentType(contentType);
       persistentContentType.setVersion(0l);
+      logger.debug("Converting rowId to ContentTypeId");
       contentType.setContentTypeID(getInfoProvider().getIdFromRowId(startRow.getRow()));
       byte[] displayName = startRow.getValue(FAMILY_SIMPLE, CELL_DISPLAY_NAME);
       if (displayName != null) {
+        logger.debug("Set display name of the content type!");
         contentType.setDisplayName(Bytes.toString(displayName));
       }
+      logger.debug("Setting creation and last modified date");
       contentType.setCreationDate(Utils.toDate(startRow.getValue(FAMILY_SIMPLE, CELL_CREATION_DATE)));
       contentType.setLastModifiedDate(Utils.toDate(startRow.getValue(FAMILY_SIMPLE, CELL_LAST_MODIFIED_DATE)));
       final byte[] parentId = startRow.getValue(FAMILY_SIMPLE, CELL_PARENT_ID);
       if (parentId != null) {
+        logger.debug("Setting parent id");
         contentType.setParent(getInfoProvider().getIdFromRowId(parentId));
+      }
+      if (logger.isDebugEnabled()) {
+        final FastDateFormat formatter = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT;
+        logger.debug(String.format("Creation date is %s and last modified date is %s", formatter.format(contentType.
+            getCreationDate()), formatter.format(contentType.getLastModifiedDate())));
+        logger.debug(String.format("Id is %s and parent id is %s", contentType.getContentTypeID().toString(), contentType.
+            getParent().toString()));
       }
       /*
        * Content status
        */
+      logger.info("Form statuses");
       NavigableMap<byte[], byte[]> statusMap = startRow.getFamilyMap(FAMILY_STATUSES);
       int index = 0;
       for (byte[] statusName : statusMap.navigableKeySet()) {
+        final String statusNameStr = Bytes.toString(statusName);
+        if (logger.isDebugEnabled()) {
+          logger.debug(new StringBuilder("Forming content status for ").append(statusNameStr).toString());
+        }
         //Value not required as both are the same for status
         MutableContentStatus contentStatus = SmartContentAPI.getInstance().getContentTypeLoader().
             createMutableContentStatus();
         contentStatus.setContentTypeID(contentType.getContentTypeID());
         contentStatus.setId(++index);
-        contentStatus.setName(Bytes.toString(statusName));
+        contentStatus.setName(statusNameStr);
         contentType.getMutableStatuses().add(contentStatus);
       }
       /*
        * Representations
        */
+      logger.info("Form representations!");
       NavigableMap<byte[], byte[]> representationMap = startRow.getFamilyMap(FAMILY_REPRESENTATIONS);
       Map<String, MutableRepresentationDef> reps = new HashMap<String, MutableRepresentationDef>();
       for (byte[] keyBytes : representationMap.navigableKeySet()) {
         final String key = Bytes.toString(keyBytes);
+        if (logger.isDebugEnabled()) {
+          logger.debug(new StringBuilder("Work with key ").append(key).toString());
+        }
         final int indexOfFirstColon = key.indexOf(':');
         final String repName = key.substring(0, indexOfFirstColon);
         final byte[] qualifier = Bytes.toBytes(key.substring(indexOfFirstColon + 1));
+        if (logger.isDebugEnabled()) {
+          logger.debug(new StringBuilder("Representation name ").append(repName).toString());
+          logger.debug(new StringBuilder("Representation qualifier ").append(Bytes.toString(qualifier)).toString());
+        }
         MutableRepresentationDef representationDef = reps.get(repName);
         if (representationDef == null) {
+          logger.debug("Creating new representation def and putting to map");
           representationDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableRepresentationDef();
           reps.put(repName, representationDef);
           representationDef.setName(repName);
@@ -337,6 +365,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
       NavigableMap<byte[], byte[]> fieldMap = startRow.getFamilyMap(FAMILY_FIELDS);
       //From a map of all cells form a map of cells by field name
       Map<String, Map<byte[], byte[]>> fieldsByName = new LinkedHashMap<String, Map<byte[], byte[]>>();
+      logger.info("Organize fields by their name so that each field cells can be processed at once");
       for (Entry<byte[], byte[]> entry : fieldMap.entrySet()) {
         final String key = Bytes.toString(entry.getKey());
         final int indexOfFirstColon = key.indexOf(':');
@@ -361,15 +390,35 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         DataType mutableDataType = null;
         FieldValueType valueType = null;
         fieldDef.setName(fieldName);
-        Pattern validatorPattern = Pattern.compile(new StringBuilder(fieldName).append(':').append(CELL_FIELD_VALIDATOR).
-            append(':').append("(.*)").toString());
-        Pattern searchDefPattern = Pattern.compile(new StringBuilder(fieldName).append(":(").append(CELL_FIELD_SEARCHDEF).
-            append(':').append(".*)").toString());
-        Pattern variationsDefPattern = Pattern.compile(new StringBuilder(fieldName).append(':').append(
-            CELL_FIELD_VAR_DEF).append(":([\\d]+):(.*)").toString());
+        final String validatorPatternString = new StringBuilder(fieldName).append(':').append(CELL_FIELD_VALIDATOR).
+            append(':').append(
+            "(.*)").toString();
+        if (logger.isDebugEnabled()) {
+          logger.debug(new StringBuilder("Using following pattern to identify validator: ").append(
+              validatorPatternString).toString());
+        }
+        Pattern validatorPattern = Pattern.compile(validatorPatternString);
+        final String searchDefPatternString = new StringBuilder(fieldName).append(":(").append(CELL_FIELD_SEARCHDEF).
+            append(':').append(".*)").toString();
+        if (logger.isDebugEnabled()) {
+          logger.debug(new StringBuilder("Using following pattern to identify search definition: ").append(
+              searchDefPatternString).toString());
+        }
+        Pattern searchDefPattern = Pattern.compile(searchDefPatternString);
+        final String variationPatternString = new StringBuilder(fieldName).append(':').append(CELL_FIELD_VAR_DEF).append(
+            ":([\\d]+):(.*)").toString();
+        if (logger.isDebugEnabled()) {
+          logger.debug(new StringBuilder("Using following pattern to identify variation: ").append(
+              variationPatternString).toString());
+        }
+        Pattern variationsDefPattern = Pattern.compile(variationPatternString);
         for (Entry<byte[], byte[]> cell : fieldCells.entrySet()) {
           final String key = Bytes.toString(cell.getKey());
           final byte[] value = cell.getValue();
+          if (logger.isDebugEnabled()) {
+            logger.debug(new StringBuilder("Matching following key against the patterns: ").append(key).toString());
+            logger.debug(new StringBuilder("Cell value: ").append(Bytes.toString(value)).toString());
+          }
           final Matcher searchDefMatcher = searchDefPattern.matcher(key);
           final Matcher variationsDefMatcher = variationsDefPattern.matcher(key);
           final Matcher validatorMatcher = validatorPattern.matcher(key);
@@ -377,6 +426,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
            * Search Def
            */
           if (searchDefMatcher.matches()) {
+            logger.debug("Matched search definition pattern");
             byte[] searchDefCell = Bytes.toBytes(searchDefMatcher.group(1));
             if (Arrays.equals(CELL_FIELD_SEARCHDEF_INDEXED, searchDefCell)) {
               searchDef.setIndexed(Bytes.toBoolean(value));
@@ -392,6 +442,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
            * Variations
            */
           else if (variationsDefMatcher.matches()) {
+            logger.debug("Matched variation pattern");
             Integer indexInt = NumberUtils.toInt(variationsDefMatcher.group(1), -1);
             if (indexInt > -1) {
               MutableVariationDef variationDef = fieldVariations.get(indexInt);
@@ -406,26 +457,32 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
            * Validator
            */
           else if (validatorMatcher.matches()) {
+            logger.debug("Matched validator pattern");
             String validatorCell = validatorMatcher.group(1);
             byte[] validatorCellBytes = Bytes.toBytes(validatorCell);
             if (validatorCell.equals(CELL_FIELD_VALIDATOR_TYPE)) {
+              logger.debug("Matched validator type");
               validatorDef.seType(ValidatorType.valueOf(Bytes.toString(value)));
             }
             else if (Arrays.equals(validatorCellBytes, CELL_RSRC_URI_TYPE)) {
+              logger.debug("Matched Resource URI Type");
               final ResourceUri.Type valueOf = ResourceUri.Type.valueOf(Bytes.toString(value));
               MutableResourceUri uri =
                                  SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
               uri.setType(valueOf);
               final ResourceUri resourceUri = validatorDef.getUri();
               if (resourceUri != null) {
+                logger.debug("Set value from old resource uri");
                 uri.setValue(resourceUri.getValue());
               }
               validatorDef.setUri(uri);
             }
             else if (Arrays.equals(validatorCellBytes, CELL_RSRC_URI_VAL)) {
+              logger.debug("Matched Resource URI Value");
               MutableResourceUri uri = SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
               final ResourceUri resourceUri = validatorDef.getUri();
               if (resourceUri != null) {
+                logger.debug("Set type from old resource uri");
                 uri.setType(resourceUri.getType());
               }
               uri.setValue(Bytes.toString(value));
@@ -436,17 +493,21 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
            * Simple and data type
            */
           else {
+            logger.debug("Did not match any pattern");
             byte[] qualifier = Bytes.toBytes(key.substring(fieldName.length() + 1));
             if (Arrays.equals(CELL_FIELD_STANDALONE, qualifier)) {
+              logger.debug("Its the basic standalone key");
               fieldDef.setFieldStandaloneUpdateAble(Bytes.toBoolean(value));
             }
             else if (Arrays.equals(CELL_FIELD_REQUIRED, qualifier)) {
+              logger.debug("Its the basic required key");
               fieldDef.setRequired(Bytes.toBoolean(value));
             }
             /*
              * Data type
              */
             else {
+              logger.debug("Its nothing but a data type cell key");
               if (Arrays.equals(CELL_FIELD_VAL_TYPE, qualifier)) {
                 valueType = FieldValueType.valueOf(Bytes.toString(value));
                 switch (valueType) {
@@ -486,7 +547,6 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
                * Handle special fields
                */
               else {
-
               }
             }
           }
@@ -499,6 +559,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
           logger.error(msg);
           throw new RuntimeException(msg);
         }
+        logger.info("Set all fields into the field definition!");
         fieldDef.setCustomValidator(validatorDef);
         fieldDef.setSearchDefinition(searchDef);
         fieldDef.setVariations(fieldVariations.values());
@@ -513,29 +574,37 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
   }
 
   protected void fillResourceDef(final byte[] qualifier, final MutableResourceDef resourceDef, final byte[] value) {
+    logger.debug("Filling resource!");
     if (Arrays.equals(qualifier, CELL_RSRC_NAME)) {
+      logger.debug("Filling resource name");
       resourceDef.setName(Bytes.toString(value));
     }
     else if (Arrays.equals(qualifier, CELL_RSRC_MIME_TYPE)) {
+      logger.debug("Filling resource mime type");
       resourceDef.setMIMEType(Bytes.toString(value));
     }
     else if (Arrays.equals(qualifier, CELL_RSRC_TEMPLATE)) {
+      logger.debug("Filling resource template");
       resourceDef.setTemplateType(TemplateType.valueOf(Bytes.toString(value)));
     }
     else if (Arrays.equals(qualifier, CELL_RSRC_URI_TYPE)) {
+      logger.debug("Filling resource uri type");
       final ResourceUri.Type valueOf = ResourceUri.Type.valueOf(Bytes.toString(value));
       MutableResourceUri uri = SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
       uri.setType(valueOf);
       final ResourceUri resourceUri = resourceDef.getResourceUri();
       if (resourceUri != null) {
+        logger.debug("Set value from old resource uri");
         uri.setValue(resourceUri.getValue());
       }
       resourceDef.setResourceUri(uri);
     }
     else if (Arrays.equals(qualifier, CELL_RSRC_URI_VAL)) {
+      logger.debug("Filling resource uri value");
       MutableResourceUri uri = SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
       final ResourceUri resourceUri = resourceDef.getResourceUri();
       if (resourceUri != null) {
+        logger.debug("Set type from old resource uri");
         uri.setType(resourceUri.getType());
       }
       uri.setValue(Bytes.toString(value));
