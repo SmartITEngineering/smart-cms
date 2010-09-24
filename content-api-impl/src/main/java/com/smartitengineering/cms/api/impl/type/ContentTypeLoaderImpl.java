@@ -82,8 +82,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       throws NullPointerException, IOException {
     TypeValidator validator = SmartContentSPI.getInstance().getTypeValidators().getValidators().get(mediaType);
     ContentTypeDefinitionParser parser = SmartContentSPI.getInstance().getContentTypeDefinitionParsers().getParsers().
-        get(
-        mediaType);
+        get(mediaType);
     if (validator == null || parser == null) {
       throw new IOException("Media type " + mediaType.toString() + " is not supported!");
     }
@@ -95,6 +94,11 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
         throw new IOException("Content does not meet definition!");
       }
       final Collection<MutableContentType> types = parser.parseStream(workspaceId, contentTypeDefinitionStream);
+      if (logger.isDebugEnabled()) {
+        for (MutableContentType contentType : types) {
+          logger.debug("ID " + contentType.getContentTypeID());
+        }
+      }
       List<ContentTypeImpl> resultingTypes = mergeWithStoredContentTypes(types);
       return Collections.<MutableContentType>unmodifiableCollection(resultingTypes);
     }

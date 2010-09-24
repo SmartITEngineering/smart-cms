@@ -34,7 +34,7 @@ public class XMLContentTypeDefinitionParser implements ContentTypeDefinitionPars
 
   @Override
   public Collection<MutableContentType> parseStream(WorkspaceId workspaceId, InputStream inputStream) {
-    XmlParser parser = new XmlParser(inputStream);
+    XmlParser parser = new XmlParser(workspaceId, inputStream);
     return parser.parse();
   }
 
