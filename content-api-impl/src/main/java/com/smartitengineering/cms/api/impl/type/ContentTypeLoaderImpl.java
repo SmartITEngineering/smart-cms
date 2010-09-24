@@ -61,7 +61,8 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   @Override
   public ContentType loadContentType(ContentTypeId contentTypeID) throws NullPointerException {
     final Collection<? extends ContentType> reads =
-                                  SmartContentSPI.getInstance().getContentTypeReader().readContentTypeFromPersistentStorage(
+                                            SmartContentSPI.getInstance().getContentTypeReader().
+        readContentTypeFromPersistentStorage(
         contentTypeID);
     if (reads.size() > 0) {
       return reads.iterator().next();
@@ -72,10 +73,12 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   }
 
   @Override
-  public Collection<MutableContentType> parseContentTypes(InputStream contentTypeDefinitionStream, MediaType mediaType)
+  public Collection<MutableContentType> parseContentTypes(WorkspaceId workspaceId,
+                                                          InputStream contentTypeDefinitionStream, MediaType mediaType)
       throws NullPointerException, IOException {
     TypeValidator validator = SmartContentSPI.getInstance().getTypeValidators().getValidators().get(mediaType);
-    ContentTypeDefinitionParser parser = SmartContentSPI.getInstance().getContentTypeDefinitionParsers().getParsers().get(
+    ContentTypeDefinitionParser parser = SmartContentSPI.getInstance().getContentTypeDefinitionParsers().getParsers().
+        get(
         mediaType);
     if (validator == null || parser == null) {
       throw new IOException("Media type " + mediaType.toString() + " is not supported!");
@@ -87,7 +90,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       if (!validator.isValid(contentTypeDefinitionStream)) {
         throw new IOException("Content does not meet definition!");
       }
-      final Collection<MutableContentType> types = parser.parseStream(contentTypeDefinitionStream);
+      final Collection<MutableContentType> types = parser.parseStream(workspaceId, contentTypeDefinitionStream);
       List<ContentTypeImpl> resultingTypes = mergeWithStoredContentTypes(types);
       return Collections.<MutableContentType>unmodifiableCollection(resultingTypes);
     }
@@ -284,10 +287,12 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   public MutableSearchDef createMutableSearchDef() {
     return new SearchDefImpl();
   }
+
   @Override
   public MutableOtherDataType createMutableOtherDataType() {
     return new OtherDataTypeImpl();
   }
+
   @Override
   public MutableStringDataType createMutableStringDataType() {
     return new StringDataTypeImpl();

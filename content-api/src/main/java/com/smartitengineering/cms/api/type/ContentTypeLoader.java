@@ -51,7 +51,8 @@ public interface ContentTypeLoader {
    * @throws NullPointerException If contentTypeDefinition is null
    * @throws IOException If there is any error during parsing.
    */
-  public Collection<MutableContentType> parseContentTypes(InputStream contentTypeDefinitionStream, MediaType mediaType)
+  public Collection<MutableContentType> parseContentTypes(WorkspaceId workspaceId,
+                                                          InputStream contentTypeDefinitionStream, MediaType mediaType)
       throws NullPointerException,
              IOException;
 
