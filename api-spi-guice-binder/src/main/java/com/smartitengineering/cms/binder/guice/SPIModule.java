@@ -35,7 +35,7 @@ import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
 import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
 import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeSchemaBaseConfigProvider;
 import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
-import com.smartitengineering.cms.spi.impl.type.XMLSchemaBasedTypeValidator;
+import com.smartitengineering.cms.spi.impl.type.validator.XMLSchemaBasedTypeValidator;
 import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeFilterConfigsProvider;
 import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
@@ -108,7 +108,7 @@ public class SPIModule extends AbstractModule {
     MapBinder<MediaType, TypeValidator> validatorBinder = MapBinder.newMapBinder(binder(), MediaType.class,
                                                                                  TypeValidator.class);
     validatorBinder.addBinding(MediaType.APPLICATION_XML).to(XMLSchemaBasedTypeValidator.class);
-    bind(TypeValidators.class).to(com.smartitengineering.cms.spi.impl.type.TypeValidators.class);
+    bind(TypeValidators.class).to(com.smartitengineering.cms.spi.impl.type.validator.TypeValidators.class);
     MapBinder<Class, PersistentService> serviceBinder = MapBinder.newMapBinder(binder(), Class.class,
                                                                                PersistentService.class);
     serviceBinder.addBinding(MutableContentType.class).to(ContentTypePersistentService.class);
@@ -118,7 +118,7 @@ public class SPIModule extends AbstractModule {
                                                       MapBinder.newMapBinder(binder(), MediaType.class,
                                                                              ContentTypeDefinitionParser.class);
     bind(ContentTypeDefinitionParsers.class).to(
-        com.smartitengineering.cms.spi.impl.type.ContentTypeDefinitionParsers.class);
+        com.smartitengineering.cms.spi.impl.type.validator.ContentTypeDefinitionParsers.class);
     bind(PersistentContentTypeReader.class).to(ContentTypePersistentService.class);
     bind(LockHandler.class).to(DefaultLockHandler.class).in(Scopes.SINGLETON);
     bind(PersistableDomainFactory.class).to(PersistableDomainFactoryImpl.class).in(Scopes.SINGLETON);

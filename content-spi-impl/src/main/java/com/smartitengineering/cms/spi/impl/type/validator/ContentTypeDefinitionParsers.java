@@ -1,3 +1,5 @@
+package com.smartitengineering.cms.spi.impl.type.validator;
+
 /*
  *
  * This is a simple Content Management System (CMS)
@@ -16,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.impl.type;
+
 
 import com.google.inject.Inject;
 import com.smartitengineering.cms.api.common.MediaType;

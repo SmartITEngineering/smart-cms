@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.type;
 
+import com.smartitengineering.cms.spi.impl.type.validator.XMLSchemaBasedTypeValidator;
 import com.smartitengineering.cms.spi.type.*;
 import java.io.File;
 import java.net.URL;
