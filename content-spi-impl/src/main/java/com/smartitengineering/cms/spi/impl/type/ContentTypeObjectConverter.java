@@ -130,7 +130,9 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
        */
       final String displayName = instance.getMutableContentType().getDisplayName();
       if (StringUtils.isNotBlank(displayName)) {
-        logger.debug("Set displayName");
+        if (logger.isDebugEnabled()) {
+          logger.debug(new StringBuilder("Set displayName ").append(displayName).toString());
+        }
         put.add(FAMILY_SIMPLE, CELL_DISPLAY_NAME, Bytes.toBytes(displayName));
       }
       final Date lastModifiedDate = date;
@@ -146,26 +148,38 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         creationDate = date;
       }
       if (instance.getMutableContentType() instanceof com.smartitengineering.cms.spi.type.PersistableContentType) {
+        logger.debug("Found to be instanceof PersistableContentType thus setting date members in the object");
         PersistableContentType typeImpl = (PersistableContentType) instance.getMutableContentType();
         typeImpl.setCreationDate(creationDate);
         typeImpl.setLastModifiedDate(lastModifiedDate);
       }
       put.add(FAMILY_SIMPLE, CELL_CREATION_DATE, Utils.toBytes(creationDate));
-      if (instance.getMutableContentType().getParent() != null) {
-        put.add(FAMILY_SIMPLE, CELL_PARENT_ID, getInfoProvider().getRowIdFromId(instance.getMutableContentType().
-            getParent()));
+      final ContentTypeId parent = instance.getMutableContentType().getParent();
+      if (parent != null) {
+        if (logger.isDebugEnabled()) {
+          logger.debug(new StringBuilder("Has parent ").append(parent.toString()).toString());
+        }
+        put.add(FAMILY_SIMPLE, CELL_PARENT_ID, getInfoProvider().getRowIdFromId(parent));
       }
       /*
        * Content statuses
        */
       for (Entry<String, ContentStatus> entry : instance.getMutableContentType().getStatuses().entrySet()) {
-        put.add(FAMILY_STATUSES, Bytes.toBytes(entry.getKey()), Bytes.toBytes(entry.getValue().getName()));
+        final String key = entry.getKey();
+        if (logger.isDebugEnabled()) {
+          logger.debug(new StringBuilder("Putting status ").append(key).toString());
+        }
+        put.add(FAMILY_STATUSES, Bytes.toBytes(key), Bytes.toBytes(entry.getValue().getName()));
       }
       /*
        * Representations
        */
       final byte[] repFamily = FAMILY_REPRESENTATIONS;
       for (Entry<String, RepresentationDef> entry : instance.getMutableContentType().getRepresentationDefs().entrySet()) {
+        if (logger.isDebugEnabled()) {
+          logger.debug(new StringBuilder("Putting representation def for ").append(entry.getKey()).append(" and value ").
+              append(entry.getValue().toString()).toString());
+        }
         final RepresentationDef value = entry.getValue();
         final byte[] toBytes = Bytes.add(Bytes.toBytes(entry.getKey()), COLON);
         putResourceDef(put, repFamily, toBytes, value);
@@ -174,11 +188,16 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
        * Fields
        */
       for (Entry<String, FieldDef> entry : instance.getMutableContentType().getFieldDefs().entrySet()) {
+        if (logger.isDebugEnabled()) {
+          logger.debug(new StringBuilder("Putting field with name ").append(entry.getKey()).append(" and value ").append(entry.
+              getValue().toString()).toString());
+        }
         final FieldDef value = entry.getValue();
         final byte[] toBytes = Bytes.add(Bytes.toBytes(entry.getKey()), COLON);
         /*
          * Simple field values
          */
+        logger.debug("Putting simple field values");
         put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_STANDALONE), Bytes.toBytes(value.
             isFieldStandaloneUpdateAble()));
         put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_REQUIRED), Bytes.toBytes(value.isRequired()));
@@ -189,6 +208,9 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         if (varDefs != null && !varDefs.isEmpty()) {
           int index = 0;
           for (VariationDef def : varDefs) {
+            if (logger.isDebugEnabled()) {
+              logger.debug(new StringBuilder("Putting variation with name ").append(def.getName()).toString());
+            }
             putResourceDef(put, FAMILY_FIELDS, Bytes.add(toBytes, Bytes.toBytes(new StringBuilder(CELL_FIELD_VAR_DEF).
                 append(':').append(index++).append(':').toString())), def);
           }
@@ -197,26 +219,38 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
          * Validator def
          */
         ValidatorDef validatorDef = value.getCustomValidator();
-        put.add(FAMILY_FIELDS, Bytes.add(toBytes, Bytes.toBytes(new StringBuilder(CELL_FIELD_VALIDATOR).append(
-            ':').append(CELL_FIELD_VALIDATOR_TYPE).toString())), Bytes.toBytes(validatorDef.geType().name()));
-        putResourceUri(put, FAMILY_FIELDS, Bytes.add(toBytes, Bytes.toBytes(new StringBuilder(CELL_FIELD_VALIDATOR).
-            append(':').toString())), validatorDef.getUri());
+        if (validatorDef != null) {
+          logger.debug("Put custom validator for field");
+          put.add(FAMILY_FIELDS, Bytes.add(toBytes, Bytes.toBytes(new StringBuilder(CELL_FIELD_VALIDATOR).append(
+              ':').append(CELL_FIELD_VALIDATOR_TYPE).toString())), Bytes.toBytes(validatorDef.geType().name()));
+          putResourceUri(put, FAMILY_FIELDS, Bytes.add(toBytes, Bytes.toBytes(new StringBuilder(CELL_FIELD_VALIDATOR).
+              append(':').toString())), validatorDef.getUri());
+        }
         /*
          * Search def
          */
         SearchDef searchDef = value.getSearchDefinition();
-        put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_SEARCHDEF_INDEXED), Bytes.toBytes(searchDef.isIndexed()));
-        put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_SEARCHDEF_STORED), Bytes.toBytes(searchDef.isStored()));
-        if (StringUtils.isNotBlank(searchDef.getBoostConfig())) {
-          put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_SEARCHDEF_BOOST_CONFIG), Bytes.toBytes(searchDef.
-              getBoostConfig()));
+        if (searchDef != null) {
+          logger.debug("Putting search definition for field");
+          put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_SEARCHDEF_INDEXED), Bytes.toBytes(searchDef.isIndexed()));
+          put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_SEARCHDEF_STORED), Bytes.toBytes(searchDef.isStored()));
+          if (StringUtils.isNotBlank(searchDef.getBoostConfig())) {
+            put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_SEARCHDEF_BOOST_CONFIG), Bytes.toBytes(searchDef.
+                getBoostConfig()));
+          }
         }
         /*
          * Data type
          */
         final DataType valueDef = value.getValueDef();
-        put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_VAL_TYPE), Bytes.toBytes(valueDef.getType().name()));
-        handleSpecialDataTypes(put, toBytes, valueDef);
+        if (valueDef != null) {
+          logger.debug("Work with field data type");
+          put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_VAL_TYPE), Bytes.toBytes(valueDef.getType().name()));
+          handleSpecialDataTypes(put, toBytes, valueDef);
+        }
+        if (logger.isDebugEnabled()) {
+          logger.debug(new StringBuilder("Finished putting field with name ").append(entry.getKey()).toString());
+        }
       }
     }
     catch (Exception ex) {
@@ -230,6 +264,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
     byte[] prefix = Bytes.add(Bytes.add(myPrefix, Bytes.toBytes(valueDef.getType().name())), COLON);
     switch (valueDef.getType()) {
       case COLLECTION:
+        logger.debug("Working with COLLECTION Special data type");
         CollectionDataType collectionDataType = (CollectionDataType) valueDef;
         put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_COLLECTION_ITEM_TYPE), Bytes.toBytes(collectionDataType.
             getItemDataType().getType().name()));
@@ -241,6 +276,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         handleSpecialDataTypes(put, nestedPrefix, collectionDataType.getItemDataType());
         break;
       case CONTENT:
+        logger.debug("Working with CONTENT Special data type");
         ContentDataType contentDataType = (ContentDataType) valueDef;
         if (StringUtils.isNotBlank(contentDataType.getBidirectionalFieldName())) {
           put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_CONTENT_BIDIRECTIONAL), Bytes.toBytes(contentDataType.
@@ -250,10 +286,12 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
                 getInfoProvider().getRowIdFromId(contentDataType.getTypeDef()));
         break;
       case STRING:
+        logger.debug("Working with STRING Special data type");
         StringDataType stringDataType = (StringDataType) valueDef;
         put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_OTHER_MIME_TYPE),
                 Bytes.toBytes(stringDataType.getEncoding()));
       case OTHER:
+        logger.debug("Working with OTHER Special data type");
         OtherDataType otherDataType = (OtherDataType) valueDef;
         put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_OTHER_MIME_TYPE), Bytes.toBytes(otherDataType.getMIMEType()));
         break;
@@ -276,6 +314,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
   @Override
   protected void getDeleteForTable(PersistentContentType instance, ExecutorService service, Delete put) {
     // No further implementation is supposed to needed.
+    logger.debug("Nothing to process for Delete!");
   }
 
   @Override
@@ -547,6 +586,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
                * Handle special fields
                */
               else {
+                logger.debug("Its a special data type cell!");
               }
             }
           }
