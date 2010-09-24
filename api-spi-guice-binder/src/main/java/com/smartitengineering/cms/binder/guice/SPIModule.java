@@ -46,6 +46,7 @@ import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParsers;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
+import com.smartitengineering.cms.spi.type.XMLContentTypeDefinitionParser;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.dao.impl.hbase.CommonDao;
@@ -117,6 +118,7 @@ public class SPIModule extends AbstractModule {
     MapBinder<MediaType, ContentTypeDefinitionParser> parserBinder =
                                                       MapBinder.newMapBinder(binder(), MediaType.class,
                                                                              ContentTypeDefinitionParser.class);
+    parserBinder.addBinding(MediaType.APPLICATION_XML).to(XMLContentTypeDefinitionParser.class);
     bind(ContentTypeDefinitionParsers.class).to(
         com.smartitengineering.cms.spi.impl.type.validator.ContentTypeDefinitionParsers.class);
     bind(PersistentContentTypeReader.class).to(ContentTypePersistentService.class);
