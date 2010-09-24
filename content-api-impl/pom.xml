@@ -50,6 +50,10 @@ The module is responsible for Implementing the API for the CMS.
 						<groupId>com.google.inject</groupId>
 						<artifactId>guice</artifactId>
 				</dependency>
+        <dependency>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+				</dependency>
 				<dependency>
 						<groupId>junit</groupId>
 						<artifactId>junit</artifactId>
