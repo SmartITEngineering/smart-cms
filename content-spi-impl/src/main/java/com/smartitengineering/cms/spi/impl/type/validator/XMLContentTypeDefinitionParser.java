@@ -16,11 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.type;
+package com.smartitengineering.cms.spi.impl.type.validator;
 
 import com.smartitengineering.cms.api.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,7 +34,8 @@ public class XMLContentTypeDefinitionParser implements ContentTypeDefinitionPars
 
   @Override
   public Collection<MutableContentType> parseStream(WorkspaceId workspaceId, InputStream inputStream) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    XmlParser parser = new XmlParser(inputStream);
+    return parser.parse();
   }
 
   @Override

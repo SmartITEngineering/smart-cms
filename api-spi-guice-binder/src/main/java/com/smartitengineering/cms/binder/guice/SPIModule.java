@@ -37,6 +37,7 @@ import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeSchemaBaseConfi
 import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLSchemaBasedTypeValidator;
 import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeFilterConfigsProvider;
+import com.smartitengineering.cms.spi.impl.type.validator.XMLContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
@@ -46,7 +47,6 @@ import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParsers;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
-import com.smartitengineering.cms.spi.type.XMLContentTypeDefinitionParser;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.dao.impl.hbase.CommonDao;

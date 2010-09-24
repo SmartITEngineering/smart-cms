@@ -24,30 +24,46 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.WorkspaceAPI;
+import com.smartitengineering.cms.api.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.impl.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
+import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.spi.SmartContentSPI;
+import com.smartitengineering.cms.spi.impl.content.PersistentServiceRegistrar;
 import com.smartitengineering.cms.spi.impl.type.validator.ContentTypeDefinitionParsers;
 import com.smartitengineering.cms.spi.impl.type.validator.TypeValidators;
+import com.smartitengineering.cms.spi.impl.type.validator.XMLContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLSchemaBasedTypeValidator;
+import com.smartitengineering.cms.spi.lock.Key;
+import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
+import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.type.TypeValidator;
-import com.smartitengineering.cms.spi.type.XMLContentTypeDefinitionParser;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author imyousuf
  */
 public class XMLContentTypeDefnitionParserTest {
+
+  private Logger logger = LoggerFactory.getLogger(getClass());
 
   @BeforeClass
   public static void setupAPIAndSPI() throws ClassNotFoundException {
@@ -69,7 +85,56 @@ public class XMLContentTypeDefnitionParserTest {
         SmartContentSPI.getInstance().getTypeValidators().getValidators().get(MediaType.APPLICATION_XML));
   }
 
+  @Test
+  public void testParsing() {
+    logger.debug(":::::::::::::::::::::Starting My First Test::::::::::::::::::::::::::::");
+    try {
+      InputStream inputStream = getClass().getClassLoader().getResourceAsStream("content-type-def-1.xml");
+      Assert.assertNotNull(inputStream);
+      XMLContentTypeDefinitionParser parser = new XMLContentTypeDefinitionParser();
+      WorkspaceId testId = new WorkspaceId() {
+
+        @Override
+        public String getGlobalNamespace() {
+          return "test";
+        }
+
+        @Override
+        public String getName() {
+          return "testWS";
+        }
+
+        @Override
+        public void writeExternal(DataOutput output) throws IOException {
+          throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void readExternal(DataInput input) throws IOException, ClassNotFoundException {
+          throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public int compareTo(WorkspaceId o) {
+          throw new UnsupportedOperationException("Not supported yet.");
+        }
+      };
+      parser.parseStream(testId, inputStream);
+    }
+    catch (Exception e) {
+      logger.error(e.getMessage(), e);
+      Assert.fail("Should not get exceptions");
+    }
+    logger.debug(":::::::::::::::::::::Ending My First Test::::::::::::::::::::::::::::");
+  }
+
+  @Test
+  public void testParsingContentNameAnd() {
+  }
+
   public static class TestModule extends AbstractModule {
+
+    private Mockery mockery = new Mockery();
 
     @Override
     protected void configure() {
@@ -85,6 +150,19 @@ public class XMLContentTypeDefnitionParserTest {
                                                                                ContentTypeDefinitionParser.class);
       parserBinder.addBinding(MediaType.APPLICATION_XML).to(XMLContentTypeDefinitionParser.class);
       bind(com.smartitengineering.cms.spi.type.ContentTypeDefinitionParsers.class).to(ContentTypeDefinitionParsers.class);
+      final LockHandler handler = mockery.mock(LockHandler.class);
+      bind(LockHandler.class).toInstance(handler);
+      mockery.checking(new Expectations() {
+
+        {
+          allowing(handler).register(with(any(Key.class)));
+        }
+      });
+      MapBinder<Class, PersistentService> serviceBinder = MapBinder.newMapBinder(binder(), Class.class,
+                                                                                 PersistentService.class);
+      serviceBinder.addBinding(MutableContentType.class).toInstance(mockery.mock(PersistentService.class));
+      bind(com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar.class).to(
+          PersistentServiceRegistrar.class);
     }
   }
 }
