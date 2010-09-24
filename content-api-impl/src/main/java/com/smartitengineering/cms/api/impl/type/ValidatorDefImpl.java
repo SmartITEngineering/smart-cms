@@ -77,4 +77,9 @@ public class ValidatorDefImpl implements MutableValidatorDef {
     hash = 19 * hash + (this.uri != null ? this.uri.hashCode() : 0);
     return hash;
   }
+
+  @Override
+  public String toString() {
+    return "ValidatorDefImpl{" + "validatorType=" + validatorType + "; uri=" + uri + '}';
+  }
 }

@@ -90,4 +90,9 @@ public class SearchDefImpl implements MutableSearchDef {
     hash = 13 * hash + (this.boostConfig != null ? this.boostConfig.hashCode() : 0);
     return hash;
   }
+
+  @Override
+  public String toString() {
+    return "SearchDefImpl{" + "indexed=" + indexed + "; stored=" + stored + "; boostConfig=" + boostConfig + '}';
+  }
 }

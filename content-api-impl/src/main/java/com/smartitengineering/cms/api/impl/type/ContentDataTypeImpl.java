@@ -70,8 +70,8 @@ public class ContentDataTypeImpl implements MutableContentDataType {
         (this.contentTypeId == null || !this.contentTypeId.equals(other.getTypeDef()))) {
       return false;
     }
-    if ((this.bidirectionalFieldName == null) ? (other.getBidirectionalFieldName() != null)
-        : !this.bidirectionalFieldName.equals(other.getBidirectionalFieldName())) {
+    if ((this.bidirectionalFieldName == null) ? (other.getBidirectionalFieldName() != null) : !this.bidirectionalFieldName.
+        equals(other.getBidirectionalFieldName())) {
       return false;
     }
     return true;
@@ -81,5 +81,11 @@ public class ContentDataTypeImpl implements MutableContentDataType {
   public int hashCode() {
     int hash = 7;
     return hash;
+  }
+
+  @Override
+  public String toString() {
+    return "ContentDataTypeImpl{" + "contentTypeId=" + contentTypeId + "; bidirectionalFieldName=" +
+        bidirectionalFieldName + '}';
   }
 }

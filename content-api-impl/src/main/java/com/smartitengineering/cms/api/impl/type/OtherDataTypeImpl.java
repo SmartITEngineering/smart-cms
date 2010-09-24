@@ -66,4 +66,9 @@ public class OtherDataTypeImpl implements MutableOtherDataType {
     hash = 47 * hash + (this.mimeType != null ? this.mimeType.hashCode() : 0);
     return hash;
   }
+
+  @Override
+  public String toString() {
+    return "OtherDataTypeImpl{" + "mimeType=" + mimeType + '}';
+  }
 }

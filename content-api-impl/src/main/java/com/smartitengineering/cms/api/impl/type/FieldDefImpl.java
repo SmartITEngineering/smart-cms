@@ -145,4 +145,11 @@ public class FieldDefImpl implements MutableFieldDef {
     hash = 23 * hash + (this.newFieldName != null ? this.newFieldName.hashCode() : 0);
     return hash;
   }
+
+  @Override
+  public String toString() {
+    return "FieldDefImpl{" + "newFieldName=" + newFieldName + "; required=" + required + "; dataType=" + dataType +
+        "; variationDefs=" + variationDefs + "; validatorDef=" + validatorDef + "; searchDef=" + searchDef +
+        "; standaloneUpdateAble=" + standaloneUpdateAble + '}';
+  }
 }

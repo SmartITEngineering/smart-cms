@@ -116,4 +116,10 @@ public class ResourceDefImpl implements MutableResourceDef {
     hash = 11 * hash + (this.name != null ? this.name.hashCode() : 0);
     return hash;
   }
+
+  @Override
+  public String toString() {
+    return "ResourceDefImpl{" + "; templateType=" + templateType + "; mimeType=" + mimeType + "; name=" + name + "; resourceUri=" +
+        resourceUri + "; creationDate=" + creationDate + "; lastModifiedDate=" + lastModifiedDate + '}';
+  }
 }

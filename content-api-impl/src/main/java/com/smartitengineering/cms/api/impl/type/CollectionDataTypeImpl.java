@@ -79,7 +79,8 @@ public class CollectionDataTypeImpl implements MutableCollectionDataType {
       return false;
     }
     final CollectionDataType other = (CollectionDataType) obj;
-    if (this.dataType != other.getItemDataType() && (this.dataType == null || !this.dataType.equals(other.getItemDataType()))) {
+    if (this.dataType != other.getItemDataType() && (this.dataType == null || !this.dataType.equals(other.
+                                                     getItemDataType()))) {
       return false;
     }
     if (this.maxSize != other.getMaxSize()) {
@@ -98,5 +99,10 @@ public class CollectionDataTypeImpl implements MutableCollectionDataType {
     hash = 89 * hash + this.maxSize;
     hash = 89 * hash + this.minSize;
     return hash;
+  }
+
+  @Override
+  public String toString() {
+    return "CollectionDataTypeImpl{" + "dataType=" + dataType + "; maxSize=" + maxSize + "; minSize=" + minSize + '}';
   }
 }

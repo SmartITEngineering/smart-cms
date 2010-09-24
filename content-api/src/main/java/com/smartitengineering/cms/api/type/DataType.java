@@ -25,65 +25,85 @@ package com.smartitengineering.cms.api.type;
  */
 public interface DataType {
 
-		/**
-		 * Represents the integer data type
-		 */
-		public static final DataType INTEGER = new DataType() {
+  /**
+   * Represents the integer data type
+   */
+  public static final DataType INTEGER = new DataType() {
 
     @Override
-				public FieldValueType getType() {
-						return FieldValueType.INTEGER;
-				}
-		};
-
-		/**
-		 * Represents the boolean data type
-		 */
-		public static final DataType BOOLEAN = new DataType() {
+    public FieldValueType getType() {
+      return FieldValueType.INTEGER;
+    }
 
     @Override
-				public FieldValueType getType() {
-						return FieldValueType.BOOLEAN;
-				}
-		};
-
-		/**
-		 * Represents the double data type
-		 */
-		public static final DataType DOUBLE = new DataType() {
-
-    @Override
-				public FieldValueType getType() {
-						return FieldValueType.DOUBLE;
-				}
-		};
-
-		/**
-		 * Represents the datetime data type
-		 */
-		public static final DataType DATE_TIME = new DataType() {
+    public String toString() {
+      return "Integer{type=" + getType() + '}';
+    }
+  };
+  /**
+   * Represents the boolean data type
+   */
+  public static final DataType BOOLEAN = new DataType() {
 
     @Override
-				public FieldValueType getType() {
-						return FieldValueType.DATE_TIME;
-				}
-		};
-
-		/**
-		 * Represents the long data type
-		 */
-		public static final DataType LONG = new DataType() {
+    public FieldValueType getType() {
+      return FieldValueType.BOOLEAN;
+    }
 
     @Override
-				public FieldValueType getType() {
-						return FieldValueType.LONG;
-				}
-		};
+    public String toString() {
+      return "Boolean{type=" + getType() + '}';
+    }
+  };
+  /**
+   * Represents the double data type
+   */
+  public static final DataType DOUBLE = new DataType() {
 
-		/**
-		 * Retrieves the type of the data type
-		 * @return the type of the data type
-		 */
-		public FieldValueType getType();
+    @Override
+    public FieldValueType getType() {
+      return FieldValueType.DOUBLE;
+    }
 
+    @Override
+    public String toString() {
+      return "Double{type=" + getType() + '}';
+    }
+  };
+  /**
+   * Represents the datetime data type
+   */
+  public static final DataType DATE_TIME = new DataType() {
+
+    @Override
+    public FieldValueType getType() {
+      return FieldValueType.DATE_TIME;
+    }
+
+    @Override
+    public String toString() {
+      return "DateTime{type=" + getType() + '}';
+    }
+  };
+  /**
+   * Represents the long data type
+   */
+  public static final DataType LONG = new DataType() {
+
+    @Override
+    public FieldValueType getType() {
+      return FieldValueType.LONG;
+    }
+
+    @Override
+    public String toString() {
+      return "Long{type=" + getType() + '}';
+    }
+  };
+
+  /**
+   * Retrieves the type of the data type
+   * @return the type of the data type
+   */
+  public FieldValueType getType();
 }
