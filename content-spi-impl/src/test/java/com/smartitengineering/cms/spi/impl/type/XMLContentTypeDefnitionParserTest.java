@@ -31,7 +31,13 @@ import com.smartitengineering.cms.api.impl.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
+import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.api.type.MutableRepresentationDef;
+import com.smartitengineering.cms.api.type.MutableResourceUri;
+import com.smartitengineering.cms.api.type.RepresentationDef;
+import com.smartitengineering.cms.api.type.ResourceUri.Type;
+import com.smartitengineering.cms.api.type.TemplateType;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.impl.content.PersistentServiceRegistrar;
 import com.smartitengineering.cms.spi.impl.type.validator.ContentTypeDefinitionParsers;
@@ -126,14 +132,6 @@ public class XMLContentTypeDefnitionParserTest {
   public void testParsing() {
     logger.debug(":::::::::::::::::::::Starting My First Test::::::::::::::::::::::::::::");
     try {
-      InputStream inputStream = getClass().getClassLoader().getResourceAsStream("content-type-def-1.xml");
-      Assert.assertNotNull(inputStream);
-      XMLContentTypeDefinitionParser parser = new XMLContentTypeDefinitionParser();
-      Collection collection = parser.parseStream(TEST_WS_ID, inputStream);
-      Assert.assertNotNull(collection);
-      Assert.assertFalse(collection.isEmpty());
-      Assert.assertEquals(2, collection.size());
-      inputStream = getClass().getClassLoader().getResourceAsStream("content-type-def-1.xml");
       init();
     }
     catch (Exception e) {
@@ -157,8 +155,109 @@ public class XMLContentTypeDefnitionParserTest {
         getContentTypeID());
   }
 
+  @Test
+  public void testParsingSataus() throws Exception {
+    Collection<MutableContentType> collection = init();
+    Iterator<MutableContentType> iterator = collection.iterator();
+    MutableContentType contentType = iterator.next();
+    logger.debug("First status size is " + contentType.getStatuses().size());
+    Assert.assertEquals(3, contentType.getStatuses().size());
+    String[] name = {"draft", "marketed", "obselete"};
+    for (int i = 0; i < 3; i++) {
+      MutableContentStatus contentStatus = SmartContentAPI.getInstance().getContentTypeLoader().
+          createMutableContentStatus();
+      contentStatus.setName(name[i]);
+      Assert.assertEquals(contentStatus, contentType.getStatuses().get(name[i]));
+
+    }
+    contentType = iterator.next();
+    logger.debug("2nd status size is " + contentType.getStatuses().size());
+    Assert.assertEquals(3, contentType.getStatuses().size());
+    for (int i = 0; i < 3; i++) {
+      MutableContentStatus contentStatus = SmartContentAPI.getInstance().getContentTypeLoader().
+          createMutableContentStatus();
+      contentStatus.setName(name[i]);
+      Assert.assertEquals(contentStatus, contentType.getStatuses().get(name[i]));
+    }
+  }
+
+  @Test
+  public void testParsingRepresentations() throws Exception {
+    Collection<MutableContentType> collection = init();
+    Iterator<MutableContentType> iterator = collection.iterator();
+    MutableContentType contentType = iterator.next();
+    logger.debug("First ContentType contains " + contentType.getRepresentationDefs().size() + " no of representations.");
+    System.out.println("First ContentType contains " + contentType.getRepresentationDefs().size()
+        + " no of representations.");
+    Assert.assertEquals(0, contentType.getRepresentationDefs().size());
+    contentType = iterator.next();
+    logger.debug("2nd ContentType contains " + contentType.getRepresentationDefs().size() + " no of representations.");
+    System.out.println("2nd ContentType contains " + contentType.getRepresentationDefs().size()
+        + " no of representations.");
+    Assert.assertEquals(2, contentType.getRepresentationDefs().size());
+
+
+    MutableResourceUri resourceUri = SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
+    resourceUri.setType(Type.EXTERNAL);
+    resourceUri.setValue("http://some/uri");
+
+
+    MutableRepresentationDef def = SmartContentAPI.getInstance().getContentTypeLoader().createMutableRepresentationDef();
+    def.setName("arep");
+    def.setMIMEType("some/type");
+    def.setResourceUri(resourceUri);
+    def.setTemplateType(TemplateType.VELOCITY);
+
+
+    final RepresentationDef defFromXml = contentType.getRepresentationDefs().get("arep");
+    System.out.println(def.getName() + " Name " + defFromXml.getName());
+    System.out.println(def.getMIMEType() + " mime type " + defFromXml.getMIMEType());
+    System.out.println(def.getResourceUri().getType().name() + " Uri Type "
+        + defFromXml.getResourceUri().getType().name());
+    System.out.println(def.getResourceUri().getValue() + " RESOURCE URI " + defFromXml.getResourceUri().getValue());
+    System.out.println(def.getTemplateType().name() + " TEMPLATE TYPE " + defFromXml.getTemplateType().name());
+    System.out.println(def.hashCode() + " Hash COde " + defFromXml.hashCode());
+//    Assert.assertEquals(def, defFromXml);
+
+    Assert.assertEquals(def.getName(), defFromXml.getName());
+    Assert.assertEquals(def.getMIMEType(), defFromXml.getMIMEType());
+    Assert.assertEquals(def.getResourceUri().getType(), defFromXml.getResourceUri().getType());
+    Assert.assertEquals(def.getResourceUri().getValue(), defFromXml.getResourceUri().getValue());
+    Assert.assertEquals(def.getTemplateType(), defFromXml.getTemplateType());
+
+    MutableResourceUri resourceUri1 = SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
+    resourceUri1.setType(Type.INTERNAL);
+    resourceUri1.setValue("internalrep");
+
+
+    MutableRepresentationDef def1 =
+                             SmartContentAPI.getInstance().getContentTypeLoader().createMutableRepresentationDef();
+    def1.setName("anotherrep");
+    def1.setMIMEType("some/type");
+    def1.setTemplateType(TemplateType.RUBY);
+    def1.setResourceUri(resourceUri1);
+
+
+    final RepresentationDef defFromXml1 = contentType.getRepresentationDefs().get("anotherrep");
+    System.out.println(def1.getName() + " Name " + defFromXml1.getName());
+    System.out.println(def1.getMIMEType() + " mime type " + defFromXml1.getMIMEType());
+    System.out.println(def1.getResourceUri().getType().name() + " Uri Type "
+        + defFromXml1.getResourceUri().getType().name());
+    System.out.println(def1.getResourceUri().getValue() + " RESOURCE URI " + defFromXml1.getResourceUri().getValue());
+    System.out.println(def1.getTemplateType().name() + " TEMPLATE TYPE " + defFromXml1.getTemplateType().name());
+    System.out.println(def1.hashCode() + " Hash COde " + defFromXml1.hashCode());
+    //Assert.assertEquals(def1, defFromXml1);
+
+    Assert.assertEquals(def1.getName(), defFromXml1.getName());
+    Assert.assertEquals(def1.getMIMEType(), defFromXml1.getMIMEType());
+    Assert.assertEquals(def1.getResourceUri().getType(), defFromXml1.getResourceUri().getType());
+    Assert.assertEquals(def1.getResourceUri().getValue(), defFromXml1.getResourceUri().getValue());
+    Assert.assertEquals(def1.getTemplateType(), defFromXml1.getTemplateType());
+  }
+
   protected Collection<MutableContentType> init() throws NullPointerException, IOException {
     InputStream inputStream = getClass().getClassLoader().getResourceAsStream("content-type-def-1.xml");
+    Assert.assertNotNull(inputStream);
     Collection<MutableContentType> collection;
     collection =
     SmartContentAPI.getInstance().getContentTypeLoader().
