@@ -29,6 +29,7 @@ import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.impl.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
+import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.spi.SmartContentSPI;
@@ -42,12 +43,16 @@ import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
+import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.Properties;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -64,6 +69,38 @@ import org.slf4j.LoggerFactory;
 public class XMLContentTypeDefnitionParserTest {
 
   private Logger logger = LoggerFactory.getLogger(getClass());
+  public static final WorkspaceId TEST_WS_ID = new WorkspaceId() {
+
+    @Override
+    public String getGlobalNamespace() {
+      return "test";
+    }
+
+    @Override
+    public String getName() {
+      return "testWS";
+    }
+
+    @Override
+    public void writeExternal(DataOutput output) throws IOException {
+      throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void readExternal(DataInput input) throws IOException, ClassNotFoundException {
+      throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public int compareTo(WorkspaceId o) {
+      throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public String toString() {
+      return "test:testWS";
+    }
+  };
 
   @BeforeClass
   public static void setupAPIAndSPI() throws ClassNotFoundException {
@@ -92,34 +129,12 @@ public class XMLContentTypeDefnitionParserTest {
       InputStream inputStream = getClass().getClassLoader().getResourceAsStream("content-type-def-1.xml");
       Assert.assertNotNull(inputStream);
       XMLContentTypeDefinitionParser parser = new XMLContentTypeDefinitionParser();
-      WorkspaceId testId = new WorkspaceId() {
-
-        @Override
-        public String getGlobalNamespace() {
-          return "test";
-        }
-
-        @Override
-        public String getName() {
-          return "testWS";
-        }
-
-        @Override
-        public void writeExternal(DataOutput output) throws IOException {
-          throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public void readExternal(DataInput input) throws IOException, ClassNotFoundException {
-          throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public int compareTo(WorkspaceId o) {
-          throw new UnsupportedOperationException("Not supported yet.");
-        }
-      };
-      parser.parseStream(testId, inputStream);
+      Collection collection = parser.parseStream(TEST_WS_ID, inputStream);
+      Assert.assertNotNull(collection);
+      Assert.assertFalse(collection.isEmpty());
+      Assert.assertEquals(2, collection.size());
+      inputStream = getClass().getClassLoader().getResourceAsStream("content-type-def-1.xml");
+      init();
     }
     catch (Exception e) {
       logger.error(e.getMessage(), e);
@@ -129,7 +144,29 @@ public class XMLContentTypeDefnitionParserTest {
   }
 
   @Test
-  public void testParsingContentNameAnd() {
+  public void testParsingContentId() throws Exception {
+    Collection<MutableContentType> collection = init();
+    Iterator<MutableContentType> iterator = collection.iterator();
+    MutableContentType contentType = iterator.next();
+    Assert.assertEquals(SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(TEST_WS_ID, "asdfasdf1",
+                                                                                                 "XYZ"), contentType.
+        getContentTypeID());
+    contentType = iterator.next();
+    Assert.assertEquals(SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(TEST_WS_ID, "jpeg",
+                                                                                                 "RST"), contentType.
+        getContentTypeID());
+  }
+
+  protected Collection<MutableContentType> init() throws NullPointerException, IOException {
+    InputStream inputStream = getClass().getClassLoader().getResourceAsStream("content-type-def-1.xml");
+    Collection<MutableContentType> collection;
+    collection =
+    SmartContentAPI.getInstance().getContentTypeLoader().
+        parseContentTypes(TEST_WS_ID, inputStream, MediaType.APPLICATION_XML);
+    Assert.assertNotNull(collection);
+    Assert.assertFalse(collection.isEmpty());
+    Assert.assertEquals(2, collection.size());
+    return collection;
   }
 
   public static class TestModule extends AbstractModule {
@@ -152,10 +189,14 @@ public class XMLContentTypeDefnitionParserTest {
       bind(com.smartitengineering.cms.spi.type.ContentTypeDefinitionParsers.class).to(ContentTypeDefinitionParsers.class);
       final LockHandler handler = mockery.mock(LockHandler.class);
       bind(LockHandler.class).toInstance(handler);
+      final PersistentContentTypeReader mockReader = mockery.mock(PersistentContentTypeReader.class);
+      bind(PersistentContentTypeReader.class).toInstance(mockReader);
       mockery.checking(new Expectations() {
 
         {
           allowing(handler).register(with(any(Key.class)));
+          allowing(mockReader).readContentTypeFromPersistentStorage(with(this.<ContentTypeId[]>anything()));
+          will(returnValue(Collections.emptyList()));
         }
       });
       MapBinder<Class, PersistentService> serviceBinder = MapBinder.newMapBinder(binder(), Class.class,

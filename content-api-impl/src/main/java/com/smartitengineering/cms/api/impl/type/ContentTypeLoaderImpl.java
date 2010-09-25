@@ -51,12 +51,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author kaisar
  */
 public class ContentTypeLoaderImpl implements ContentTypeLoader {
+
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public ContentType loadContentType(ContentTypeId contentTypeID) throws NullPointerException {
@@ -78,8 +82,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       throws NullPointerException, IOException {
     TypeValidator validator = SmartContentSPI.getInstance().getTypeValidators().getValidators().get(mediaType);
     ContentTypeDefinitionParser parser = SmartContentSPI.getInstance().getContentTypeDefinitionParsers().getParsers().
-        get(
-        mediaType);
+        get(mediaType);
     if (validator == null || parser == null) {
       throw new IOException("Media type " + mediaType.toString() + " is not supported!");
     }
@@ -91,6 +94,11 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
         throw new IOException("Content does not meet definition!");
       }
       final Collection<MutableContentType> types = parser.parseStream(workspaceId, contentTypeDefinitionStream);
+      if (logger.isDebugEnabled()) {
+        for (MutableContentType contentType : types) {
+          logger.debug("ID " + contentType.getContentTypeID());
+        }
+      }
       List<ContentTypeImpl> resultingTypes = mergeWithStoredContentTypes(types);
       return Collections.<MutableContentType>unmodifiableCollection(resultingTypes);
     }
@@ -116,12 +124,21 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       contentTypeImpl.setFromPersistentStorage(true);
       resultingTypes.add(contentTypeImpl);
     }
+    if (logger.isDebugEnabled()) {
+      logger.debug(new StringBuilder("After getting from persistent storage size is of 2bReturnedList is ").append(resultingTypes.
+          size()).toString());
+    }
     for (MutableContentType type : types) {
+      if (logger.isDebugEnabled()) {
+        logger.debug(new StringBuilder("Type ID is ").append(type.getContentTypeID()).toString());
+      }
       int index = resultingTypes.indexOf(type);
       if (index >= 0) {
+        logger.debug("Just merging");
         merge(resultingTypes.get(index), type);
       }
       else {
+        logger.debug("Adding to list");
         resultingTypes.add(getContentTypeImpl(type));
       }
     }

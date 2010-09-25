@@ -74,4 +74,5 @@ public interface XmlConstants {
   public String CONTENT_TYPE = "contentType";
   public String NAMESPACE = "http://www.smartitengineering.com/smart-cms/content/content-type-schema";
   public String CONTENT_TYPES = "contentTypes";
+  String ATTR_NAMESPACE = "namespace";
 }

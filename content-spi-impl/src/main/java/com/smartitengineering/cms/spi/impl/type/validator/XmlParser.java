@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.spi.impl.type.validator;
 
 import com.smartitengineering.cms.api.SmartContentAPI;
+import com.smartitengineering.cms.api.WorkspaceId;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
@@ -51,6 +52,8 @@ import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Elements;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -58,13 +61,16 @@ import org.apache.commons.lang.StringUtils;
  */
 public class XmlParser implements XmlConstants {
 
-  private InputStream source;
+  private final InputStream source;
+  private final WorkspaceId workspaceId;
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
-  public XmlParser(InputStream stream) {
-    this.source = stream;
-    if (source == null) {
-      throw new IllegalArgumentException("Source stream can not be null!");
+  public XmlParser(WorkspaceId workspaceId, InputStream stream) {
+    if (stream == null || workspaceId == null) {
+      throw new IllegalArgumentException("Source stream or workspace id can not be null!");
     }
+    this.workspaceId = workspaceId;
+    this.source = stream;
   }
 
   public Collection<MutableContentType> parse() {
@@ -75,27 +81,35 @@ public class XmlParser implements XmlConstants {
     Collection<RepresentationDef> representationDefs = new ArrayList<RepresentationDef>();
     Collection<ContentStatus> statuses = new ArrayList<ContentStatus>();
     String displayName = null;
-    MutableContentType mutableContent = SmartContentSPI.getInstance().getPersistableDomainFactory().
-        createPersistableContentType();
     try {
       Builder builder = new Builder(false);
       Document document = builder.build(this.source);
       Element rootElement = document.getRootElement();
       Elements childRootElements = rootElement.getChildElements();
       for (int j = 0; j < childRootElements.size(); j++) {
-        Elements childElements = childRootElements.get(j).getChildElements();
-        String name = parseMandatoryStringElement(childRootElements.get(j), NAME); //max=1,min=1
-        String attributeName = parseAttribute(childRootElements.get(j), "namespace");
-        displayName = parseOptionalStringElement(childRootElements.get(j), DISPLAY_NAME); //min=0,max=1
+        MutableContentType mutableContent = SmartContentSPI.getInstance().getPersistableDomainFactory().
+            createPersistableContentType();
+        final Element contentTypeElement = childRootElements.get(j);
+        Elements childElements = contentTypeElement.getChildElements();
+        String name = parseMandatoryStringElement(contentTypeElement, NAME); //max=1,min=1
+        String namespace = parseAttribute(contentTypeElement, ATTR_NAMESPACE);
+        if (logger.isDebugEnabled()) {
+          logger.debug(new StringBuilder("Iterating over ").append(j).toString());
+          logger.debug(new StringBuilder("Namespace ").append(namespace).toString());
+          logger.debug(new StringBuilder("Name ").append(name).toString());
+        }
+        contentTypeId = SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(workspaceId,
+                                                                                                 namespace, name);
+        mutableContent.setContentTypeID(contentTypeId);
+        displayName = parseOptionalStringElement(contentTypeElement, DISPLAY_NAME); //min=0,max=1
         for (int child = 0; child < childElements.size(); child++) {//fields min=1,max=unbounted
           if (StringUtils.equalsIgnoreCase(childElements.get(child).getLocalName(), FIELDS)) {
             fieldDefs.addAll(parseFieldDefs(childElements.get(child)));
           }
         }
-        statuses = parseContentStatus(childRootElements.get(j), STATUS);
-        representationDefs = parseRepresentations(childRootElements.get(j), REPRESENTATIONS);
-        contentTypeId = parseContentTypeId(childRootElements.get(j), PARENT);
-        mutableContent.setContentTypeID(contentTypeId);
+        statuses = parseContentStatus(contentTypeElement, STATUS);
+        representationDefs = parseRepresentations(contentTypeElement, REPRESENTATIONS);
+        contentTypeId = parseContentTypeId(contentTypeElement, PARENT);
         mutableContent.setDisplayName(displayName);
         mutableContent.setParent(contentTypeId);
         mutableContent.getMutableFieldDefs().addAll(fieldDefs);
