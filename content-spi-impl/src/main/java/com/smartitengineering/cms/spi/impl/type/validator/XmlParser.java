@@ -107,7 +107,7 @@ public class XmlParser implements XmlConstants {
             fieldDefs.addAll(parseFieldDefs(childElements.get(child)));
           }
         }
-        statuses = parseContentStatus(contentTypeElement, STATUS);
+        statuses = parseContentStatuses(contentTypeElement, STATUS);
         representationDefs = parseRepresentations(contentTypeElement, REPRESENTATIONS);
         contentTypeId = parseContentTypeId(contentTypeElement, PARENT);
         mutableContent.setDisplayName(displayName);
@@ -221,7 +221,7 @@ public class XmlParser implements XmlConstants {
     }
     if (StringUtils.equalsIgnoreCase(elems.get(0).getChildElements().get(0).getLocalName(), INTERNAL)) {
       resourceUri.setType(ResourceUri.Type.INTERNAL);
-      resourceUri.setValue(elems.get(0).getChildElements().get(0).getValue());
+      resourceUri.setValue(elems.get(0).getChildElements().get(0).getChildElements().get(0).getValue());
     }
     if (StringUtils.equalsIgnoreCase(elems.get(0).getChildElements().get(0).getLocalName(), EXTERNAL)) {
       resourceUri.setType(ResourceUri.Type.EXTERNAL);
@@ -426,19 +426,17 @@ public class XmlParser implements XmlConstants {
     }
   }
 
-  /********************************** CONFUSED ****************************************/
-  protected Collection<ContentStatus> parseContentStatus(Element rootElement, String elementName) throws
+  protected Collection<ContentStatus> parseContentStatuses(Element rootElement, String elementName) throws
       IllegalStateException {
     Elements elems = rootElement.getChildElements(elementName, NAMESPACE);
     if (elems.size() > 1) {
       throw new IllegalStateException("More than one " + elementName);
     }
     if (elems.size() > 0) {
-      MutableContentStatus contentStatus =
-                           SmartContentAPI.getInstance().getContentTypeLoader().createMutableContentStatus();
       List<ContentStatus> contentStatuses = new ArrayList<ContentStatus>();
       for (int i = 0; i < elems.get(0).getChildElements().size(); i++) {
-        contentStatus.setId(i);
+        MutableContentStatus contentStatus =
+                             SmartContentAPI.getInstance().getContentTypeLoader().createMutableContentStatus();
         if (StringUtils.equalsIgnoreCase(elems.get(0).getChildElements().get(i).getLocalName(), STATUS_NAME)) {
           contentStatus.setName(elems.get(0).getChildElements().get(i).getValue());
         }
@@ -452,6 +450,7 @@ public class XmlParser implements XmlConstants {
     }
   }
 
+  /********************************** CONFUSED ****************************************/
   protected DataType parseValueDef(Element rootElement) {
     return DataType.LONG;
   }
