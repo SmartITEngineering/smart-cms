@@ -23,13 +23,19 @@ import com.google.inject.Singleton;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
+import com.smartitengineering.dao.common.queryparam.MatchMode;
+import com.smartitengineering.dao.common.queryparam.QueryParameter;
+import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -77,5 +83,16 @@ public class ContentTypePersistentService implements PersistentService<MutableCo
   public Collection<? extends ContentType> readContentTypeFromPersistentStorage(ContentTypeId... contentTypeId) {
     final Set<PersistentContentType> byIds = commonReadDao.getByIds(Arrays.asList(contentTypeId));
     return getAdapter().convertInversely(byIds.toArray(new PersistentContentType[byIds.size()]));
+  }
+
+  @Override
+  public Collection<? extends ContentType> getByWorkspace(WorkspaceId workspaceId) {
+    QueryParameter parameter = QueryParameterFactory.getStringLikePropertyParam("id", new StringBuilder(workspaceId.
+        toString()).append(':').toString(), MatchMode.START);
+    final List<PersistentContentType> list = commonReadDao.getList(parameter);
+    if (list == null || list.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return getAdapter().convertInversely(list.toArray(new PersistentContentType[list.size()]));
   }
 }

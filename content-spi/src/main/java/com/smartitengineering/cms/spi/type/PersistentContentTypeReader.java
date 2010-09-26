@@ -20,6 +20,7 @@ package com.smartitengineering.cms.spi.type;
 
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import java.util.Collection;
 
 /**
@@ -29,4 +30,6 @@ import java.util.Collection;
 public interface PersistentContentTypeReader {
 
   public Collection<? extends ContentType> readContentTypeFromPersistentStorage(ContentTypeId... contentTypeId);
+
+  public Collection<? extends ContentType> getByWorkspace(WorkspaceId workspaceId);
 }
