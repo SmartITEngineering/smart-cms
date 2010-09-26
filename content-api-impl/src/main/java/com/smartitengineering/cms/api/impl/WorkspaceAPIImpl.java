@@ -24,6 +24,7 @@ import com.smartitengineering.cms.api.WorkspaceAPI;
 import com.smartitengineering.cms.api.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.util.Collection;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -60,14 +61,15 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
     return workspaceId;
   }
 
-  protected WorkspaceId createWorkspaceId(String name) {
-    final String namespace = getGlobalNamespace();
-    return createWorkspaceId(namespace, name);
+  @Override
+  public WorkspaceId createWorkspaceId(String name) {
+    return createWorkspaceId(null, name);
   }
 
-  protected WorkspaceId createWorkspaceId(final String namespace, String name) {
+  @Override
+  public WorkspaceId createWorkspaceId(final String namespace, String name) {
     final WorkspaceIdImpl workspaceIdImpl = new WorkspaceIdImpl();
-    workspaceIdImpl.setGlobalNamespace(namespace);
+    workspaceIdImpl.setGlobalNamespace(StringUtils.isBlank(namespace) ? getGlobalNamespace() : namespace);
     workspaceIdImpl.setName(name);
     return workspaceIdImpl;
   }
