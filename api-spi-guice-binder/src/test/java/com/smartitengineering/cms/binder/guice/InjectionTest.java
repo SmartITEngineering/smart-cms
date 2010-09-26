@@ -49,6 +49,7 @@ public class InjectionTest extends TestCase {
     assertNotNull(SmartContentSPI.getInstance().getPersistentServiceRegistrar());
     final PersistentContentTypeReader contentTypeReader = SmartContentSPI.getInstance().getContentTypeReader();
     assertNotNull(contentTypeReader);
+    assertNotNull(SmartContentSPI.getInstance().getWorkspaceService());
     final PersistentService<MutableContentType> persistentService =
                                                 SmartContentSPI.getInstance().getPersistentService(MutableContentType.class);
     if (ContentTypePersistentService.class.isAssignableFrom(persistentService.getClass())) {

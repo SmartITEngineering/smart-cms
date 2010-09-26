@@ -29,6 +29,8 @@ import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
@@ -38,6 +40,12 @@ import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLSchemaBasedTypeValidator;
 import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeFilterConfigsProvider;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLContentTypeDefinitionParser;
+import com.smartitengineering.cms.spi.impl.workspace.PersistentWorkspace;
+import com.smartitengineering.cms.spi.impl.workspace.WorkspaceAdapterHelper;
+import com.smartitengineering.cms.spi.impl.workspace.WorkspaceObjectConverter;
+import com.smartitengineering.cms.spi.impl.workspace.WorkspaceServiceImpl;
+import com.smartitengineering.cms.spi.impl.workspace.guice.WorkspaceFilterConfigsProvider;
+import com.smartitengineering.cms.spi.impl.workspace.guice.WorkspaceSchemaBaseConfigProvider;
 import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
@@ -47,6 +55,7 @@ import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParsers;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
+import com.smartitengineering.cms.spi.workspace.WorkspaceService;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.dao.impl.hbase.CommonDao;
@@ -109,6 +118,39 @@ public class SPIModule extends AbstractModule {
     }).to(ContentTypeAdapterHelper.class).in(Scopes.SINGLETON);
     /*
      * End injection specific to common dao of content type
+     */
+    /*
+     * Start injection specific to common dao of workspace
+     */
+    bind(WorkspaceService.class).to(WorkspaceServiceImpl.class).in(Singleton.class);
+    bind(new TypeLiteral<ObjectRowConverter<PersistentWorkspace>>() {
+    }).to(WorkspaceObjectConverter.class).in(Singleton.class);
+    bind(new TypeLiteral<CommonReadDao<PersistentWorkspace, WorkspaceId>>() {
+    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentWorkspace, WorkspaceId>>() {
+    }).in(Singleton.class);
+    bind(new TypeLiteral<CommonWriteDao<PersistentWorkspace>>() {
+    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentWorkspace, WorkspaceId>>() {
+    }).in(Singleton.class);
+    bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentWorkspace, WorkspaceId>>() {
+    }).to(new TypeLiteral<CommonDao<PersistentWorkspace, WorkspaceId>>() {
+    }).in(Singleton.class);
+    final TypeLiteral<SchemaInfoProviderImpl<PersistentWorkspace, WorkspaceId>> wTypeLiteral = new TypeLiteral<SchemaInfoProviderImpl<PersistentWorkspace, WorkspaceId>>() {
+    };
+    bind(new TypeLiteral<Class<WorkspaceId>>() {
+    }).toInstance(WorkspaceId.class);
+    bind(new TypeLiteral<SchemaInfoProvider<PersistentWorkspace, WorkspaceId>>() {
+    }).to(wTypeLiteral).in(Singleton.class);
+    bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistentWorkspace>>() {
+    }).toProvider(WorkspaceSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<FilterConfigs<PersistentWorkspace>>() {
+    }).toProvider(WorkspaceFilterConfigsProvider.class).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<GenericAdapter<Workspace, PersistentWorkspace>>() {
+    }).to(new TypeLiteral<GenericAdapterImpl<Workspace, PersistentWorkspace>>() {
+    }).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<AbstractAdapterHelper<Workspace, PersistentWorkspace>>() {
+    }).to(WorkspaceAdapterHelper.class).in(Scopes.SINGLETON);
+    /*
+     * End injection specific to common dao of workspace
      */
     MapBinder<MediaType, TypeValidator> validatorBinder = MapBinder.newMapBinder(binder(), MediaType.class,
                                                                                  TypeValidator.class);
