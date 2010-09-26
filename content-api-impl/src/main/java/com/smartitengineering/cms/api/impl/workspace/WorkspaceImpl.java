@@ -24,6 +24,7 @@ import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
+import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 import java.util.Collection;
 import java.util.Date;
 
@@ -31,15 +32,17 @@ import java.util.Date;
  *
  * @author imyousuf
  */
-public class WorkspaceImpl implements Workspace {
+public class WorkspaceImpl implements PersistableWorkspace {
 
   private WorkspaceId id;
   private Date creationDate;
 
+  @Override
   public void setCreationDate(Date creationDate) {
     this.creationDate = creationDate;
   }
 
+  @Override
   public void setId(WorkspaceId id) {
     this.id = id;
   }

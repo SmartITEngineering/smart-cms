@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2010 Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,18 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.persistence;
+package com.smartitengineering.cms.spi.workspace;
 
-import com.smartitengineering.cms.spi.type.PersistableContentType;
-import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
+import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import java.util.Date;
 
 /**
  *
  * @author imyousuf
  */
-public interface PersistableDomainFactory {
+public interface PersistableWorkspace extends Workspace {
 
-  PersistableContentType createPersistableContentType();
+  public void setCreationDate(Date creationDate);
 
-  PersistableWorkspace createPersistentWorkspace();
+  public void setId(WorkspaceId id);
 }

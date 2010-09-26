@@ -16,27 +16,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.impl;
+package com.smartitengineering.cms.spi.impl.workspace;
 
-import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
-import com.smartitengineering.cms.api.impl.workspace.WorkspaceImpl;
-import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
-import com.smartitengineering.cms.spi.type.PersistableContentType;
-import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
+import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.domain.AbstractGenericPersistentDTO;
 
 /**
  *
  * @author imyousuf
  */
-public class PersistableDomainFactoryImpl implements PersistableDomainFactory {
+public class PersistentWorkspace extends AbstractGenericPersistentDTO<PersistentWorkspace, WorkspaceId, Long> {
 
-  @Override
-  public PersistableContentType createPersistableContentType() {
-    return new ContentTypeImpl();
+  private Workspace workspace;
+
+  public Workspace getWorkspace() {
+    return workspace;
+  }
+
+  public void setWorkspace(Workspace workspaceId) {
+    this.workspace = workspaceId;
   }
 
   @Override
-  public PersistableWorkspace createPersistentWorkspace() {
-    return new WorkspaceImpl();
+  public WorkspaceId getId() {
+    if (workspace == null) {
+      return null;
+    }
+    return workspace.getId();
+  }
+
+  @Override
+  public void setId(WorkspaceId id) {
+    throw new UnsupportedOperationException("setId not supported!");
+  }
+
+  @Override
+  public boolean isValid() {
+    return getId() != null;
   }
 }

@@ -16,27 +16,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.impl;
+package com.smartitengineering.cms.spi.impl.workspace;
 
-import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
-import com.smartitengineering.cms.api.impl.workspace.WorkspaceImpl;
-import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
-import com.smartitengineering.cms.spi.type.PersistableContentType;
-import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
+import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 
 /**
  *
  * @author imyousuf
  */
-public class PersistableDomainFactoryImpl implements PersistableDomainFactory {
+public class WorkspaceAdapterHelper extends AbstractAdapterHelper<Workspace, PersistentWorkspace>{
 
   @Override
-  public PersistableContentType createPersistableContentType() {
-    return new ContentTypeImpl();
+  protected PersistentWorkspace newTInstance() {
+    return new PersistentWorkspace();
   }
 
   @Override
-  public PersistableWorkspace createPersistentWorkspace() {
-    return new WorkspaceImpl();
+  protected void mergeFromF2T(Workspace fromBean, PersistentWorkspace toBean) {
+    toBean.setWorkspace(fromBean);
   }
+
+  @Override
+  protected Workspace convertFromT2F(PersistentWorkspace toBean) {
+    return toBean.getWorkspace();
+  }
+
 }
