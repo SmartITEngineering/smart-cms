@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.Workspace;
 import com.smartitengineering.cms.api.WorkspaceAPI;
 import com.smartitengineering.cms.api.WorkspaceId;
@@ -35,7 +36,7 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   private String globalNamespace;
 
   @Inject
-  public void setGlobalNamespace(String globalNamespace) {
+  public void setGlobalNamespace(@Named("globalNamespace") String globalNamespace) {
     this.globalNamespace = globalNamespace;
   }
 
