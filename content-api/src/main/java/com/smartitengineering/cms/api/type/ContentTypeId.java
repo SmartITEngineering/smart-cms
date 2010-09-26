@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.api.type;
 
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.dao.impl.hbase.spi.Externalizable;
 import java.io.Serializable;
 

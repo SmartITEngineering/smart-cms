@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;

@@ -20,9 +20,9 @@ package com.smartitengineering.cms.binder.guice;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
-import com.smartitengineering.cms.api.WorkspaceAPI;
+import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.content.ContentLoader;
-import com.smartitengineering.cms.api.impl.WorkspaceAPIImpl;
+import com.smartitengineering.cms.api.impl.workspace.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.content.ContentLoaderImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;

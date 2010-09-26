@@ -5,7 +5,7 @@
 package com.smartitengineering.cms.spi.impl.type.validator;
 
 import com.smartitengineering.cms.api.SmartContentAPI;
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;

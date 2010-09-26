@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.impl;
+package com.smartitengineering.cms.api.impl.workspace;
 
-import com.smartitengineering.cms.api.Workspace;
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.VariationDef;

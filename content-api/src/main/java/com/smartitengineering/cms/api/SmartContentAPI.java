@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api;
 
+import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.content.ContentLoader;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;

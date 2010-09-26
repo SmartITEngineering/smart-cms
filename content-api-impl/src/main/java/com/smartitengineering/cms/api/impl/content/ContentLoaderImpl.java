@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.content.BooleanFieldValue;
 import com.smartitengineering.cms.api.content.CollectionFieldValue;
 import com.smartitengineering.cms.api.content.Content;

@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.impl;
+package com.smartitengineering.cms.api.impl.workspace;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.smartitengineering.cms.api.Workspace;
-import com.smartitengineering.cms.api.WorkspaceAPI;
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.util.Collection;
 import org.apache.commons.lang.StringUtils;

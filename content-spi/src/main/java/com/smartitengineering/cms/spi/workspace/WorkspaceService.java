@@ -18,8 +18,8 @@
  */
 package com.smartitengineering.cms.spi.workspace;
 
-import com.smartitengineering.cms.api.Workspace;
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.VariationDef;
