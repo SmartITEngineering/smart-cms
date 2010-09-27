@@ -16,26 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.workspace;
+package com.smartitengineering.cms.api.impl.workspace;
 
-import com.smartitengineering.cms.api.common.TemplateType;
-import java.util.Date;
+import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 
 /**
  *
  * @author imyousuf
  */
-public interface ResourceTemplate {
-
-  WorkspaceId getWorkspaceId();
-
-  String getName();
-
-  TemplateType getTemplateType();
-
-  byte[] getTemplate();
-
-  Date getCreatedDate();
-
-  Date getLastModifiedDate();
+public class VariationTemplateImpl extends ResourceTemplateImpl implements PersistableVariationTemplate {
 }

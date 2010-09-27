@@ -16,26 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.workspace;
+package com.smartitengineering.cms.spi.workspace;
 
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.workspace.ResourceTemplate;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import java.util.Date;
 
 /**
  *
  * @author imyousuf
  */
-public interface ResourceTemplate {
+public interface PersistableResourceTemplate extends ResourceTemplate {
 
-  WorkspaceId getWorkspaceId();
+  void setWorkspaceId(WorkspaceId workspaceId);
 
-  String getName();
+  void setName(String name);
 
-  TemplateType getTemplateType();
+  void setTemplateType(TemplateType templateType);
 
-  byte[] getTemplate();
+  void setTemplate(byte[] data);
 
-  Date getCreatedDate();
+  void setCreatedDate(Date creationDate);
 
-  Date getLastModifiedDate();
+  void setLastModifiedDate(Date lastModifiedDate);
 }

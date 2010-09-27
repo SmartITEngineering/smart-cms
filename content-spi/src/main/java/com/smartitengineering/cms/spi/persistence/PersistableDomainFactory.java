@@ -19,6 +19,8 @@
 package com.smartitengineering.cms.spi.persistence;
 
 import com.smartitengineering.cms.spi.type.PersistableContentType;
+import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
+import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 
 /**
@@ -30,4 +32,8 @@ public interface PersistableDomainFactory {
   PersistableContentType createPersistableContentType();
 
   PersistableWorkspace createPersistentWorkspace();
+
+  PersistableRepresentationTemplate createPersistableRepresentationTemplate();
+
+  PersistableVariationTemplate createPersistableVariationTemplate();
 }
