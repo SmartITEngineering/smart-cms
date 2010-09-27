@@ -18,25 +18,9 @@
  */
 package com.smartitengineering.cms.api.workspace;
 
-import com.smartitengineering.cms.api.type.ContentType;
-import java.util.Collection;
-import java.util.Date;
-
 /**
  *
  * @author imyousuf
  */
-public interface Workspace {
-
-  public WorkspaceId getId();
-
-  public Collection<ContentType> getContentDefintions();
-
-  public Collection<WorkspaceId> getFriendlies();
-
-  public RepresentationTemplate getRepresentation(String name);
-
-  public VariationTemplate getVariations(String name);
-
-  public Date getCreationDate();
+public interface VariationTemplate extends ResourceTemplate {
 }

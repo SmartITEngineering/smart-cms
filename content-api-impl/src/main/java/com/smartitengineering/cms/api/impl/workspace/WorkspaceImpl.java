@@ -18,6 +18,8 @@
  */
 package com.smartitengineering.cms.api.impl.workspace;
 
+import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.type.ContentType;
@@ -68,12 +70,13 @@ public class WorkspaceImpl implements PersistableWorkspace {
   }
 
   @Override
-  public Collection<RepresentationDef> getRepresentations() {
-    return SmartContentSPI.getInstance().getWorkspaceService().getRepresentations(getId());
+  public RepresentationTemplate getRepresentation(String name) {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public Collection<VariationDef> getVariations() {
-    return SmartContentSPI.getInstance().getWorkspaceService().getVariations(getId());
+  public VariationTemplate getVariations(String name) {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
+
 }
