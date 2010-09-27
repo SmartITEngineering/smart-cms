@@ -20,11 +20,17 @@ package com.smartitengineering.cms.api.impl.workspace;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -98,5 +104,37 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   @Override
   public Collection<Workspace> getWorkspaces() {
     return SmartContentSPI.getInstance().getWorkspaceService().getWorkspaces();
+  }
+
+  @Override
+  public RepresentationTemplate putRepresentationTemplate(String name, TemplateType templateType, InputStream stream)
+      throws IOException {
+    return putRepresentationTemplate(name, templateType, IOUtils.toByteArray(stream));
+  }
+
+  @Override
+  public RepresentationTemplate putRepresentationTemplate(String name, TemplateType templateType, byte[] data) {
+    return SmartContentSPI.getInstance().getWorkspaceService().putRepresentationTemplate(name, templateType, data);
+  }
+
+  @Override
+  public VariationTemplate putVariationTemplate(String name, TemplateType templateType, InputStream stream) throws
+      IOException {
+    return putVariationTemplate(name, templateType, IOUtils.toByteArray(stream));
+  }
+
+  @Override
+  public VariationTemplate putVariationTemplate(String name, TemplateType templateType, byte[] data) {
+    return SmartContentSPI.getInstance().getWorkspaceService().putVariationTemplate(name, templateType, data);
+  }
+
+  @Override
+  public void delete(RepresentationTemplate template) {
+    SmartContentSPI.getInstance().getWorkspaceService().deleteRepresentation(template);
+  }
+
+  @Override
+  public void delete(VariationTemplate template) {
+    SmartContentSPI.getInstance().getWorkspaceService().deleteVariation(template);
   }
 }

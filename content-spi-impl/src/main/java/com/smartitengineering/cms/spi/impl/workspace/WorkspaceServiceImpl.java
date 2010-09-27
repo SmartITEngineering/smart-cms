@@ -19,9 +19,10 @@
 package com.smartitengineering.cms.spi.impl.workspace;
 
 import com.google.inject.Inject;
+import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.type.ContentType;
-import com.smartitengineering.cms.api.type.RepresentationDef;
-import com.smartitengineering.cms.api.type.VariationDef;
+import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
@@ -105,12 +106,32 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public Collection<RepresentationDef> getRepresentations(WorkspaceId workspaceId) {
+  public RepresentationTemplate putRepresentationTemplate(String name, TemplateType templateType, byte[] data) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public Collection<VariationDef> getVariations(WorkspaceId workspaceId) {
+  public RepresentationTemplate getRepresentationTemplate(WorkspaceId workspaceId, String name) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public VariationTemplate putVariationTemplate(String name, TemplateType templateType, byte[] data) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public VariationTemplate getVariationTemplate(WorkspaceId workspaceId, String name) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public void deleteRepresentation(RepresentationTemplate template) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public void deleteVariation(VariationTemplate template) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 }

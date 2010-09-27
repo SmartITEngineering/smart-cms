@@ -18,6 +18,9 @@
  */
 package com.smartitengineering.cms.api.workspace;
 
+import com.smartitengineering.cms.api.common.TemplateType;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 
 /**
@@ -37,6 +40,19 @@ public interface WorkspaceAPI {
   WorkspaceId createWorkspace(String globalNamespace, String name);
 
   WorkspaceId createWorkspace(WorkspaceId workspaceId);
+
+  RepresentationTemplate putRepresentationTemplate(String name, TemplateType templateType, InputStream stream) throws
+      IOException;
+
+  RepresentationTemplate putRepresentationTemplate(String name, TemplateType templateType, byte[] data);
+
+  void delete(RepresentationTemplate template);
+
+  void delete(VariationTemplate template);
+
+  VariationTemplate putVariationTemplate(String name, TemplateType templateType, InputStream stream) throws IOException;
+
+  VariationTemplate putVariationTemplate(String name, TemplateType templateType, byte[] data);
 
   WorkspaceId getWorkspaceIdIfExists(String name);
 
