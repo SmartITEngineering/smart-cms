@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.binder.guice;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.PrivateModule;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
@@ -29,8 +29,6 @@ import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentType;
-import com.smartitengineering.cms.api.workspace.Workspace;
-import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
@@ -40,12 +38,6 @@ import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLSchemaBasedTypeValidator;
 import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeFilterConfigsProvider;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLContentTypeDefinitionParser;
-import com.smartitengineering.cms.spi.impl.workspace.PersistentWorkspace;
-import com.smartitengineering.cms.spi.impl.workspace.WorkspaceAdapterHelper;
-import com.smartitengineering.cms.spi.impl.workspace.WorkspaceObjectConverter;
-import com.smartitengineering.cms.spi.impl.workspace.WorkspaceServiceImpl;
-import com.smartitengineering.cms.spi.impl.workspace.guice.WorkspaceFilterConfigsProvider;
-import com.smartitengineering.cms.spi.impl.workspace.guice.WorkspaceSchemaBaseConfigProvider;
 import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
@@ -55,7 +47,6 @@ import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParsers;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
-import com.smartitengineering.cms.spi.workspace.WorkspaceService;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.dao.impl.hbase.CommonDao;
@@ -76,17 +67,22 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class SPIModule extends AbstractModule {
+public class SPIModule extends PrivateModule {
 
   @Override
   protected void configure() {
     bind(AsyncExecutorService.class).to(MixedExecutorServiceImpl.class).in(Singleton.class);
+    binder().expose(AsyncExecutorService.class);
     bind(ExecutorService.class).toInstance(Executors.newCachedThreadPool());
+    binder().expose(ExecutorService.class);
     bind(Integer.class).annotatedWith(Names.named("maxRows")).toInstance(new Integer(50));
     bind(Long.class).annotatedWith(Names.named("waitTime")).toInstance(new Long(10));
+    binder().expose(Long.class).annotatedWith(Names.named("waitTime"));
     bind(TimeUnit.class).annotatedWith(Names.named("unit")).toInstance(TimeUnit.SECONDS);
+    binder().expose(TimeUnit.class).annotatedWith(Names.named("unit"));
     bind(Boolean.class).annotatedWith(Names.named("mergeEnabled")).toInstance(Boolean.TRUE);
     bind(MergeService.class).to(DiffBasedMergeService.class).in(Singleton.class);
+    binder().expose(MergeService.class);
     /*
      * Start injection specific to common dao of content type
      */
@@ -116,60 +112,34 @@ public class SPIModule extends AbstractModule {
     }).in(Scopes.SINGLETON);
     bind(new TypeLiteral<AbstractAdapterHelper<MutableContentType, PersistentContentType>>() {
     }).to(ContentTypeAdapterHelper.class).in(Scopes.SINGLETON);
+    bind(PersistentContentTypeReader.class).to(ContentTypePersistentService.class);
+    binder().expose(PersistentContentTypeReader.class);
     /*
      * End injection specific to common dao of content type
-     */
-    /*
-     * Start injection specific to common dao of workspace
-     */
-    bind(WorkspaceService.class).to(WorkspaceServiceImpl.class).in(Singleton.class);
-    bind(new TypeLiteral<ObjectRowConverter<PersistentWorkspace>>() {
-    }).to(WorkspaceObjectConverter.class).in(Singleton.class);
-    bind(new TypeLiteral<CommonReadDao<PersistentWorkspace, WorkspaceId>>() {
-    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentWorkspace, WorkspaceId>>() {
-    }).in(Singleton.class);
-    bind(new TypeLiteral<CommonWriteDao<PersistentWorkspace>>() {
-    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentWorkspace, WorkspaceId>>() {
-    }).in(Singleton.class);
-    bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentWorkspace, WorkspaceId>>() {
-    }).to(new TypeLiteral<CommonDao<PersistentWorkspace, WorkspaceId>>() {
-    }).in(Singleton.class);
-    final TypeLiteral<SchemaInfoProviderImpl<PersistentWorkspace, WorkspaceId>> wTypeLiteral = new TypeLiteral<SchemaInfoProviderImpl<PersistentWorkspace, WorkspaceId>>() {
-    };
-    bind(new TypeLiteral<Class<WorkspaceId>>() {
-    }).toInstance(WorkspaceId.class);
-    bind(new TypeLiteral<SchemaInfoProvider<PersistentWorkspace, WorkspaceId>>() {
-    }).to(wTypeLiteral).in(Singleton.class);
-    bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistentWorkspace>>() {
-    }).toProvider(WorkspaceSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);
-    bind(new TypeLiteral<FilterConfigs<PersistentWorkspace>>() {
-    }).toProvider(WorkspaceFilterConfigsProvider.class).in(Scopes.SINGLETON);
-    bind(new TypeLiteral<GenericAdapter<Workspace, PersistentWorkspace>>() {
-    }).to(new TypeLiteral<GenericAdapterImpl<Workspace, PersistentWorkspace>>() {
-    }).in(Scopes.SINGLETON);
-    bind(new TypeLiteral<AbstractAdapterHelper<Workspace, PersistentWorkspace>>() {
-    }).to(WorkspaceAdapterHelper.class).in(Scopes.SINGLETON);
-    /*
-     * End injection specific to common dao of workspace
      */
     MapBinder<MediaType, TypeValidator> validatorBinder = MapBinder.newMapBinder(binder(), MediaType.class,
                                                                                  TypeValidator.class);
     validatorBinder.addBinding(MediaType.APPLICATION_XML).to(XMLSchemaBasedTypeValidator.class);
     bind(TypeValidators.class).to(com.smartitengineering.cms.spi.impl.type.validator.TypeValidators.class);
+    binder().expose(TypeValidators.class);
     MapBinder<Class, PersistentService> serviceBinder = MapBinder.newMapBinder(binder(), Class.class,
                                                                                PersistentService.class);
     serviceBinder.addBinding(MutableContentType.class).to(ContentTypePersistentService.class);
     bind(PersistentServiceRegistrar.class).to(
         com.smartitengineering.cms.spi.impl.content.PersistentServiceRegistrar.class);
+    binder().expose(PersistentServiceRegistrar.class);
     MapBinder<MediaType, ContentTypeDefinitionParser> parserBinder =
                                                       MapBinder.newMapBinder(binder(), MediaType.class,
                                                                              ContentTypeDefinitionParser.class);
     parserBinder.addBinding(MediaType.APPLICATION_XML).to(XMLContentTypeDefinitionParser.class);
     bind(ContentTypeDefinitionParsers.class).to(
         com.smartitengineering.cms.spi.impl.type.validator.ContentTypeDefinitionParsers.class);
-    bind(PersistentContentTypeReader.class).to(ContentTypePersistentService.class);
     bind(LockHandler.class).to(DefaultLockHandler.class).in(Scopes.SINGLETON);
     bind(PersistableDomainFactory.class).to(PersistableDomainFactoryImpl.class).in(Scopes.SINGLETON);
     bind(DomainIdInstanceProvider.class).to(DomainIdInstanceProviderImpl.class).in(Scopes.SINGLETON);
+    binder().expose(ContentTypeDefinitionParsers.class);
+    binder().expose(LockHandler.class);
+    binder().expose(PersistableDomainFactory.class);
+    binder().expose(DomainIdInstanceProvider.class);
   }
 }
