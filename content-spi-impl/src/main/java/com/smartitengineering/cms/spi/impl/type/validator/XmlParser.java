@@ -22,7 +22,7 @@ import com.smartitengineering.cms.api.type.MutableVariationDef;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.type.SearchDef;
-import com.smartitengineering.cms.api.type.TemplateType;
+import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.type.VariationDef;

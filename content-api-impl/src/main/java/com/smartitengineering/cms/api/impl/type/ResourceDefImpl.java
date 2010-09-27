@@ -21,7 +21,7 @@ package com.smartitengineering.cms.api.impl.type;
 import com.smartitengineering.cms.api.type.MutableResourceDef;
 import com.smartitengineering.cms.api.type.ResourceDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
-import com.smartitengineering.cms.api.type.TemplateType;
+import com.smartitengineering.cms.api.common.TemplateType;
 
 /**
  *
