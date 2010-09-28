@@ -105,6 +105,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
+  public void addFriend(WorkspaceId workspaceId){
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public void removeFriend(WorkspaceId workspaceId){
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
   public RepresentationTemplate putRepresentationTemplate(String name, TemplateType templateType, byte[] data) {
     throw new UnsupportedOperationException("Not supported yet.");
   }

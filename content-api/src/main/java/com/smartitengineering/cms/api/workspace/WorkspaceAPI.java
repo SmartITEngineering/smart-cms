@@ -61,4 +61,10 @@ public interface WorkspaceAPI {
   Workspace getWorkspace(WorkspaceId workspaceId);
 
   Collection<Workspace> getWorkspaces();
+
+  public Collection<WorkspaceId> getFriendlies(WorkspaceId workspaceId);
+
+  public void addFriend(WorkspaceId workspaceId);
+
+  public void removeFriend(WorkspaceId workspaceId);
 }
