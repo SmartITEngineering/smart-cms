@@ -32,7 +32,6 @@ import com.smartitengineering.cms.spi.workspace.WorkspaceService;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -97,7 +96,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public Collection<ContentType> getContentDefintions(WorkspaceId workspaceId) {
-    return new ArrayList<ContentType>(getContentTypeReader().getByWorkspace(workspaceId));
+    return Collections.unmodifiableCollection(getContentTypeReader().getByWorkspace(workspaceId));
   }
 
   @Override
