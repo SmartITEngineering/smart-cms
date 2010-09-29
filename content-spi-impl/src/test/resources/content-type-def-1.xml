@@ -25,10 +25,14 @@
         Test content type definition.
 -->
 <contentTypes  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-   xmlns='http://www.smartitengineering.com/smart-cms/content/content-type-schema'
-   xsi:schemaLocation='http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../../../content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd'>
+               xmlns='http://www.smartitengineering.com/smart-cms/content/content-type-schema'
+               xsi:schemaLocation='http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../../../content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd'>
   <contentType namespace="asdfasdf1">
     <name>XYZ</name>
+    <parent>
+      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+      <typeName>Product</typeName>
+    </parent>
     <fields>
       <field>
         <name>fieldA</name>
