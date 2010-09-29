@@ -26,8 +26,14 @@ import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
+import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
+import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 import com.smartitengineering.cms.spi.workspace.WorkspaceService;
+import com.smartitengineering.dao.common.queryparam.MatchMode;
+import com.smartitengineering.dao.common.queryparam.QueryParameter;
+import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -38,6 +44,8 @@ import java.util.List;
  * @author imyousuf
  */
 public class WorkspaceServiceImpl extends AbstractWorkspaceService implements WorkspaceService {
+
+  public static final QueryParameter<Void> SELF_PARAM = QueryParameterFactory.getPropProjectionParam("workspace");
 
   public PersistentContentTypeReader getContentTypeReader() {
     return contentTypeReader;
@@ -85,48 +93,141 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
 
   @Override
   public Collection<WorkspaceId> getFriendlies(WorkspaceId workspaceId) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    final QueryParameter friendliesProp = QueryParameterFactory.getPropProjectionParam("friendlies");
+    final QueryParameter idParam = getIdParam(workspaceId);
+    PersistentWorkspace workspace = commonReadDao.getSingle(idParam, SELF_PARAM, friendliesProp);
+    return workspace.getFriendlies();
   }
 
   @Override
   public void addFriend(WorkspaceId to, WorkspaceId workspaceId) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    PersistentWorkspace workspace = getWorkspace(to);
+    workspace.addFriendly(workspaceId);
+    workspace.setFriendliesPopulated(true);
+    commonWriteDao.update(workspace);
   }
 
   @Override
   public void removeFriend(WorkspaceId from, WorkspaceId workspaceId) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    PersistentWorkspace workspace = getWorkspace(from);
+    workspace.addFriendly(workspaceId);
+    workspace.setFriendliesPopulated(true);
+    commonWriteDao.delete(workspace);
+  }
+
+  protected PersistentWorkspace getWorkspace(WorkspaceId from) {
+    PersistentWorkspace workspace = new PersistentWorkspace();
+    workspace.setWorkspace(load(from));
+    return workspace;
   }
 
   @Override
   public RepresentationTemplate putRepresentationTemplate(WorkspaceId workspaceId, String name,
                                                           TemplateType templateType, byte[] data) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    PersistentWorkspace workspace = getWorkspace(workspaceId);
+    PersistableRepresentationTemplate template = SmartContentSPI.getInstance().getPersistableDomainFactory().
+        createPersistableRepresentationTemplate();
+    workspace.addRepresentationTemplate(template);
+    template.setName(name);
+    template.setTemplateType(templateType);
+    template.setWorkspaceId(workspaceId);
+    template.setTemplate(data);
+    workspace.setRepresentationPopulated(true);
+    commonWriteDao.update(workspace);
+    return template;
   }
 
   @Override
   public RepresentationTemplate getRepresentationTemplate(WorkspaceId workspaceId, String name) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    List<QueryParameter> params = new ArrayList<QueryParameter>();
+    final String info = WorkspaceObjectConverter.REP_INFO;
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.TEMPLATETYPE).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.CREATED).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.LASTMODIFIED).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(WorkspaceObjectConverter.REP_DATA).append(
+        ':').append(name).toString()));
+    params.add(SELF_PARAM);
+    params.add(getIdParam(workspaceId));
+    final List<PersistableRepresentationTemplate> list = commonReadDao.getSingle(params).getRepresentationTemplates();
+    if (list.isEmpty()) {
+      return null;
+    }
+    return list.get(0);
   }
 
   @Override
   public VariationTemplate putVariationTemplate(WorkspaceId workspaceId, String name, TemplateType templateType,
                                                 byte[] data) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    PersistentWorkspace workspace = getWorkspace(workspaceId);
+    PersistableVariationTemplate template = SmartContentSPI.getInstance().getPersistableDomainFactory().
+        createPersistableVariationTemplate();
+    workspace.addVariationTemplate(template);
+    template.setName(name);
+    template.setTemplateType(templateType);
+    template.setWorkspaceId(workspaceId);
+    template.setTemplate(data);
+    workspace.setVariationPopulated(true);
+    commonWriteDao.update(workspace);
+    return template;
   }
 
   @Override
   public VariationTemplate getVariationTemplate(WorkspaceId workspaceId, String name) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    List<QueryParameter> params = new ArrayList<QueryParameter>();
+    final String info = WorkspaceObjectConverter.VAR_INFO;
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.TEMPLATETYPE).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.CREATED).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.LASTMODIFIED).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(WorkspaceObjectConverter.VAR_DATA).append(
+        ':').append(name).toString()));
+    params.add(SELF_PARAM);
+    params.add(getIdParam(workspaceId));
+    final List<PersistableVariationTemplate> list = commonReadDao.getSingle(params).getVariationTemplates();
+    if (list.isEmpty()) {
+      return null;
+    }
+    return list.get(0);
   }
 
   @Override
   public void deleteRepresentation(RepresentationTemplate template) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    PersistentWorkspace workspace = getWorkspace(template.getWorkspaceId());
+    workspace.setRepresentationPopulated(true);
+    PersistableRepresentationTemplate repTemplate = SmartContentSPI.getInstance().getPersistableDomainFactory().
+        createPersistableRepresentationTemplate();
+    repTemplate.setCreatedDate(template.getCreatedDate());
+    repTemplate.setLastModifiedDate(template.getLastModifiedDate());
+    repTemplate.setWorkspaceId(template.getWorkspaceId());
+    repTemplate.setName(template.getName());
+    repTemplate.setTemplate(template.getTemplate());
+    repTemplate.setTemplateType(template.getTemplateType());
+    workspace.addRepresentationTemplate(repTemplate);
+    commonWriteDao.delete(workspace);
   }
 
   @Override
   public void deleteVariation(VariationTemplate template) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    PersistentWorkspace workspace = getWorkspace(template.getWorkspaceId());
+    workspace.setVariationPopulated(true);
+    PersistableVariationTemplate varTemplate = SmartContentSPI.getInstance().getPersistableDomainFactory().
+        createPersistableVariationTemplate();
+    varTemplate.setCreatedDate(template.getCreatedDate());
+    varTemplate.setLastModifiedDate(template.getLastModifiedDate());
+    varTemplate.setWorkspaceId(template.getWorkspaceId());
+    varTemplate.setName(template.getName());
+    varTemplate.setTemplate(template.getTemplate());
+    varTemplate.setTemplateType(template.getTemplateType());
+    workspace.addVariationTemplate(varTemplate);
+    commonWriteDao.delete(workspace);
+  }
+
+  protected QueryParameter<String> getIdParam(WorkspaceId workspaceId) {
+    return QueryParameterFactory.getStringLikePropertyParam("id", workspaceId.toString(), MatchMode.EXACT);
   }
 }

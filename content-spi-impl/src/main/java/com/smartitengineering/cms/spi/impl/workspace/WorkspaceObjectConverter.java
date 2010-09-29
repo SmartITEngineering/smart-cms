@@ -50,17 +50,26 @@ import org.slf4j.LoggerFactory;
  */
 public class WorkspaceObjectConverter extends AbstactObjectRowConverter<PersistentWorkspace, WorkspaceId> {
 
+  public static final String FRIENDLIES = "friendlies";
+  public static final String LASTMODIFIED = "lastModified";
+  public static final String NAME = "name";
+  public static final String REP_DATA = "repData";
+  public static final String REP_INFO = "repInfo";
+  public static final String TEMPLATETYPE = "templateType";
+  public static final String VAR_DATA = "varData";
+  public static final String VAR_INFO = "varInfo";
+  public static final String CREATED = "created";
   public static final byte[] FAMILY_SELF = Bytes.toBytes("self");
-  public static final byte[] FAMILY_REPRESENTATIONS_INFO = Bytes.toBytes("repInfo");
-  public static final byte[] FAMILY_REPRESENTATIONS_DATA = Bytes.toBytes("repData");
-  public static final byte[] FAMILY_VARIATIONS_INFO = Bytes.toBytes("varInfo");
-  public static final byte[] FAMILY_VARIATIONS_DATA = Bytes.toBytes("varData");
-  public static final byte[] FAMILY_FRIENDLIES = Bytes.toBytes("friendlies");
+  public static final byte[] FAMILY_REPRESENTATIONS_INFO = Bytes.toBytes(REP_INFO);
+  public static final byte[] FAMILY_REPRESENTATIONS_DATA = Bytes.toBytes(REP_DATA);
+  public static final byte[] FAMILY_VARIATIONS_INFO = Bytes.toBytes(VAR_INFO);
+  public static final byte[] FAMILY_VARIATIONS_DATA = Bytes.toBytes(VAR_DATA);
+  public static final byte[] FAMILY_FRIENDLIES = Bytes.toBytes(FRIENDLIES);
   public static final byte[] CELL_NAMESPACE = Bytes.toBytes("namespace");
-  public static final byte[] CELL_NAME = Bytes.toBytes("name");
-  public static final byte[] CELL_CREATED = Bytes.toBytes("created");
-  public static final byte[] CELL_LAST_MODIFIED = Bytes.toBytes("lastModified");
-  public static final byte[] CELL_TEMPLATE_TYPE = Bytes.toBytes("templateType");
+  public static final byte[] CELL_NAME = Bytes.toBytes(NAME);
+  public static final byte[] CELL_CREATED = Bytes.toBytes(CREATED);
+  public static final byte[] CELL_LAST_MODIFIED = Bytes.toBytes(LASTMODIFIED);
+  public static final byte[] CELL_TEMPLATE_TYPE = Bytes.toBytes(TEMPLATETYPE);
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override

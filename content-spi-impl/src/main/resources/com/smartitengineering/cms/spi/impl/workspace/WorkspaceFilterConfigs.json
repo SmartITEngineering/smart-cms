@@ -15,6 +15,46 @@
       "filterOnLatestVersionOnly":true,
       "qualifierARangePrefix":false,
       "filterOnRowId":false
+    },
+    "friendlies": {
+      "columnFamilyAsString":"friendlies",
+      "columnQualifierAsString":"",
+      "filterOnIfMissing":false,
+      "filterOnLatestVersionOnly":true,
+      "qualifierARangePrefix":false,
+      "filterOnRowId":false
+    },
+    "repInfo": {
+      "columnFamilyAsString":"repInfo",
+      "columnQualifierAsString":"",
+      "filterOnIfMissing":false,
+      "filterOnLatestVersionOnly":true,
+      "qualifierARangePrefix":false,
+      "filterOnRowId":false
+    },
+    "repData": {
+      "columnFamilyAsString":"repData",
+      "columnQualifierAsString":"",
+      "filterOnIfMissing":false,
+      "filterOnLatestVersionOnly":true,
+      "qualifierARangePrefix":false,
+      "filterOnRowId":false
+    },
+    "varInfo": {
+      "columnFamilyAsString":"varInfo",
+      "columnQualifierAsString":"",
+      "filterOnIfMissing":false,
+      "filterOnLatestVersionOnly":true,
+      "qualifierARangePrefix":false,
+      "filterOnRowId":false
+    },
+    "varData": {
+      "columnFamilyAsString":"varData",
+      "columnQualifierAsString":"",
+      "filterOnIfMissing":false,
+      "filterOnLatestVersionOnly":true,
+      "qualifierARangePrefix":false,
+      "filterOnRowId":false
     }
   }
 }
