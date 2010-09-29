@@ -18,9 +18,15 @@
  */
 package com.smartitengineering.cms.spi.impl.workspace;
 
+import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.domain.AbstractGenericPersistentDTO;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  *
@@ -29,6 +35,51 @@ import com.smartitengineering.domain.AbstractGenericPersistentDTO;
 public class PersistentWorkspace extends AbstractGenericPersistentDTO<PersistentWorkspace, WorkspaceId, Long> {
 
   private Workspace workspace;
+  private boolean representationPopulated;
+  private boolean variationPopulated;
+  private boolean friendliesPopulated;
+  private final List<RepresentationTemplate> representationTemplates = new ArrayList<RepresentationTemplate>();
+  private final List<VariationTemplate> variationTemplates = new ArrayList<VariationTemplate>();
+
+  public List<RepresentationTemplate> getRepresentationTemplates() {
+    return Collections.unmodifiableList(representationTemplates);
+  }
+
+  public void setRepresenationTemplates(Collection<? extends RepresentationTemplate> collection) {
+    representationTemplates.clear();
+    if (collection == null || collection.isEmpty()) {
+      return;
+    }
+    representationTemplates.addAll(collection);
+  }
+
+  public void addRepresentationTemplate(RepresentationTemplate representationTemplate) {
+    representationTemplates.add(representationTemplate);
+  }
+
+  public void removeRepresentationTemplate(RepresentationTemplate representationTemplate) {
+    representationTemplates.remove(representationTemplate);
+  }
+
+  public List<VariationTemplate> getVariationTemplates() {
+    return Collections.unmodifiableList(variationTemplates);
+  }
+
+  public void setVariationTemplates(Collection<? extends VariationTemplate> collection) {
+    variationTemplates.clear();
+    if (collection == null || collection.isEmpty()) {
+      return;
+    }
+    variationTemplates.addAll(collection);
+  }
+
+  public void addVariationTemplate(VariationTemplate variationTemplate) {
+    variationTemplates.add(variationTemplate);
+  }
+
+  public void removeRepresentationTemplate(VariationTemplate variationTemplate) {
+    variationTemplates.remove(variationTemplate);
+  }
 
   public Workspace getWorkspace() {
     return workspace;
@@ -44,6 +95,30 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
       return null;
     }
     return workspace.getId();
+  }
+
+  public boolean isFriendliesPopulated() {
+    return friendliesPopulated;
+  }
+
+  public void setFriendliesPopulated(boolean friendliesPopulated) {
+    this.friendliesPopulated = friendliesPopulated;
+  }
+
+  public boolean isRepresentationPopulated() {
+    return representationPopulated;
+  }
+
+  public void setRepresentationPopulated(boolean representationPopulated) {
+    this.representationPopulated = representationPopulated;
+  }
+
+  public boolean isVariationPopulated() {
+    return variationPopulated;
+  }
+
+  public void setVariationPopulated(boolean variationPopulated) {
+    this.variationPopulated = variationPopulated;
   }
 
   @Override
