@@ -70,6 +70,7 @@
             </simple-value>
           </collection>
         </value>
+        <required>true</required>
         <validator>
           <validatorType>javascript</validatorType>
           <uri>

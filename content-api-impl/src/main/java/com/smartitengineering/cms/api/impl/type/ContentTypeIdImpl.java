@@ -18,11 +18,11 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
-import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.impl.Utils;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentTypeId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;

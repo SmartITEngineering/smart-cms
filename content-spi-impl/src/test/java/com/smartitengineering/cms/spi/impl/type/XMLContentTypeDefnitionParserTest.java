@@ -32,12 +32,15 @@ import com.smartitengineering.cms.api.impl.workspace.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
+import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
 import com.smartitengineering.cms.api.type.MutableResourceUri;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceUri.Type;
+import com.smartitengineering.cms.api.type.ValidatorType;
+import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.impl.content.PersistentServiceRegistrar;
 import com.smartitengineering.cms.spi.impl.type.validator.ContentTypeDefinitionParsers;
@@ -128,7 +131,9 @@ public class XMLContentTypeDefnitionParserTest {
     Collection<MutableContentType> collection = init();
     Iterator<MutableContentType> iterator = collection.iterator();
     MutableContentType contentType = iterator.next();
-    logger.debug("First status size is " + contentType.getStatuses().size());
+    if (logger.isInfoEnabled()) {
+      logger.debug(new StringBuffer("First status size is ").append(contentType.getStatuses().size()).toString());
+    }
     Assert.assertEquals(3, contentType.getStatuses().size());
     String[] name = {"draft", "marketed", "obselete"};
     for (int i = 0; i < 3; i++) {
@@ -139,7 +144,9 @@ public class XMLContentTypeDefnitionParserTest {
 
     }
     contentType = iterator.next();
-    logger.debug("2nd status size is " + contentType.getStatuses().size());
+    if (logger.isInfoEnabled()) {
+      logger.debug(new StringBuffer("2nd status size is ").append(contentType.getStatuses().size()).toString());
+    }
     Assert.assertEquals(3, contentType.getStatuses().size());
     for (int i = 0; i < 3; i++) {
       MutableContentStatus contentStatus = SmartContentAPI.getInstance().getContentTypeLoader().
@@ -154,14 +161,80 @@ public class XMLContentTypeDefnitionParserTest {
     Collection<MutableContentType> collection = init();
     Iterator<MutableContentType> iterator = collection.iterator();
     MutableContentType contentType = iterator.next();
-    logger.debug("first Fileds size is " + contentType.getFieldDefs().size());
-    System.out.println(contentType.getContentTypeID() + "first Fileds size is " + contentType.getFieldDefs().size());
+
+    if (logger.isInfoEnabled()) {
+      logger.debug(new StringBuffer("first Fileds size is ").append(contentType.getFieldDefs().size()).toString());
+    }
     Assert.assertEquals(3, contentType.getFieldDefs().size());
     contentType = iterator.next();
-    logger.debug("2nd Fileds size is " + contentType.getFieldDefs().size());
-    System.out.println(contentType.getContentTypeID() + "2nd Fileds size is " + contentType.getFieldDefs().size());
+
+    if (logger.isInfoEnabled()) {
+      logger.debug(new StringBuffer("2nd Fileds size is ").append(contentType.getFieldDefs()).toString());
+    }
     Assert.assertEquals(2, contentType.getFieldDefs().size());
 
+  }
+
+  @Test
+  public void testParsingField() throws Exception {
+    Collection<MutableContentType> collection = init();
+    Iterator<MutableContentType> iterator = collection.iterator();
+    Collection<FieldDef> fieldDefs = iterator.next().getMutableFieldDefs();
+    Iterator<FieldDef> fieldIterator = fieldDefs.iterator();
+    Assert.assertEquals(3, fieldDefs.size());
+    FieldDef fieldDef = fieldIterator.next();
+
+    //parsing fieldA
+
+    Assert.assertEquals("fieldA", fieldDef.getName());
+    Assert.assertEquals(2, fieldDef.getVariations().size());
+
+    Collection<VariationDef> variationDefs = fieldDef.getVariations();
+    Iterator<VariationDef> variationIterator = variationDefs.iterator();
+    VariationDef variationDef = variationIterator.next();
+
+    Assert.assertEquals("avar", variationDef.getName());
+    Assert.assertEquals(TemplateType.VELOCITY, variationDef.getTemplateType());
+    Assert.assertEquals("some/type", variationDef.getMIMEType());
+    Assert.assertEquals(Type.EXTERNAL, variationDef.getResourceUri().getType());
+    Assert.assertEquals("http://some/uri", variationDef.getResourceUri().getValue());
+
+//    Assert.assertEquals(variationDef, variationDef1);          /*not working*/
+    variationDef = variationIterator.next();
+
+    Assert.assertEquals("anothervar", variationDef.getName());
+    Assert.assertEquals(TemplateType.JAVASCRIPT, variationDef.getTemplateType());
+    Assert.assertEquals("some/type", variationDef.getMIMEType());
+    Assert.assertEquals(Type.INTERNAL, variationDef.getResourceUri().getType());
+    Assert.assertEquals("internalvar", variationDef.getResourceUri().getValue());
+
+    //end parsing fieldA
+
+    fieldDef = fieldIterator.next();
+    Assert.assertEquals("fieldB", fieldDef.getName());
+    Assert.assertEquals(ValidatorType.JAVASCRIPT, fieldDef.getCustomValidator().geType());
+    Assert.assertEquals(Type.INTERNAL, fieldDef.getCustomValidator().getUri().getType());
+    Assert.assertEquals("internalvar", fieldDef.getCustomValidator().getUri().getValue());
+    Assert.assertEquals(Boolean.TRUE, fieldDef.isRequired());
+
+    fieldDef = fieldIterator.next();
+    Assert.assertEquals("fieldC", fieldDef.getName());
+    Assert.assertEquals(ValidatorType.GROOVY, fieldDef.getCustomValidator().geType());
+    Assert.assertEquals(Type.EXTERNAL, fieldDef.getCustomValidator().getUri().getType());
+    Assert.assertEquals("http://some/uri", fieldDef.getCustomValidator().getUri().getValue());
+    fieldDefs.clear();
+    fieldDefs = iterator.next().getMutableFieldDefs();
+    Assert.assertEquals(2, fieldDefs.size());
+    Iterator<FieldDef> newFieldIterator = fieldDefs.iterator();
+    FieldDef newFieldDef = newFieldIterator.next();
+    Assert.assertEquals("image", newFieldDef.getName());
+    Assert.assertEquals(Boolean.TRUE, newFieldDef.getSearchDefinition().isIndexed());
+    Assert.assertEquals(Boolean.FALSE, newFieldDef.getSearchDefinition().isStored());
+    Assert.assertEquals("a", newFieldDef.getSearchDefinition().getBoostConfig());
+    Assert.assertEquals(Boolean.TRUE, newFieldDef.isFieldStandaloneUpdateAble());
+    newFieldDef = newFieldIterator.next();
+    Assert.assertEquals("altText", newFieldDef.getName());
+    Assert.assertEquals(Boolean.TRUE, newFieldDef.isFieldStandaloneUpdateAble());
   }
 
   @Test
