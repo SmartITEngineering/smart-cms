@@ -107,25 +107,28 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   }
 
   @Override
-  public RepresentationTemplate putRepresentationTemplate(String name, TemplateType templateType, InputStream stream)
+  public RepresentationTemplate putRepresentationTemplate(WorkspaceId to, String name, TemplateType templateType,
+                                                          InputStream stream)
       throws IOException {
-    return putRepresentationTemplate(name, templateType, IOUtils.toByteArray(stream));
+    return putRepresentationTemplate(to, name, templateType, IOUtils.toByteArray(stream));
   }
 
   @Override
-  public RepresentationTemplate putRepresentationTemplate(String name, TemplateType templateType, byte[] data) {
-    return SmartContentSPI.getInstance().getWorkspaceService().putRepresentationTemplate(name, templateType, data);
+  public RepresentationTemplate putRepresentationTemplate(WorkspaceId to, String name, TemplateType templateType,
+                                                          byte[] data) {
+    return SmartContentSPI.getInstance().getWorkspaceService().putRepresentationTemplate(to, name, templateType, data);
   }
 
   @Override
-  public VariationTemplate putVariationTemplate(String name, TemplateType templateType, InputStream stream) throws
+  public VariationTemplate putVariationTemplate(WorkspaceId to, String name, TemplateType templateType,
+                                                InputStream stream) throws
       IOException {
-    return putVariationTemplate(name, templateType, IOUtils.toByteArray(stream));
+    return putVariationTemplate(to, name, templateType, IOUtils.toByteArray(stream));
   }
 
   @Override
-  public VariationTemplate putVariationTemplate(String name, TemplateType templateType, byte[] data) {
-    return SmartContentSPI.getInstance().getWorkspaceService().putVariationTemplate(name, templateType, data);
+  public VariationTemplate putVariationTemplate(WorkspaceId to, String name, TemplateType templateType, byte[] data) {
+    return SmartContentSPI.getInstance().getWorkspaceService().putVariationTemplate(to, name, templateType, data);
   }
 
   @Override
@@ -144,12 +147,12 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   }
 
   @Override
-  public void addFriend(WorkspaceId workspaceId) {
-    SmartContentSPI.getInstance().getWorkspaceService().addFriend(workspaceId);
+  public void addFriend(WorkspaceId to, WorkspaceId workspaceId) {
+    SmartContentSPI.getInstance().getWorkspaceService().addFriend(to, workspaceId);
   }
 
   @Override
-  public void removeFriend(WorkspaceId workspaceId) {
-    SmartContentSPI.getInstance().getWorkspaceService().removeFriend(workspaceId);
+  public void removeFriend(WorkspaceId from, WorkspaceId workspaceId) {
+    SmartContentSPI.getInstance().getWorkspaceService().removeFriend(from, workspaceId);
   }
 }

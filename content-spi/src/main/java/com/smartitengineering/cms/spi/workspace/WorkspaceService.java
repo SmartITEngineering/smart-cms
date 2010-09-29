@@ -44,17 +44,19 @@ public interface WorkspaceService {
 
   public Collection<WorkspaceId> getFriendlies(WorkspaceId workspaceId);
 
-  public void addFriend(WorkspaceId workspaceId);
+  public void addFriend(WorkspaceId to, WorkspaceId workspaceId);
 
-  public void removeFriend(WorkspaceId workspaceId);
+  public void removeFriend(WorkspaceId from, WorkspaceId workspaceId);
 
-  public RepresentationTemplate putRepresentationTemplate(String name, TemplateType templateType, byte[] data);
+  public RepresentationTemplate putRepresentationTemplate(WorkspaceId workspaceId, String name,
+                                                          TemplateType templateType, byte[] data);
 
   public RepresentationTemplate getRepresentationTemplate(WorkspaceId workspaceId, String name);
 
   public void deleteRepresentation(RepresentationTemplate template);
 
-  public VariationTemplate putVariationTemplate(String name, TemplateType templateType, byte[] data);
+  public VariationTemplate putVariationTemplate(WorkspaceId workspaceId, String name, TemplateType templateType,
+                                                byte[] data);
 
   public VariationTemplate getVariationTemplate(WorkspaceId workspaceId, String name);
 

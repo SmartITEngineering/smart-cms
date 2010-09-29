@@ -41,18 +41,18 @@ public interface WorkspaceAPI {
 
   WorkspaceId createWorkspace(WorkspaceId workspaceId);
 
-  RepresentationTemplate putRepresentationTemplate(String name, TemplateType templateType, InputStream stream) throws
+  RepresentationTemplate putRepresentationTemplate(WorkspaceId to, String name, TemplateType templateType, InputStream stream) throws
       IOException;
 
-  RepresentationTemplate putRepresentationTemplate(String name, TemplateType templateType, byte[] data);
+  RepresentationTemplate putRepresentationTemplate(WorkspaceId to, String name, TemplateType templateType, byte[] data);
 
   void delete(RepresentationTemplate template);
 
   void delete(VariationTemplate template);
 
-  VariationTemplate putVariationTemplate(String name, TemplateType templateType, InputStream stream) throws IOException;
+  VariationTemplate putVariationTemplate(WorkspaceId to, String name, TemplateType templateType, InputStream stream) throws IOException;
 
-  VariationTemplate putVariationTemplate(String name, TemplateType templateType, byte[] data);
+  VariationTemplate putVariationTemplate(WorkspaceId to, String name, TemplateType templateType, byte[] data);
 
   WorkspaceId getWorkspaceIdIfExists(String name);
 
@@ -64,7 +64,7 @@ public interface WorkspaceAPI {
 
   public Collection<WorkspaceId> getFriendlies(WorkspaceId workspaceId);
 
-  public void addFriend(WorkspaceId workspaceId);
+  public void addFriend(WorkspaceId to, WorkspaceId workspaceId);
 
-  public void removeFriend(WorkspaceId workspaceId);
+  public void removeFriend(WorkspaceId from, WorkspaceId workspaceId);
 }

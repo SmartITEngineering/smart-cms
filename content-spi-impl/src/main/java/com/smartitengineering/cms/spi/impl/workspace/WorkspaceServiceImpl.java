@@ -105,17 +105,18 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public void addFriend(WorkspaceId workspaceId){
+  public void addFriend(WorkspaceId to, WorkspaceId workspaceId) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public void removeFriend(WorkspaceId workspaceId){
+  public void removeFriend(WorkspaceId from, WorkspaceId workspaceId) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public RepresentationTemplate putRepresentationTemplate(String name, TemplateType templateType, byte[] data) {
+  public RepresentationTemplate putRepresentationTemplate(WorkspaceId workspaceId, String name,
+                                                          TemplateType templateType, byte[] data) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
@@ -125,7 +126,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public VariationTemplate putVariationTemplate(String name, TemplateType templateType, byte[] data) {
+  public VariationTemplate putVariationTemplate(WorkspaceId workspaceId, String name, TemplateType templateType,
+                                                byte[] data) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
