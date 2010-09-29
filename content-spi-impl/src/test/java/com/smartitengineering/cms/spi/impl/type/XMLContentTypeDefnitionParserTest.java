@@ -26,25 +26,19 @@ import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.WorkspaceAPI;
 import com.smartitengineering.cms.api.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
-import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.impl.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
-import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
-import com.smartitengineering.cms.api.type.MutableFieldDef;
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
 import com.smartitengineering.cms.api.type.MutableResourceUri;
-import com.smartitengineering.cms.api.type.MutableValidatorDef;
-import com.smartitengineering.cms.api.type.MutableVariationDef;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceUri.Type;
 import com.smartitengineering.cms.api.type.TemplateType;
-import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
@@ -203,14 +197,12 @@ public class XMLContentTypeDefnitionParserTest {
     if (logger.isInfoEnabled()) {
       logger.debug(new StringBuffer("first Fileds size is ").append(contentType.getFieldDefs().size()).toString());
     }
-//    System.out.println(contentType.getContentTypeID() + "first Fileds size is " + contentType.getFieldDefs().size());
     Assert.assertEquals(3, contentType.getFieldDefs().size());
     contentType = iterator.next();
 
     if (logger.isInfoEnabled()) {
       logger.debug(new StringBuffer("2nd Fileds size is ").append(contentType.getFieldDefs()).toString());
     }
-//    System.out.println(contentType.getContentTypeID() + "2nd Fileds size is " + contentType.getFieldDefs().size());
     Assert.assertEquals(2, contentType.getFieldDefs().size());
 
   }
@@ -232,20 +224,6 @@ public class XMLContentTypeDefnitionParserTest {
     Collection<VariationDef> variationDefs = fieldDef.getVariations();
     Iterator<VariationDef> variationIterator = variationDefs.iterator();
     VariationDef variationDef = variationIterator.next();
-//    System.out.println(variationDef.getName());
-//    System.out.println(variationDef.getMIMEType());
-//    System.out.println(variationDef.getResourceUri().getType());
-//    System.out.println(variationDef.getResourceUri().getValue());
-//    System.out.println(variationDef.getTemplateType());
-//    MutableResourceUri resourceUri1 = SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
-//    resourceUri1.setType(Type.EXTERNAL);
-//    resourceUri1.setValue("http://some/uri");
-//
-//    MutableVariationDef variationDef1 = SmartContentAPI.getInstance().getContentTypeLoader().createMutableVariationDef();
-//    variationDef1.setName("avar");
-//    variationDef1.setMIMEType("some/type");
-//    variationDef1.setResourceUri(resourceUri1);
-//    variationDef1.setTemplateType(TemplateType.VELOCITY);
 
     Assert.assertEquals("avar", variationDef.getName());
     Assert.assertEquals(TemplateType.VELOCITY, variationDef.getTemplateType());
@@ -269,6 +247,7 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals(ValidatorType.JAVASCRIPT, fieldDef.getCustomValidator().geType());
     Assert.assertEquals(Type.INTERNAL, fieldDef.getCustomValidator().getUri().getType());
     Assert.assertEquals("internalvar", fieldDef.getCustomValidator().getUri().getValue());
+    Assert.assertEquals(Boolean.TRUE, fieldDef.isRequired());
 
     fieldDef = fieldIterator.next();
     Assert.assertEquals("fieldC", fieldDef.getName());
@@ -283,8 +262,11 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals("image", newFieldDef.getName());
     Assert.assertEquals(Boolean.TRUE, newFieldDef.getSearchDefinition().isIndexed());
     Assert.assertEquals(Boolean.FALSE, newFieldDef.getSearchDefinition().isStored());
-    System.out.println(fieldDef.getSearchDefinition().getBoostConfig().toString());
-    //Assert.assertEquals("a", fieldDef.getSearchDefinition().getBoostConfig());
+    Assert.assertEquals("a", newFieldDef.getSearchDefinition().getBoostConfig());
+    Assert.assertEquals(Boolean.TRUE, newFieldDef.isFieldStandaloneUpdateAble());
+    newFieldDef = newFieldIterator.next();
+    Assert.assertEquals("altText", newFieldDef.getName());
+    Assert.assertEquals(Boolean.TRUE, newFieldDef.isFieldStandaloneUpdateAble());
   }
 
   @Test
