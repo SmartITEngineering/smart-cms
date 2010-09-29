@@ -18,7 +18,6 @@
  */
 package com.smartitengineering.cms.spi.impl.workspace;
 
-import com.google.inject.Inject;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
@@ -29,9 +28,6 @@ import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 import com.smartitengineering.cms.spi.workspace.WorkspaceService;
-import com.smartitengineering.dao.common.CommonReadDao;
-import com.smartitengineering.dao.common.CommonWriteDao;
-import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -41,16 +37,7 @@ import java.util.List;
  *
  * @author imyousuf
  */
-public class WorkspaceServiceImpl implements WorkspaceService {
-
-  @Inject
-  private PersistentContentTypeReader contentTypeReader;
-  @Inject
-  private CommonReadDao<PersistentWorkspace, WorkspaceId> commonReadDao;
-  @Inject
-  private CommonWriteDao<PersistentWorkspace> commonWriteDao;
-  @Inject
-  private GenericAdapter<Workspace, PersistentWorkspace> adapter;
+public class WorkspaceServiceImpl extends AbstractWorkspaceService implements WorkspaceService {
 
   public PersistentContentTypeReader getContentTypeReader() {
     return contentTypeReader;
@@ -68,10 +55,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public Workspace load(WorkspaceId workspaceId) {
-    if (workspaceId == null) {
-      return null;
-    }
-    return adapter.convertInversely(commonReadDao.getById(workspaceId));
+    return adapter.convertInversely(getByIdWorkspaceOnly(workspaceId));
   }
 
   @Override
