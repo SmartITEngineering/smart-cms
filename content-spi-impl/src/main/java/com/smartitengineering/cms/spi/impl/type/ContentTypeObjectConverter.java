@@ -412,21 +412,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
       NavigableMap<byte[], byte[]> fieldMap = startRow.getFamilyMap(FAMILY_FIELDS);
       //From a map of all cells form a map of cells by field name
       Map<String, Map<byte[], byte[]>> fieldsByName = new LinkedHashMap<String, Map<byte[], byte[]>>();
-      logger.info("Organize fields by their name so that each field cells can be processed at once");
-      for (Entry<byte[], byte[]> entry : fieldMap.entrySet()) {
-        final String key = Bytes.toString(entry.getKey());
-        final int indexOfFirstColon = key.indexOf(':');
-        final String fieldName = key.substring(0, indexOfFirstColon);
-        final byte[] fieldNameBytes = Bytes.toBytes(fieldName);
-        if (Bytes.startsWith(entry.getKey(), fieldNameBytes)) {
-          Map<byte[], byte[]> fieldCells = fieldsByName.get(fieldName);
-          if (fieldCells == null) {
-            fieldCells = new LinkedHashMap<byte[], byte[]>();
-            fieldsByName.put(fieldName, fieldCells);
-          }
-          fieldCells.put(entry.getKey(), entry.getValue());
-        }
-      }
+      Utils.organizeByPrefix(fieldMap, fieldsByName, ':');
       for (String fieldName : fieldsByName.keySet()) {
         final Map<byte[], byte[]> fieldCells = fieldsByName.get(fieldName);
         final Map<Integer, MutableVariationDef> fieldVariations = new TreeMap<Integer, MutableVariationDef>();
