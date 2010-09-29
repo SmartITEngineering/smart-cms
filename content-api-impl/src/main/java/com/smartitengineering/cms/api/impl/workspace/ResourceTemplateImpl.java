@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl.workspace;
 
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.workspace.PersistableResourceTemplate;
 import java.nio.ByteBuffer;
@@ -99,5 +100,32 @@ public class ResourceTemplateImpl implements PersistableResourceTemplate {
   @Override
   public WorkspaceId getWorkspaceId() {
     return workspaceId;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (ResourceTemplate.class.isAssignableFrom(obj.getClass())) {
+      return false;
+    }
+    final ResourceTemplate other = (ResourceTemplate) obj;
+    if ((this.name == null) ? (other.getName() != null) : !this.name.equals(other.getName())) {
+      return false;
+    }
+    if (this.workspaceId != other.getWorkspaceId() &&
+        (this.workspaceId == null || !this.workspaceId.equals(other.getWorkspaceId()))) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 5;
+    hash = 29 * hash + (this.name != null ? this.name.hashCode() : 0);
+    hash = 29 * hash + (this.workspaceId != null ? this.workspaceId.hashCode() : 0);
+    return hash;
   }
 }
