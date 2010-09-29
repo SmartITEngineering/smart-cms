@@ -32,6 +32,7 @@ import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.impl.AbstactObjectRowConverter;
+import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -82,6 +83,16 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
       for (VariationTemplate template : instance.getVariationTemplates()) {
         popolatePutWithResource(FAMILY_VARIATIONS_INFO, template, put);
         popolatePutWithResourceData(FAMILY_VARIATIONS_DATA, template, put);
+      }
+    }
+    if (instance.isFriendliesPopulated()) {
+      for (WorkspaceId friendly : instance.getFriendlies()) {
+        try {
+          put.add(FAMILY_FRIENDLIES, getInfoProvider().getRowIdFromId(friendly), Bytes.toBytes(friendly.toString()));
+        }
+        catch (IOException ex) {
+          logger.warn("Error putting friendly", ex);
+        }
       }
     }
   }
@@ -155,6 +166,21 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
           }
         }
       }
+      if (instance.isFriendliesPopulated()) {
+        if (instance.getFriendlies().isEmpty()) {
+          delete.deleteFamily(FAMILY_FRIENDLIES);
+        }
+        else {
+          for (WorkspaceId friendly : instance.getFriendlies()) {
+            try {
+              delete.deleteColumn(FAMILY_FRIENDLIES, getInfoProvider().getRowIdFromId(friendly));
+            }
+            catch (IOException ex) {
+              logger.warn("Error deleting friendly", ex);
+            }
+          }
+        }
+      }
     }
   }
 
@@ -205,7 +231,7 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
       final NavigableMap<byte[], byte[]> varInfo = allFamilies.get(FAMILY_VARIATIONS_INFO);
       final NavigableMap<byte[], byte[]> varData = allFamilies.get(FAMILY_VARIATIONS_DATA);
       if (varInfo != null) {
-        persistentWorkspace.setRepresentationPopulated(true);
+        persistentWorkspace.setVariationPopulated(true);
         final Map<String, Map<byte[], byte[]>> varsByName = new LinkedHashMap<String, Map<byte[], byte[]>>();
         Utils.organizeByPrefix(varInfo, varsByName, ':');
         final Map<String, Map<byte[], byte[]>> varsDataByName = new LinkedHashMap<String, Map<byte[], byte[]>>();
@@ -217,6 +243,20 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
           populateResourceTemplateInfo(varName, template, varsByName.get(varName));
           populateResourceTemplateData(varName, template, varsDataByName.get(varName));
           persistentWorkspace.addVariationTemplate(template);
+        }
+      }
+      {
+        final Map<byte[], byte[]> friendlies = allFamilies.get(FAMILY_FRIENDLIES);
+        if (friendlies != null && !friendlies.isEmpty()) {
+          persistentWorkspace.setFriendliesPopulated(true);
+          for (byte[] workspaceId : friendlies.keySet()) {
+            try {
+              persistentWorkspace.addFriendly(getInfoProvider().getIdFromRowId(workspaceId));
+            }
+            catch (Exception ex) {
+              logger.warn("Error putting friendly", ex);
+            }
+          }
         }
       }
     }

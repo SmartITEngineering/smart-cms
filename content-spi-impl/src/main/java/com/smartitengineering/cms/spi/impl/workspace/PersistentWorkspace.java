@@ -40,6 +40,27 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
   private boolean friendliesPopulated;
   private final List<RepresentationTemplate> representationTemplates = new ArrayList<RepresentationTemplate>();
   private final List<VariationTemplate> variationTemplates = new ArrayList<VariationTemplate>();
+  private final List<WorkspaceId> friendlies = new ArrayList<WorkspaceId>();
+
+  public List<WorkspaceId> getFriendlies() {
+    return Collections.unmodifiableList(friendlies);
+  }
+
+  public void setFriendlies(Collection<? extends WorkspaceId> collection) {
+    friendlies.clear();
+    if (collection == null || collection.isEmpty()) {
+      return;
+    }
+    friendlies.addAll(collection);
+  }
+
+  public void addFriendly(WorkspaceId friendly) {
+    friendlies.add(friendly);
+  }
+
+  public void removeFriendly(WorkspaceId friendly) {
+    friendlies.remove(friendly);
+  }
 
   public List<RepresentationTemplate> getRepresentationTemplates() {
     return Collections.unmodifiableList(representationTemplates);
