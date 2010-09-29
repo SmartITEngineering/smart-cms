@@ -31,6 +31,7 @@ import com.smartitengineering.cms.api.impl.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
+import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
@@ -182,17 +183,32 @@ public class XMLContentTypeDefnitionParserTest {
   }
 
   @Test
+  public void testParsingFileds() throws Exception {
+    Collection<MutableContentType> collection = init();
+    Iterator<MutableContentType> iterator = collection.iterator();
+    MutableContentType contentType = iterator.next();
+    logger.debug("first Fileds size is " + contentType.getFieldDefs().size());
+    System.out.println(contentType.getContentTypeID() + "first Fileds size is " + contentType.getFieldDefs().size());
+    Assert.assertEquals(3, contentType.getFieldDefs().size());
+    contentType = iterator.next();
+    logger.debug("2nd Fileds size is " + contentType.getFieldDefs().size());
+    System.out.println(contentType.getContentTypeID() + "2nd Fileds size is " + contentType.getFieldDefs().size());
+    Assert.assertEquals(2, contentType.getFieldDefs().size());
+
+  }
+
+  @Test
   public void testParsingRepresentations() throws Exception {
     Collection<MutableContentType> collection = init();
     Iterator<MutableContentType> iterator = collection.iterator();
     MutableContentType contentType = iterator.next();
     logger.debug("First ContentType contains " + contentType.getRepresentationDefs().size() + " no of representations.");
-    System.out.println("First ContentType contains " + contentType.getRepresentationDefs().size()
+    logger.debug("First ContentType contains " + contentType.getRepresentationDefs().size()
         + " no of representations.");
     Assert.assertEquals(0, contentType.getRepresentationDefs().size());
     contentType = iterator.next();
     logger.debug("2nd ContentType contains " + contentType.getRepresentationDefs().size() + " no of representations.");
-    System.out.println("2nd ContentType contains " + contentType.getRepresentationDefs().size()
+    logger.debug("2nd ContentType contains " + contentType.getRepresentationDefs().size()
         + " no of representations.");
     Assert.assertEquals(2, contentType.getRepresentationDefs().size());
 
@@ -210,13 +226,13 @@ public class XMLContentTypeDefnitionParserTest {
 
 
     final RepresentationDef defFromXml = contentType.getRepresentationDefs().get("arep");
-    System.out.println(def.getName() + " Name " + defFromXml.getName());
-    System.out.println(def.getMIMEType() + " mime type " + defFromXml.getMIMEType());
-    System.out.println(def.getResourceUri().getType().name() + " Uri Type "
+    logger.debug(def.getName() + " Name " + defFromXml.getName());
+    logger.debug(def.getMIMEType() + " mime type " + defFromXml.getMIMEType());
+    logger.debug(def.getResourceUri().getType().name() + " Uri Type "
         + defFromXml.getResourceUri().getType().name());
-    System.out.println(def.getResourceUri().getValue() + " RESOURCE URI " + defFromXml.getResourceUri().getValue());
-    System.out.println(def.getTemplateType().name() + " TEMPLATE TYPE " + defFromXml.getTemplateType().name());
-    System.out.println(def.hashCode() + " Hash COde " + defFromXml.hashCode());
+    logger.debug(def.getResourceUri().getValue() + " RESOURCE URI " + defFromXml.getResourceUri().getValue());
+    logger.debug(def.getTemplateType().name() + " TEMPLATE TYPE " + defFromXml.getTemplateType().name());
+    logger.debug(def.hashCode() + " Hash COde " + defFromXml.hashCode());
 //    Assert.assertEquals(def, defFromXml);
 
     Assert.assertEquals(def.getName(), defFromXml.getName());
@@ -239,13 +255,13 @@ public class XMLContentTypeDefnitionParserTest {
 
 
     final RepresentationDef defFromXml1 = contentType.getRepresentationDefs().get("anotherrep");
-    System.out.println(def1.getName() + " Name " + defFromXml1.getName());
-    System.out.println(def1.getMIMEType() + " mime type " + defFromXml1.getMIMEType());
-    System.out.println(def1.getResourceUri().getType().name() + " Uri Type "
+    logger.debug(def1.getName() + " Name " + defFromXml1.getName());
+    logger.debug(def1.getMIMEType() + " mime type " + defFromXml1.getMIMEType());
+    logger.debug(def1.getResourceUri().getType().name() + " Uri Type "
         + defFromXml1.getResourceUri().getType().name());
-    System.out.println(def1.getResourceUri().getValue() + " RESOURCE URI " + defFromXml1.getResourceUri().getValue());
-    System.out.println(def1.getTemplateType().name() + " TEMPLATE TYPE " + defFromXml1.getTemplateType().name());
-    System.out.println(def1.hashCode() + " Hash COde " + defFromXml1.hashCode());
+    logger.debug(def1.getResourceUri().getValue() + " RESOURCE URI " + defFromXml1.getResourceUri().getValue());
+    logger.debug(def1.getTemplateType().name() + " TEMPLATE TYPE " + defFromXml1.getTemplateType().name());
+    logger.debug(def1.hashCode() + " Hash COde " + defFromXml1.hashCode());
     //Assert.assertEquals(def1, defFromXml1);
 
     Assert.assertEquals(def1.getName(), defFromXml1.getName());
