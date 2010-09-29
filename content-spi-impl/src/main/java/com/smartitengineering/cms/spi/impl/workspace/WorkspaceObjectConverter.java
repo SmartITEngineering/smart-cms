@@ -74,13 +74,13 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     put.add(FAMILY_SELF, CELL_NAME, Bytes.toBytes(instance.getId().getName()));
     put.add(FAMILY_SELF, CELL_CREATED, Utils.toBytes(instance.getWorkspace().getCreationDate()));
     if (instance.isRepresentationPopulated() && !instance.getRepresentationTemplates().isEmpty()) {
-      for (RepresentationTemplate template : instance.getRepresentationTemplates()) {
+      for (PersistableRepresentationTemplate template : instance.getRepresentationTemplates()) {
         popolatePutWithResource(FAMILY_REPRESENTATIONS_INFO, template, put);
         popolatePutWithResourceData(FAMILY_REPRESENTATIONS_DATA, template, put);
       }
     }
     if (instance.isVariationPopulated() && !instance.getVariationTemplates().isEmpty()) {
-      for (VariationTemplate template : instance.getVariationTemplates()) {
+      for (PersistableVariationTemplate template : instance.getVariationTemplates()) {
         popolatePutWithResource(FAMILY_VARIATIONS_INFO, template, put);
         popolatePutWithResourceData(FAMILY_VARIATIONS_DATA, template, put);
       }
@@ -101,13 +101,15 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     return Bytes.toBytes(new StringBuilder(template.getName()).append(':').toString());
   }
 
-  protected void popolatePutWithResource(byte[] family, ResourceTemplate template, Put put) {
+  protected void popolatePutWithResource(byte[] family, PersistableResourceTemplate template, Put put) {
     byte[] prefix = getPrefixForResource(template);
     put.add(family, Bytes.add(prefix, CELL_TEMPLATE_TYPE), Bytes.toBytes(template.getTemplateType().name()));
     final Date created = template.getCreatedDate() == null ? new Date() : template.getCreatedDate();
     put.add(family, Bytes.add(prefix, CELL_CREATED), Utils.toBytes(created));
+    template.setCreatedDate(created);
     final Date lastModified = template.getLastModifiedDate() == null ? new Date() : template.getLastModifiedDate();
     put.add(family, Bytes.add(prefix, CELL_LAST_MODIFIED), Utils.toBytes(lastModified));
+    template.setLastModifiedDate(lastModified);
   }
 
   protected void popolatePutWithResourceData(byte[] family, ResourceTemplate template, Put put) {

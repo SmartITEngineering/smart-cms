@@ -18,10 +18,10 @@
  */
 package com.smartitengineering.cms.spi.impl.workspace;
 
-import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
-import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
+import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.domain.AbstractGenericPersistentDTO;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,8 +38,8 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
   private boolean representationPopulated;
   private boolean variationPopulated;
   private boolean friendliesPopulated;
-  private final List<RepresentationTemplate> representationTemplates = new ArrayList<RepresentationTemplate>();
-  private final List<VariationTemplate> variationTemplates = new ArrayList<VariationTemplate>();
+  private final List<PersistableRepresentationTemplate> representationTemplates = new ArrayList<PersistableRepresentationTemplate>();
+  private final List<PersistableVariationTemplate> variationTemplates = new ArrayList<PersistableVariationTemplate>();
   private final List<WorkspaceId> friendlies = new ArrayList<WorkspaceId>();
 
   public List<WorkspaceId> getFriendlies() {
@@ -62,11 +62,11 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
     friendlies.remove(friendly);
   }
 
-  public List<RepresentationTemplate> getRepresentationTemplates() {
+  public List<PersistableRepresentationTemplate> getRepresentationTemplates() {
     return Collections.unmodifiableList(representationTemplates);
   }
 
-  public void setRepresenationTemplates(Collection<? extends RepresentationTemplate> collection) {
+  public void setRepresenationTemplates(Collection<? extends PersistableRepresentationTemplate> collection) {
     representationTemplates.clear();
     if (collection == null || collection.isEmpty()) {
       return;
@@ -74,19 +74,19 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
     representationTemplates.addAll(collection);
   }
 
-  public void addRepresentationTemplate(RepresentationTemplate representationTemplate) {
-    representationTemplates.add(representationTemplate);
+  public void addRepresentationTemplate(PersistableRepresentationTemplate PersistableRepresentationTemplate) {
+    representationTemplates.add(PersistableRepresentationTemplate);
   }
 
-  public void removeRepresentationTemplate(RepresentationTemplate representationTemplate) {
-    representationTemplates.remove(representationTemplate);
+  public void removeRepresentationTemplate(PersistableRepresentationTemplate PersistableRepresentationTemplate) {
+    representationTemplates.remove(PersistableRepresentationTemplate);
   }
 
-  public List<VariationTemplate> getVariationTemplates() {
+  public List<PersistableVariationTemplate> getVariationTemplates() {
     return Collections.unmodifiableList(variationTemplates);
   }
 
-  public void setVariationTemplates(Collection<? extends VariationTemplate> collection) {
+  public void setVariationTemplates(Collection<? extends PersistableVariationTemplate> collection) {
     variationTemplates.clear();
     if (collection == null || collection.isEmpty()) {
       return;
@@ -94,11 +94,11 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
     variationTemplates.addAll(collection);
   }
 
-  public void addVariationTemplate(VariationTemplate variationTemplate) {
+  public void addVariationTemplate(PersistableVariationTemplate variationTemplate) {
     variationTemplates.add(variationTemplate);
   }
 
-  public void removeRepresentationTemplate(VariationTemplate variationTemplate) {
+  public void removeRepresentationTemplate(PersistableVariationTemplate variationTemplate) {
     variationTemplates.remove(variationTemplate);
   }
 
