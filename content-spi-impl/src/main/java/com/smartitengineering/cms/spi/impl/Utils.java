@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -68,15 +69,20 @@ public final class Utils {
     for (Entry<byte[], byte[]> entry : fieldMap.entrySet()) {
       final String key = Bytes.toString(entry.getKey());
       final int indexOfFirstColon = key.indexOf(separator);
-      final String fieldName = key.substring(0, indexOfFirstColon);
-      final byte[] fieldNameBytes = Bytes.toBytes(fieldName);
-      if (Bytes.startsWith(entry.getKey(), fieldNameBytes)) {
-        Map<byte[], byte[]> fieldCells = fieldsByName.get(fieldName);
-        if (fieldCells == null) {
-          fieldCells = new LinkedHashMap<byte[], byte[]>();
-          fieldsByName.put(fieldName, fieldCells);
+      if (indexOfFirstColon > -1) {
+        final String fieldName = key.substring(0, indexOfFirstColon);
+        final byte[] fieldNameBytes = Bytes.toBytes(fieldName);
+        if (Bytes.startsWith(entry.getKey(), fieldNameBytes)) {
+          Map<byte[], byte[]> fieldCells = fieldsByName.get(fieldName);
+          if (fieldCells == null) {
+            fieldCells = new LinkedHashMap<byte[], byte[]>();
+            fieldsByName.put(fieldName, fieldCells);
+          }
+          fieldCells.put(entry.getKey(), entry.getValue());
         }
-        fieldCells.put(entry.getKey(), entry.getValue());
+      }
+      else {
+        fieldsByName.put(key, Collections.singletonMap(entry.getKey(), entry.getValue()));
       }
     }
   }
