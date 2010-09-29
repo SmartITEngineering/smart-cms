@@ -16,25 +16,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api;
+package com.smartitengineering.cms.spi.impl.workspace;
 
-import com.smartitengineering.dao.impl.hbase.spi.Externalizable;
+import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 
 /**
  *
  * @author imyousuf
  */
-public interface WorkspaceId extends Externalizable, Comparable<WorkspaceId> {
+public class WorkspaceAdapterHelper extends AbstractAdapterHelper<Workspace, PersistentWorkspace>{
 
-  public String getGlobalNamespace();
-
-  public String getName();
-
-  /**
-   * Override the toString so that it could be used to compare to ids of this instance. It should represent the state
-   * of the Id.
-   * @return String representation, i.e. state, of the id
-   */
   @Override
-  public String toString();
+  protected PersistentWorkspace newTInstance() {
+    return new PersistentWorkspace();
+  }
+
+  @Override
+  protected void mergeFromF2T(Workspace fromBean, PersistentWorkspace toBean) {
+    toBean.setWorkspace(fromBean);
+  }
+
+  @Override
+  protected Workspace convertFromT2F(PersistentWorkspace toBean) {
+    return toBean.getWorkspace();
+  }
+
 }

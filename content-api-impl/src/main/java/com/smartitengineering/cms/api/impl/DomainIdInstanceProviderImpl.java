@@ -18,12 +18,13 @@
  */
 package com.smartitengineering.cms.api.impl;
 
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
 import com.smartitengineering.dao.impl.hbase.spi.DomainIdInstanceProvider;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.impl.content.ContentIdImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 
 /**
  *

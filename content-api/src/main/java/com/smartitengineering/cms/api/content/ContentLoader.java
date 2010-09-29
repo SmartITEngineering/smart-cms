@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.api.content;
 
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.type.FieldDef;
 import java.util.Set;
 

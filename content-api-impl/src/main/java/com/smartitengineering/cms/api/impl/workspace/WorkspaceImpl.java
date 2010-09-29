@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.impl;
+package com.smartitengineering.cms.api.impl.workspace;
 
-import com.smartitengineering.cms.api.Workspace;
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.VariationTemplate;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.type.ContentType;
-import com.smartitengineering.cms.api.type.RepresentationDef;
-import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
+import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 import java.util.Collection;
 import java.util.Date;
 
@@ -31,15 +31,17 @@ import java.util.Date;
  *
  * @author imyousuf
  */
-public class WorkspaceImpl implements Workspace {
+public class WorkspaceImpl implements PersistableWorkspace {
 
   private WorkspaceId id;
   private Date creationDate;
 
+  @Override
   public void setCreationDate(Date creationDate) {
     this.creationDate = creationDate;
   }
 
+  @Override
   public void setId(WorkspaceId id) {
     this.id = id;
   }
@@ -65,12 +67,12 @@ public class WorkspaceImpl implements Workspace {
   }
 
   @Override
-  public Collection<RepresentationDef> getRepresentations() {
-    return SmartContentSPI.getInstance().getWorkspaceService().getRepresentations(getId());
+  public RepresentationTemplate getRepresentation(String name) {
+    return SmartContentSPI.getInstance().getWorkspaceService().getRepresentationTemplate(id, name);
   }
 
   @Override
-  public Collection<VariationDef> getVariations() {
-    return SmartContentSPI.getInstance().getWorkspaceService().getVariations(getId());
+  public VariationTemplate getVariations(String name) {
+    return SmartContentSPI.getInstance().getWorkspaceService().getVariationTemplate(id, name);
   }
 }

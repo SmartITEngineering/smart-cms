@@ -16,26 +16,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.content;
+package com.smartitengineering.cms.spi.impl.workspace.guice;
 
-import com.smartitengineering.cms.api.workspace.WorkspaceId;
-import com.smartitengineering.dao.impl.hbase.spi.Externalizable;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.smartitengineering.cms.spi.impl.workspace.PersistentWorkspace;
+import com.smartitengineering.dao.impl.hbase.spi.FilterConfigs;
+import com.smartitengineering.dao.impl.hbase.spi.impl.JsonConfigLoader;
+import java.io.IOException;
 
 /**
  *
  * @author imyousuf
  */
-public interface ContentId extends Externalizable, Comparable<ContentId> {
+@Singleton
+public class WorkspaceFilterConfigsProvider implements Provider<FilterConfigs<PersistentWorkspace>> {
 
-  public WorkspaceId getWorkspaceId();
-
-  public byte[] getId();
-
-  /**
-   * Override the toString so that it could be used to compare to ids of this instance. It should represent the state
-   * of the Id.
-   * @return String representation, i.e. state, of the id
-   */
   @Override
-  public String toString();
+  public FilterConfigs<PersistentWorkspace> get() {
+    try {
+      return JsonConfigLoader.parseJsonAsFilterConfigMap(getClass().getClassLoader().
+          getResourceAsStream("com/smartitengineering/cms/spi/impl/workspace/WorkspaceFilterConfigs.json"));
+    }
+    catch (IOException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
 }

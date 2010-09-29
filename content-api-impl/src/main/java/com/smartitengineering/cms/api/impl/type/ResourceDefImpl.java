@@ -18,11 +18,10 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
+import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.type.MutableResourceDef;
 import com.smartitengineering.cms.api.type.ResourceDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
-import com.smartitengineering.cms.api.type.TemplateType;
-import java.util.Date;
 
 /**
  *
@@ -34,8 +33,6 @@ public class ResourceDefImpl implements MutableResourceDef {
   private String mimeType;
   private String name;
   private ResourceUri resourceUri;
-  private Date creationDate;
-  private Date lastModifiedDate;
 
   @Override
   public void setTemplateType(TemplateType templateType) {
@@ -78,24 +75,6 @@ public class ResourceDefImpl implements MutableResourceDef {
   }
 
   @Override
-  public Date getCreationDate() {
-    return this.creationDate;
-  }
-
-  @Override
-  public Date getLastModifiedDate() {
-    return this.lastModifiedDate;
-  }
-
-  public void setCreationDate(Date creationDate) {
-    this.creationDate = creationDate;
-  }
-
-  public void setLastModifiedDate(Date lastModifiedDate) {
-    this.lastModifiedDate = lastModifiedDate;
-  }
-
-  @Override
   public boolean equals(Object obj) {
     if (obj == null) {
       return false;
@@ -120,6 +99,6 @@ public class ResourceDefImpl implements MutableResourceDef {
   @Override
   public String toString() {
     return "ResourceDefImpl{" + "; templateType=" + templateType + "; mimeType=" + mimeType + "; name=" + name + "; resourceUri=" +
-        resourceUri + "; creationDate=" + creationDate + "; lastModifiedDate=" + lastModifiedDate + '}';
+        resourceUri + '}';
   }
 }

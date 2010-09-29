@@ -18,11 +18,12 @@
  */
 package com.smartitengineering.cms.spi.workspace;
 
-import com.smartitengineering.cms.api.Workspace;
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.type.ContentType;
-import com.smartitengineering.cms.api.type.RepresentationDef;
-import com.smartitengineering.cms.api.type.VariationDef;
+import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import java.util.Collection;
 
 /**
@@ -43,7 +44,21 @@ public interface WorkspaceService {
 
   public Collection<WorkspaceId> getFriendlies(WorkspaceId workspaceId);
 
-  public Collection<RepresentationDef> getRepresentations(WorkspaceId workspaceId);
+  public void addFriend(WorkspaceId to, WorkspaceId workspaceId);
 
-  public Collection<VariationDef> getVariations(WorkspaceId workspaceId);
+  public void removeFriend(WorkspaceId from, WorkspaceId workspaceId);
+
+  public RepresentationTemplate putRepresentationTemplate(WorkspaceId workspaceId, String name,
+                                                          TemplateType templateType, byte[] data);
+
+  public RepresentationTemplate getRepresentationTemplate(WorkspaceId workspaceId, String name);
+
+  public void deleteRepresentation(RepresentationTemplate template);
+
+  public VariationTemplate putVariationTemplate(WorkspaceId workspaceId, String name, TemplateType templateType,
+                                                byte[] data);
+
+  public VariationTemplate getVariationTemplate(WorkspaceId workspaceId, String name);
+
+  public void deleteVariation(VariationTemplate template);
 }

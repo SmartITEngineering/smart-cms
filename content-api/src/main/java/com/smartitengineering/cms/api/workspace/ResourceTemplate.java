@@ -16,26 +16,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.content;
+package com.smartitengineering.cms.api.workspace;
 
-import com.smartitengineering.cms.api.workspace.WorkspaceId;
-import com.smartitengineering.dao.impl.hbase.spi.Externalizable;
+import com.smartitengineering.cms.api.common.TemplateType;
+import java.util.Date;
 
 /**
  *
  * @author imyousuf
  */
-public interface ContentId extends Externalizable, Comparable<ContentId> {
+public interface ResourceTemplate {
 
-  public WorkspaceId getWorkspaceId();
+  WorkspaceId getWorkspaceId();
 
-  public byte[] getId();
+  String getName();
 
-  /**
-   * Override the toString so that it could be used to compare to ids of this instance. It should represent the state
-   * of the Id.
-   * @return String representation, i.e. state, of the id
-   */
-  @Override
-  public String toString();
+  TemplateType getTemplateType();
+
+  byte[] getTemplate();
+
+  Date getCreatedDate();
+
+  Date getLastModifiedDate();
 }

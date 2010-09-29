@@ -23,11 +23,12 @@ import com.google.inject.Scopes;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.SmartContentAPI;
-import com.smartitengineering.cms.api.WorkspaceAPI;
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
-import com.smartitengineering.cms.api.impl.WorkspaceAPIImpl;
+import com.smartitengineering.cms.api.impl.workspace.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
@@ -38,7 +39,6 @@ import com.smartitengineering.cms.api.type.MutableRepresentationDef;
 import com.smartitengineering.cms.api.type.MutableResourceUri;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceUri.Type;
-import com.smartitengineering.cms.api.type.TemplateType;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
@@ -55,8 +55,6 @@ import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -78,38 +76,7 @@ import org.slf4j.LoggerFactory;
 public class XMLContentTypeDefnitionParserTest {
 
   private Logger logger = LoggerFactory.getLogger(getClass());
-  public static final WorkspaceId TEST_WS_ID = new WorkspaceId() {
-
-    @Override
-    public String getGlobalNamespace() {
-      return "test";
-    }
-
-    @Override
-    public String getName() {
-      return "testWS";
-    }
-
-    @Override
-    public void writeExternal(DataOutput output) throws IOException {
-      throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void readExternal(DataInput input) throws IOException, ClassNotFoundException {
-      throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public int compareTo(WorkspaceId o) {
-      throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public String toString() {
-      return "test:testWS";
-    }
-  };
+  public static WorkspaceId TEST_WS_ID;
 
   @BeforeClass
   public static void setupAPIAndSPI() throws ClassNotFoundException {
@@ -118,6 +85,7 @@ public class XMLContentTypeDefnitionParserTest {
     properties.setProperty(GuiceUtil.IGNORE_MISSING_DEP_PROP, Boolean.toString(true));
     properties.setProperty(GuiceUtil.MODULES_LIST_PROP, TestModule.class.getName());
     GuiceUtil.getInstance(properties).register();
+    TEST_WS_ID = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId("test");
   }
 
   @Test
@@ -365,6 +333,7 @@ public class XMLContentTypeDefnitionParserTest {
       bind(PersistableDomainFactory.class).to(PersistableDomainFactoryImpl.class).in(Scopes.SINGLETON);
       bind(ContentTypeLoader.class).annotatedWith(Names.named("apiContentTypeLoader")).to(ContentTypeLoaderImpl.class);
       bind(WorkspaceAPI.class).annotatedWith(Names.named("apiWorkspaceApi")).to(WorkspaceAPIImpl.class);
+      bind(String.class).annotatedWith(Names.named("globalNamespace")).toInstance("testWS");
       MapBinder<MediaType, TypeValidator> validatorBinder = MapBinder.newMapBinder(binder(), MediaType.class,
                                                                                    TypeValidator.class);
       validatorBinder.addBinding(MediaType.APPLICATION_XML).to(XMLSchemaBasedTypeValidator.class);
@@ -382,7 +351,7 @@ public class XMLContentTypeDefnitionParserTest {
 
         {
           allowing(handler).register(with(any(Key.class)));
-          allowing(mockReader).readContentTypeFromPersistentStorage(with(this.<ContentTypeId[]>anything()));
+          allowing(mockReader).readContentTypeFromPersistentStorage(with(Expectations.<ContentTypeId[]>anything()));
           will(returnValue(Collections.emptyList()));
         }
       });

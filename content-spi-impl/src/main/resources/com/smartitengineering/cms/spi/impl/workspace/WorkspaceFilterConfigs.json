@@ -1,0 +1,20 @@
+{
+  "configs": {
+    "id": {
+      "columnFamilyAsString":"self",
+      "columnQualifierAsString":"id",
+      "filterOnIfMissing":false,
+      "filterOnLatestVersionOnly":true,
+      "qualifierARangePrefix":false,
+      "filterOnRowId":true
+    },
+    "workspace": {
+      "columnFamilyAsString":"self",
+      "columnQualifierAsString":"",
+      "filterOnIfMissing":false,
+      "filterOnLatestVersionOnly":true,
+      "qualifierARangePrefix":false,
+      "filterOnRowId":false
+    }
+  }
+}

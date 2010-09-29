@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2010 Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,26 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.content;
+package com.smartitengineering.cms.spi.workspace;
 
+import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
-import com.smartitengineering.dao.impl.hbase.spi.Externalizable;
+import java.util.Date;
 
 /**
  *
  * @author imyousuf
  */
-public interface ContentId extends Externalizable, Comparable<ContentId> {
+public interface PersistableWorkspace extends Workspace {
 
-  public WorkspaceId getWorkspaceId();
+  public void setCreationDate(Date creationDate);
 
-  public byte[] getId();
-
-  /**
-   * Override the toString so that it could be used to compare to ids of this instance. It should represent the state
-   * of the Id.
-   * @return String representation, i.e. state, of the id
-   */
-  @Override
-  public String toString();
+  public void setId(WorkspaceId id);
 }

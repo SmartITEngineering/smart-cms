@@ -16,15 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.type;
+package com.smartitengineering.cms.spi.workspace;
+
+import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.workspace.ResourceTemplate;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import java.util.Date;
 
 /**
  *
  * @author imyousuf
  */
-public enum TemplateType {
-  VELOCITY,
-  RUBY,
-  GROOVY,
-  JAVASCRIPT
+public interface PersistableResourceTemplate extends ResourceTemplate {
+
+  void setWorkspaceId(WorkspaceId workspaceId);
+
+  void setName(String name);
+
+  void setTemplateType(TemplateType templateType);
+
+  void setTemplate(byte[] data);
+
+  void setCreatedDate(Date creationDate);
+
+  void setLastModifiedDate(Date lastModifiedDate);
 }

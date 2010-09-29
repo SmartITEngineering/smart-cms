@@ -18,8 +18,8 @@
  */
 package com.smartitengineering.cms.content.api.impl;
 
-import com.smartitengineering.cms.api.WorkspaceId;
-import com.smartitengineering.cms.api.impl.WorkspaceIdImpl;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import java.io.ByteArrayInputStream;

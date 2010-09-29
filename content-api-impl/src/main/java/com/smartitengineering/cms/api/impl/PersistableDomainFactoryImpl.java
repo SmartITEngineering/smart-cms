@@ -19,8 +19,14 @@
 package com.smartitengineering.cms.api.impl;
 
 import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
+import com.smartitengineering.cms.api.impl.workspace.RepresentationTemplateImpl;
+import com.smartitengineering.cms.api.impl.workspace.VariationTemplateImpl;
+import com.smartitengineering.cms.api.impl.workspace.WorkspaceImpl;
 import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
 import com.smartitengineering.cms.spi.type.PersistableContentType;
+import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
+import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
+import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 
 /**
  *
@@ -31,5 +37,20 @@ public class PersistableDomainFactoryImpl implements PersistableDomainFactory {
   @Override
   public PersistableContentType createPersistableContentType() {
     return new ContentTypeImpl();
+  }
+
+  @Override
+  public PersistableWorkspace createPersistentWorkspace() {
+    return new WorkspaceImpl();
+  }
+
+  @Override
+  public PersistableRepresentationTemplate createPersistableRepresentationTemplate() {
+    return new RepresentationTemplateImpl();
+  }
+
+  @Override
+  public PersistableVariationTemplate createPersistableVariationTemplate() {
+    return new VariationTemplateImpl();
   }
 }

@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.api.type;
 
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
 import java.io.IOException;
 import java.io.InputStream;

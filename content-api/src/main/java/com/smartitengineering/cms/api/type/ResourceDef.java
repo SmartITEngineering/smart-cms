@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.api.type;
 
-import java.util.Date;
+import com.smartitengineering.cms.api.common.TemplateType;
 
 /**
  *
@@ -33,8 +33,4 @@ public interface ResourceDef {
   public String getName();
 
   public ResourceUri getResourceUri();
-
-  public Date getCreationDate();
-
-  public Date getLastModifiedDate();
 }

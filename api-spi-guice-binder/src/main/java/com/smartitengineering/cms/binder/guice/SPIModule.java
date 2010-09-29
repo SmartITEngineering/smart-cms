@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.binder.guice;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.PrivateModule;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
@@ -53,8 +53,10 @@ import com.smartitengineering.dao.impl.hbase.CommonDao;
 import com.smartitengineering.dao.impl.hbase.spi.AsyncExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.DomainIdInstanceProvider;
 import com.smartitengineering.dao.impl.hbase.spi.FilterConfigs;
+import com.smartitengineering.dao.impl.hbase.spi.MergeService;
 import com.smartitengineering.dao.impl.hbase.spi.ObjectRowConverter;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
+import com.smartitengineering.dao.impl.hbase.spi.impl.DiffBasedMergeService;
 import com.smartitengineering.dao.impl.hbase.spi.impl.MixedExecutorServiceImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
@@ -65,15 +67,22 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class SPIModule extends AbstractModule {
+public class SPIModule extends PrivateModule {
 
   @Override
   protected void configure() {
     bind(AsyncExecutorService.class).to(MixedExecutorServiceImpl.class).in(Singleton.class);
+    binder().expose(AsyncExecutorService.class);
     bind(ExecutorService.class).toInstance(Executors.newCachedThreadPool());
+    binder().expose(ExecutorService.class);
     bind(Integer.class).annotatedWith(Names.named("maxRows")).toInstance(new Integer(50));
     bind(Long.class).annotatedWith(Names.named("waitTime")).toInstance(new Long(10));
+    binder().expose(Long.class).annotatedWith(Names.named("waitTime"));
     bind(TimeUnit.class).annotatedWith(Names.named("unit")).toInstance(TimeUnit.SECONDS);
+    binder().expose(TimeUnit.class).annotatedWith(Names.named("unit"));
+    bind(Boolean.class).annotatedWith(Names.named("mergeEnabled")).toInstance(Boolean.TRUE);
+    bind(MergeService.class).to(DiffBasedMergeService.class).in(Singleton.class);
+    binder().expose(MergeService.class);
     /*
      * Start injection specific to common dao of content type
      */
@@ -103,6 +112,8 @@ public class SPIModule extends AbstractModule {
     }).in(Scopes.SINGLETON);
     bind(new TypeLiteral<AbstractAdapterHelper<MutableContentType, PersistentContentType>>() {
     }).to(ContentTypeAdapterHelper.class).in(Scopes.SINGLETON);
+    bind(PersistentContentTypeReader.class).to(ContentTypePersistentService.class);
+    binder().expose(PersistentContentTypeReader.class);
     /*
      * End injection specific to common dao of content type
      */
@@ -110,20 +121,25 @@ public class SPIModule extends AbstractModule {
                                                                                  TypeValidator.class);
     validatorBinder.addBinding(MediaType.APPLICATION_XML).to(XMLSchemaBasedTypeValidator.class);
     bind(TypeValidators.class).to(com.smartitengineering.cms.spi.impl.type.validator.TypeValidators.class);
+    binder().expose(TypeValidators.class);
     MapBinder<Class, PersistentService> serviceBinder = MapBinder.newMapBinder(binder(), Class.class,
                                                                                PersistentService.class);
     serviceBinder.addBinding(MutableContentType.class).to(ContentTypePersistentService.class);
     bind(PersistentServiceRegistrar.class).to(
         com.smartitengineering.cms.spi.impl.content.PersistentServiceRegistrar.class);
+    binder().expose(PersistentServiceRegistrar.class);
     MapBinder<MediaType, ContentTypeDefinitionParser> parserBinder =
                                                       MapBinder.newMapBinder(binder(), MediaType.class,
                                                                              ContentTypeDefinitionParser.class);
     parserBinder.addBinding(MediaType.APPLICATION_XML).to(XMLContentTypeDefinitionParser.class);
     bind(ContentTypeDefinitionParsers.class).to(
         com.smartitengineering.cms.spi.impl.type.validator.ContentTypeDefinitionParsers.class);
-    bind(PersistentContentTypeReader.class).to(ContentTypePersistentService.class);
     bind(LockHandler.class).to(DefaultLockHandler.class).in(Scopes.SINGLETON);
     bind(PersistableDomainFactory.class).to(PersistableDomainFactoryImpl.class).in(Scopes.SINGLETON);
     bind(DomainIdInstanceProvider.class).to(DomainIdInstanceProviderImpl.class).in(Scopes.SINGLETON);
+    binder().expose(ContentTypeDefinitionParsers.class);
+    binder().expose(LockHandler.class);
+    binder().expose(PersistableDomainFactory.class);
+    binder().expose(DomainIdInstanceProvider.class);
   }
 }

@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.api.type;
 
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 
 /**
  * A {@link ContentTypeID} that can be edited.

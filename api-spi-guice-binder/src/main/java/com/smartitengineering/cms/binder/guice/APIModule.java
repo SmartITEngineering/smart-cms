@@ -20,19 +20,39 @@ package com.smartitengineering.cms.binder.guice;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
-import com.smartitengineering.cms.api.WorkspaceAPI;
+import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.content.ContentLoader;
-import com.smartitengineering.cms.api.impl.WorkspaceAPIImpl;
+import com.smartitengineering.cms.api.impl.workspace.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.content.ContentLoaderImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
+import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class APIModule extends AbstractModule {
+
+  private final Properties properties;
+  private final Logger logger = LoggerFactory.getLogger(getClass());
+
+  public APIModule(Properties properties) {
+    if (properties != null) {
+      this.properties = properties;
+    }
+    else {
+      this.properties = new Properties();
+    }
+  }
 
   @Override
   protected void configure() {
     bind(ContentTypeLoader.class).annotatedWith(Names.named("apiContentTypeLoader")).to(ContentTypeLoaderImpl.class);
     bind(ContentLoader.class).annotatedWith(Names.named("apiContentLoader")).to(ContentLoaderImpl.class);
     bind(WorkspaceAPI.class).annotatedWith(Names.named("apiWorkspaceApi")).to(WorkspaceAPIImpl.class);
+    final String globalNamespace = properties.getProperty("com.smartitengineering.cms.globalNamespace");
+    if (logger.isDebugEnabled()) {
+      logger.debug(new StringBuilder("Global Namespace ").append(globalNamespace).toString());
+    }
+    bind(String.class).annotatedWith(Names.named("globalNamespace")).toInstance(globalNamespace);
   }
 }

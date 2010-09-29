@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.type.validator;
 
-import com.smartitengineering.cms.api.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;

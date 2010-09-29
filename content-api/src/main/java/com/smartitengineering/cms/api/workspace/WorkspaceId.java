@@ -16,33 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.type;
+package com.smartitengineering.cms.api.workspace;
 
-import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.dao.impl.hbase.spi.Externalizable;
-import java.io.Serializable;
 
 /**
- * Represents the unique identifier for a {@link ContentType}, specified by its
- * namespace, similar to that of package of java, and its name.
+ *
  * @author imyousuf
- * @since 0.1
  */
-public interface ContentTypeId extends Externalizable, Comparable<ContentTypeId> {
+public interface WorkspaceId extends Externalizable, Comparable<WorkspaceId> {
 
-  public WorkspaceId getWorkspace();
+  public String getGlobalNamespace();
 
-  /**
-   * Retrieve the name of the {@link ContentType}
-   * @return a non-empty string
-   */
   public String getName();
-
-  /**
-   * Retrieve the namespace of the {@link ContentType}
-   * @return a non-null string, but may be empty
-   */
-  public String getNamespace();
 
   /**
    * Override the toString so that it could be used to compare to ids of this instance. It should represent the state

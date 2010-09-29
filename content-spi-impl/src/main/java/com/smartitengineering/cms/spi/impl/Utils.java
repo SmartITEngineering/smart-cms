@@ -18,9 +18,16 @@
  */
 package com.smartitengineering.cms.spi.impl;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -28,6 +35,7 @@ import org.apache.commons.lang.time.DateUtils;
  */
 public final class Utils {
 
+  private static final Logger logger = LoggerFactory.getLogger(Utils.class);
   public static final String UTF_8_ENCODING = "UTF-8";
 
   private Utils() {
@@ -52,6 +60,30 @@ public final class Utils {
     }
     catch (Exception ex) {
       throw new RuntimeException(ex);
+    }
+  }
+
+  public static void organizeByPrefix(Map<byte[], byte[]> fieldMap, Map<String, Map<byte[], byte[]>> fieldsByName,
+                                      char separator) {
+    logger.info("Organize by their prefix so that each field cells can be processed at once");
+    for (Entry<byte[], byte[]> entry : fieldMap.entrySet()) {
+      final String key = Bytes.toString(entry.getKey());
+      final int indexOfFirstColon = key.indexOf(separator);
+      if (indexOfFirstColon > -1) {
+        final String fieldName = key.substring(0, indexOfFirstColon);
+        final byte[] fieldNameBytes = Bytes.toBytes(fieldName);
+        if (Bytes.startsWith(entry.getKey(), fieldNameBytes)) {
+          Map<byte[], byte[]> fieldCells = fieldsByName.get(fieldName);
+          if (fieldCells == null) {
+            fieldCells = new LinkedHashMap<byte[], byte[]>();
+            fieldsByName.put(fieldName, fieldCells);
+          }
+          fieldCells.put(entry.getKey(), entry.getValue());
+        }
+      }
+      else {
+        fieldsByName.put(key, Collections.singletonMap(entry.getKey(), entry.getValue()));
+      }
     }
   }
 }
