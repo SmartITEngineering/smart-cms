@@ -248,23 +248,6 @@ public class XmlParser implements XmlConstants {
     }
   }
 
-  protected Map<String, String> parseValue(Element rootElement) {
-    Map<String, String> value = new HashMap<String, String>();
-    Elements elements;
-    elements = rootElement.getChildElements();
-    for (int i = 0; i < elements.size(); i++) {
-      if (StringUtils.equalsIgnoreCase(elements.get(i).getLocalName(), CONTENT)) {
-        value.putAll(parseContent(rootElement.getChildElements().get(i)));
-      }
-      else if (StringUtils.equalsIgnoreCase(elements.get(i).getLocalName(), COLLECTION)) {
-        value.putAll(parseCollection(rootElement.getChildElements().get(i)));
-      }
-      else {
-      }
-    }
-    return value;
-  }
-
   protected Map<String, String> parseContent(Element rootElement) {
     Map<String, String> content = new HashMap<String, String>();
     for (int i = 0; i < rootElement.getChildElements().size(); i++) {
@@ -454,6 +437,23 @@ public class XmlParser implements XmlConstants {
   /********************************** CONFUSED ****************************************/
   protected DataType parseValueDef(Element rootElement) {
     return DataType.LONG;
+  }
+
+  protected Map<String, String> parseValue(Element rootElement) {
+    Map<String, String> value = new HashMap<String, String>();
+    Elements elements;
+    elements = rootElement.getChildElements();
+    for (int i = 0; i < elements.size(); i++) {
+      if (StringUtils.equalsIgnoreCase(elements.get(i).getLocalName(), CONTENT)) {
+        value.putAll(parseContent(rootElement.getChildElements().get(i)));
+      }
+      else if (StringUtils.equalsIgnoreCase(elements.get(i).getLocalName(), COLLECTION)) {
+        value.putAll(parseCollection(rootElement.getChildElements().get(i)));
+      }
+      else {
+      }
+    }
+    return value;
   }
   /************************end of confsion **********************/
 }

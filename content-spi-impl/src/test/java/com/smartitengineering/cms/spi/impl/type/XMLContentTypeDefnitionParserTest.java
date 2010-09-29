@@ -113,7 +113,7 @@ public class XMLContentTypeDefnitionParserTest {
   }
 
   @Test
-  public void testParsingContentId() throws Exception {
+  public void testParsingContentId() throws Exception { //done
     Collection<MutableContentType> collection = init();
     Iterator<MutableContentType> iterator = collection.iterator();
     MutableContentType contentType = iterator.next();
@@ -127,7 +127,32 @@ public class XMLContentTypeDefnitionParserTest {
   }
 
   @Test
-  public void testParsingSataus() throws Exception {
+  public void testDisplayName() throws Exception {  //done
+    Collection<MutableContentType> collection = init();
+    Iterator<MutableContentType> iterator = collection.iterator();
+    MutableContentType contentType = iterator.next();
+    contentType = iterator.next();
+    if (logger.isInfoEnabled()) {
+      logger.debug(new StringBuffer("ContentType Dssplay Name is ").append(contentType.getDisplayName()).toString());
+    }
+    Assert.assertEquals("JPEG Image", contentType.getDisplayName());
+  }
+
+  @Test
+  public void testParent() throws Exception { //done
+    Collection<MutableContentType> collections = init();
+    Iterator<MutableContentType> iterator = collections.iterator();
+    MutableContentType contentType = iterator.next();
+    if (logger.isInfoEnabled()) {
+      logger.debug(new StringBuffer("Parent's Name is ").append(contentType.getParent().getName()).toString());
+      logger.debug(new StringBuffer("Parent's NameSpace is ").append(contentType.getParent().getNamespace()).toString());
+    }
+    Assert.assertEquals("com.smartitengineering.smart-shopping.content", contentType.getParent().getNamespace());
+    Assert.assertEquals("Product", contentType.getParent().getName());
+  }
+
+  @Test
+  public void testParsingSataus() throws Exception {  //done
     Collection<MutableContentType> collection = init();
     Iterator<MutableContentType> iterator = collection.iterator();
     MutableContentType contentType = iterator.next();
@@ -157,7 +182,7 @@ public class XMLContentTypeDefnitionParserTest {
   }
 
   @Test
-  public void testParsingFileds() throws Exception {
+  public void testParsingFileds() throws Exception {  //done
     Collection<MutableContentType> collection = init();
     Iterator<MutableContentType> iterator = collection.iterator();
     MutableContentType contentType = iterator.next();
@@ -176,7 +201,7 @@ public class XMLContentTypeDefnitionParserTest {
   }
 
   @Test
-  public void testParsingField() throws Exception {
+  public void testParsingField() throws Exception {// done without value
     Collection<MutableContentType> collection = init();
     Iterator<MutableContentType> iterator = collection.iterator();
     Collection<FieldDef> fieldDefs = iterator.next().getMutableFieldDefs();
@@ -184,7 +209,6 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals(3, fieldDefs.size());
     FieldDef fieldDef = fieldIterator.next();
 
-    //parsing fieldA
 
     Assert.assertEquals("fieldA", fieldDef.getName());
     Assert.assertEquals(2, fieldDef.getVariations().size());
@@ -193,14 +217,36 @@ public class XMLContentTypeDefnitionParserTest {
     Iterator<VariationDef> variationIterator = variationDefs.iterator();
     VariationDef variationDef = variationIterator.next();
 
+    if (logger.isInfoEnabled()) {
+      logger.debug(new StringBuffer("First ContentType's first field's 1st variation name is ").append(
+          variationDef.getName()).toString());
+      logger.debug(new StringBuffer("First ContentType's first field's 1st variation TemplateType is ").append(
+          variationDef.getTemplateType()).toString());
+      logger.debug(new StringBuffer("First ContentType's first field's 1st variation ResourceUri's type is ").append(
+          variationDef.getResourceUri().getType()).toString());
+      logger.debug(new StringBuffer("First ContentType's first field's 1st variation ResourceUri's value is ").append(
+          variationDef.getResourceUri().getValue()).toString());
+    }
+
     Assert.assertEquals("avar", variationDef.getName());
     Assert.assertEquals(TemplateType.VELOCITY, variationDef.getTemplateType());
     Assert.assertEquals("some/type", variationDef.getMIMEType());
     Assert.assertEquals(Type.EXTERNAL, variationDef.getResourceUri().getType());
     Assert.assertEquals("http://some/uri", variationDef.getResourceUri().getValue());
 
-//    Assert.assertEquals(variationDef, variationDef1);          /*not working*/
+
     variationDef = variationIterator.next();
+
+    if (logger.isInfoEnabled()) {
+      logger.debug(new StringBuffer("First ContentType's first field's 2nd variation name is ").append(
+          variationDef.getName()).toString());
+      logger.debug(new StringBuffer("First ContentType's first field's 2nd variation TemplateType is ").append(
+          variationDef.getTemplateType()).toString());
+      logger.debug(new StringBuffer("First ContentType's first field's 2nd variation ResourceUri's type is ").append(
+          variationDef.getResourceUri().getType()).toString());
+      logger.debug(new StringBuffer("First ContentType's first field's 2nd variation ResourceUri's value is ").append(
+          variationDef.getResourceUri().getValue()).toString());
+    }
 
     Assert.assertEquals("anothervar", variationDef.getName());
     Assert.assertEquals(TemplateType.JAVASCRIPT, variationDef.getTemplateType());
@@ -208,9 +254,23 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals(Type.INTERNAL, variationDef.getResourceUri().getType());
     Assert.assertEquals("internalvar", variationDef.getResourceUri().getValue());
 
-    //end parsing fieldA
+
 
     fieldDef = fieldIterator.next();
+
+    if (logger.isInfoEnabled()) {
+      logger.debug(new StringBuffer("First ContentType's 2nd field's validition name is ").append(
+          fieldDef.getName()).toString());
+      logger.debug(new StringBuffer("First ContentType's 2nd field's validition Type is ").append(
+          fieldDef.getCustomValidator().geType()).toString());
+      logger.debug(new StringBuffer("First ContentType's 2nd field's validition ResourceUri's type is ").append(
+          fieldDef.getCustomValidator().getUri().getType()).toString());
+      logger.debug(new StringBuffer("First ContentType's 2nd field's validition ResourceUri's value is ").append(
+          fieldDef.getCustomValidator().getUri().getValue()).toString());
+      logger.debug(new StringBuffer("First ContentType's 2nd field's validition Require value is ").append(fieldDef.
+          isRequired()).toString());
+    }
+
     Assert.assertEquals("fieldB", fieldDef.getName());
     Assert.assertEquals(ValidatorType.JAVASCRIPT, fieldDef.getCustomValidator().geType());
     Assert.assertEquals(Type.INTERNAL, fieldDef.getCustomValidator().getUri().getType());
@@ -218,6 +278,18 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals(Boolean.TRUE, fieldDef.isRequired());
 
     fieldDef = fieldIterator.next();
+
+    if (logger.isInfoEnabled()) {
+      logger.debug(new StringBuffer("First ContentType's 3rdd field's validition name is ").append(
+          fieldDef.getName()).toString());
+      logger.debug(new StringBuffer("First ContentType's 3rdd field's validition Type is ").append(
+          fieldDef.getCustomValidator().geType()).toString());
+      logger.debug(new StringBuffer("First ContentType's 3rdd field's validition ResourceUri's type is ").append(
+          fieldDef.getCustomValidator().getUri().getType()).toString());
+      logger.debug(new StringBuffer("First ContentType's 3rdd field's validition ResourceUri's value is ").append(
+          fieldDef.getCustomValidator().getUri().getValue()).toString());
+    }
+
     Assert.assertEquals("fieldC", fieldDef.getName());
     Assert.assertEquals(ValidatorType.GROOVY, fieldDef.getCustomValidator().geType());
     Assert.assertEquals(Type.EXTERNAL, fieldDef.getCustomValidator().getUri().getType());
@@ -238,7 +310,7 @@ public class XMLContentTypeDefnitionParserTest {
   }
 
   @Test
-  public void testParsingRepresentations() throws Exception {
+  public void testParsingRepresentations() throws Exception { //done
     Collection<MutableContentType> collection = init();
     Iterator<MutableContentType> iterator = collection.iterator();
     MutableContentType contentType = iterator.next();
@@ -273,7 +345,7 @@ public class XMLContentTypeDefnitionParserTest {
     logger.debug(def.getResourceUri().getValue() + " RESOURCE URI " + defFromXml.getResourceUri().getValue());
     logger.debug(def.getTemplateType().name() + " TEMPLATE TYPE " + defFromXml.getTemplateType().name());
     logger.debug(def.hashCode() + " Hash COde " + defFromXml.hashCode());
-//    Assert.assertEquals(def, defFromXml);
+
 
     Assert.assertEquals(def.getName(), defFromXml.getName());
     Assert.assertEquals(def.getMIMEType(), defFromXml.getMIMEType());
@@ -302,7 +374,7 @@ public class XMLContentTypeDefnitionParserTest {
     logger.debug(def1.getResourceUri().getValue() + " RESOURCE URI " + defFromXml1.getResourceUri().getValue());
     logger.debug(def1.getTemplateType().name() + " TEMPLATE TYPE " + defFromXml1.getTemplateType().name());
     logger.debug(def1.hashCode() + " Hash COde " + defFromXml1.hashCode());
-    //Assert.assertEquals(def1, defFromXml1);
+
 
     Assert.assertEquals(def1.getName(), defFromXml1.getName());
     Assert.assertEquals(def1.getMIMEType(), defFromXml1.getMIMEType());
