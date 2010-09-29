@@ -26,19 +26,18 @@ import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
-import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
 import com.smartitengineering.cms.api.type.MutableResourceUri;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceUri.Type;
-import com.smartitengineering.cms.api.type.TemplateType;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.impl.content.PersistentServiceRegistrar;
 import com.smartitengineering.cms.spi.impl.type.validator.ContentTypeDefinitionParsers;
@@ -279,7 +278,7 @@ public class XMLContentTypeDefnitionParserTest {
 
         {
           allowing(handler).register(with(any(Key.class)));
-          allowing(mockReader).readContentTypeFromPersistentStorage(with(this.<ContentTypeId[]>anything()));
+          allowing(mockReader).readContentTypeFromPersistentStorage(with(Expectations.<ContentTypeId[]>anything()));
           will(returnValue(Collections.emptyList()));
         }
       });
