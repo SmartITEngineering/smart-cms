@@ -1,6 +1,20 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *
+ * This is a simple Content Management System (CMS)
+ * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.smartitengineering.cms.spi.impl.type.validator;
 
@@ -93,7 +107,7 @@ public class XmlParser implements XmlConstants {
             fieldDefs.addAll(parseFieldDefs(childElements.get(child)));
           }
         }
-        statuses = parseContentStatus(contentTypeElement, STATUS);
+        statuses = parseContentStatuses(contentTypeElement, STATUS);
         representationDefs = parseRepresentations(contentTypeElement, REPRESENTATIONS);
         contentTypeId = parseContentTypeId(contentTypeElement, PARENT);
         mutableContent.setDisplayName(displayName);
@@ -104,6 +118,7 @@ public class XmlParser implements XmlConstants {
         }
         mutableContent.getMutableStatuses().addAll(statuses);
         contentTypes.add(mutableContent);
+        fieldDefs.clear();
       }
     }
     catch (Exception e) {
@@ -207,7 +222,7 @@ public class XmlParser implements XmlConstants {
     }
     if (StringUtils.equalsIgnoreCase(elems.get(0).getChildElements().get(0).getLocalName(), INTERNAL)) {
       resourceUri.setType(ResourceUri.Type.INTERNAL);
-      resourceUri.setValue(elems.get(0).getChildElements().get(0).getValue());
+      resourceUri.setValue(elems.get(0).getChildElements().get(0).getChildElements().get(0).getValue());
     }
     if (StringUtils.equalsIgnoreCase(elems.get(0).getChildElements().get(0).getLocalName(), EXTERNAL)) {
       resourceUri.setType(ResourceUri.Type.EXTERNAL);
@@ -412,19 +427,17 @@ public class XmlParser implements XmlConstants {
     }
   }
 
-  /********************************** CONFUSED ****************************************/
-  protected Collection<ContentStatus> parseContentStatus(Element rootElement, String elementName) throws
+  protected Collection<ContentStatus> parseContentStatuses(Element rootElement, String elementName) throws
       IllegalStateException {
     Elements elems = rootElement.getChildElements(elementName, NAMESPACE);
     if (elems.size() > 1) {
       throw new IllegalStateException("More than one " + elementName);
     }
     if (elems.size() > 0) {
-      MutableContentStatus contentStatus =
-                           SmartContentAPI.getInstance().getContentTypeLoader().createMutableContentStatus();
       List<ContentStatus> contentStatuses = new ArrayList<ContentStatus>();
       for (int i = 0; i < elems.get(0).getChildElements().size(); i++) {
-        contentStatus.setId(i);
+        MutableContentStatus contentStatus =
+                             SmartContentAPI.getInstance().getContentTypeLoader().createMutableContentStatus();
         if (StringUtils.equalsIgnoreCase(elems.get(0).getChildElements().get(i).getLocalName(), STATUS_NAME)) {
           contentStatus.setName(elems.get(0).getChildElements().get(i).getValue());
         }
@@ -438,6 +451,7 @@ public class XmlParser implements XmlConstants {
     }
   }
 
+  /********************************** CONFUSED ****************************************/
   protected DataType parseValueDef(Element rootElement) {
     return DataType.LONG;
   }
