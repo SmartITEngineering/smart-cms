@@ -78,7 +78,8 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
 
   @Override
   public Collection<Workspace> getWorkspaces() {
-    final List<PersistentWorkspace> list = commonReadDao.getList();
+    final List<PersistentWorkspace> list = commonReadDao.getList(SELF_PARAM, QueryParameterFactory.
+        getStringLikePropertyParam("id", "", MatchMode.START));
     if (list == null || list.isEmpty()) {
       return Collections.emptyList();
     }
