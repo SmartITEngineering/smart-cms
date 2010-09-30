@@ -117,7 +117,6 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
   public static final String SPCL_FIELD_DATA_TYPE_PATTERN = ":(" + FieldValueType.COLLECTION.name() + "|" + FieldValueType.CONTENT.
       name() + "|" + FieldValueType.OTHER.name() + "|" + FieldValueType.STRING.name() + "):(.+)";
   public static final String COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX = ":COLLECTION:" + CELL_FIELD_COLLECTION_ITEM;
-  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   protected String[] getTablesToAttainLock() {

@@ -70,7 +70,6 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
   public static final byte[] CELL_CREATED = Bytes.toBytes(CREATED);
   public static final byte[] CELL_LAST_MODIFIED = Bytes.toBytes(LASTMODIFIED);
   public static final byte[] CELL_TEMPLATE_TYPE = Bytes.toBytes(TEMPLATETYPE);
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   protected String[] getTablesToAttainLock() {
