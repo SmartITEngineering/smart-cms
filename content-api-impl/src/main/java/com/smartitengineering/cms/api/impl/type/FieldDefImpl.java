@@ -148,8 +148,8 @@ public class FieldDefImpl implements MutableFieldDef {
 
   @Override
   public String toString() {
-    return "FieldDefImpl{" + "newFieldName=" + newFieldName + "; required=" + required + "; dataType=" + dataType +
-        "; variationDefs=" + variationDefs + "; validatorDef=" + validatorDef + "; searchDef=" + searchDef +
-        "; standaloneUpdateAble=" + standaloneUpdateAble + '}';
+    return "FieldDefImpl{" + "newFieldName=" + newFieldName + "; required=" + required + "; dataType=" + dataType
+        + "; variationDefs=" + variationDefs + "; validatorDef=" + validatorDef + "; searchDef=" + searchDef
+        + "; standaloneUpdateAble=" + standaloneUpdateAble + '}';
   }
 }

@@ -66,8 +66,8 @@ public class ContentDataTypeImpl implements MutableContentDataType {
       return false;
     }
     final ContentDataType other = (ContentDataType) obj;
-    if (this.contentTypeId != other.getTypeDef() &&
-        (this.contentTypeId == null || !this.contentTypeId.equals(other.getTypeDef()))) {
+    if (this.contentTypeId != other.getTypeDef() && (this.contentTypeId == null || !this.contentTypeId.equals(other.
+        getTypeDef()))) {
       return false;
     }
     if ((this.bidirectionalFieldName == null) ? (other.getBidirectionalFieldName() != null) : !this.bidirectionalFieldName.
@@ -85,7 +85,7 @@ public class ContentDataTypeImpl implements MutableContentDataType {
 
   @Override
   public String toString() {
-    return "ContentDataTypeImpl{" + "contentTypeId=" + contentTypeId + "; bidirectionalFieldName=" +
-        bidirectionalFieldName + '}';
+    return "ContentDataTypeImpl{" + "contentTypeId=" + contentTypeId + "; bidirectionalFieldName="
+        + bidirectionalFieldName + '}';
   }
 }

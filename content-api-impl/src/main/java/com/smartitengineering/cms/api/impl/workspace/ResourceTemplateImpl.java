@@ -114,8 +114,8 @@ public class ResourceTemplateImpl implements PersistableResourceTemplate {
     if ((this.name == null) ? (other.getName() != null) : !this.name.equals(other.getName())) {
       return false;
     }
-    if (this.workspaceId != other.getWorkspaceId() &&
-        (this.workspaceId == null || !this.workspaceId.equals(other.getWorkspaceId()))) {
+    if (this.workspaceId != other.getWorkspaceId() && (this.workspaceId == null || !this.workspaceId.equals(other.
+        getWorkspaceId()))) {
       return false;
     }
     return true;

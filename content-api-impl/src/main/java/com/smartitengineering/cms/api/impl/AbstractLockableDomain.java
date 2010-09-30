@@ -30,8 +30,8 @@ import java.util.concurrent.TimeUnit;
  * @since 0.1
  */
 public abstract class AbstractLockableDomain
-        implements Lock,
-                   Key {
+    implements Lock,
+               Key {
 
   protected Lock lock;
 
@@ -44,7 +44,7 @@ public abstract class AbstractLockableDomain
 
   @Override
   protected void finalize()
-          throws Throwable {
+      throws Throwable {
     LockManager.unregister(this);
     super.finalize();
   }
@@ -68,7 +68,7 @@ public abstract class AbstractLockableDomain
   @Override
   public boolean tryLock(long time,
                          TimeUnit unit)
-          throws InterruptedException {
+      throws InterruptedException {
     boolean locked = lock.tryLock(time, unit);
     return locked;
   }
@@ -77,5 +77,4 @@ public abstract class AbstractLockableDomain
   public void unlock() {
     lock.unlock();
   }
-
 }

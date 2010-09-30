@@ -24,6 +24,6 @@ package com.smartitengineering.cms.api.content;
  * @since 0.1
  */
 public interface MutableContentFieldValue
-        extends MutableFieldValue<ContentId>,
-                ContentFieldValue {
+    extends MutableFieldValue<ContentId>,
+            ContentFieldValue {
 }

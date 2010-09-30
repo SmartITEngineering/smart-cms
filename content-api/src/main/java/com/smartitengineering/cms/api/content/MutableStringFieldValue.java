@@ -24,6 +24,6 @@ package com.smartitengineering.cms.api.content;
  * @since 0.1
  */
 public interface MutableStringFieldValue
-        extends MutableFieldValue<String>,
-                StringFieldValue {
+    extends MutableFieldValue<String>,
+            StringFieldValue {
 }

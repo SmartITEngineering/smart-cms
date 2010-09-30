@@ -27,15 +27,15 @@ import org.w3c.dom.Document;
  */
 public interface XMLContent {
 
-		/**
-		 * Retrieve the xml document representing the instance
-		 * @return xml document
-		 */
-		public Document getXMLDocument();
+  /**
+   * Retrieve the xml document representing the instance
+   * @return xml document
+   */
+  public Document getXMLDocument();
 
-    /**
-     * Returns the current content's XML version
-     * @return XML {@link CharSequence} of the current content.
-     */
-    public CharSequence toXml();
+  /**
+   * Returns the current content's XML version
+   * @return XML {@link CharSequence} of the current content.
+   */
+  public CharSequence toXml();
 }

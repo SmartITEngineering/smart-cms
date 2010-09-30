@@ -183,5 +183,4 @@ public class IdTest extends TestCase {
     idImpl.readExternal(new DataInputStream(new ByteArrayInputStream(baoStream.toByteArray())));
     assertEquals(contentTypeId, idImpl);
   }
-
 }

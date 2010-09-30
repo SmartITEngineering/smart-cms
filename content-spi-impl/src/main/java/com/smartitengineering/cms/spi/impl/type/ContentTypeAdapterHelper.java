@@ -25,7 +25,7 @@ import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
  *
  * @author imyousuf
  */
-public class ContentTypeAdapterHelper extends AbstractAdapterHelper<MutableContentType, PersistentContentType>{
+public class ContentTypeAdapterHelper extends AbstractAdapterHelper<MutableContentType, PersistentContentType> {
 
   @Override
   protected PersistentContentType newTInstance() {
@@ -41,5 +41,4 @@ public class ContentTypeAdapterHelper extends AbstractAdapterHelper<MutableConte
   protected MutableContentType convertFromT2F(PersistentContentType toBean) {
     return toBean.getMutableContentType();
   }
-
 }

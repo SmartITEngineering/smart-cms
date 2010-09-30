@@ -25,7 +25,7 @@ package com.smartitengineering.cms.api.content;
  * @since 0.1
  */
 public interface MutableFieldValue<V>
-        extends FieldValue<V> {
+    extends FieldValue<V> {
 
   public void setValue(V newV);
 }

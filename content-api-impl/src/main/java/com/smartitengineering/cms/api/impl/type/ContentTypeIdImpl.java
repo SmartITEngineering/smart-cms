@@ -93,8 +93,8 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
     if ((this.newContentTypeName == null) ? (other.getName() != null) : !this.newContentTypeName.equals(other.getName())) {
       return false;
     }
-    if (this.workspaceId != other.getWorkspace() &&
-        (this.workspaceId == null || !this.workspaceId.equals(other.getWorkspace()))) {
+    if (this.workspaceId != other.getWorkspace() && (this.workspaceId == null || !this.workspaceId.equals(other.
+        getWorkspace()))) {
       return false;
     }
     return true;

@@ -28,34 +28,34 @@ import java.util.Collection;
  * @since 0.1
  */
 public interface MutableContentType
-				extends PersistentWriter,
-								ContentType {
+    extends PersistentWriter,
+            ContentType {
 
-		/**
-		 * Set the content type identifier for the content type.
-		 * @param contentTypeID The content type identifier
-		 * @throws IllegalArgumentException If contentTypeID is null
-		 */
-		public void setContentTypeID(ContentTypeId contentTypeID)
-						throws IllegalArgumentException;
+  /**
+   * Set the content type identifier for the content type.
+   * @param contentTypeID The content type identifier
+   * @throws IllegalArgumentException If contentTypeID is null
+   */
+  public void setContentTypeID(ContentTypeId contentTypeID)
+      throws IllegalArgumentException;
 
-		/**
-		 * Retrieve the statuses available for the workflow of contents of
-		 * this type in a mutable {@link Collection}
-		 * @return Mutable collection fo statuses, could be empty if no status
-		 */
-		public Collection<ContentStatus> getMutableStatuses();
+  /**
+   * Retrieve the statuses available for the workflow of contents of
+   * this type in a mutable {@link Collection}
+   * @return Mutable collection fo statuses, could be empty if no status
+   */
+  public Collection<ContentStatus> getMutableStatuses();
 
-		/**
-		 * Retrieve the defined fields for this content type in a mutable
-		 * {@link Collection}
-		 * @return Mutable collection of fields, could be empty if not field
-		 */
-		public Collection<FieldDef> getMutableFieldDefs();
+  /**
+   * Retrieve the defined fields for this content type in a mutable
+   * {@link Collection}
+   * @return Mutable collection of fields, could be empty if not field
+   */
+  public Collection<FieldDef> getMutableFieldDefs();
 
-    public Collection<RepresentationDef> getMutableRepresentationDefs();
+  public Collection<RepresentationDef> getMutableRepresentationDefs();
 
-    public void setParent(ContentTypeId parentId);
+  public void setParent(ContentTypeId parentId);
 
-    public void setDisplayName(String displayName);
+  public void setDisplayName(String displayName);
 }

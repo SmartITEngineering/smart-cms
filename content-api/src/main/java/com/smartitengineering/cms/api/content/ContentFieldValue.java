@@ -24,5 +24,5 @@ package com.smartitengineering.cms.api.content;
  * @since 0.1
  */
 public interface ContentFieldValue
-        extends FieldValue<ContentId> {
+    extends FieldValue<ContentId> {
 }

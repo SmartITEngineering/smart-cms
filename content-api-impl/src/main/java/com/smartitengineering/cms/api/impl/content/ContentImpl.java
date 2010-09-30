@@ -111,7 +111,8 @@ public class ContentImpl extends AbstractPersistableDomain<MutableContent> imple
 
   @Override
   public Representation getRepresentation(String repName) {
-    return SmartContentSPI.getInstance().getRepresentationProvider().getRepresentation(repName, getContentDefinition(), this);
+    return SmartContentSPI.getInstance().getRepresentationProvider().getRepresentation(repName, getContentDefinition(),
+                                                                                       this);
   }
 
   @Override
@@ -170,8 +171,8 @@ public class ContentImpl extends AbstractPersistableDomain<MutableContent> imple
       return false;
     }
     final Content other = (Content) obj;
-    if (this.contentId != other.getContentId() && (this.contentId == null ||
-                                                   !this.contentId.equals(other.getContentId()))) {
+    if (this.contentId != other.getContentId() && (this.contentId == null
+        || !this.contentId.equals(other.getContentId()))) {
       return false;
     }
     return true;

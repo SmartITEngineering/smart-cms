@@ -24,6 +24,6 @@ package com.smartitengineering.cms.api.content;
  * @since 0.1
  */
 public interface MutableBooleanFieldValue
-        extends MutableFieldValue<Boolean>,
-                BooleanFieldValue {
+    extends MutableFieldValue<Boolean>,
+            BooleanFieldValue {
 }

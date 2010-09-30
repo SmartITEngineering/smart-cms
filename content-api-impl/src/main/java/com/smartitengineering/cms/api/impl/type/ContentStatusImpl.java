@@ -86,5 +86,4 @@ public class ContentStatusImpl implements MutableContentStatus {
     hash = 23 * hash + (this.name != null ? this.name.hashCode() : 0);
     return hash;
   }
-
 }

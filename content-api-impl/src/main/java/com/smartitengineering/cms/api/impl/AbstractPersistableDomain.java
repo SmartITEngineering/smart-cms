@@ -53,8 +53,7 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
    */
   protected AbstractPersistableDomain() {
     Class<T> pesistenceRegistryClass =
-                       (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).
-        getActualTypeArguments()[0];
+             (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     service = SmartContentSPI.getInstance().getPersistentService(pesistenceRegistryClass);
     nextPerformToWaitForLock = false;
   }
