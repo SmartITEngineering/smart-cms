@@ -107,5 +107,6 @@
     <module>content-spi</module>
     <module>content-spi-impl</module>
     <module>api-spi-guice-binder</module>
+    <module>smart-cms-client-api</module>
   </modules>
 </project>
