@@ -24,23 +24,23 @@ package com.smartitengineering.cms.api.type;
  * @since 0.1
  */
 public interface CollectionDataType
-				extends DataType {
+    extends DataType {
 
-		/**
-		 * Retrieve the definition of the collection's items. Since currently
-		 * collection only supports homogeneous types so it will return only a
-		 * definite existing content type definition.
-		 * @return Definition of collection's items.
-		 */
-		public DataType getItemDataType();
+  /**
+   * Retrieve the definition of the collection's items. Since currently
+   * collection only supports homogeneous types so it will return only a
+   * definite existing content type definition.
+   * @return Definition of collection's items.
+   */
+  public DataType getItemDataType();
 
-		/**
-		 * Retrieve the maximum size of the collection. If it is a non positive
-		 * number, it will indicate that the upper bound of the collection
-		 * is infinity.
-		 * @return the maximum size
-		 */
-		public int getMaxSize();
+  /**
+   * Retrieve the maximum size of the collection. If it is a non positive
+   * number, it will indicate that the upper bound of the collection
+   * is infinity.
+   * @return the maximum size
+   */
+  public int getMaxSize();
 
-    public int getMinSize();
+  public int getMinSize();
 }

@@ -23,6 +23,7 @@ package com.smartitengineering.cms.api.common;
  * @author imyousuf
  */
 public enum TemplateType {
+
   VELOCITY,
   RUBY,
   GROOVY,

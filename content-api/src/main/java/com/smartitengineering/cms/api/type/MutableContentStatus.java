@@ -24,29 +24,29 @@ package com.smartitengineering.cms.api.type;
  * @since 0.1
  */
 public interface MutableContentStatus
-				extends ContentStatus {
+    extends ContentStatus {
 
-		/**
-		 * Sets the id of the status. so that it could be directly retrieved from a
-		 * content type.
-		 * @param id The new id of the status.
-		 */
-		public void setId(int id);
+  /**
+   * Sets the id of the status. so that it could be directly retrieved from a
+   * content type.
+   * @param id The new id of the status.
+   */
+  public void setId(int id);
 
-		/**
-		 * Sets the name of the status. It has to be non-blank
-		 * @param newName The new name of the status
-		 * @throws IllegalArgumentException If newName is blank
-		 */
-		public void setName(String newName)
-						throws IllegalArgumentException;
+  /**
+   * Sets the name of the status. It has to be non-blank
+   * @param newName The new name of the status
+   * @throws IllegalArgumentException If newName is blank
+   */
+  public void setName(String newName)
+      throws IllegalArgumentException;
 
-		/**
-		 * Set the content type id of the status. This could be used to change the
-		 * content type of a status
-		 * @param typeId Content Type's identifier for this status
-		 * @throws IllegalArgumentException If typeId is null
-		 */
-		public void setContentTypeID(ContentTypeId typeId)
-						throws IllegalArgumentException;
+  /**
+   * Set the content type id of the status. This could be used to change the
+   * content type of a status
+   * @param typeId Content Type's identifier for this status
+   * @throws IllegalArgumentException If typeId is null
+   */
+  public void setContentTypeID(ContentTypeId typeId)
+      throws IllegalArgumentException;
 }

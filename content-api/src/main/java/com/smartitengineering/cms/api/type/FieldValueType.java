@@ -25,13 +25,13 @@ package com.smartitengineering.cms.api.type;
  */
 public enum FieldValueType {
 
-		INTEGER,
-		LONG,
-		DOUBLE,
-		BOOLEAN,
-		DATE_TIME,
-		STRING,
-		CONTENT,
-		COLLECTION,
-    OTHER
+  INTEGER,
+  LONG,
+  DOUBLE,
+  BOOLEAN,
+  DATE_TIME,
+  STRING,
+  CONTENT,
+  COLLECTION,
+  OTHER
 }

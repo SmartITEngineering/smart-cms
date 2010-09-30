@@ -25,21 +25,21 @@ package com.smartitengineering.cms.api.type;
  */
 public interface ContentStatus {
 
-		/**
-		 * Retrieve the unique identifier integer for this status.
-		 * @return unique positive identifier
-		 */
-		public int getId();
+  /**
+   * Retrieve the unique identifier integer for this status.
+   * @return unique positive identifier
+   */
+  public int getId();
 
-		/**
-		 * Retrieve the identifier for the associated content type.
-		 * @return associated content type
-		 */
-		public ContentTypeId getContentType();
+  /**
+   * Retrieve the identifier for the associated content type.
+   * @return associated content type
+   */
+  public ContentTypeId getContentType();
 
-		/**
-		 * Retrive the name of the status. It has to be a non-empty string.
-		 * @return name of the status
-		 */
-		public String getName();
+  /**
+   * Retrive the name of the status. It has to be a non-empty string.
+   * @return name of the status
+   */
+  public String getName();
 }

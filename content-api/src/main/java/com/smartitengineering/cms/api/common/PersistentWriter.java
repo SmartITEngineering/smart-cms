@@ -32,19 +32,19 @@ import java.io.IOException;
  * @since 0.1
  */
 public interface PersistentWriter
-				extends Lock {
+    extends Lock {
 
-		/**
-		 * Persist this instance in the persistent storage.
-		 * @throws IOException If there is any error in the persistent procedure.
-		 */
-		public void put()
-						throws IOException;
+  /**
+   * Persist this instance in the persistent storage.
+   * @throws IOException If there is any error in the persistent procedure.
+   */
+  public void put()
+      throws IOException;
 
-		/**
-		 * Deletes the current instance from its persistent storage.
-		 * @throws IOException If there is any error in the persistent procedure.
-		 */
-		public void delete()
-						throws IOException;
+  /**
+   * Deletes the current instance from its persistent storage.
+   * @throws IOException If there is any error in the persistent procedure.
+   */
+  public void delete()
+      throws IOException;
 }

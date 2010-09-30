@@ -64,8 +64,8 @@ public class ContentIdImpl implements ContentId {
 
   @Override
   public String toString() {
-    return new StringBuilder().append(workspaceId).append(SmartContentSPI.getInstance().getContentIdProcessor().getIdAsString(
-        id)).toString();
+    return new StringBuilder().append(workspaceId).append(SmartContentSPI.getInstance().getContentIdProcessor().
+        getIdAsString(id)).toString();
   }
 
   @Override

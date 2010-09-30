@@ -80,7 +80,7 @@ public class CollectionDataTypeImpl implements MutableCollectionDataType {
     }
     final CollectionDataType other = (CollectionDataType) obj;
     if (this.dataType != other.getItemDataType() && (this.dataType == null || !this.dataType.equals(other.
-                                                     getItemDataType()))) {
+        getItemDataType()))) {
       return false;
     }
     if (this.maxSize != other.getMaxSize()) {

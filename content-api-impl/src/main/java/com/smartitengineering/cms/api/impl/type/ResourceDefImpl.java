@@ -98,7 +98,7 @@ public class ResourceDefImpl implements MutableResourceDef {
 
   @Override
   public String toString() {
-    return "ResourceDefImpl{" + "; templateType=" + templateType + "; mimeType=" + mimeType + "; name=" + name + "; resourceUri=" +
-        resourceUri + '}';
+    return "ResourceDefImpl{" + "; templateType=" + templateType + "; mimeType=" + mimeType + "; name=" + name
+        + "; resourceUri=" + resourceUri + '}';
   }
 }

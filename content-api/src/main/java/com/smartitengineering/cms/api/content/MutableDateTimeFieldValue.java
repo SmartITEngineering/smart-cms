@@ -26,6 +26,6 @@ import java.util.Date;
  * @since 0.1
  */
 public interface MutableDateTimeFieldValue
-        extends MutableFieldValue<Date>,
-                DateTimeFieldValue {
+    extends MutableFieldValue<Date>,
+            DateTimeFieldValue {
 }

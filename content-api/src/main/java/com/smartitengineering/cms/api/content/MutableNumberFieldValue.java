@@ -24,6 +24,6 @@ package com.smartitengineering.cms.api.content;
  * @since 0.1
  */
 public interface MutableNumberFieldValue
-        extends MutableFieldValue<Number>,
-                NumberFieldValue {
+    extends MutableFieldValue<Number>,
+            NumberFieldValue {
 }

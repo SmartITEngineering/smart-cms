@@ -175,7 +175,8 @@ public class ContentLoaderImpl implements ContentLoader {
   @Override
   public Content loadContent(ContentId contentId) {
     final Collection<Content> contents =
-                              SmartContentSPI.getInstance().getContentReader().readContentsFromPersistentStorage(contentId);
+                              SmartContentSPI.getInstance().getContentReader().readContentsFromPersistentStorage(
+        contentId);
     if (contents == null || contents.isEmpty()) {
       return null;
     }
@@ -189,7 +190,8 @@ public class ContentLoaderImpl implements ContentLoader {
 
   @Override
   public Set<Content> search(Filter filter) {
-    return Collections.unmodifiableSet(new LinkedHashSet<Content>(SmartContentSPI.getInstance().getContentReader().search(
+    return Collections.unmodifiableSet(new LinkedHashSet<Content>(SmartContentSPI.getInstance().getContentReader().
+        search(
         filter)));
   }
 

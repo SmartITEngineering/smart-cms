@@ -26,5 +26,5 @@ import java.util.Collection;
  * @since 0.1
  */
 public interface CollectionFieldValue
-        extends FieldValue<Collection<FieldValue>> {
+    extends FieldValue<Collection<FieldValue>> {
 }

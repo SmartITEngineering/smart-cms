@@ -314,14 +314,17 @@ public class XMLContentTypeDefnitionParserTest {
     Collection<MutableContentType> collection = init();
     Iterator<MutableContentType> iterator = collection.iterator();
     MutableContentType contentType = iterator.next();
-    logger.debug("First ContentType contains " + contentType.getRepresentationDefs().size() + " no of representations.");
-    logger.debug("First ContentType contains " + contentType.getRepresentationDefs().size()
-        + " no of representations.");
+    if (logger.isInfoEnabled()) {
+      logger.debug(new StringBuffer("First ContentType contains ").append(contentType.getRepresentationDefs().size()).
+          append(" no of representations.").toString());
+
+    }
     Assert.assertEquals(0, contentType.getRepresentationDefs().size());
     contentType = iterator.next();
-    logger.debug("2nd ContentType contains " + contentType.getRepresentationDefs().size() + " no of representations.");
-    logger.debug("2nd ContentType contains " + contentType.getRepresentationDefs().size()
-        + " no of representations.");
+    if (logger.isInfoEnabled()) {
+      logger.debug(new StringBuffer("2nd ContentType contains ").append(contentType.getRepresentationDefs().size()).
+          append(" no of representations.").toString());
+    }
     Assert.assertEquals(2, contentType.getRepresentationDefs().size());
 
 
