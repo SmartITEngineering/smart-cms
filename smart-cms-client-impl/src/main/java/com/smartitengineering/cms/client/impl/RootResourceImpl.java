@@ -22,15 +22,16 @@ import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.util.rest.atom.AbstractFeedClientResource;
 import com.smartitengineering.util.rest.atom.AtomClientUtil;
-import com.smartitengineering.util.rest.client.ClientUtil;
 import com.smartitengineering.util.rest.client.Resource;
 import com.smartitengineering.util.rest.client.ResourceLink;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.atom.abdera.impl.provider.entity.FeedProvider;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
@@ -48,7 +49,7 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
 
   private RootResourceImpl(URI uri) throws IllegalArgumentException,
                                            UniformInterfaceException {
-    super(null, uri);
+    super(null, uri, false, null);
     if (logger.isDebugEnabled()) {
       logger.debug("Root resource URI for Smart CMS " + uri.toString());
     }
@@ -67,13 +68,28 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
 
   @Override
   public Collection<WorkspaceContentResouce> getWorkspaces() {
-    List<Entry> entries = getLastReadStateOfEntity().getEntries();
-    List<WorkspaceContentResouce> list = new ArrayList<WorkspaceContentResouce>(entries.size());
-    for (Entry entry : entries) {
-      list.add(new WorkspaceContentResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(entry.getLink(
-          WorkspaceContentResouce.WORKSPACE_CONTENT))));
+    try {
+      final Feed feed = getLastReadStateOfEntity();
+      List<Entry> entries = feed.getEntries();
+      List<WorkspaceContentResouce> list = new ArrayList<WorkspaceContentResouce>(entries.size());
+      for (Entry entry : entries) {
+        list.add(new WorkspaceContentResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(entry.getLink(
+            WorkspaceContentResouce.WORKSPACE_CONTENT))));
+      }
+      return list;
     }
-    return list;
+    catch (UniformInterfaceException exception) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Exception while getting..", exception);
+      }
+      if (exception.getResponse().getStatus() != ClientResponse.Status.NO_CONTENT.getStatusCode()) {
+        logger.error("Rethrowing the exception as it was not expected. Turn on Debug to see more.");
+        throw exception;
+      }
+      else {
+        return Collections.emptyList();
+      }
+    }
   }
 
   public static RootResource getRoot(URI uri) {
