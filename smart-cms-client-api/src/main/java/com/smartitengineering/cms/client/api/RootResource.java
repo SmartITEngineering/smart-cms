@@ -28,5 +28,5 @@ import org.apache.abdera.model.Feed;
  */
 public interface RootResource extends WritableResource<Feed> {
 
-  public Collection<WorkspaceResouce> getWorkspaces();
+  public Collection<WorkspaceContentResouce> getWorkspaces();
 }

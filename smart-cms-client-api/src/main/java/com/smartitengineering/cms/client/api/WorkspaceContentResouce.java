@@ -20,13 +20,13 @@ package com.smartitengineering.cms.client.api;
 
 import com.smartitengineering.cms.client.api.domains.Workspace;
 import com.smartitengineering.util.rest.client.Resource;
-import org.apache.abdera.model.Feed;
 
 /**
  *
  * @author kaisar
  */
-public interface WorkspaceResouce extends Resource<Feed> {
+public interface WorkspaceContentResouce extends Resource<Workspace> {
 
-  Workspace getWorkspace();
+  String WORKSPACE_CONTENT = "workspaceContent";
+  String WORKSPACE_FEED = "workspaceFeed";
 }
