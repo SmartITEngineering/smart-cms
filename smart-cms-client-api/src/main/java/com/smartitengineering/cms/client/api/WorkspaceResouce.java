@@ -18,19 +18,15 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.util.rest.client.WritableResource;
-import java.util.Collection;
+import com.smartitengineering.cms.client.api.domains.Workspace;
+import com.smartitengineering.util.rest.client.Resource;
 import org.apache.abdera.model.Feed;
 
 /**
  *
  * @author kaisar
  */
-public interface WorkSpacesResouce extends WritableResource<Feed> {
+public interface WorkspaceResouce extends Resource<Feed> {
 
-  public Collection<WorkSpaceResouce> getWorkSpaceResouces();
-
-  public void createWorkspace(WorkSpaceClient workSpaceClient);
-
-  public WorkSpacesResouce searchWorkSpaces();
+  Workspace getWorkspace();
 }

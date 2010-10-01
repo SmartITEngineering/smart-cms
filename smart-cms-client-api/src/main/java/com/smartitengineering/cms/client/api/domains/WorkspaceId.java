@@ -16,23 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.client.api;
-
-import com.smartitengineering.util.rest.client.WritableResource;
-import java.util.Collection;
-import org.apache.abdera.model.Feed;
+package com.smartitengineering.cms.client.api.domains;
 
 /**
  *
- * @author kaisar
+ * @author imyousuf
  */
-public interface WorkSpaceResouce extends WritableResource<Feed> {
+public class WorkspaceId {
+  private String globalNamespace;
+  private String name;
 
-  public WorkSpaceClient getWorkSpace();
+  public String getGlobalNamespace() {
+    return globalNamespace;
+  }
 
-  public Collection<ContainerResource> getContentResources();
+  public void setGlobalNamespace(String globalNamespace) {
+    this.globalNamespace = globalNamespace;
+  }
 
-  public void createContainerResource(ContainerClient container);
+  public String getName() {
+    return name;
+  }
 
-  public void update();
+  public void setName(String name) {
+    this.name = name;
+  }
 }

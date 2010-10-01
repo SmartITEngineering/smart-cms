@@ -16,17 +16,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.client.api;
+package com.smartitengineering.cms.client.api.domains;
 
-import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  *
- * @author kaisar
+ * @author imyousuf
  */
-public interface ContainerResource {
+public class Workspace {
 
-  public Collection<ContainerResource> getContainerResources();
+  private WorkspaceId id;
+  private Date creationDate;
+  private List<WorkspaceId> friendlies;
 
-  public Collection<ContentResource> getContentResources();
+  public Date getCreationDate() {
+    return creationDate;
+  }
+
+  public void setCreationDate(Date creationDate) {
+    this.creationDate = creationDate;
+  }
+
+  public List<WorkspaceId> getFriendlies() {
+    return friendlies;
+  }
+
+  public void setFriendlies(List<WorkspaceId> friendlies) {
+    this.friendlies = friendlies;
+  }
+
+  public WorkspaceId getId() {
+    return id;
+  }
+
+  public void setId(WorkspaceId id) {
+    this.id = id;
+  }
 }
