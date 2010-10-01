@@ -21,11 +21,16 @@ package com.smartitengineering.cms.ws.resources;
 import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
+import java.util.Date;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 /**
  *
@@ -41,11 +46,21 @@ public class WorkspaceResource {
   private String namespace;
   @PathParam(PARAM_NAME)
   private String workspaceName;
+  @HeaderParam(HttpHeaders.IF_MODIFIED_SINCE)
+  private Date ifModifiedSince;
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public Workspace getWorkspace() {
+  public Response getWorkspace() {
     final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
-    return workspaceApi.getWorkspace(workspaceApi.createWorkspaceId(namespace, workspaceName));
+    final Workspace workspace = workspaceApi.getWorkspace(workspaceApi.createWorkspaceId(namespace, workspaceName));
+    if (ifModifiedSince == null || ifModifiedSince.before(workspace.getCreationDate())) {
+      ResponseBuilder builder = Response.ok(workspace);
+      builder.lastModified(workspace.getCreationDate());
+      return builder.build();
+    }
+    else {
+      return Response.status(Response.Status.NOT_MODIFIED).build();
+    }
   }
 }
