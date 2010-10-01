@@ -26,6 +26,7 @@ import com.smartitengineering.cms.client.api.domains.Workspace;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
 import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ClientUtil;
+import com.smartitengineering.util.rest.client.ConnectionConfig;
 import com.smartitengineering.util.rest.client.ResourceLink;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
@@ -94,8 +95,9 @@ public class AppTest {
      * Ensure DIs done
      */
     Properties properties = new Properties();
-    properties.setProperty(GuiceUtil.CONTEXT_NAME_PROP, "com.smartitengineering.dao.impl.hbase");
-    properties.setProperty(GuiceUtil.IGNORE_MISSING_DEP_PROP, Boolean.toString(false));
+    properties.setProperty(GuiceUtil.CONTEXT_NAME_PROP,
+                           "com.smartitengineering.dao.impl.hbase,com.smartitengineering.user.client");
+    properties.setProperty(GuiceUtil.IGNORE_MISSING_DEP_PROP, Boolean.TRUE.toString());
     properties.setProperty(GuiceUtil.MODULES_LIST_PROP, ConfigurationModule.class.getName());
     GuiceUtil.getInstance(properties).register();
     Initializer.init();
@@ -210,6 +212,12 @@ public class AppTest {
     @Override
     protected void configure() {
       bind(Configuration.class).toInstance(TEST_UTIL.getConfiguration());
+      ConnectionConfig config = new ConnectionConfig();
+      config.setBasicUri("");
+      config.setContextPath("/");
+      config.setHost("localhost");
+      config.setPort(PORT);
+      bind(ConnectionConfig.class).toInstance(config);
     }
   }
 }
