@@ -75,6 +75,7 @@ public class RootResource extends AbstractResource {
       response = Response.status(Response.Status.OK);
       Feed feed = getFeed("workspaces", "Workspaces", lastModifiedDate);
       Collections.sort(workspaces, WORKSPACE_COMPRATOR);
+      Collections.reverse(workspaces);
       for (Workspace workspace : workspaces) {
         final WorkspaceId id = workspace.getId();
         Link link = getLink(
