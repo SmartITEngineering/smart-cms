@@ -12,6 +12,7 @@ import com.smartitengineering.util.rest.client.ResourceLink;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
@@ -158,14 +159,29 @@ public class AppTest {
 
   @Test
   public void testConditionalRootResourceGet() throws Exception {
+    final String uri = ROOT_URI_STRING;
+    testConditionalGetUsingLastModified(uri);
+  }
+
+  @Test
+  public void testConditionalWorkspaceContentResourceGet() throws Exception {
+    final String uri = ROOT_URI_STRING;
+    RootResource resource = RootResourceImpl.getRoot(new URI(uri));
+    Collection<WorkspaceContentResouce> resouces = resource.getWorkspaces();
+    for (WorkspaceContentResouce contentResouce : resouces) {
+      testConditionalGetUsingLastModified(contentResouce.getUri().toString());
+    }
+  }
+
+  protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
     HttpClient client = new HttpClient();
-    GetMethod method = new GetMethod(ROOT_URI_STRING);
+    GetMethod method = new GetMethod(uri);
     client.executeMethod(method);
     Assert.assertEquals(200, method.getStatusCode());
     Header date = method.getResponseHeader(HttpHeaders.LAST_MODIFIED);
     String dateStr = date.getValue();
     Header ifDate = new Header(HttpHeaders.IF_MODIFIED_SINCE, dateStr);
-    method = new GetMethod(ROOT_URI_STRING);
+    method = new GetMethod(uri);
     method.addRequestHeader(ifDate);
     client.executeMethod(method);
     Assert.assertEquals(304, method.getStatusCode());
