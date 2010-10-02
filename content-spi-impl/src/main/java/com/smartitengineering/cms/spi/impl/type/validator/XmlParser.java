@@ -44,6 +44,7 @@ import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -336,7 +337,7 @@ public class XmlParser implements XmlConstants {
       return variationDefs;
     }
     else {
-      return null;
+      return Collections.emptyList();
     }
   }
 
@@ -430,7 +431,7 @@ public class XmlParser implements XmlConstants {
       return contentStatuses;
     }
     else {
-      return null;
+      return Collections.emptyList();
     }
   }
 
