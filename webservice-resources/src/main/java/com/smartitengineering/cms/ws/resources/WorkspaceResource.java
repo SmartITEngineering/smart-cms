@@ -21,6 +21,7 @@ package com.smartitengineering.cms.ws.resources;
 import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
+import com.smartitengineering.cms.ws.resources.domains.Factory;
 import java.util.Date;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -55,7 +56,7 @@ public class WorkspaceResource {
     final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
     final Workspace workspace = workspaceApi.getWorkspace(workspaceApi.createWorkspaceId(namespace, workspaceName));
     if (ifModifiedSince == null || ifModifiedSince.before(workspace.getCreationDate())) {
-      ResponseBuilder builder = Response.ok(workspace);
+      ResponseBuilder builder = Response.ok(Factory.getWorkspace(workspace));
       builder.lastModified(workspace.getCreationDate());
       return builder.build();
     }
