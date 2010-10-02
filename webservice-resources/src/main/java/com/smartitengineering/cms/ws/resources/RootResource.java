@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.ws.resources;
 
+import com.smartitengineering.cms.ws.resources.workspace.WorkspaceResource;
 import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
