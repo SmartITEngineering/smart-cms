@@ -26,7 +26,6 @@ import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 import java.util.Collection;
 import java.util.Date;
-import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
@@ -58,7 +57,6 @@ public class WorkspaceImpl implements PersistableWorkspace {
   }
 
   @Override
-  @JsonIgnore
   public Collection<ContentType> getContentDefintions() {
     return SmartContentSPI.getInstance().getWorkspaceService().getContentDefintions(getId());
   }

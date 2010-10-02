@@ -58,9 +58,5 @@ The module is responsible for Implementing the API for the CMS.
 						<groupId>junit</groupId>
 						<artifactId>junit</artifactId>
 				</dependency>
-		  <dependency>
-		    <groupId>org.codehaus.jackson</groupId>
-		    <artifactId>jackson-core-lgpl</artifactId>
-		  </dependency>
 		</dependencies>
 </project>
