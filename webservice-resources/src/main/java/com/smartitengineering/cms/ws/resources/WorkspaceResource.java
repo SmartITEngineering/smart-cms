@@ -28,6 +28,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -40,6 +41,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 @Path("/ws/{" + WorkspaceResource.PARAM_NAMESPACE + "}/{" + WorkspaceResource.PARAM_NAME + "}")
 public class WorkspaceResource {
 
+  public static final int MAX_AGE = 1 * 60 * 60;
   public static final String PARAM_NAMESPACE = "ns";
   public static final String PARAM_NAME = "wsName";
   public static final String REL_WORKSPACE_CONTENT = "workspaceContent";
@@ -58,6 +60,9 @@ public class WorkspaceResource {
     if (ifModifiedSince == null || ifModifiedSince.before(workspace.getCreationDate())) {
       ResponseBuilder builder = Response.ok(Factory.getWorkspace(workspace));
       builder.lastModified(workspace.getCreationDate());
+      CacheControl control = new CacheControl();
+      control.setMaxAge(MAX_AGE);
+      builder.cacheControl(control);
       return builder.build();
     }
     else {
