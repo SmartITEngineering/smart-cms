@@ -23,6 +23,7 @@ import com.smartitengineering.cms.binder.guice.Initializer;
 import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.cms.client.api.domains.Workspace;
+import com.smartitengineering.cms.client.api.domains.WorkspaceId;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
 import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ClientUtil;
@@ -35,6 +36,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Properties;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -191,6 +193,19 @@ public class AppTest {
     for (WorkspaceContentResouce contentResouce : resouces) {
       testConditionalGetUsingLastModified(contentResouce.getUri().toString());
     }
+  }
+
+  @Test
+  public void testCreateWorkspace() throws Exception {
+
+    WorkspaceId workspaceId = new WorkspaceId();
+    workspaceId.setName("this is a test");
+    workspaceId.setGlobalNamespace("a test namespace");
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Workspace workspace = resource.createWorkspace(workspaceId);
+    Assert.assertEquals(workspaceId.getName(), workspace.getId().getName());
+    Assert.assertEquals(workspaceId.getGlobalNamespace(), workspace.getId().getGlobalNamespace());
+    Assert.assertEquals(new Date().toString(), workspace.getCreationDate().toString());
   }
 
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
