@@ -18,14 +18,19 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.cms.client.api.domains.Workspace;
-import com.smartitengineering.util.rest.client.Resource;
+import com.smartitengineering.util.rest.client.WritableResource;
+import java.net.URI;
+import java.util.Collection;
 
 /**
  *
- * @author kaisar
+ * @author imyousuf
  */
-public interface WorkspaceContentResouce extends Resource<Workspace> {
+public interface WorkspaceFriendsResource extends WritableResource<Collection<URI>> {
 
-  String WORKSPACE_CONTENT = "workspaceContent";
+  void replaceAllFriends(Collection<URI> workspaces); // Do a PUT
+
+  void deleteFriend(URI friend); //DELETE using query param workspaceUri
+
+  void addFriend(URI friend); //POST using form param workspaceUri (multivaluemap)
 }
