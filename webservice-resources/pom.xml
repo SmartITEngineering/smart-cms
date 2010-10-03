@@ -47,6 +47,12 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>com.smartitengineering.smart-cms</groupId>
+      <artifactId>webservice-common</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>

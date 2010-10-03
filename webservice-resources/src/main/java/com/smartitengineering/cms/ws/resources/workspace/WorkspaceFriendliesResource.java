@@ -22,7 +22,7 @@ import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
-import com.smartitengineering.cms.ws.providers.TextURIListProvider;
+import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;

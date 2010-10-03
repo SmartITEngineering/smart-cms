@@ -24,6 +24,11 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>com.smartitengineering.smart-cms</groupId>
+      <artifactId>webservice-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.smartitengineering.smart-util.rest</groupId>
       <artifactId>atom-client</artifactId>
     </dependency>

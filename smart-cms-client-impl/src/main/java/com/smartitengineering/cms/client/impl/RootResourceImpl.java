@@ -22,6 +22,8 @@ import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.cms.client.api.domains.Workspace;
 import com.smartitengineering.cms.client.api.domains.WorkspaceId;
+import com.smartitengineering.cms.ws.common.providers.JacksonJsonProvider;
+import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
 import com.smartitengineering.util.rest.atom.AbstractFeedClientResource;
 import com.smartitengineering.util.rest.atom.AtomClientUtil;
 import com.smartitengineering.util.rest.client.ClientUtil;
@@ -43,7 +45,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
-import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +69,7 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
   @Override
   protected void processClientConfig(ClientConfig clientConfig) {
     clientConfig.getClasses().add(JacksonJsonProvider.class);
+    clientConfig.getClasses().add(TextURIListProvider.class);
     clientConfig.getClasses().add(FeedProvider.class);
   }
 
