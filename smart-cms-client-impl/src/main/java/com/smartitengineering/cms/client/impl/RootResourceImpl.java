@@ -121,14 +121,13 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
 
   @Override
   public Workspace createWorkspace(WorkspaceId workspaceId) throws URISyntaxException {
-    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     final MultivaluedMap<String, String> map = new MultivaluedMapImpl();
     map.add("name", workspaceId.getName());
     map.add("namespace", workspaceId.getGlobalNamespace());
-    ClientResponse response = resource.post(MediaType.APPLICATION_FORM_URLENCODED, map, ClientResponse.Status.CREATED);
+    ClientResponse response = post(MediaType.APPLICATION_FORM_URLENCODED, map, ClientResponse.Status.CREATED);
     ResourceLink link = ClientUtil.createResourceLink(WorkspaceContentResouce.WORKSPACE_CONTENT, response.getLocation(),
                                                       MediaType.APPLICATION_JSON);
-    WorkspaceContentResouce workspaceContentResouce = new WorkspaceContentResourceImpl(resource, link);
+    WorkspaceContentResouce workspaceContentResouce = new WorkspaceContentResourceImpl(this, link);
     Workspace workspace = workspaceContentResouce.getLastReadStateOfEntity();
     return workspace;
   }
