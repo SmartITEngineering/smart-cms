@@ -41,8 +41,6 @@ import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -96,7 +94,7 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     if (instance.isFriendliesPopulated()) {
       for (WorkspaceId friendly : instance.getFriendlies()) {
         try {
-          put.add(FAMILY_FRIENDLIES, getInfoProvider().getRowIdFromId(friendly), Bytes.toBytes(friendly.toString()));
+          put.add(FAMILY_FRIENDLIES, getInfoProvider().getRowIdFromId(friendly), Utils.toBytes(new Date()));
         }
         catch (IOException ex) {
           logger.warn("Error putting friendly", ex);
@@ -127,6 +125,9 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
 
   @Override
   protected void getDeleteForTable(PersistentWorkspace instance, ExecutorService service, Delete delete) {
+    if (logger.isInfoEnabled()) {
+      logger.info(new StringBuilder("Deleting workspace (full/partial) with ID: ").append(instance.getId()).toString());
+    }
     /*
      * Delete whole workspace
      */
@@ -145,6 +146,7 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
          * Delete all representations
          */
         if (instance.getRepresentationTemplates().isEmpty()) {
+          logger.info("Delete all representations");
           delete.deleteFamily(FAMILY_REPRESENTATIONS_INFO);
           delete.deleteFamily(FAMILY_REPRESENTATIONS_DATA);
         }
@@ -152,7 +154,12 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
          * Delete particular representation(s)
          */
         else {
+          logger.info("Delete selected representations");
           for (RepresentationTemplate representationTemplate : instance.getRepresentationTemplates()) {
+            if (logger.isDebugEnabled()) {
+              logger.debug(new StringBuilder("Deleting representation ").append(representationTemplate.getName()).
+                  toString());
+            }
             addResourceColumnsToDelete(FAMILY_REPRESENTATIONS_INFO, delete, representationTemplate);
             addResourceDataColumnsToDelete(FAMILY_REPRESENTATIONS_DATA, delete, representationTemplate);
           }
@@ -163,6 +170,7 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
          * Delete all variations
          */
         if (instance.getVariationTemplates().isEmpty()) {
+          logger.info("Delete all variations");
           delete.deleteFamily(FAMILY_VARIATIONS_INFO);
           delete.deleteFamily(FAMILY_VARIATIONS_DATA);
         }
@@ -170,7 +178,11 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
          * Delete particular variation(s)
          */
         else {
+          logger.info("Delete selected variations");
           for (VariationTemplate varTemplate : instance.getVariationTemplates()) {
+            if (logger.isDebugEnabled()) {
+              logger.debug(new StringBuilder("Deleting variation ").append(varTemplate.getName()).toString());
+            }
             addResourceColumnsToDelete(FAMILY_VARIATIONS_INFO, delete, varTemplate);
             addResourceDataColumnsToDelete(FAMILY_VARIATIONS_DATA, delete, varTemplate);
           }
@@ -178,11 +190,16 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
       }
       if (instance.isFriendliesPopulated()) {
         if (instance.getFriendlies().isEmpty()) {
+          logger.info("Delete all friendlies");
           delete.deleteFamily(FAMILY_FRIENDLIES);
         }
         else {
+          logger.info("Delete selected friendlies");
           for (WorkspaceId friendly : instance.getFriendlies()) {
             try {
+              if (logger.isDebugEnabled()) {
+                logger.debug(new StringBuilder("Deleting friendly ").append(friendly.toString()).toString());
+              }
               delete.deleteColumn(FAMILY_FRIENDLIES, getInfoProvider().getRowIdFromId(friendly));
             }
             catch (IOException ex) {
