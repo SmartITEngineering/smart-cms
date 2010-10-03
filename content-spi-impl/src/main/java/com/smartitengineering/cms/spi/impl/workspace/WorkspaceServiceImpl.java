@@ -231,4 +231,25 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
   protected QueryParameter<String> getIdParam(WorkspaceId workspaceId) {
     return QueryParameterFactory.getStringLikePropertyParam("id", workspaceId.toString(), MatchMode.EXACT);
   }
+
+  @Override
+  public void removeAllFriendlies(WorkspaceId workspaceId) {
+    PersistentWorkspace workspace = getWorkspace(workspaceId);
+    workspace.setFriendliesPopulated(true);
+    commonWriteDao.delete(workspace);
+  }
+
+  @Override
+  public void removeAllRepresentationTemplates(WorkspaceId workspaceId) {
+    PersistentWorkspace workspace = getWorkspace(workspaceId);
+    workspace.setRepresentationPopulated(true);
+    commonWriteDao.delete(workspace);
+  }
+
+  @Override
+  public void removeAllVariationTemplates(WorkspaceId workspaceId) {
+    PersistentWorkspace workspace = getWorkspace(workspaceId);
+    workspace.setVariationPopulated(true);
+    commonWriteDao.delete(workspace);
+  }
 }

@@ -155,4 +155,19 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   public void removeFriend(WorkspaceId from, WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getWorkspaceService().removeFriend(from, workspaceId);
   }
+
+  @Override
+  public void removeAllFriendlies(WorkspaceId workspaceId) {
+    SmartContentSPI.getInstance().getWorkspaceService().removeAllFriendlies(workspaceId);
+  }
+
+  @Override
+  public void removeAllRepresentationTemplates(WorkspaceId workspaceId) {
+    SmartContentSPI.getInstance().getWorkspaceService().removeAllRepresentationTemplates(workspaceId);
+  }
+
+  @Override
+  public void removeAllVariationTemplates(WorkspaceId workspaceId) {
+    SmartContentSPI.getInstance().getWorkspaceService().removeAllVariationTemplates(workspaceId);
+  }
 }

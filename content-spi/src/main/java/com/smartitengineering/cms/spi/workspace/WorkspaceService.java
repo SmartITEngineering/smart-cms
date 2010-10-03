@@ -61,4 +61,10 @@ public interface WorkspaceService {
   public VariationTemplate getVariationTemplate(WorkspaceId workspaceId, String name);
 
   public void deleteVariation(VariationTemplate template);
+
+  public void removeAllFriendlies(WorkspaceId workspaceId);
+
+  public void removeAllRepresentationTemplates(WorkspaceId workspaceId);
+
+  public void removeAllVariationTemplates(WorkspaceId workspaceId);
 }
