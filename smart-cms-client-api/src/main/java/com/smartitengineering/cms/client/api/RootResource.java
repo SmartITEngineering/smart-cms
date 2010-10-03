@@ -18,7 +18,10 @@
  */
 package com.smartitengineering.cms.client.api;
 
+import com.smartitengineering.cms.client.api.domains.Workspace;
+import com.smartitengineering.cms.client.api.domains.WorkspaceId;
 import com.smartitengineering.util.rest.client.WritableResource;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import org.apache.abdera.model.Feed;
 
@@ -29,4 +32,6 @@ import org.apache.abdera.model.Feed;
 public interface RootResource extends WritableResource<Feed> {
 
   public Collection<WorkspaceContentResouce> getWorkspaces();
+
+  public Workspace createWorkspace(WorkspaceId workspaceId) throws URISyntaxException;
 }

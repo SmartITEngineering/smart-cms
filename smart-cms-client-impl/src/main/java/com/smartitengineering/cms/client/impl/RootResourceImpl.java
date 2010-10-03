@@ -20,19 +20,26 @@ package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
+import com.smartitengineering.cms.client.api.domains.Workspace;
+import com.smartitengineering.cms.client.api.domains.WorkspaceId;
 import com.smartitengineering.util.rest.atom.AbstractFeedClientResource;
 import com.smartitengineering.util.rest.atom.AtomClientUtil;
+import com.smartitengineering.util.rest.client.ClientUtil;
 import com.smartitengineering.util.rest.client.Resource;
 import com.smartitengineering.util.rest.client.ResourceLink;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.atom.abdera.impl.provider.entity.FeedProvider;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
@@ -46,6 +53,8 @@ import org.slf4j.LoggerFactory;
 public class RootResourceImpl extends AbstractFeedClientResource<Resource<? extends Feed>> implements RootResource {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RootResourceImpl.class);
+  private static final int PORT = 10080;
+  public static final String ROOT_URI_STRING = "http://localhost:" + PORT + "/";
 
   private RootResourceImpl(URI uri) throws IllegalArgumentException,
                                            UniformInterfaceException {
@@ -101,5 +110,19 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
       LOGGER.error(ex.getMessage(), ex);
       throw ex;
     }
+  }
+
+  @Override
+  public Workspace createWorkspace(WorkspaceId workspaceId) throws URISyntaxException {
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    final MultivaluedMap<String, String> map = new MultivaluedMapImpl();
+    map.add("name", workspaceId.getName());
+    map.add("namespace", workspaceId.getGlobalNamespace());
+    ClientResponse response = resource.post(MediaType.APPLICATION_FORM_URLENCODED, map, ClientResponse.Status.CREATED);
+    ResourceLink link = ClientUtil.createResourceLink(WorkspaceContentResouce.WORKSPACE_CONTENT, response.getLocation(),
+                                                      MediaType.APPLICATION_JSON);
+    WorkspaceContentResouce workspaceContentResouce = new WorkspaceContentResourceImpl(resource, link);
+    Workspace workspace = workspaceContentResouce.getLastReadStateOfEntity();
+    return workspace;
   }
 }
