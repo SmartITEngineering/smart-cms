@@ -22,7 +22,9 @@ import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.ws.providers.TextURIListProvider;
 import com.smartitengineering.cms.ws.resources.domains.Factory;
+import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import java.net.URI;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -40,6 +42,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import org.apache.abdera.model.Feed;
+import org.apache.abdera.model.Link;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -47,11 +51,13 @@ import org.apache.commons.lang.StringUtils;
  * @author imyousuf
  */
 @Path("/ws/{" + WorkspaceResource.PARAM_NAMESPACE + "}/{" + WorkspaceResource.PARAM_NAME + "}")
-public class WorkspaceResource {
+public class WorkspaceResource extends AbstractResource {
 
   public static final int MAX_AGE = 1 * 60 * 60;
   public static final String PARAM_NAMESPACE = "ns";
   public static final String PARAM_NAME = "wsName";
+  public static final String PATH_FRIENDLIES = "friendlies";
+  public static final String REL_FRIENDLIES = "friendlies";
   public static final String REL_WORKSPACE_CONTENT = "workspaceContent";
   public static final Pattern PATTERN = Pattern.compile("(/)?ws/([\\w\\._-]+)/(\\w+)");
   private final String namespace;
@@ -66,7 +72,7 @@ public class WorkspaceResource {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getWorkspace() {
+  public Response getWorkspaceContent() {
     final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
     final Workspace workspace = workspaceApi.getWorkspace(workspaceApi.createWorkspaceId(namespace, workspaceName));
     if (ifModifiedSince == null || ifModifiedSince.before(workspace.getCreationDate())) {
@@ -82,7 +88,31 @@ public class WorkspaceResource {
     }
   }
 
-  @Path("friendlies")
+  @GET
+  @Produces(MediaType.APPLICATION_ATOM_XML)
+  public Response getWorkspace() {
+    final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
+    final Workspace workspace = workspaceApi.getWorkspace(workspaceApi.createWorkspaceId(namespace, workspaceName));
+    final Date creationDate = workspace.getCreationDate();
+    if (ifModifiedSince == null || ifModifiedSince.before(creationDate)) {
+      Feed feed = getFeed(workspace.getId().toString(), workspaceName, creationDate);
+      feed.addLink(getLink(
+          getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_FRIENDLIES).build(namespace, workspaceName),
+          REL_FRIENDLIES, TextURIListProvider.TEXT_URI_LIST));
+      feed.addLink(getLink(getUriInfo().getRequestUri(), Link.REL_ALTERNATE, MediaType.APPLICATION_JSON));
+      ResponseBuilder builder = Response.ok(feed);
+      builder.lastModified(creationDate);
+      CacheControl control = new CacheControl();
+      control.setMaxAge(MAX_AGE);
+      builder.cacheControl(control);
+      return builder.build();
+    }
+    else {
+      return Response.status(Response.Status.NOT_MODIFIED).build();
+    }
+  }
+
+  @Path(PATH_FRIENDLIES)
   public WorkspaceFriendliesResource getFriendliesResource(@Context UriInfo info) {
     return new WorkspaceFriendliesResource(namespace, workspaceName, info);
   }
@@ -122,5 +152,10 @@ public class WorkspaceResource {
     else {
       return null;
     }
+  }
+
+  @Override
+  protected String getAuthor() {
+    return "Smart CMS";
   }
 }

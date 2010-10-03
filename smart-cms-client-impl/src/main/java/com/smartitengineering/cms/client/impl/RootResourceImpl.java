@@ -42,6 +42,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
+import org.apache.abdera.model.Link;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,8 +83,14 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
       List<Entry> entries = feed.getEntries();
       List<WorkspaceContentResouce> list = new ArrayList<WorkspaceContentResouce>(entries.size());
       for (Entry entry : entries) {
-        list.add(new WorkspaceContentResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(entry.getLink(
-            WorkspaceContentResouce.WORKSPACE_CONTENT))));
+        final List<Link> links = entry.getLinks(WorkspaceContentResouce.WORKSPACE_CONTENT);
+        Link link = null;
+        for (Link tmp : links) {
+          if (MediaType.APPLICATION_JSON.equals(tmp.getMimeType().toString())) {
+            link = tmp;
+          }
+        }
+        list.add(new WorkspaceContentResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(link)));
       }
       return list;
     }

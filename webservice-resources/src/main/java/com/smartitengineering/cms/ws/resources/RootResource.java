@@ -83,6 +83,9 @@ public class RootResource extends AbstractResource {
             UriBuilder.fromResource(WorkspaceResource.class).build(id.getGlobalNamespace(), id.getName()),
             WorkspaceResource.REL_WORKSPACE_CONTENT, MediaType.APPLICATION_JSON);
         Entry entry = getEntry(id.toString(), id.getName(), workspace.getCreationDate(), link);
+        link = getLink(UriBuilder.fromResource(WorkspaceResource.class).build(id.getGlobalNamespace(), id.getName()),
+                       WorkspaceResource.REL_WORKSPACE_CONTENT, MediaType.APPLICATION_ATOM_XML);
+        entry.addLink(link);
         feed.addEntry(entry);
       }
       response.entity(feed);
