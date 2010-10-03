@@ -33,6 +33,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -52,7 +53,7 @@ public class WorkspaceResource {
   public static final String PARAM_NAMESPACE = "ns";
   public static final String PARAM_NAME = "wsName";
   public static final String REL_WORKSPACE_CONTENT = "workspaceContent";
-  public static final Pattern PATTERN = Pattern.compile("(/)?ws/(\\w+)/(\\w+)");
+  public static final Pattern PATTERN = Pattern.compile("(/)?ws/([\\w\\._-]+)/(\\w+)");
   private final String namespace;
   private final String workspaceName;
   @HeaderParam(HttpHeaders.IF_MODIFIED_SINCE)
@@ -82,8 +83,8 @@ public class WorkspaceResource {
   }
 
   @Path("friendlies")
-  public WorkspaceFriendliesResource getFriendliesResource() {
-    return new WorkspaceFriendliesResource(namespace, workspaceName);
+  public WorkspaceFriendliesResource getFriendliesResource(@Context UriInfo info) {
+    return new WorkspaceFriendliesResource(namespace, workspaceName, info);
   }
 
   public static URI getWorkspaceURI(UriBuilder builder, String namespace, String name) {
@@ -97,14 +98,26 @@ public class WorkspaceResource {
   public static WorkspaceId parseWorkspaceId(UriInfo uriInfo, URI uri) {
     String path = uri.getPath();
     String basePath = uriInfo.getBaseUri().getPath();
-    if (StringUtils.isBlank(path) || !path.startsWith(basePath)) {
+    String fullPath = uriInfo.getBaseUri().toASCIIString();
+    if (StringUtils.isBlank(path)) {
       return null;
     }
-    String pathToWorkspace = path.substring(0, basePath.length());
+    final String pathToWorkspace;
+    if (path.startsWith(fullPath)) {
+      pathToWorkspace = path.substring(fullPath.length());
+    }
+    else if (path.startsWith(basePath)) {
+      pathToWorkspace = path.substring(basePath.length());
+    }
+    else {
+      pathToWorkspace = path;
+    }
     Matcher matcher = PATTERN.matcher(pathToWorkspace);
     if (matcher.matches()) {
       final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
-      return workspaceApi.getWorkspaceIdIfExists(workspaceApi.createWorkspaceId(matcher.group(2), matcher.group(3)));
+      final String namespace = matcher.group(2);
+      final String name = matcher.group(3);
+      return workspaceApi.getWorkspaceIdIfExists(workspaceApi.createWorkspaceId(namespace, name));
     }
     else {
       return null;

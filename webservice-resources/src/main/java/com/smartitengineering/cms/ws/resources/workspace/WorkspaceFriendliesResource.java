@@ -23,7 +23,6 @@ import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.ws.providers.TextURIListProvider;
-import com.smartitengineering.util.rest.server.AbstractResource;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -41,19 +40,31 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
 
 /**
  *
  * @author imyousuf
  */
-public class WorkspaceFriendliesResource extends AbstractResource {
+public class WorkspaceFriendliesResource {
 
+  private final UriInfo info;
   private final Workspace workspace;
 
-  public WorkspaceFriendliesResource(String namespace, String name) {
+  public WorkspaceFriendliesResource(String namespace, String name, UriInfo info) {
     final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
     workspace = workspaceApi.getWorkspace(workspaceApi.createWorkspaceId(namespace, name));
+    this.info = info;
+  }
+
+  protected UriBuilder getAbsoluteURIBuilder() {
+    return getUriInfo().getBaseUriBuilder();
+  }
+
+  protected UriInfo getUriInfo() {
+    return info;
   }
 
   @GET
