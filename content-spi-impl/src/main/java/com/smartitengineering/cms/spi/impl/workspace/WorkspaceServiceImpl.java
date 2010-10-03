@@ -101,9 +101,11 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
   }
 
   @Override
-  public void addFriend(WorkspaceId to, WorkspaceId workspaceId) {
+  public void addFriend(WorkspaceId to, WorkspaceId... workspaceIds) {
     PersistentWorkspace workspace = getWorkspace(to);
-    workspace.addFriendly(workspaceId);
+    for(WorkspaceId id : workspaceIds) {
+      workspace.addFriendly(id);
+    }
     workspace.setFriendliesPopulated(true);
     commonWriteDao.update(workspace);
   }

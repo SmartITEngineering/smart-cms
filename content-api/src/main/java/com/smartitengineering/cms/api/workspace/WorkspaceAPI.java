@@ -66,7 +66,7 @@ public interface WorkspaceAPI {
 
   public Collection<WorkspaceId> getFriendlies(WorkspaceId workspaceId);
 
-  public void addFriend(WorkspaceId to, WorkspaceId workspaceId);
+  public void addFriend(WorkspaceId to, WorkspaceId... workspaceIds);
 
   public void removeFriend(WorkspaceId from, WorkspaceId workspaceId);
 

@@ -28,11 +28,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.CacheControl;
@@ -79,6 +81,28 @@ public class WorkspaceFriendliesResource extends AbstractResource {
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   public Response addWorkspaceAsFriendly(@FormParam("workspaceUri") final String uri) {
     return writeFriends(uri, true);
+  }
+
+  @PUT
+  @Consumes(TextURIListProvider.TEXT_URI_LIST)
+  public Response replaceWorkspaceAsFriendlies(final Collection<URI> uris) {
+    SmartContentAPI.getInstance().getWorkspaceApi().removeAllFriendlies(workspace.getId());
+    if (uris != null && uris.size() > 0) {
+      List<WorkspaceId> ids = new ArrayList<WorkspaceId>(uris.size());
+      for (URI uri : uris) {
+        WorkspaceId id = WorkspaceResource.parseWorkspaceId(getUriInfo(), uri);
+        if (id == null) {
+          return Response.status(Response.Status.BAD_REQUEST).entity("Some URIs could not be resolved internally!").
+              build();
+        }
+        ids.add(id);
+      }
+      SmartContentAPI.getInstance().getWorkspaceApi().addFriend(workspace.getId(), ids.toArray(
+          new WorkspaceId[ids.size()]));
+    }
+    ResponseBuilder builder = Response.status(Response.Status.OK);
+    builder.location(getUriInfo().getAbsolutePath());
+    return builder.build();
   }
 
   @DELETE

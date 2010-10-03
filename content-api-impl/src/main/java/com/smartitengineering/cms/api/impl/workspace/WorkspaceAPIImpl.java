@@ -147,8 +147,8 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   }
 
   @Override
-  public void addFriend(WorkspaceId to, WorkspaceId workspaceId) {
-    SmartContentSPI.getInstance().getWorkspaceService().addFriend(to, workspaceId);
+  public void addFriend(WorkspaceId to, WorkspaceId... workspaceIds) {
+    SmartContentSPI.getInstance().getWorkspaceService().addFriend(to, workspaceIds);
   }
 
   @Override
