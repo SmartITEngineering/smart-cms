@@ -43,6 +43,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -52,6 +54,7 @@ public class WorkspaceFriendliesResource {
 
   private final UriInfo info;
   private final Workspace workspace;
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   public WorkspaceFriendliesResource(String namespace, String name, UriInfo info) {
     final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
@@ -101,6 +104,9 @@ public class WorkspaceFriendliesResource {
     if (uris != null && uris.size() > 0) {
       List<WorkspaceId> ids = new ArrayList<WorkspaceId>(uris.size());
       for (URI uri : uris) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("URI to parse " + uri.toASCIIString());
+        }
         WorkspaceId id = WorkspaceResource.parseWorkspaceId(getUriInfo(), uri);
         if (id == null) {
           return Response.status(Response.Status.BAD_REQUEST).entity("Some URIs could not be resolved internally!").

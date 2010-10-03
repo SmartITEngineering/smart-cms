@@ -74,7 +74,7 @@ public class TextURIListProvider implements MessageBodyReader<Collection<URI>>, 
                                   MediaType mediaType, MultivaluedMap<String, String> httpHeaders,
                                   InputStream entityStream) throws IOException, WebApplicationException {
     if (isReadable(type, genericType, annotations, mediaType)) {
-      List<String> asLines = IOUtils.readLines(entityStream);
+      List<String> asLines = IOUtils.readLines(entityStream, null);
       if (asLines == null || asLines.isEmpty()) {
         return Collections.emptyList();
       }
@@ -114,14 +114,14 @@ public class TextURIListProvider implements MessageBodyReader<Collection<URI>>, 
                       MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException,
                                                                                                     WebApplicationException {
     if (isWriteable(type, genericType, annotations, mediaType)) {
-      StringBuilder builder = new StringBuilder();
+      List<String> lines = new ArrayList<String>(t.size());
       for (URI uri : t) {
         if (uri == null) {
           continue;
         }
-        builder.append(uri.toASCIIString()).append('\r').append('\n');
+        lines.add(uri.toASCIIString());
       }
-      IOUtils.write(builder.toString(), entityStream);
+      IOUtils.writeLines(lines, null, entityStream);
     }
   }
 }
