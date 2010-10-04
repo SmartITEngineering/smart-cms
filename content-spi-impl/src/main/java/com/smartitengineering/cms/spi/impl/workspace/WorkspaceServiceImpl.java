@@ -29,6 +29,7 @@ import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
+import com.smartitengineering.cms.spi.workspace.PersistableResourceTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 import com.smartitengineering.cms.spi.workspace.WorkspaceService;
@@ -152,6 +153,8 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     template.setTemplateType(templateType);
     template.setWorkspaceId(workspaceId);
     template.setTemplate(data);
+    RepresentationTemplate oldTemplate = getRepresentationTemplate(workspaceId, name);
+    updateDates(template, oldTemplate);
     workspace.setRepresentationPopulated(true);
     commonWriteDao.update(workspace);
     return template;
@@ -189,6 +192,8 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     template.setTemplateType(templateType);
     template.setWorkspaceId(workspaceId);
     template.setTemplate(data);
+    VariationTemplate oldTemplate = getVariationTemplate(workspaceId, name);
+    updateDates(template, oldTemplate);
     workspace.setVariationPopulated(true);
     commonWriteDao.update(workspace);
     return template;
@@ -313,5 +318,16 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     }
     Collections.sort(templates, comp);
     return Collections.unmodifiableCollection(templates);
+  }
+
+  private void updateDates(PersistableResourceTemplate template, ResourceTemplate oldTemplate) {
+    final Date date = new Date();
+    if (oldTemplate != null) {
+      template.setCreatedDate(oldTemplate.getCreatedDate());
+    }
+    else {
+      template.setCreatedDate(date);
+    }
+    template.setLastModifiedDate(date);
   }
 }
