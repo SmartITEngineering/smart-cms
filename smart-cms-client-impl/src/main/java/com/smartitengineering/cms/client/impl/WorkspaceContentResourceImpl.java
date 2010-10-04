@@ -19,7 +19,7 @@
 package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
-import com.smartitengineering.cms.client.api.domains.Workspace;
+import com.smartitengineering.cms.ws.common.domains.Workspace;
 import com.smartitengineering.util.rest.client.AbstractClientResource;
 import com.smartitengineering.util.rest.client.Resource;
 import com.smartitengineering.util.rest.client.ResourceLink;

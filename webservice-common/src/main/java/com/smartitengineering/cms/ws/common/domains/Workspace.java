@@ -16,15 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.ws.resources.domains;
+package com.smartitengineering.cms.ws.common.domains;
+
+import java.util.Date;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 /**
  *
  * @author imyousuf
  */
-public interface WorkspaceId {
+@JsonDeserialize(as=WorkspaceImpl.class)
+public interface Workspace {
 
-  String getGlobalNamespace();
+  Date getCreationDate();
 
-  String getName();
+  WorkspaceId getId();
 }

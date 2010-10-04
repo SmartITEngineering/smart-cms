@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.ws.resources.domains;
+package com.smartitengineering.cms.ws.common.domains;
 
 import java.util.Date;
 
@@ -24,19 +24,23 @@ import java.util.Date;
  *
  * @author imyousuf
  */
-class WorkspaceImpl implements Workspace {
+public class WorkspaceImpl implements Workspace {
 
-  private final com.smartitengineering.cms.api.workspace.Workspace workspace;
-  private final WorkspaceId id;
+  private WorkspaceId id;
+  private Date creationDate;
 
-  public WorkspaceImpl(com.smartitengineering.cms.api.workspace.Workspace workspace) {
-    this.workspace = workspace;
-    this.id = new WorkspaceIdImpl(workspace.getId());
+  public WorkspaceImpl() {
+    this(null, null);
+  }
+
+  public WorkspaceImpl(WorkspaceId workspaceId, Date creationDate) {
+    this.id = workspaceId;
+    this.creationDate = creationDate;
   }
 
   @Override
   public Date getCreationDate() {
-    return workspace.getCreationDate();
+    return creationDate;
   }
 
   @Override
@@ -44,22 +48,42 @@ class WorkspaceImpl implements Workspace {
     return id;
   }
 
-  static class WorkspaceIdImpl implements WorkspaceId {
+  public void setCreationDate(Date creationDate) {
+    this.creationDate = creationDate;
+  }
 
-    private final com.smartitengineering.cms.api.workspace.WorkspaceId id;
+  public void setId(WorkspaceId id) {
+    this.id = id;
+  }
 
-    public WorkspaceIdImpl(com.smartitengineering.cms.api.workspace.WorkspaceId id) {
-      this.id = id;
+  public static class WorkspaceIdImpl implements WorkspaceId {
+
+    private String globalNamespace, name;
+
+    public WorkspaceIdImpl() {
+    }
+
+    public WorkspaceIdImpl(String globalNamespace, String name) {
+      this.globalNamespace = globalNamespace;
+      this.name = name;
+    }
+
+    public void setGlobalNamespace(String globalNamespace) {
+      this.globalNamespace = globalNamespace;
+    }
+
+    public void setName(String name) {
+      this.name = name;
     }
 
     @Override
     public String getGlobalNamespace() {
-      return id.getGlobalNamespace();
+      return globalNamespace;
     }
 
     @Override
     public String getName() {
-      return id.getName();
+      return name;
     }
   }
 }

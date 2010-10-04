@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.cms.client.api.domains.Workspace;
+import com.smartitengineering.cms.ws.common.domains.Workspace;
 import com.smartitengineering.util.rest.client.Resource;
 
 /**

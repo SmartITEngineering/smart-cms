@@ -18,6 +18,9 @@
  */
 package com.smartitengineering.cms.ws.resources.domains;
 
+import com.smartitengineering.cms.ws.common.domains.WorkspaceImpl;
+import com.smartitengineering.cms.ws.common.domains.Workspace;
+
 /**
  *
  * @author imyousuf
@@ -28,6 +31,7 @@ public final class Factory {
   }
 
   public static Workspace getWorkspace(com.smartitengineering.cms.api.workspace.Workspace workspace) {
-    return new WorkspaceImpl(workspace);
+    return new WorkspaceImpl(new WorkspaceImpl.WorkspaceIdImpl(workspace.getId().getGlobalNamespace(), workspace.getId().
+        getName()), workspace.getCreationDate());
   }
 }

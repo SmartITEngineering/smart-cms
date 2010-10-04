@@ -20,8 +20,8 @@ package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
-import com.smartitengineering.cms.client.api.domains.Workspace;
-import com.smartitengineering.cms.client.api.domains.WorkspaceId;
+import com.smartitengineering.cms.ws.common.domains.Workspace;
+import com.smartitengineering.cms.ws.common.domains.WorkspaceId;
 import com.smartitengineering.cms.ws.common.providers.JacksonJsonProvider;
 import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
 import com.smartitengineering.util.rest.atom.AbstractFeedClientResource;
