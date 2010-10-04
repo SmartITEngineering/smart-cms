@@ -29,11 +29,13 @@ import java.net.URI;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
@@ -58,7 +60,11 @@ public class WorkspaceResource extends AbstractResource {
   public static final String PARAM_NAMESPACE = "ns";
   public static final String PARAM_NAME = "wsName";
   public static final String PATH_FRIENDLIES = "friendlies";
+  public static final String PATH_REPRESENTATIONS = "representations";
+  public static final String PATH_VARIATIONS = "variations";
   public static final String REL_FRIENDLIES = "friendlies";
+  public static final String REL_REPRESENTATIONS = "representations";
+  public static final String REL_VARIATIONS = "variations";
   public static final String REL_WORKSPACE_CONTENT = "workspaceContent";
   public static final Pattern PATTERN = Pattern.compile("(/)?ws/([\\w\\._-]+)/(\\w+)");
   private final String namespace;
@@ -116,8 +122,28 @@ public class WorkspaceResource extends AbstractResource {
   }
 
   @Path(PATH_FRIENDLIES)
-  public WorkspaceFriendliesResource getFriendliesResource(@Context UriInfo info) {
-    return new WorkspaceFriendliesResource(workspace, info);
+  public WorkspaceFriendliesResource getFriendliesResource() {
+    return new WorkspaceFriendliesResource(workspace, getUriInfo());
+  }
+
+  @Path(PATH_REPRESENTATIONS)
+  public WorkspaceRepresentationsResource getRepresentationsResource(@QueryParam("count") @DefaultValue("10") int count) {
+    return new WorkspaceRepresentationsResource(workspace, getUriInfo(), count);
+  }
+
+  @Path(PATH_VARIATIONS)
+  public WorkspaceVariationsResource getVariationsResource(@QueryParam("count") @DefaultValue("10") int count) {
+    return new WorkspaceVariationsResource(workspace, getUriInfo(), count);
+  }
+
+  @Path(PATH_REPRESENTATIONS + "/name/{name}")
+  public WorkspaceRepresentationResource getRepresentationsResource(@PathParam("name") String name) {
+    return new WorkspaceRepresentationResource(name, workspace, getUriInfo());
+  }
+
+  @Path(PATH_VARIATIONS + "/name/{name}")
+  public WorkspaceVariationResource getVariationResource(@PathParam("name") String name) {
+    return new WorkspaceVariationResource(name, workspace, getUriInfo());
   }
 
   public static URI getWorkspaceURI(UriBuilder builder, String namespace, String name) {
