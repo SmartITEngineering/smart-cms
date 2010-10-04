@@ -24,6 +24,7 @@ import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
+import com.smartitengineering.cms.api.workspace.WorkspaceAPI.ResourceSortCriteria;
 import java.util.Collection;
 
 /**
@@ -67,4 +68,8 @@ public interface WorkspaceService {
   public void removeAllRepresentationTemplates(WorkspaceId workspaceId);
 
   public void removeAllVariationTemplates(WorkspaceId workspaceId);
+
+  public Collection<RepresentationTemplate> getRepresentationsWithoutData(WorkspaceId id, ResourceSortCriteria criteria);
+
+  public Collection<VariationTemplate> getVariationsWithoutData(WorkspaceId id, ResourceSortCriteria criteria);
 }

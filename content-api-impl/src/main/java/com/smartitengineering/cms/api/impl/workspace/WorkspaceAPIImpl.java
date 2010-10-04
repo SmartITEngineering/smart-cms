@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
@@ -29,7 +30,10 @@ import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -169,5 +173,107 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   @Override
   public void removeAllVariationTemplates(WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getWorkspaceService().removeAllVariationTemplates(workspaceId);
+  }
+
+  @Override
+  public Collection<String> getRepresentationNames(WorkspaceId id, ResourceSortCriteria criteria, String startPoint,
+                                                   int count) {
+    if (count == 0 || startPoint == null) {
+      return Collections.emptyList();
+    }
+    List<String> list = new ArrayList<String>(getRepresentationNames(id, criteria));
+    int index = Collections.binarySearch(list, startPoint);
+    if (index < 0) {
+      index = index * - 1;
+    }
+    if (index >= list.size() && count > 0) {
+      return Collections.emptyList();
+    }
+    if (index <= 0 && count < 0) {
+      return Collections.emptyList();
+    }
+    final int startIndex;
+    final int toIndex;
+    if (count > 0) {
+      startIndex = StringUtils.isBlank(startPoint) ? 0 : index;
+      toIndex = (startIndex + count >= list.size()) ? list.size() : startIndex + count;
+    }
+    else {
+      toIndex = index;
+      startIndex = (toIndex + count >= 0) ? toIndex + count : 0;
+    }
+    return list.subList(startIndex, toIndex);
+  }
+
+  @Override
+  public Collection<String> getVariationNames(WorkspaceId id, ResourceSortCriteria criteria, String startPoint,
+                                              int count) {
+    if (count == 0 || startPoint == null) {
+      return Collections.emptyList();
+    }
+    List<String> list = new ArrayList<String>(getVariationNames(id, criteria));
+    int index = Collections.binarySearch(list, startPoint);
+    if (index < 0) {
+      index = index * - 1;
+    }
+    if (index >= list.size() && count > 0) {
+      return Collections.emptyList();
+    }
+    if (index <= 0 && count < 0) {
+      return Collections.emptyList();
+    }
+    final int startIndex;
+    final int toIndex;
+    if (count > 0) {
+      startIndex = index;
+      toIndex = (startIndex + count >= list.size()) ? list.size() : startIndex + count;
+    }
+    else {
+      toIndex = index;
+      startIndex = (toIndex + count >= 0) ? toIndex + count : 0;
+    }
+    return list.subList(startIndex, toIndex);
+  }
+
+  @Override
+  public Collection<String> getRepresentationNames(WorkspaceId id, ResourceSortCriteria criteria) {
+    final Collection<? extends ResourceTemplate> repsWithoutData = SmartContentSPI.getInstance().
+        getWorkspaceService().getRepresentationsWithoutData(id, criteria);
+    return getResourceNames(repsWithoutData);
+  }
+
+  @Override
+  public Collection<String> getVariationNames(WorkspaceId id, ResourceSortCriteria criteria) {
+    final Collection<? extends ResourceTemplate> variationsWithoutData = SmartContentSPI.getInstance().
+        getWorkspaceService().getVariationsWithoutData(id, criteria);
+    return getResourceNames(variationsWithoutData);
+  }
+
+  protected Collection<String> getResourceNames(Collection<? extends ResourceTemplate> templates) {
+    ArrayList<String> list = new ArrayList<String>(templates.size());
+    for (ResourceTemplate template : templates) {
+      list.add(template.getName());
+    }
+    return list;
+  }
+
+  @Override
+  public Collection<String> getRepresentationNames(WorkspaceId id) {
+    return getRepresentationNames(id, ResourceSortCriteria.BY_NAME);
+  }
+
+  @Override
+  public Collection<String> getVariationNames(WorkspaceId id) {
+    return getVariationNames(id, ResourceSortCriteria.BY_NAME);
+  }
+
+  @Override
+  public Collection<String> getRepresentationNames(WorkspaceId id, String startPoint, int count) {
+    return getRepresentationNames(id, ResourceSortCriteria.BY_NAME, startPoint, count);
+  }
+
+  @Override
+  public Collection<String> getVariationNames(WorkspaceId id, String startPoint, int count) {
+    return getVariationNames(id, ResourceSortCriteria.BY_NAME, startPoint, count);
   }
 }

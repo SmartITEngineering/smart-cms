@@ -75,4 +75,26 @@ public interface WorkspaceAPI {
   public void removeAllRepresentationTemplates(WorkspaceId workspaceId);
 
   public void removeAllVariationTemplates(WorkspaceId workspaceId);
+
+  enum ResourceSortCriteria {
+
+    BY_NAME,
+    BY_DATE,
+  }
+
+  public Collection<String> getRepresentationNames(WorkspaceId id);
+
+  public Collection<String> getVariationNames(WorkspaceId id);
+
+  public Collection<String> getRepresentationNames(WorkspaceId id, String startPoint, int count);
+
+  public Collection<String> getVariationNames(WorkspaceId id, String startPoint, int count);
+
+  public Collection<String> getRepresentationNames(WorkspaceId id, ResourceSortCriteria criteria);
+
+  public Collection<String> getVariationNames(WorkspaceId id, ResourceSortCriteria criteria);
+
+  public Collection<String> getRepresentationNames(WorkspaceId id, ResourceSortCriteria criteria, String startPoint, int count);
+
+  public Collection<String> getVariationNames(WorkspaceId id, ResourceSortCriteria criteria, String startPoint, int count);
 }
