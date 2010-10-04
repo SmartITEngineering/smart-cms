@@ -34,6 +34,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -62,19 +63,23 @@ public class WorkspaceResource extends AbstractResource {
   public static final Pattern PATTERN = Pattern.compile("(/)?ws/([\\w\\._-]+)/(\\w+)");
   private final String namespace;
   private final String workspaceName;
+  private final Workspace workspace;
   @HeaderParam(HttpHeaders.IF_MODIFIED_SINCE)
   private Date ifModifiedSince;
 
   public WorkspaceResource(@PathParam(PARAM_NAMESPACE) String namespace, @PathParam(PARAM_NAME) String workspaceName) {
     this.namespace = namespace;
     this.workspaceName = workspaceName;
+    final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
+    this.workspace = workspaceApi.getWorkspace(workspaceApi.createWorkspaceId(namespace, workspaceName));
+    if (this.workspace == null) {
+      throw new WebApplicationException(Response.Status.NOT_FOUND);
+    }
   }
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response getWorkspaceContent() {
-    final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
-    final Workspace workspace = workspaceApi.getWorkspace(workspaceApi.createWorkspaceId(namespace, workspaceName));
     if (ifModifiedSince == null || ifModifiedSince.before(workspace.getCreationDate())) {
       ResponseBuilder builder = Response.ok(Factory.getWorkspace(workspace));
       builder.lastModified(workspace.getCreationDate());
@@ -91,8 +96,6 @@ public class WorkspaceResource extends AbstractResource {
   @GET
   @Produces(MediaType.APPLICATION_ATOM_XML)
   public Response getWorkspace() {
-    final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
-    final Workspace workspace = workspaceApi.getWorkspace(workspaceApi.createWorkspaceId(namespace, workspaceName));
     final Date creationDate = workspace.getCreationDate();
     if (ifModifiedSince == null || ifModifiedSince.before(creationDate)) {
       Feed feed = getFeed(workspace.getId().toString(), workspaceName, creationDate);
@@ -114,7 +117,7 @@ public class WorkspaceResource extends AbstractResource {
 
   @Path(PATH_FRIENDLIES)
   public WorkspaceFriendliesResource getFriendliesResource(@Context UriInfo info) {
-    return new WorkspaceFriendliesResource(namespace, workspaceName, info);
+    return new WorkspaceFriendliesResource(workspace, info);
   }
 
   public static URI getWorkspaceURI(UriBuilder builder, String namespace, String name) {

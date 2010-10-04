@@ -56,9 +56,8 @@ public class WorkspaceFriendliesResource {
   private final Workspace workspace;
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
-  public WorkspaceFriendliesResource(String namespace, String name, UriInfo info) {
-    final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
-    workspace = workspaceApi.getWorkspace(workspaceApi.createWorkspaceId(namespace, name));
+  public WorkspaceFriendliesResource(Workspace workspace, UriInfo info) {
+    this.workspace = workspace;
     this.info = info;
   }
 
