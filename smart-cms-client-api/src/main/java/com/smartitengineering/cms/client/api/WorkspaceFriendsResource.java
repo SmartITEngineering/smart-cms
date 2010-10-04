@@ -28,6 +28,8 @@ import java.util.Collection;
  */
 public interface WorkspaceFriendsResource extends WritableResource<Collection<URI>> {
 
+  void deleteAllFriends(); //simple DELETE to the URI will do it
+
   void replaceAllFriends(Collection<URI> workspaces); // Do a PUT
 
   void deleteFriend(URI friend); //DELETE using query param workspaceUri
