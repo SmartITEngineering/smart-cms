@@ -41,6 +41,7 @@ import java.util.Properties;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import org.apache.abdera.model.Feed;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -202,10 +203,13 @@ public class AppTest {
     workspaceId.setName("this is a test");
     workspaceId.setGlobalNamespace("a test namespace");
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    int size = resource.getWorkspaces().size();
     Workspace workspace = resource.createWorkspace(workspaceId);
     Assert.assertEquals(workspaceId.getName(), workspace.getId().getName());
     Assert.assertEquals(workspaceId.getGlobalNamespace(), workspace.getId().getGlobalNamespace());
-    Assert.assertEquals(new Date().toString(), workspace.getCreationDate().toString());
+    Feed feed = resource.get();
+    Assert.assertNotNull(feed);
+    Assert.assertEquals(size + 1, resource.getWorkspaces().size());
   }
 
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
