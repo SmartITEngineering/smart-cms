@@ -114,6 +114,12 @@ public class WorkspaceResource extends AbstractResource {
       feed.addLink(getLink(
           getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_FRIENDLIES).build(namespace, workspaceName),
           REL_FRIENDLIES, TextURIListProvider.TEXT_URI_LIST));
+      feed.addLink(getLink(
+          getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_REPRESENTATIONS).build(namespace, workspaceName),
+          REL_REPRESENTATIONS, MediaType.APPLICATION_ATOM_XML));
+      feed.addLink(getLink(
+          getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_VARIATIONS).build(namespace, workspaceName),
+          REL_VARIATIONS, MediaType.APPLICATION_ATOM_XML));
       feed.addLink(getLink(getUriInfo().getRequestUri(), Link.REL_ALTERNATE, MediaType.APPLICATION_JSON));
       ResponseBuilder builder = Response.ok(feed);
       builder.lastModified(creationDate);
