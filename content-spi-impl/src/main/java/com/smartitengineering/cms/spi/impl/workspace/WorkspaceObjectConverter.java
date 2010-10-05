@@ -200,7 +200,7 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
               if (logger.isDebugEnabled()) {
                 logger.debug(new StringBuilder("Deleting friendly ").append(friendly.toString()).toString());
               }
-              delete.deleteColumn(FAMILY_FRIENDLIES, getInfoProvider().getRowIdFromId(friendly));
+              delete.deleteColumns(FAMILY_FRIENDLIES, getInfoProvider().getRowIdFromId(friendly));
             }
             catch (IOException ex) {
               logger.warn("Error deleting friendly", ex);
@@ -213,13 +213,13 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
 
   protected void addResourceColumnsToDelete(byte[] family, Delete delete, ResourceTemplate resourceTemplate) {
     byte[] prefix = getPrefixForResource(resourceTemplate);
-    delete.deleteColumn(family, Bytes.add(prefix, CELL_CREATED));
-    delete.deleteColumn(family, Bytes.add(prefix, CELL_LAST_MODIFIED));
-    delete.deleteColumn(family, Bytes.add(prefix, CELL_TEMPLATE_TYPE));
+    delete.deleteColumns(family, Bytes.add(prefix, CELL_CREATED));
+    delete.deleteColumns(family, Bytes.add(prefix, CELL_LAST_MODIFIED));
+    delete.deleteColumns(family, Bytes.add(prefix, CELL_TEMPLATE_TYPE));
   }
 
   protected void addResourceDataColumnsToDelete(byte[] family, Delete delete, ResourceTemplate resourceTemplate) {
-    delete.deleteColumn(family, Bytes.toBytes(resourceTemplate.getName()));
+    delete.deleteColumns(family, Bytes.toBytes(resourceTemplate.getName()));
   }
 
   @Override
