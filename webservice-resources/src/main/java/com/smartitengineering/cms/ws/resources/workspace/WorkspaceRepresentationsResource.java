@@ -82,7 +82,7 @@ public class WorkspaceRepresentationsResource extends AbstractResource {
     }
     WorkspaceRepresentationResource resource = new WorkspaceRepresentationResource(template.getName(), workspace,
                                                                                    getInjectables());
-    return resource.put(template);
+    return resource.put(template, null);
   }
 
   protected Response getResponseForRepNames(Collection<String> names) {
@@ -92,24 +92,26 @@ public class WorkspaceRepresentationsResource extends AbstractResource {
     final Date date = new Date();
     Feed feed = getFeed(new StringBuilder("reps-").append(workspace.getId().toString()).toString(),
                         "Representations of a feed", date);
-    ArrayList<String> nameList = new ArrayList<String>(names.size());
+    ArrayList<String> nameList = new ArrayList<String>(names);
     final String first = nameList.get(0);
     final String last = nameList.get(nameList.size() - 1);
     Link previousLink = getLink(getUriInfo().getBaseUriBuilder().path(WorkspaceResource.class).path(
-        WorkspaceResource.REL_REPRESENTATIONS).path("before").path(first).build(), Link.REL_PREVIOUS,
-                                MediaType.APPLICATION_ATOM_XML);
+        WorkspaceResource.REL_REPRESENTATIONS).path("before").path(first).build(workspace.getId().getGlobalNamespace(), workspace.
+        getId().getName()), Link.REL_PREVIOUS, MediaType.APPLICATION_ATOM_XML);
     Link nextLink = getLink(getUriInfo().getBaseUriBuilder().path(WorkspaceResource.class).path(
-        WorkspaceResource.REL_REPRESENTATIONS).path("after").path(last).build(), Link.REL_NEXT,
-                            MediaType.APPLICATION_ATOM_XML);
-    Link firstLink = getLink(getUriInfo().getBaseUriBuilder().path(WorkspaceResource.class).path(
-        WorkspaceResource.REL_REPRESENTATIONS).build(), Link.REL_FIRST, MediaType.APPLICATION_ATOM_XML);
+        WorkspaceResource.REL_REPRESENTATIONS).path("after").path(last).build(workspace.getId().getGlobalNamespace(), workspace.
+        getId().getName()), Link.REL_NEXT, MediaType.APPLICATION_ATOM_XML);
+    Link firstLink = getLink(
+        getUriInfo().getBaseUriBuilder().path(WorkspaceResource.class).path(
+        WorkspaceResource.REL_REPRESENTATIONS).build(workspace.getId().getGlobalNamespace(), workspace.getId().getName()),
+        Link.REL_FIRST, MediaType.APPLICATION_ATOM_XML);
     feed.addLink(firstLink);
     feed.addLink(previousLink);
     feed.addLink(nextLink);
     for (String name : nameList) {
       Link nameLink = getLink(getUriInfo().getBaseUriBuilder().path(WorkspaceResource.class).path(
-          WorkspaceResource.REL_REPRESENTATIONS).path("name").path(name).build(), Link.REL_NEXT,
-                              MediaType.APPLICATION_ATOM_XML);
+          WorkspaceResource.REL_REPRESENTATIONS).path("name").path(name).build(workspace.getId().getGlobalNamespace(), workspace.
+          getId().getName()), Link.REL_ALTERNATE, MediaType.APPLICATION_ATOM_XML);
       Entry entry = getEntry(name, name, date, nameLink);
       feed.addEntry(entry);
     }
