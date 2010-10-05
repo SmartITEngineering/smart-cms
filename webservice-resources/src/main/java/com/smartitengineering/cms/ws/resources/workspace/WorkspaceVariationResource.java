@@ -32,14 +32,18 @@ import java.util.Date;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -55,7 +59,9 @@ public class WorkspaceVariationResource extends AbstractResource {
     this.varName = varName;
     template = SmartContentAPI.getInstance().getWorkspaceApi().getVariationTemplate(workspace.getId(), varName);
   }
+
   @GET
+  @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
     if (template == null) {
       return Response.status(Response.Status.NOT_FOUND).build();
@@ -67,6 +73,7 @@ public class WorkspaceVariationResource extends AbstractResource {
       builder = Response.ok();
       builder.entity(Factory.getResourceTemplate(template));
       builder.lastModified(template.getLastModifiedDate());
+      builder.tag(tag);
       CacheControl control = new CacheControl();
       control.setMaxAge(300);
       builder.cacheControl(control);
@@ -76,13 +83,14 @@ public class WorkspaceVariationResource extends AbstractResource {
 
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response put(com.smartitengineering.cms.ws.common.domains.ResourceTemplate template) {
+  public Response put(com.smartitengineering.cms.ws.common.domains.ResourceTemplate template, @HeaderParam(
+      HttpHeaders.IF_MATCH) String ifMatchHeader) {
     ResponseBuilder builder;
     if (this.template == null) {
       WorkspaceId id = template.getWorkspaceId();
       final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
-      VariationTemplate created = workspaceApi.putVariationTemplate(workspaceApi.createWorkspaceId(id.
-          getGlobalNamespace(), id.getName()), varName, TemplateType.valueOf(template.getTemplateType()), template.
+      VariationTemplate created = workspaceApi.putVariationTemplate(workspaceApi.createWorkspaceId(
+          id.getGlobalNamespace(), id.getName()), varName, TemplateType.valueOf(template.getTemplateType()), template.
           getTemplate());
       if (created != null) {
         builder = Response.created(getUriInfo().getRequestUri());
@@ -92,15 +100,17 @@ public class WorkspaceVariationResource extends AbstractResource {
       }
     }
     else {
-      Date lastModifiedDate = template.getLastModifiedDate();
+      if (StringUtils.isBlank(ifMatchHeader)) {
+        return Response.status(Status.PRECONDITION_FAILED).build();
+      }
+      Date lastModifiedDate = this.template.getLastModifiedDate();
       EntityTag entityTag = new EntityTag(DigestUtils.md5Hex(Utils.getFormattedDate(lastModifiedDate)));
       builder = getContext().getRequest().evaluatePreconditions(lastModifiedDate, entityTag);
       if (builder == null) {
         WorkspaceId id = template.getWorkspaceId();
         final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
-        VariationTemplate put = workspaceApi.putVariationTemplate(workspaceApi.createWorkspaceId(id.
-            getGlobalNamespace(), id.getName()), varName, TemplateType.valueOf(template.getTemplateType()), template.
-            getTemplate());
+        VariationTemplate put = workspaceApi.putVariationTemplate(workspaceApi.createWorkspaceId(id.getGlobalNamespace(), id.
+            getName()), varName, TemplateType.valueOf(template.getTemplateType()), template.getTemplate());
         if (put != null) {
           builder = Response.status(Status.ACCEPTED).location(getUriInfo().getRequestUri());
         }
@@ -113,9 +123,12 @@ public class WorkspaceVariationResource extends AbstractResource {
   }
 
   @DELETE
-  public Response delete() {
+  public Response delete(@HeaderParam(HttpHeaders.IF_MATCH) String ifMatchHeader) {
     if (template == null) {
       return Response.status(Status.NOT_FOUND).build();
+    }
+    if (StringUtils.isBlank(ifMatchHeader)) {
+      return Response.status(Status.PRECONDITION_FAILED).build();
     }
     Date lastModifiedDate = template.getLastModifiedDate();
     EntityTag entityTag = new EntityTag(DigestUtils.md5Hex(Utils.getFormattedDate(lastModifiedDate)));
