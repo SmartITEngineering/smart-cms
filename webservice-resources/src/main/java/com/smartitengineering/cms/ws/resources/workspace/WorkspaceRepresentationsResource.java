@@ -21,13 +21,16 @@ package com.smartitengineering.cms.ws.resources.workspace;
 import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceAPI.ResourceSortCriteria;
+import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
@@ -35,6 +38,7 @@ import javax.ws.rs.core.Response;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -68,6 +72,17 @@ public class WorkspaceRepresentationsResource extends AbstractResource {
   public Response getBefore(@PathParam("name") @DefaultValue("") String startPointName) {
     return getResponseForRepNames(SmartContentAPI.getInstance().getWorkspaceApi().getRepresentationNames(
         workspace.getId(), ResourceSortCriteria.BY_NAME, startPointName, -1 * count));
+  }
+
+  @POST
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response putRepresentations(ResourceTemplate template) {
+    if (StringUtils.isBlank(template.getName())) {
+      return Response.status(Response.Status.BAD_REQUEST).build();
+    }
+    WorkspaceRepresentationResource resource = new WorkspaceRepresentationResource(template.getName(), workspace,
+                                                                                   getInjectables());
+    return resource.put(template);
   }
 
   protected Response getResponseForRepNames(Collection<String> names) {

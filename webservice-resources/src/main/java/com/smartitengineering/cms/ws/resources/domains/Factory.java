@@ -18,6 +18,8 @@
  */
 package com.smartitengineering.cms.ws.resources.domains;
 
+import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
+import com.smartitengineering.cms.ws.common.domains.ResourceTemplateImpl;
 import com.smartitengineering.cms.ws.common.domains.WorkspaceImpl;
 import com.smartitengineering.cms.ws.common.domains.Workspace;
 
@@ -33,5 +35,17 @@ public final class Factory {
   public static Workspace getWorkspace(com.smartitengineering.cms.api.workspace.Workspace workspace) {
     return new WorkspaceImpl(new WorkspaceImpl.WorkspaceIdImpl(workspace.getId().getGlobalNamespace(), workspace.getId().
         getName()), workspace.getCreationDate());
+  }
+
+  public static ResourceTemplate getResourceTemplate(com.smartitengineering.cms.api.workspace.ResourceTemplate t) {
+    ResourceTemplateImpl template = new ResourceTemplateImpl();
+    template.setCreatedDate(t.getCreatedDate());
+    template.setLastModifiedDate(t.getLastModifiedDate());
+    template.setName(t.getName());
+    template.setTemplate(t.getTemplate());
+    template.setTemplateType(t.getTemplateType().name());
+    template.setWorkspaceId(new WorkspaceImpl.WorkspaceIdImpl(t.getWorkspaceId().getGlobalNamespace(), t.getWorkspaceId().
+        getName()));
+    return template;
   }
 }
