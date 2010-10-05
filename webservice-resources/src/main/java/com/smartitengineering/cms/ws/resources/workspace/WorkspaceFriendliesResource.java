@@ -25,7 +25,6 @@ import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -130,9 +129,13 @@ public class WorkspaceFriendliesResource extends AbstractResource {
     else {
       WorkspaceId workspaceId = null;
       try {
+        if(logger.isDebugEnabled()) {
+          logger.debug("Trying to add " + uri);
+        }
         workspaceId = WorkspaceResource.parseWorkspaceId(getUriInfo(), new URI(uri));
       }
-      catch (URISyntaxException ex) {
+      catch (Exception ex) {
+        logger.warn(ex.getMessage(), ex);
         error = true;
         entity = ex.getMessage() + ". ";
       }

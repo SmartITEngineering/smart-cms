@@ -222,7 +222,7 @@ public class AppTest {
     final Iterator<WorkspaceFeedResource> iterator = root.getWorkspaceFeeds().iterator();
     WorkspaceFeedResource feedResource = iterator.next();
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(new StringBuffer("Total no of workspace created in test : ").append(root.getWorkspaceFeeds().size()).
+      LOGGER.debug(new StringBuilder("Total no of workspace created in test : ").append(root.getWorkspaceFeeds().size()).
           toString());
     }
     Assert.assertNotNull(feedResource);
@@ -246,23 +246,26 @@ public class AppTest {
     Iterator<URI> frdUris = frdUri.iterator();
     Assert.assertEquals(1, frdUri.size());
     Assert.assertEquals("http://localhost:10080/ws/com.smartitengineering/test", frdUris.next().toASCIIString());
-    friendsResource.addFriend(new URI("http://localhost:10080/ws/testNS/test"));
+    friendsResource.addFriend(URI.create("/ws/a%20test%20namespace/this%20is%20a%20test"));
+    friendsResource.addFriend(new URI("ws/testNS/test"));
     WorkspaceFriendsResource newFriendsResource = feedResource.getFriends();
-    newFriendsResource.get();
-    Collection<URI> collection = newFriendsResource.getLastReadStateOfEntity();
+    Collection<URI> collection = newFriendsResource.get();
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(new StringBuffer("Total no of friend workspace after adding a friend are : ").append(
+      LOGGER.debug(new StringBuilder("Total no of friend workspace after adding a friend are : ").append(
           collection.size()).
           toString());
     }
-    Assert.assertEquals(2, collection.size());
+    Assert.assertEquals(3, collection.size());
     frdUris = collection.iterator();
-    final String friendWorkspace1 = frdUris.next().toASCIIString();
-    Assert.assertEquals("http://localhost:10080/ws/com.smartitengineering/test", friendWorkspace1);
-    LOGGER.debug(new StringBuffer("First friend workspace is : ").append(friendWorkspace1).toString());
-    final String friendWorkspace2 = frdUris.next().toASCIIString();
-    Assert.assertEquals("http://localhost:10080/ws/testNS/test", friendWorkspace2);
-    LOGGER.debug(new StringBuffer("Second friend workspace is : ").append(friendWorkspace2).toString());
+    String friendWorkspace = frdUris.next().toASCIIString();
+    Assert.assertEquals("http://localhost:10080/ws/a%20test%20namespace/this%20is%20a%20test", friendWorkspace);
+    LOGGER.debug(new StringBuilder("First friend workspace is : ").append(friendWorkspace).toString());
+    friendWorkspace = frdUris.next().toASCIIString();
+    Assert.assertEquals("http://localhost:10080/ws/com.smartitengineering/test", friendWorkspace);
+    LOGGER.debug(new StringBuilder("Second friend workspace is : ").append(friendWorkspace).toString());
+    friendWorkspace = frdUris.next().toASCIIString();
+    Assert.assertEquals("http://localhost:10080/ws/testNS/test", friendWorkspace);
+    LOGGER.debug(new StringBuilder("Third friend workspace is : ").append(friendWorkspace).toString());
   }
 
   @Test
@@ -277,13 +280,16 @@ public class AppTest {
     Collection<URI> frdUri = friendsResource.getLastReadStateOfEntity();
     Iterator<URI> frdUris = frdUri.iterator();
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(new StringBuffer("Total no of friend workspace after deleting a friend is : ").append(frdUri.size()).
+      LOGGER.debug(new StringBuilder("Total no of friend workspace after deleting a friend is : ").append(frdUri.size()).
           toString());
     }
-    Assert.assertEquals(1, frdUri.size());
-    final String friendWorkspace = frdUris.next().toASCIIString();
+    Assert.assertEquals(2, frdUri.size());
+    String friendWorkspace = frdUris.next().toASCIIString();
+    Assert.assertEquals("http://localhost:10080/ws/a%20test%20namespace/this%20is%20a%20test", friendWorkspace);
+    LOGGER.debug(new StringBuilder("First friend workspace is : ").append(friendWorkspace).toString());
+    friendWorkspace = frdUris.next().toASCIIString();
     Assert.assertEquals("http://localhost:10080/ws/testNS/test", friendWorkspace);
-    LOGGER.debug(new StringBuffer("The friend workspace after deleting is : ").append(friendWorkspace).toString());
+    LOGGER.debug(new StringBuilder("Second friend workspace is : ").append(friendWorkspace).toString());
   }
 
   @Test
@@ -307,16 +313,16 @@ public class AppTest {
     Collection<URI> frdUri = friendsResource.getLastReadStateOfEntity();
     Iterator<URI> frdUris = frdUri.iterator();
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(new StringBuffer("Total no of friend workspace after replace all friends are : ").append(
+      LOGGER.debug(new StringBuilder("Total no of friend workspace after replace all friends are : ").append(
           frdUri.size()).toString());
     }
     Assert.assertEquals(2, frdUri.size());
     final String friendWS1 = frdUris.next().toASCIIString();
     Assert.assertEquals("http://localhost:10080/ws/atest2/additional", friendWS1);
-    LOGGER.debug(new StringBuffer("First friend after replacing is : ").append(friendWS1).toString());
+    LOGGER.debug(new StringBuilder("First friend after replacing is : ").append(friendWS1).toString());
     final String friendWS2 = frdUris.next().toASCIIString();
     Assert.assertEquals("http://localhost:10080/ws/com.smartitengineering/test", friendWS2);
-    LOGGER.debug(new StringBuffer("Second friend after replacing is : ").append(friendWS2).toString());
+    LOGGER.debug(new StringBuilder("Second friend after replacing is : ").append(friendWS2).toString());
   }
 
   @Test
