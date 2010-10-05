@@ -274,8 +274,6 @@ public class AppTest {
   @Test
   public void testReplaceAllFriends() throws Exception {
     Collection<URI> uris = new ArrayList<URI>();
-
-
     final RootResource rootResource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     final MultivaluedMap<String, String> map = new MultivaluedMapImpl();
     map.add("name", "additional");
@@ -296,6 +294,19 @@ public class AppTest {
     Assert.assertEquals(2, frdUri.size());
     Assert.assertEquals("http://localhost:10080/ws/atest2/additional", frdUris.next().toASCIIString());
     Assert.assertEquals("http://localhost:10080/ws/com.smartitengineering/test", frdUris.next().toASCIIString());
+  }
+
+  @Test
+  public void testDeleteAllFriends() throws Exception {
+    final RootResource rootResource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    rootResource.get();
+    final Iterator<WorkspaceFeedResource> iterator = rootResource.getWorkspaceFeeds().iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    WorkspaceFriendsResource friendsResource = feedResource.getFriends();
+    friendsResource.deleteAllFriends();
+    friendsResource.get();
+    Collection<URI> frdUri = friendsResource.getLastReadStateOfEntity();
+    Assert.assertNull(frdUri);
   }
 
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
