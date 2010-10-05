@@ -20,6 +20,7 @@ package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
+import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.ws.common.domains.Workspace;
 import com.smartitengineering.cms.ws.common.domains.WorkspaceId;
 import com.smartitengineering.cms.ws.common.providers.JacksonJsonProvider;
@@ -121,5 +122,37 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
     WorkspaceContentResouce workspaceContentResouce = new WorkspaceContentResourceImpl(this, link);
     Workspace workspace = workspaceContentResouce.getLastReadStateOfEntity();
     return workspace;
+  }
+
+  @Override
+  public Collection<WorkspaceFeedResource> getWorkspaceFeeds() {
+    try {
+      final Feed feed = getLastReadStateOfEntity();
+      List<Entry> entries = feed.getEntries();
+      List<WorkspaceFeedResource> list = new ArrayList<WorkspaceFeedResource>(entries.size());
+      for (Entry entry : entries) {
+        final List<Link> links = entry.getLinks(WorkspaceContentResouce.WORKSPACE_CONTENT);
+        Link link = null;
+        for (Link tmp : links) {
+          if (MediaType.APPLICATION_ATOM_XML.equals(tmp.getMimeType().toString())) {
+            link = tmp;
+          }
+        }
+        list.add(new WorkspaceFeedResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(link)));
+      }
+      return list;
+    }
+    catch (UniformInterfaceException exception) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Exception while getting..", exception);
+      }
+      if (exception.getResponse().getStatus() != ClientResponse.Status.NO_CONTENT.getStatusCode()) {
+        logger.error("Rethrowing the exception as it was not expected. Turn on Debug to see more.");
+        throw exception;
+      }
+      else {
+        return Collections.emptyList();
+      }
+    }
   }
 }

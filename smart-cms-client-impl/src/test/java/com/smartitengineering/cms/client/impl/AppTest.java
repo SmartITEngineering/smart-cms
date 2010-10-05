@@ -22,6 +22,8 @@ import com.google.inject.AbstractModule;
 import com.smartitengineering.cms.binder.guice.Initializer;
 import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
+import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
+import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
 import com.smartitengineering.cms.ws.common.domains.Workspace;
 import com.smartitengineering.cms.ws.common.domains.WorkspaceImpl.WorkspaceIdImpl;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
@@ -35,8 +37,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
+import java.util.Iterator;
 import java.util.Properties;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -132,14 +135,14 @@ public class AppTest {
 
   @Test
   public void testStartup() throws URISyntaxException {
-    RootResource resource = RootResourceImpl.getRoot(new URI("http://localhost:" + PORT + "/"));
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     Assert.assertNotNull(resource);
     Assert.assertEquals(0, resource.getWorkspaces().size());
   }
 
   @Test
   public void testCreationAndRetrievalWithNameOnly() throws URISyntaxException {
-    RootResource resource = RootResourceImpl.getRoot(new URI("http://localhost:" + PORT + "/"));
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     final MultivaluedMap<String, String> map = new MultivaluedMapImpl();
     map.add("name", TEST);
     ClientResponse response = resource.post(MediaType.APPLICATION_FORM_URLENCODED, map, ClientResponse.Status.CREATED);
@@ -198,10 +201,10 @@ public class AppTest {
 
   @Test
   public void testCreateWorkspace() throws Exception {
-
     WorkspaceIdImpl workspaceId = new WorkspaceIdImpl();
     workspaceId.setName("this is a test");
     workspaceId.setGlobalNamespace("a test namespace");
+
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     int size = resource.getWorkspaces().size();
     Workspace workspace = resource.createWorkspace(workspaceId);
@@ -210,6 +213,123 @@ public class AppTest {
     Feed feed = resource.get();
     Assert.assertNotNull(feed);
     Assert.assertEquals(size + 1, resource.getWorkspaces().size());
+  }
+
+  @Test
+  public void testWorkspaceExists() throws Exception {
+    final RootResource root = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    root.get();
+    final Iterator<WorkspaceFeedResource> iterator = root.getWorkspaceFeeds().iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(new StringBuffer("Total no of workspace created in test : ").append(root.getWorkspaceFeeds().size()).
+          toString());
+    }
+    Assert.assertNotNull(feedResource);
+    feedResource = iterator.next();
+    Assert.assertNotNull(feedResource);
+    feedResource = iterator.next();
+    Assert.assertNotNull(feedResource);
+    Assert.assertEquals(3, root.getWorkspaceFeeds().size());
+  }
+
+  @Test
+  public void testAddFriend() throws Exception {
+    final RootResource rootResource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    rootResource.get();
+    final Iterator<WorkspaceFeedResource> iterator = rootResource.getWorkspaceFeeds().iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    WorkspaceFriendsResource friendsResource = feedResource.getFriends();
+    friendsResource.addFriend(new URI("http://localhost:10080/ws/com.smartitengineering/test"));
+    friendsResource.get();
+    Collection<URI> frdUri = friendsResource.getLastReadStateOfEntity();
+    Iterator<URI> frdUris = frdUri.iterator();
+    Assert.assertEquals(1, frdUri.size());
+    Assert.assertEquals("http://localhost:10080/ws/com.smartitengineering/test", frdUris.next().toASCIIString());
+    friendsResource.addFriend(new URI("http://localhost:10080/ws/testNS/test"));
+    WorkspaceFriendsResource newFriendsResource = feedResource.getFriends();
+    newFriendsResource.get();
+    Collection<URI> collection = newFriendsResource.getLastReadStateOfEntity();
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(new StringBuffer("Total no of friend workspace after adding a friend are : ").append(
+          collection.size()).
+          toString());
+    }
+    Assert.assertEquals(2, collection.size());
+    frdUris = collection.iterator();
+    final String friendWorkspace1 = frdUris.next().toASCIIString();
+    Assert.assertEquals("http://localhost:10080/ws/com.smartitengineering/test", friendWorkspace1);
+    LOGGER.debug(new StringBuffer("First friend workspace is : ").append(friendWorkspace1).toString());
+    final String friendWorkspace2 = frdUris.next().toASCIIString();
+    Assert.assertEquals("http://localhost:10080/ws/testNS/test", friendWorkspace2);
+    LOGGER.debug(new StringBuffer("Second friend workspace is : ").append(friendWorkspace2).toString());
+  }
+
+  @Test
+  public void testDeleteFriend() throws Exception {
+    final RootResource rootResource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    rootResource.get();
+    final Iterator<WorkspaceFeedResource> iterator = rootResource.getWorkspaceFeeds().iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    WorkspaceFriendsResource friendsResource = feedResource.getFriends();
+    friendsResource.deleteFriend(new URI("http://localhost:10080/ws/com.smartitengineering/test"));
+    friendsResource.get();
+    Collection<URI> frdUri = friendsResource.getLastReadStateOfEntity();
+    Iterator<URI> frdUris = frdUri.iterator();
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(new StringBuffer("Total no of friend workspace after deleting a friend is : ").append(frdUri.size()).
+          toString());
+    }
+    Assert.assertEquals(1, frdUri.size());
+    final String friendWorkspace = frdUris.next().toASCIIString();
+    Assert.assertEquals("http://localhost:10080/ws/testNS/test", friendWorkspace);
+    LOGGER.debug(new StringBuffer("The friend workspace after deleting is : ").append(friendWorkspace).toString());
+  }
+
+  @Test
+  public void testReplaceAllFriends() throws Exception {
+    Collection<URI> uris = new ArrayList<URI>();
+    final RootResource rootResource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    final MultivaluedMap<String, String> map = new MultivaluedMapImpl();
+    map.add("name", "additional");
+    map.add("namespace", "atest2");
+    rootResource.post(MediaType.APPLICATION_FORM_URLENCODED, map, ClientResponse.Status.CREATED);
+    rootResource.get();
+    final Iterator<WorkspaceFeedResource> iterator = rootResource.getWorkspaceFeeds().iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    WorkspaceFriendsResource friendsResource = feedResource.getFriends();
+
+    uris.add(new URI("http://localhost:10080/ws/atest2/additional"));
+    uris.add(new URI("http://localhost:10080/ws/com.smartitengineering/test"));
+
+    friendsResource.replaceAllFriends(uris);
+    friendsResource.get();
+    Collection<URI> frdUri = friendsResource.getLastReadStateOfEntity();
+    Iterator<URI> frdUris = frdUri.iterator();
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(new StringBuffer("Total no of friend workspace after replace all friends are : ").append(
+          frdUri.size()).toString());
+    }
+    Assert.assertEquals(2, frdUri.size());
+    final String friendWS1 = frdUris.next().toASCIIString();
+    Assert.assertEquals("http://localhost:10080/ws/atest2/additional", friendWS1);
+    LOGGER.debug(new StringBuffer("First friend after replacing is : ").append(friendWS1).toString());
+    final String friendWS2 = frdUris.next().toASCIIString();
+    Assert.assertEquals("http://localhost:10080/ws/com.smartitengineering/test", friendWS2);
+    LOGGER.debug(new StringBuffer("Second friend after replacing is : ").append(friendWS2).toString());
+  }
+
+  @Test
+  public void testDeleteAllFriends() throws Exception {
+    final RootResource rootResource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    rootResource.get();
+    final Iterator<WorkspaceFeedResource> iterator = rootResource.getWorkspaceFeeds().iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    WorkspaceFriendsResource friendsResource = feedResource.getFriends();
+    friendsResource.deleteAllFriends();
+    friendsResource.get();
+    Collection<URI> frdUri = friendsResource.getLastReadStateOfEntity();
+    Assert.assertNull(frdUri);
   }
 
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
