@@ -256,6 +256,21 @@ public class AppTest {
     Assert.assertEquals("http://localhost:10080/ws/testNS/test", frdUris.next().toASCIIString());
   }
 
+  @Test
+  public void testDeleteFriend() throws Exception {
+    final RootResource rootResource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    rootResource.get();
+    final Iterator<WorkspaceFeedResource> iterator = rootResource.getWorkspaceFeeds().iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    WorkspaceFriendsResource friendsResource = feedResource.getFriends();
+    friendsResource.deleteFriend(new URI("http://localhost:10080/ws/com.smartitengineering/test"));
+    friendsResource.get();
+    Collection<URI> frdUri = friendsResource.getLastReadStateOfEntity();
+    Iterator<URI> frdUris = frdUri.iterator();
+    Assert.assertEquals(1, frdUri.size());
+    Assert.assertEquals("http://localhost:10080/ws/testNS/test", frdUris.next().toASCIIString());
+  }
+
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
     HttpClient client = new HttpClient();
     GetMethod method = new GetMethod(uri);
