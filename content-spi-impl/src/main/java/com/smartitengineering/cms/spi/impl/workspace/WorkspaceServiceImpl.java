@@ -284,8 +284,8 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     params.add(QueryParameterFactory.getPropProjectionParam(info));
     params.add(getIdParam(id));
     final PersistentWorkspace single = commonReadDao.getSingle(params);
-    List<? extends RepresentationTemplate> templates = (single == null ? Collections.<RepresentationTemplate>emptyList() : single.
-                                                        getRepresentationTemplates());
+    List<? extends RepresentationTemplate> templates = new ArrayList(single == null ? Collections.<RepresentationTemplate>
+        emptyList() : single.getRepresentationTemplates());
     if (templates.isEmpty()) {
       return Collections.emptyList();
     }
@@ -308,8 +308,8 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     params.add(QueryParameterFactory.getPropProjectionParam(info));
     params.add(getIdParam(id));
     final PersistentWorkspace single = commonReadDao.getSingle(params);
-    List<? extends VariationTemplate> templates = (single == null ? Collections.<VariationTemplate>emptyList() : single.
-                                                   getVariationTemplates());
+    List<? extends VariationTemplate> templates = new ArrayList(single == null ? Collections.<VariationTemplate>
+        emptyList() : single.getVariationTemplates());
     if (templates.isEmpty()) {
       return Collections.emptyList();
     }
