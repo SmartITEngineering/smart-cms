@@ -27,6 +27,7 @@ import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.cms.ws.resources.domains.Factory;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,6 +51,8 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -68,7 +71,7 @@ public class WorkspaceResource extends AbstractResource {
   public static final String REL_REPRESENTATIONS = "representations";
   public static final String REL_VARIATIONS = "variations";
   public static final String REL_WORKSPACE_CONTENT = "workspaceContent";
-  public static final Pattern PATTERN = Pattern.compile("(/)?ws/([\\w\\._-]+)/(\\w+)");
+  public static final Pattern PATTERN = Pattern.compile("(/)?ws/([\\w\\s\\._-]+)/([\\w\\s]+)");
   private final String namespace;
   private final String workspaceName;
   private final Workspace workspace;
@@ -76,6 +79,7 @@ public class WorkspaceResource extends AbstractResource {
   private Date ifModifiedSince;
   @HeaderParam(HttpHeaders.IF_NONE_MATCH)
   private EntityTag entityTag;
+  private final static Logger LOGGER = LoggerFactory.getLogger(WorkspaceResource.class);
 
   public WorkspaceResource(@PathParam(PARAM_NAMESPACE) String namespace, @PathParam(PARAM_NAME) String workspaceName) {
     this.namespace = namespace;
@@ -168,9 +172,14 @@ public class WorkspaceResource extends AbstractResource {
   }
 
   public static WorkspaceId parseWorkspaceId(UriInfo uriInfo, URI uri) {
-    String path = uri.getPath();
+    String path = URLDecoder.decode(uri.getPath());
     String basePath = uriInfo.getBaseUri().getPath();
     String fullPath = uriInfo.getBaseUri().toASCIIString();
+    if(LOGGER.isDebugEnabled()) {
+      LOGGER.debug("PATH to parse " + path);
+      LOGGER.debug("BASE PATH to parse " + basePath);
+      LOGGER.debug("FULL PATH to parse " + fullPath);
+    }
     if (StringUtils.isBlank(path)) {
       return null;
     }
@@ -192,6 +201,7 @@ public class WorkspaceResource extends AbstractResource {
       return workspaceApi.getWorkspaceIdIfExists(workspaceApi.createWorkspaceId(namespace, name));
     }
     else {
+      LOGGER.debug("PATTERN does not match");
       return null;
     }
   }
