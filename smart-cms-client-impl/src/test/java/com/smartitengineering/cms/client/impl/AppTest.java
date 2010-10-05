@@ -37,8 +37,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Properties;
 import javax.ws.rs.core.HttpHeaders;
@@ -269,6 +269,33 @@ public class AppTest {
     Iterator<URI> frdUris = frdUri.iterator();
     Assert.assertEquals(1, frdUri.size());
     Assert.assertEquals("http://localhost:10080/ws/testNS/test", frdUris.next().toASCIIString());
+  }
+
+  @Test
+  public void testReplaceAllFriends() throws Exception {
+    Collection<URI> uris = new ArrayList<URI>();
+
+
+    final RootResource rootResource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    final MultivaluedMap<String, String> map = new MultivaluedMapImpl();
+    map.add("name", "additional");
+    map.add("namespace", "atest2");
+    rootResource.post(MediaType.APPLICATION_FORM_URLENCODED, map, ClientResponse.Status.CREATED);
+    rootResource.get();
+    final Iterator<WorkspaceFeedResource> iterator = rootResource.getWorkspaceFeeds().iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    WorkspaceFriendsResource friendsResource = feedResource.getFriends();
+
+    uris.add(new URI("http://localhost:10080/ws/atest2/additional"));
+    uris.add(new URI("http://localhost:10080/ws/com.smartitengineering/test"));
+
+    friendsResource.replaceAllFriends(uris);
+    friendsResource.get();
+    Collection<URI> frdUri = friendsResource.getLastReadStateOfEntity();
+    Iterator<URI> frdUris = frdUri.iterator();
+    Assert.assertEquals(2, frdUri.size());
+    Assert.assertEquals("http://localhost:10080/ws/atest2/additional", frdUris.next().toASCIIString());
+    Assert.assertEquals("http://localhost:10080/ws/com.smartitengineering/test", frdUris.next().toASCIIString());
   }
 
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
