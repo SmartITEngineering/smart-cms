@@ -80,34 +80,23 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
 
   @Override
   public Collection<WorkspaceContentResouce> getWorkspaces() {
-    try {
-      final Feed feed = getLastReadStateOfEntity();
-      List<Entry> entries = feed.getEntries();
-      List<WorkspaceContentResouce> list = new ArrayList<WorkspaceContentResouce>(entries.size());
-      for (Entry entry : entries) {
-        final List<Link> links = entry.getLinks(WorkspaceContentResouce.WORKSPACE_CONTENT);
-        Link link = null;
-        for (Link tmp : links) {
-          if (MediaType.APPLICATION_JSON.equals(tmp.getMimeType().toString())) {
-            link = tmp;
-          }
+    final Feed feed = getLastReadStateOfEntity();
+    if (feed == null) {
+      return Collections.EMPTY_LIST;
+    }
+    List<Entry> entries = feed.getEntries();
+    List<WorkspaceContentResouce> list = new ArrayList<WorkspaceContentResouce>(entries.size());
+    for (Entry entry : entries) {
+      final List<Link> links = entry.getLinks(WorkspaceContentResouce.WORKSPACE_CONTENT);
+      Link link = null;
+      for (Link tmp : links) {
+        if (MediaType.APPLICATION_JSON.equals(tmp.getMimeType().toString())) {
+          link = tmp;
         }
-        list.add(new WorkspaceContentResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(link)));
       }
-      return list;
+      list.add(new WorkspaceContentResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(link)));
     }
-    catch (UniformInterfaceException exception) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("Exception while getting..", exception);
-      }
-      if (exception.getResponse().getStatus() != ClientResponse.Status.NO_CONTENT.getStatusCode()) {
-        logger.error("Rethrowing the exception as it was not expected. Turn on Debug to see more.");
-        throw exception;
-      }
-      else {
-        return Collections.emptyList();
-      }
-    }
+    return list;
   }
 
   public static RootResource getRoot(URI uri) {
