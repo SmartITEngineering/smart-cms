@@ -276,4 +276,14 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   public Collection<String> getVariationNames(WorkspaceId id, String startPoint, int count) {
     return getVariationNames(id, ResourceSortCriteria.BY_NAME, startPoint, count);
   }
+
+  @Override
+  public RepresentationTemplate getRepresentationTemplate(WorkspaceId id, String name) {
+    return SmartContentSPI.getInstance().getWorkspaceService().getRepresentationTemplate(id, name);
+  }
+
+  @Override
+  public VariationTemplate getVariationTemplate(WorkspaceId id, String name) {
+    return SmartContentSPI.getInstance().getWorkspaceService().getVariationTemplate(id, name);
+  }
 }

@@ -47,6 +47,8 @@ public interface WorkspaceAPI {
 
   RepresentationTemplate putRepresentationTemplate(WorkspaceId to, String name, TemplateType templateType, byte[] data);
 
+  RepresentationTemplate getRepresentationTemplate(WorkspaceId id, String name);
+
   void delete(RepresentationTemplate template);
 
   void delete(VariationTemplate template);
@@ -55,6 +57,8 @@ public interface WorkspaceAPI {
       throws IOException;
 
   VariationTemplate putVariationTemplate(WorkspaceId to, String name, TemplateType templateType, byte[] data);
+
+  VariationTemplate getVariationTemplate(WorkspaceId id, String name);
 
   WorkspaceId getWorkspaceIdIfExists(String name);
 
