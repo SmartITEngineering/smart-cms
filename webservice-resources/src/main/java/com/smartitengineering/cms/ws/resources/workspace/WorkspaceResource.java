@@ -23,6 +23,7 @@ import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
+import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.cms.ws.resources.domains.Factory;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import java.net.URI;
@@ -38,6 +39,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -46,6 +48,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -71,6 +74,8 @@ public class WorkspaceResource extends AbstractResource {
   private final Workspace workspace;
   @HeaderParam(HttpHeaders.IF_MODIFIED_SINCE)
   private Date ifModifiedSince;
+  @HeaderParam(HttpHeaders.IF_NONE_MATCH)
+  private EntityTag entityTag;
 
   public WorkspaceResource(@PathParam(PARAM_NAMESPACE) String namespace, @PathParam(PARAM_NAME) String workspaceName) {
     this.namespace = namespace;
@@ -102,7 +107,9 @@ public class WorkspaceResource extends AbstractResource {
   @Produces(MediaType.APPLICATION_ATOM_XML)
   public Response getWorkspace() {
     final Date creationDate = workspace.getCreationDate();
-    if (ifModifiedSince == null || ifModifiedSince.before(creationDate)) {
+    final EntityTag tag = new EntityTag(DigestUtils.md5Hex(Utils.getFormattedDate(creationDate)));
+    if ((ifModifiedSince == null || ifModifiedSince.before(creationDate)) && (entityTag == null ||
+                                                                              !entityTag.equals(tag))) {
       Feed feed = getFeed(workspace.getId().toString(), workspaceName, creationDate);
       feed.addLink(getLink(
           getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_FRIENDLIES).build(namespace, workspaceName),
@@ -113,6 +120,7 @@ public class WorkspaceResource extends AbstractResource {
       CacheControl control = new CacheControl();
       control.setMaxAge(MAX_AGE);
       builder.cacheControl(control);
+      builder.tag(tag);
       return builder.build();
     }
     else {
