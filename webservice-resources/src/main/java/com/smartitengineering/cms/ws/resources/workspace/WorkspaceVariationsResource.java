@@ -22,6 +22,7 @@ import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceAPI.ResourceSortCriteria;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
+import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -31,7 +32,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
@@ -43,12 +43,11 @@ import org.apache.abdera.model.Link;
 public class WorkspaceVariationsResource extends AbstractResource {
 
   private final Workspace workspace;
-  private final UriInfo uriInfo;
   private final int count;
 
-  public WorkspaceVariationsResource(Workspace workspace, UriInfo uriInfo, int count) {
+  public WorkspaceVariationsResource(Workspace workspace, int count, ServerResourceInjectables injectables) {
+    super(injectables);
     this.workspace = workspace;
-    this.uriInfo = uriInfo;
     this.count = count;
   }
 
@@ -105,10 +104,5 @@ public class WorkspaceVariationsResource extends AbstractResource {
   @Override
   protected String getAuthor() {
     return "Smart CMS";
-  }
-
-  @Override
-  protected UriInfo getUriInfo() {
-    return uriInfo;
   }
 }

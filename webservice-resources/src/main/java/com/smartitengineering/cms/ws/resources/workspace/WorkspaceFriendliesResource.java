@@ -20,9 +20,10 @@ package com.smartitengineering.cms.ws.resources.workspace;
 
 import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
-import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
+import com.smartitengineering.util.rest.server.AbstractResource;
+import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -40,8 +41,6 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,23 +49,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author imyousuf
  */
-public class WorkspaceFriendliesResource {
+public class WorkspaceFriendliesResource extends AbstractResource {
 
-  private final UriInfo info;
   private final Workspace workspace;
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
-  public WorkspaceFriendliesResource(Workspace workspace, UriInfo info) {
+  public WorkspaceFriendliesResource(Workspace workspace, ServerResourceInjectables injectables) {
+    super(injectables);
     this.workspace = workspace;
-    this.info = info;
-  }
-
-  protected UriBuilder getAbsoluteURIBuilder() {
-    return getUriInfo().getBaseUriBuilder();
-  }
-
-  protected UriInfo getUriInfo() {
-    return info;
   }
 
   @GET

@@ -19,21 +19,21 @@
 package com.smartitengineering.cms.ws.resources.workspace;
 
 import com.smartitengineering.cms.api.workspace.Workspace;
-import javax.ws.rs.core.UriInfo;
+import com.smartitengineering.util.rest.server.AbstractResource;
+import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 
 /**
  *
  * @author imyousuf
  */
-public class WorkspaceVariationResource {
+public class WorkspaceVariationResource extends AbstractResource {
 
   private final String varName;
   private final Workspace workspace;
-  private final UriInfo uriInfo;
 
-  public WorkspaceVariationResource(String varName, Workspace workspace, UriInfo uriInfo) {
+  public WorkspaceVariationResource(String varName, Workspace workspace, ServerResourceInjectables injectables) {
+    super(injectables);
     this.varName = varName;
     this.workspace = workspace;
-    this.uriInfo = uriInfo;
   }
 }

@@ -19,26 +19,21 @@
 package com.smartitengineering.cms.ws.resources.workspace;
 
 import com.smartitengineering.cms.api.workspace.Workspace;
-import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.PUT;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import com.smartitengineering.util.rest.server.AbstractResource;
+import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 
 /**
  *
  * @author imyousuf
  */
-public class WorkspaceRepresentationResource {
+public class WorkspaceRepresentationResource extends AbstractResource {
 
   private final String repName;
   private final Workspace workspace;
-  private final UriInfo uriInfo;
 
-  public WorkspaceRepresentationResource(String repName, Workspace workspace, UriInfo uriInfo) {
+  public WorkspaceRepresentationResource(String repName, Workspace workspace, ServerResourceInjectables injectables) {
+    super(injectables);
     this.repName = repName;
     this.workspace = workspace;
-    this.uriInfo = uriInfo;
   }
 }

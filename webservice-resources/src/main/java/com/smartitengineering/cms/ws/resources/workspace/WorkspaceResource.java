@@ -38,7 +38,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -123,27 +122,27 @@ public class WorkspaceResource extends AbstractResource {
 
   @Path(PATH_FRIENDLIES)
   public WorkspaceFriendliesResource getFriendliesResource() {
-    return new WorkspaceFriendliesResource(workspace, getUriInfo());
+    return new WorkspaceFriendliesResource(workspace, getInjectables());
   }
 
   @Path(PATH_REPRESENTATIONS)
   public WorkspaceRepresentationsResource getRepresentationsResource(@QueryParam("count") @DefaultValue("10") int count) {
-    return new WorkspaceRepresentationsResource(workspace, getUriInfo(), count);
+    return new WorkspaceRepresentationsResource(workspace, count, getInjectables());
   }
 
   @Path(PATH_VARIATIONS)
   public WorkspaceVariationsResource getVariationsResource(@QueryParam("count") @DefaultValue("10") int count) {
-    return new WorkspaceVariationsResource(workspace, getUriInfo(), count);
+    return new WorkspaceVariationsResource(workspace, count, getInjectables());
   }
 
   @Path(PATH_REPRESENTATIONS + "/name/{name}")
   public WorkspaceRepresentationResource getRepresentationsResource(@PathParam("name") String name) {
-    return new WorkspaceRepresentationResource(name, workspace, getUriInfo());
+    return new WorkspaceRepresentationResource(name, workspace, getInjectables());
   }
 
   @Path(PATH_VARIATIONS + "/name/{name}")
   public WorkspaceVariationResource getVariationResource(@PathParam("name") String name) {
-    return new WorkspaceVariationResource(name, workspace, getUriInfo());
+    return new WorkspaceVariationResource(name, workspace, getInjectables());
   }
 
   public static URI getWorkspaceURI(UriBuilder builder, String namespace, String name) {
