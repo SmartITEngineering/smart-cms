@@ -23,6 +23,7 @@ import com.smartitengineering.cms.binder.guice.Initializer;
 import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
+import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
 import com.smartitengineering.cms.ws.common.domains.Workspace;
 import com.smartitengineering.cms.ws.common.domains.WorkspaceImpl.WorkspaceIdImpl;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
@@ -201,13 +202,8 @@ public class AppTest {
   @Test
   public void testCreateWorkspace() throws Exception {
     WorkspaceIdImpl workspaceId = new WorkspaceIdImpl();
-    workspaceId.setName("this.is.a.test");
-    workspaceId.setGlobalNamespace("a-test-namespace");
-
-
-//    WorkspaceIdImpl workspaceId = new WorkspaceIdImpl();
-//    workspaceId.setName("this is a test");
-//    workspaceId.setGlobalNamespace("a test namespace");
+    workspaceId.setName("this is a test");
+    workspaceId.setGlobalNamespace("a test namespace");
 
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     int size = resource.getWorkspaces().size();
@@ -235,6 +231,29 @@ public class AppTest {
     feedResource = iterator.next();
     Assert.assertNotNull(feedResource);
     Assert.assertEquals(3, root.getWorkspaceFeeds().size());
+  }
+
+  @Test
+  public void testAddFriend() throws Exception {
+    final RootResource rootResource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    rootResource.get();
+    final Iterator<WorkspaceFeedResource> iterator = rootResource.getWorkspaceFeeds().iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    WorkspaceFriendsResource friendsResource = feedResource.getFriends();
+    friendsResource.addFriend(new URI("http://localhost:10080/ws/com.smartitengineering/test"));
+    friendsResource.get();
+    Collection<URI> frdUri = friendsResource.getLastReadStateOfEntity();
+    Iterator<URI> frdUris = frdUri.iterator();
+    Assert.assertEquals(1, frdUri.size());
+    Assert.assertEquals("http://localhost:10080/ws/com.smartitengineering/test", frdUris.next().toASCIIString());
+    friendsResource.addFriend(new URI("http://localhost:10080/ws/testNS/test"));
+    WorkspaceFriendsResource newFriendsResource = feedResource.getFriends();
+    newFriendsResource.get();
+    Collection<URI> collection = newFriendsResource.getLastReadStateOfEntity();
+    Assert.assertEquals(2, collection.size());
+    frdUris = collection.iterator();
+    Assert.assertEquals("http://localhost:10080/ws/com.smartitengineering/test", frdUris.next().toASCIIString());
+    Assert.assertEquals("http://localhost:10080/ws/testNS/test", frdUris.next().toASCIIString());
   }
 
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
