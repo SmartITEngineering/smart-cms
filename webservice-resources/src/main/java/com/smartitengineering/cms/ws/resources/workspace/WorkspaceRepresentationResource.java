@@ -42,6 +42,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -93,7 +94,10 @@ public class WorkspaceRepresentationResource extends AbstractResource {
           getGlobalNamespace(), id.getName()), repName, TemplateType.valueOf(template.getTemplateType()), template.
           getTemplate());
       if (created != null) {
-        builder = Response.created(getUriInfo().getRequestUri());
+        UriBuilder uriBuilder = getAbsoluteURIBuilder().path(WorkspaceResource.class).path(
+            WorkspaceResource.PATH_REPRESENTATIONS).path("name").path(repName);
+        builder = Response.created(uriBuilder.build(template.getWorkspaceId().getGlobalNamespace(), template.
+            getWorkspaceId().getName()));
       }
       else {
         builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
