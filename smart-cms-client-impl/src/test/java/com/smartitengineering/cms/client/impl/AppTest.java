@@ -22,6 +22,7 @@ import com.google.inject.AbstractModule;
 import com.smartitengineering.cms.binder.guice.Initializer;
 import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
+import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.client.api.domains.Workspace;
 import com.smartitengineering.cms.client.api.domains.WorkspaceId;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
@@ -37,6 +38,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Properties;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -131,14 +133,14 @@ public class AppTest {
 
   @Test
   public void testStartup() throws URISyntaxException {
-    RootResource resource = RootResourceImpl.getRoot(new URI("http://localhost:" + PORT + "/"));
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     Assert.assertNotNull(resource);
     Assert.assertEquals(0, resource.getWorkspaces().size());
   }
 
   @Test
   public void testCreationAndRetrievalWithNameOnly() throws URISyntaxException {
-    RootResource resource = RootResourceImpl.getRoot(new URI("http://localhost:" + PORT + "/"));
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     final MultivaluedMap<String, String> map = new MultivaluedMapImpl();
     map.add("name", TEST);
     ClientResponse response = resource.post(MediaType.APPLICATION_FORM_URLENCODED, map, ClientResponse.Status.CREATED);
@@ -197,15 +199,32 @@ public class AppTest {
 
   @Test
   public void testCreateWorkspace() throws Exception {
-
     WorkspaceId workspaceId = new WorkspaceId();
-    workspaceId.setName("this is a test");
-    workspaceId.setGlobalNamespace("a test namespace");
+    workspaceId.setName("this.is.a.test");
+    workspaceId.setGlobalNamespace("a-test-namespace");
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     Workspace workspace = resource.createWorkspace(workspaceId);
     Assert.assertEquals(workspaceId.getName(), workspace.getId().getName());
     Assert.assertEquals(workspaceId.getGlobalNamespace(), workspace.getId().getGlobalNamespace());
     Assert.assertEquals(new Date().toString(), workspace.getCreationDate().toString());
+  }
+
+  @Test
+  public void testWorkspaceExists() throws Exception {
+    final RootResource root = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    root.get();
+    final Iterator<WorkspaceFeedResource> iterator = root.getWorkspaceFeeds().iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(new StringBuffer("Total no of workspace created in test : ").append(root.getWorkspaceFeeds().size()).
+          toString());
+    }
+    Assert.assertNotNull(feedResource);
+    feedResource = iterator.next();
+    Assert.assertNotNull(feedResource);
+    feedResource = iterator.next();
+    Assert.assertNotNull(feedResource);
+    Assert.assertEquals(3, root.getWorkspaceFeeds().size());
   }
 
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {

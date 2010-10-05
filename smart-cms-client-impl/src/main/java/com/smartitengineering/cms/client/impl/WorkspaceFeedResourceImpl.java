@@ -26,7 +26,6 @@ import com.smartitengineering.util.rest.client.Resource;
 import com.smartitengineering.util.rest.client.ResourceLink;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.config.ClientConfig;
-import java.net.URI;
 import org.apache.abdera.model.Feed;
 
 /**
@@ -37,7 +36,7 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
     WorkspaceFeedResource {
 
   public WorkspaceFeedResourceImpl(Resource referrer, ResourceLink uri) throws IllegalArgumentException,
-                                                   UniformInterfaceException {
+                                                                               UniformInterfaceException {
     super(referrer, uri);
   }
 
