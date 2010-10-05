@@ -16,16 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.client.api;
+package com.smartitengineering.cms.ws.resources.workspace;
 
-import com.smartitengineering.cms.ws.common.domains.Workspace;
-import com.smartitengineering.util.rest.client.Resource;
+import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.util.rest.server.AbstractResource;
+import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 
 /**
  *
- * @author kaisar
+ * @author imyousuf
  */
-public interface WorkspaceContentResouce extends Resource<Workspace> {
+public class WorkspaceRepresentationResource extends AbstractResource {
 
-  String WORKSPACE_CONTENT = "workspaceContent";
+  private final String repName;
+  private final Workspace workspace;
+
+  public WorkspaceRepresentationResource(String repName, Workspace workspace, ServerResourceInjectables injectables) {
+    super(injectables);
+    this.repName = repName;
+    this.workspace = workspace;
+  }
 }

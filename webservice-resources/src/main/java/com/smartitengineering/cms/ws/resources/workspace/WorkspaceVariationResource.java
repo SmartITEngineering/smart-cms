@@ -16,42 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.client.api.domains;
+package com.smartitengineering.cms.ws.resources.workspace;
 
-import java.util.Date;
-import java.util.List;
+import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.util.rest.server.AbstractResource;
+import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 
 /**
  *
  * @author imyousuf
  */
-public class Workspace {
+public class WorkspaceVariationResource extends AbstractResource {
 
-  private WorkspaceId id;
-  private Date creationDate;
-  private List<WorkspaceId> friendlies;
+  private final String varName;
+  private final Workspace workspace;
 
-  public Date getCreationDate() {
-    return creationDate;
-  }
-
-  public void setCreationDate(Date creationDate) {
-    this.creationDate = creationDate;
-  }
-
-  public List<WorkspaceId> getFriendlies() {
-    return friendlies;
-  }
-
-  public void setFriendlies(List<WorkspaceId> friendlies) {
-    this.friendlies = friendlies;
-  }
-
-  public WorkspaceId getId() {
-    return id;
-  }
-
-  public void setId(WorkspaceId id) {
-    this.id = id;
+  public WorkspaceVariationResource(String varName, Workspace workspace, ServerResourceInjectables injectables) {
+    super(injectables);
+    this.varName = varName;
+    this.workspace = workspace;
   }
 }

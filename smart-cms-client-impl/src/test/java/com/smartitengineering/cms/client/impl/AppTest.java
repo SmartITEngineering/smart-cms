@@ -23,8 +23,8 @@ import com.smartitengineering.cms.binder.guice.Initializer;
 import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
-import com.smartitengineering.cms.client.api.domains.Workspace;
-import com.smartitengineering.cms.client.api.domains.WorkspaceId;
+import com.smartitengineering.cms.ws.common.domains.Workspace;
+import com.smartitengineering.cms.ws.common.domains.WorkspaceImpl.WorkspaceIdImpl;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
 import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ClientUtil;
@@ -199,9 +199,15 @@ public class AppTest {
 
   @Test
   public void testCreateWorkspace() throws Exception {
-    WorkspaceId workspaceId = new WorkspaceId();
+    WorkspaceIdImpl workspaceId = new WorkspaceIdImpl();
     workspaceId.setName("this.is.a.test");
     workspaceId.setGlobalNamespace("a-test-namespace");
+
+
+//    WorkspaceIdImpl workspaceId = new WorkspaceIdImpl();
+//    workspaceId.setName("this is a test");
+//    workspaceId.setGlobalNamespace("a test namespace");
+
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     Workspace workspace = resource.createWorkspace(workspaceId);
     Assert.assertEquals(workspaceId.getName(), workspace.getId().getName());

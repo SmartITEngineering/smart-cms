@@ -18,8 +18,8 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.cms.client.api.domains.Workspace;
-import com.smartitengineering.cms.client.api.domains.WorkspaceId;
+import com.smartitengineering.cms.ws.common.domains.Workspace;
+import com.smartitengineering.cms.ws.common.domains.WorkspaceId;
 import com.smartitengineering.util.rest.client.WritableResource;
 import java.net.URISyntaxException;
 import java.util.Collection;

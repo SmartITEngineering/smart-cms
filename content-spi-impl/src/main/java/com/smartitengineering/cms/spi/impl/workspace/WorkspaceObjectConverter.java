@@ -113,7 +113,7 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     final Date created = template.getCreatedDate() == null ? new Date() : template.getCreatedDate();
     put.add(family, Bytes.add(prefix, CELL_CREATED), Utils.toBytes(created));
     template.setCreatedDate(created);
-    final Date lastModified = template.getLastModifiedDate() == null ? new Date() : template.getLastModifiedDate();
+    final Date lastModified = template.getLastModifiedDate() == null ? created : template.getLastModifiedDate();
     put.add(family, Bytes.add(prefix, CELL_LAST_MODIFIED), Utils.toBytes(lastModified));
     template.setLastModifiedDate(lastModified);
   }
@@ -243,7 +243,9 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
         final Map<String, Map<byte[], byte[]>> repsByName = new LinkedHashMap<String, Map<byte[], byte[]>>();
         Utils.organizeByPrefix(repInfo, repsByName, ':');
         final Map<String, Map<byte[], byte[]>> repsDataByName = new LinkedHashMap<String, Map<byte[], byte[]>>();
-        Utils.organizeByPrefix(repData, repsDataByName, ':');
+        if (repData != null) {
+          Utils.organizeByPrefix(repData, repsDataByName, ':');
+        }
         for (String repName : repsByName.keySet()) {
           PersistableRepresentationTemplate template = SmartContentSPI.getInstance().getPersistableDomainFactory().
               createPersistableRepresentationTemplate();
@@ -262,7 +264,9 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
         final Map<String, Map<byte[], byte[]>> varsByName = new LinkedHashMap<String, Map<byte[], byte[]>>();
         Utils.organizeByPrefix(varInfo, varsByName, ':');
         final Map<String, Map<byte[], byte[]>> varsDataByName = new LinkedHashMap<String, Map<byte[], byte[]>>();
-        Utils.organizeByPrefix(varData, varsDataByName, ':');
+        if (varData != null) {
+          Utils.organizeByPrefix(varData, varsDataByName, ':');
+        }
         for (String varName : varsByName.keySet()) {
           PersistableVariationTemplate template = SmartContentSPI.getInstance().getPersistableDomainFactory().
               createPersistableVariationTemplate();
@@ -301,6 +305,8 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
 
   protected void populateResourceTemplateData(String repName, PersistableResourceTemplate template,
                                               Map<byte[], byte[]> cells) {
-    template.setTemplate(cells.get(Bytes.toBytes(repName)));
+    if (cells != null) {
+      template.setTemplate(cells.get(Bytes.toBytes(repName)));
+    }
   }
 }

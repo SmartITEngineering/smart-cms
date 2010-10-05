@@ -21,12 +21,15 @@ package com.smartitengineering.cms.spi.impl.workspace;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.cms.api.workspace.WorkspaceAPI.ResourceSortCriteria;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
+import com.smartitengineering.cms.spi.workspace.PersistableResourceTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 import com.smartitengineering.cms.spi.workspace.WorkspaceService;
@@ -36,6 +39,7 @@ import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -46,6 +50,20 @@ import java.util.List;
 public class WorkspaceServiceImpl extends AbstractWorkspaceService implements WorkspaceService {
 
   public static final QueryParameter<Void> SELF_PARAM = QueryParameterFactory.getPropProjectionParam("workspace");
+  private static final Comparator<ResourceTemplate> TEMPLATE_DATE_COMPARATOR = new Comparator<ResourceTemplate>() {
+
+    @Override
+    public int compare(ResourceTemplate o1, ResourceTemplate o2) {
+      return o1.getLastModifiedDate().compareTo(o2.getLastModifiedDate());
+    }
+  };
+  private static final Comparator<ResourceTemplate> TEMPLATE_NAME_COMPARATOR = new Comparator<ResourceTemplate>() {
+
+    @Override
+    public int compare(ResourceTemplate o1, ResourceTemplate o2) {
+      return o1.getName().compareTo(o2.getName());
+    }
+  };
 
   public PersistentContentTypeReader getContentTypeReader() {
     return contentTypeReader;
@@ -103,7 +121,7 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
   @Override
   public void addFriend(WorkspaceId to, WorkspaceId... workspaceIds) {
     PersistentWorkspace workspace = getWorkspace(to);
-    for(WorkspaceId id : workspaceIds) {
+    for (WorkspaceId id : workspaceIds) {
       workspace.addFriendly(id);
     }
     workspace.setFriendliesPopulated(true);
@@ -135,6 +153,8 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     template.setTemplateType(templateType);
     template.setWorkspaceId(workspaceId);
     template.setTemplate(data);
+    RepresentationTemplate oldTemplate = getRepresentationTemplate(workspaceId, name);
+    updateDates(template, oldTemplate);
     workspace.setRepresentationPopulated(true);
     commonWriteDao.update(workspace);
     return template;
@@ -172,6 +192,8 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     template.setTemplateType(templateType);
     template.setWorkspaceId(workspaceId);
     template.setTemplate(data);
+    VariationTemplate oldTemplate = getVariationTemplate(workspaceId, name);
+    updateDates(template, oldTemplate);
     workspace.setVariationPopulated(true);
     commonWriteDao.update(workspace);
     return template;
@@ -253,5 +275,59 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     PersistentWorkspace workspace = getWorkspace(workspaceId);
     workspace.setVariationPopulated(true);
     commonWriteDao.delete(workspace);
+  }
+
+  @Override
+  public Collection<RepresentationTemplate> getRepresentationsWithoutData(WorkspaceId id, ResourceSortCriteria criteria) {
+    List<QueryParameter> params = new ArrayList<QueryParameter>();
+    final String info = WorkspaceObjectConverter.REP_INFO;
+    params.add(QueryParameterFactory.getPropProjectionParam(info));
+    params.add(getIdParam(id));
+    List<? extends RepresentationTemplate> templates = commonReadDao.getSingle(params).getRepresentationTemplates();
+    if (templates.isEmpty()) {
+      return Collections.emptyList();
+    }
+    final Comparator<ResourceTemplate> comp;
+    if (ResourceSortCriteria.BY_DATE.equals(criteria)) {
+      comp = TEMPLATE_DATE_COMPARATOR;
+    }
+    else {
+      comp = TEMPLATE_NAME_COMPARATOR;
+    }
+    Collections.sort(templates, comp);
+    return Collections.unmodifiableCollection(templates);
+
+  }
+
+  @Override
+  public Collection<VariationTemplate> getVariationsWithoutData(WorkspaceId id, ResourceSortCriteria criteria) {
+    List<QueryParameter> params = new ArrayList<QueryParameter>();
+    final String info = WorkspaceObjectConverter.VAR_INFO;
+    params.add(QueryParameterFactory.getPropProjectionParam(info));
+    params.add(getIdParam(id));
+    List<? extends VariationTemplate> templates = commonReadDao.getSingle(params).getVariationTemplates();
+    if (templates.isEmpty()) {
+      return Collections.emptyList();
+    }
+    final Comparator<ResourceTemplate> comp;
+    if (ResourceSortCriteria.BY_DATE.equals(criteria)) {
+      comp = TEMPLATE_DATE_COMPARATOR;
+    }
+    else {
+      comp = TEMPLATE_NAME_COMPARATOR;
+    }
+    Collections.sort(templates, comp);
+    return Collections.unmodifiableCollection(templates);
+  }
+
+  private void updateDates(PersistableResourceTemplate template, ResourceTemplate oldTemplate) {
+    final Date date = new Date();
+    if (oldTemplate != null) {
+      template.setCreatedDate(oldTemplate.getCreatedDate());
+    }
+    else {
+      template.setCreatedDate(date);
+    }
+    template.setLastModifiedDate(date);
   }
 }
