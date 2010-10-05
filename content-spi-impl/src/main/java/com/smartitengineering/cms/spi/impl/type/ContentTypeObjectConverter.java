@@ -73,8 +73,6 @@ import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -410,10 +408,10 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
        */
       NavigableMap<byte[], byte[]> fieldMap = startRow.getFamilyMap(FAMILY_FIELDS);
       //From a map of all cells form a map of cells by field name
-      Map<String, Map<byte[], byte[]>> fieldsByName = new LinkedHashMap<String, Map<byte[], byte[]>>();
+      Map<String, Map<String, byte[]>> fieldsByName = new LinkedHashMap<String, Map<String, byte[]>>();
       Utils.organizeByPrefix(fieldMap, fieldsByName, ':');
       for (String fieldName : fieldsByName.keySet()) {
-        final Map<byte[], byte[]> fieldCells = fieldsByName.get(fieldName);
+        final Map<String, byte[]> fieldCells = fieldsByName.get(fieldName);
         final Map<Integer, MutableVariationDef> fieldVariations = new TreeMap<Integer, MutableVariationDef>();
         final MutableSearchDef searchDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableSearchDef();
         final MutableFieldDef fieldDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableFieldDef();
@@ -443,8 +441,8 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
               variationPatternString).toString());
         }
         Pattern variationsDefPattern = Pattern.compile(variationPatternString);
-        for (Entry<byte[], byte[]> cell : fieldCells.entrySet()) {
-          final String key = Bytes.toString(cell.getKey());
+        for (Entry<String, byte[]> cell : fieldCells.entrySet()) {
+          final String key = cell.getKey();
           final byte[] value = cell.getValue();
           if (logger.isDebugEnabled()) {
             logger.debug(new StringBuilder("Matching following key against the patterns: ").append(key).toString());

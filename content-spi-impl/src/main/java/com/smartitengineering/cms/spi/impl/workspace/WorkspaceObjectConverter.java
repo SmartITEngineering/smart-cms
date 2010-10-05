@@ -240,9 +240,9 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
       final NavigableMap<byte[], byte[]> repData = allFamilies.get(FAMILY_REPRESENTATIONS_DATA);
       if (repInfo != null) {
         persistentWorkspace.setRepresentationPopulated(true);
-        final Map<String, Map<byte[], byte[]>> repsByName = new LinkedHashMap<String, Map<byte[], byte[]>>();
+        final Map<String, Map<String, byte[]>> repsByName = new LinkedHashMap<String, Map<String, byte[]>>();
         Utils.organizeByPrefix(repInfo, repsByName, ':');
-        final Map<String, Map<byte[], byte[]>> repsDataByName = new LinkedHashMap<String, Map<byte[], byte[]>>();
+        final Map<String, Map<String, byte[]>> repsDataByName = new LinkedHashMap<String, Map<String, byte[]>>();
         if (repData != null) {
           Utils.organizeByPrefix(repData, repsDataByName, ':');
         }
@@ -261,9 +261,9 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
       final NavigableMap<byte[], byte[]> varData = allFamilies.get(FAMILY_VARIATIONS_DATA);
       if (varInfo != null) {
         persistentWorkspace.setVariationPopulated(true);
-        final Map<String, Map<byte[], byte[]>> varsByName = new LinkedHashMap<String, Map<byte[], byte[]>>();
+        final Map<String, Map<String, byte[]>> varsByName = new LinkedHashMap<String, Map<String, byte[]>>();
         Utils.organizeByPrefix(varInfo, varsByName, ':');
-        final Map<String, Map<byte[], byte[]>> varsDataByName = new LinkedHashMap<String, Map<byte[], byte[]>>();
+        final Map<String, Map<String, byte[]>> varsDataByName = new LinkedHashMap<String, Map<String, byte[]>>();
         if (varData != null) {
           Utils.organizeByPrefix(varData, varsDataByName, ':');
         }
@@ -295,18 +295,25 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
   }
 
   protected void populateResourceTemplateInfo(String repName, PersistableResourceTemplate template,
-                                              Map<byte[], byte[]> cells) {
+                                              Map<String, byte[]> cells) {
     template.setName(repName);
-    byte[] prefix = getPrefixForResource(template);
-    template.setTemplateType(TemplateType.valueOf(Bytes.toString(cells.get(Bytes.add(prefix, CELL_TEMPLATE_TYPE)))));
-    template.setCreatedDate(Utils.toDate(cells.get(Bytes.add(prefix, CELL_CREATED))));
-    template.setLastModifiedDate(Utils.toDate(cells.get(Bytes.add(prefix, CELL_LAST_MODIFIED))));
+    String prefix = Bytes.toString(getPrefixForResource(template));
+    String key = new StringBuilder(prefix).append(TEMPLATETYPE).toString();
+    String type = Bytes.toString(cells.get(key));
+    if (logger.isDebugEnabled()) {
+      logger.debug("CELLS " + cells);
+      logger.debug("PREFIX " + prefix);
+      logger.debug("For " + key + " value is " + type);
+    }
+    template.setTemplateType(TemplateType.valueOf(type));
+    template.setCreatedDate(Utils.toDate(cells.get(new StringBuilder(prefix).append(CREATED).toString())));
+    template.setLastModifiedDate(Utils.toDate(cells.get(new StringBuilder(prefix).append(LASTMODIFIED).toString())));
   }
 
   protected void populateResourceTemplateData(String repName, PersistableResourceTemplate template,
-                                              Map<byte[], byte[]> cells) {
+                                              Map<String, byte[]> cells) {
     if (cells != null) {
-      template.setTemplate(cells.get(Bytes.toBytes(repName)));
+      template.setTemplate(cells.get(repName));
     }
   }
 }

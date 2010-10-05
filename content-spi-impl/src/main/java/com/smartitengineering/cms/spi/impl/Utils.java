@@ -63,7 +63,7 @@ public final class Utils {
     }
   }
 
-  public static void organizeByPrefix(Map<byte[], byte[]> fieldMap, Map<String, Map<byte[], byte[]>> fieldsByName,
+  public static void organizeByPrefix(Map<byte[], byte[]> fieldMap, Map<String, Map<String, byte[]>> fieldsByName,
                                       char separator) {
     logger.info("Organize by their prefix so that each field cells can be processed at once");
     for (Entry<byte[], byte[]> entry : fieldMap.entrySet()) {
@@ -73,16 +73,16 @@ public final class Utils {
         final String fieldName = key.substring(0, indexOfFirstColon);
         final byte[] fieldNameBytes = Bytes.toBytes(fieldName);
         if (Bytes.startsWith(entry.getKey(), fieldNameBytes)) {
-          Map<byte[], byte[]> fieldCells = fieldsByName.get(fieldName);
+          Map<String, byte[]> fieldCells = fieldsByName.get(fieldName);
           if (fieldCells == null) {
-            fieldCells = new LinkedHashMap<byte[], byte[]>();
+            fieldCells = new LinkedHashMap<String, byte[]>();
             fieldsByName.put(fieldName, fieldCells);
           }
-          fieldCells.put(entry.getKey(), entry.getValue());
+          fieldCells.put(Bytes.toString(entry.getKey()), entry.getValue());
         }
       }
       else {
-        fieldsByName.put(key, Collections.singletonMap(entry.getKey(), entry.getValue()));
+        fieldsByName.put(key, Collections.singletonMap(Bytes.toString(entry.getKey()), entry.getValue()));
       }
     }
   }
