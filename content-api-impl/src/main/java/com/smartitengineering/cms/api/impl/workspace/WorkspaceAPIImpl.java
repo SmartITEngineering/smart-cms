@@ -36,6 +36,8 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -44,6 +46,7 @@ import org.apache.commons.lang.StringUtils;
 public class WorkspaceAPIImpl implements WorkspaceAPI {
 
   private String globalNamespace;
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Inject
   public void setGlobalNamespace(@Named("globalNamespace") String globalNamespace) {
@@ -182,27 +185,42 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
       return Collections.emptyList();
     }
     List<String> list = new ArrayList<String>(getRepresentationNames(id, criteria));
+    if (logger.isDebugEnabled()) {
+      logger.debug("All names " + list);
+    }
     int index = Collections.binarySearch(list, startPoint);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Index " + index);
+    }
     if (index < 0) {
       index = index * - 1;
     }
-    if (index >= list.size() && count > 0) {
+    if (index >= list.size() && count > 0 && StringUtils.isNotBlank(startPoint)) {
+      logger.debug("Index is equal to size and count is greater than 0");
       return Collections.emptyList();
     }
     if (index <= 0 && count < 0) {
+      logger.debug("Index is zero to size and count is smaller than 0");
       return Collections.emptyList();
     }
-    final int startIndex;
+    final int fromIndex;
     final int toIndex;
     if (count > 0) {
-      startIndex = StringUtils.isBlank(startPoint) ? 0 : index;
-      toIndex = (startIndex + count >= list.size()) ? list.size() : startIndex + count;
+      fromIndex = StringUtils.isBlank(startPoint) ? 0 : index;
+      toIndex = (fromIndex + count >= list.size()) ? list.size() : fromIndex + count;
     }
     else {
       toIndex = index;
-      startIndex = (toIndex + count >= 0) ? toIndex + count : 0;
+      fromIndex = (toIndex + count >= 0) ? toIndex + count : 0;
     }
-    return list.subList(startIndex, toIndex);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Sublisting starts at " + fromIndex + " and ends before " + toIndex);
+    }
+    final List<String> result = list.subList(fromIndex, toIndex);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Returning " + result);
+    }
+    return result;
   }
 
   @Override
@@ -216,23 +234,23 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
     if (index < 0) {
       index = index * - 1;
     }
-    if (index >= list.size() && count > 0) {
+    if (index >= list.size() && count > 0 && StringUtils.isNotBlank(startPoint)) {
       return Collections.emptyList();
     }
     if (index <= 0 && count < 0) {
       return Collections.emptyList();
     }
-    final int startIndex;
+    final int fromIndex;
     final int toIndex;
     if (count > 0) {
-      startIndex = index;
-      toIndex = (startIndex + count >= list.size()) ? list.size() : startIndex + count;
+      fromIndex = StringUtils.isBlank(startPoint) ? 0 : index;
+      toIndex = (fromIndex + count >= list.size()) ? list.size() : fromIndex + count;
     }
     else {
       toIndex = index;
-      startIndex = (toIndex + count >= 0) ? toIndex + count : 0;
+      fromIndex = (toIndex + count >= 0) ? toIndex + count : 0;
     }
-    return list.subList(startIndex, toIndex);
+    return list.subList(fromIndex, toIndex);
   }
 
   @Override
