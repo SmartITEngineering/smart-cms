@@ -76,7 +76,7 @@ public class WorkspaceVariationsResource extends AbstractResource {
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response putRepresentations(ResourceTemplate template) {
+  public Response putVariations(ResourceTemplate template) {
     if (StringUtils.isBlank(template.getName())) {
       return Response.status(Response.Status.BAD_REQUEST).build();
     }
