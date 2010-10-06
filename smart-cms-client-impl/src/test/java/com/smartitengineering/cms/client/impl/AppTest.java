@@ -348,7 +348,6 @@ public class AppTest {
 
   @Test
   public void testCreateRepresentation() throws Exception {
-    WorkspaceId workspaceId = new WorkspaceIdImpl("atest2", "additional");
 
     ResourceTemplateImpl template = new ResourceTemplateImpl();
     String temp = "Template";
@@ -356,7 +355,6 @@ public class AppTest {
     final byte[] bytes = temp.getBytes();
     template.setTemplate(bytes);
     template.setTemplateType(TemplateType.JAVASCRIPT.toString());
-    template.setWorkspaceId(workspaceId);
 
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
@@ -367,14 +365,10 @@ public class AppTest {
     Assert.assertEquals("rep", representationResource.get().getName());
     Assert.assertEquals(temp, new String(representationResource.get().getTemplate()));
     Assert.assertEquals(TemplateType.JAVASCRIPT.toString(), representationResource.get().getTemplateType());
-    Assert.assertEquals(workspaceId.getGlobalNamespace(), representationResource.get().getWorkspaceId().
-        getGlobalNamespace());
-    Assert.assertEquals(workspaceId.getName(), representationResource.get().getWorkspaceId().getName());
   }
 
   @Test
   public void testCreateVariation() throws Exception {
-    WorkspaceId workspaceId = new WorkspaceIdImpl("atest2", "additional");
 
     ResourceTemplateImpl template = new ResourceTemplateImpl();
     String temp = "variationTemplate";
@@ -382,7 +376,6 @@ public class AppTest {
     final byte[] bytes = temp.getBytes();
     template.setTemplate(bytes);
     template.setTemplateType(TemplateType.VELOCITY.toString());
-    template.setWorkspaceId(workspaceId);
 
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
@@ -393,9 +386,6 @@ public class AppTest {
     Assert.assertEquals("variation", variationResource.get().getName());
     Assert.assertEquals(temp, new String(variationResource.get().getTemplate()));
     Assert.assertEquals(TemplateType.VELOCITY.toString(), variationResource.get().getTemplateType());
-    Assert.assertEquals(workspaceId.getGlobalNamespace(), variationResource.get().getWorkspaceId().
-        getGlobalNamespace());
-    Assert.assertEquals(workspaceId.getName(), variationResource.get().getWorkspaceId().getName());
   }
 
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
