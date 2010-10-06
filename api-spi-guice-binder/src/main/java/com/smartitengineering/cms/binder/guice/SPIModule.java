@@ -23,6 +23,7 @@ import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
+import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
@@ -63,11 +64,31 @@ import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SPIModule extends PrivateModule {
+
+  public static final String DEFAULT_LOCATION =
+                             "http://github.com/smart-it/smart-cms/raw/master/" +
+      "content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd";
+  private final String schemaLocationForContentType;
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
+
+  public SPIModule(Properties properties) {
+    if (properties != null) {
+      schemaLocationForContentType = properties.getProperty("com.smartitengineering.cms.schemaLocationForContentType",
+                                                            DEFAULT_LOCATION);
+    }
+    else {
+      schemaLocationForContentType = DEFAULT_LOCATION;
+    }
+    logger.debug("SCHEMA Location " + schemaLocationForContentType);
+  }
 
   @Override
   protected void configure() {
@@ -83,6 +104,9 @@ public class SPIModule extends PrivateModule {
     bind(Boolean.class).annotatedWith(Names.named("mergeEnabled")).toInstance(Boolean.TRUE);
     bind(MergeService.class).to(DiffBasedMergeService.class).in(Singleton.class);
     binder().expose(MergeService.class);
+    final Named named = Names.named("schemaLocationForContentTypeXml");
+    bind(String.class).annotatedWith(named).toInstance(schemaLocationForContentType);
+    binder().expose(String.class).annotatedWith(named);
     /*
      * Start injection specific to common dao of content type
      */

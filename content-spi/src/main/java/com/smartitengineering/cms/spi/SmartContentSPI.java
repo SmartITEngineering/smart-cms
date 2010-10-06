@@ -85,6 +85,12 @@ public final class SmartContentSPI {
   private ContentIdProcessor contentIdProcessor;
   @InjectableField
   private PersistableDomainFactory persistableDomainFactory;
+  @InjectableField(beanName = "schemaLocationForContentTypeXml")
+  private String schemaLocationForContentTypeXml;
+
+  public String getSchemaLocationForContentTypeXml() {
+    return schemaLocationForContentTypeXml;
+  }
 
   public PersistableDomainFactory getPersistableDomainFactory() {
     return persistableDomainFactory;

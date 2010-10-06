@@ -27,6 +27,7 @@ import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import junit.framework.TestCase;
+import org.apache.commons.lang.StringUtils;
 
 public class InjectionTest extends TestCase {
 
@@ -51,7 +52,8 @@ public class InjectionTest extends TestCase {
     assertNotNull(contentTypeReader);
     assertNotNull(SmartContentSPI.getInstance().getWorkspaceService());
     final PersistentService<MutableContentType> persistentService =
-                                                SmartContentSPI.getInstance().getPersistentService(MutableContentType.class);
+                                                SmartContentSPI.getInstance().getPersistentService(
+        MutableContentType.class);
     if (ContentTypePersistentService.class.isAssignableFrom(persistentService.getClass())) {
       ContentTypePersistentService service = (ContentTypePersistentService) persistentService;
       assertNotNull(service.getCommonReadDao());
@@ -63,6 +65,7 @@ public class InjectionTest extends TestCase {
     }
     assertNotNull(persistentService);
     assertSame(contentTypeReader, persistentService);
+    assertTrue(StringUtils.isNotBlank(SmartContentSPI.getInstance().getSchemaLocationForContentTypeXml()));
   }
 
   public void testPersistenceServiceLookup() {
