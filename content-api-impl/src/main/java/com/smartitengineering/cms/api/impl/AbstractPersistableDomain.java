@@ -88,7 +88,7 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
   @Override
   public void put()
       throws IOException {
-    if (isPersisted()) {
+    if (!isPersisted()) {
       create();
     }
     else {

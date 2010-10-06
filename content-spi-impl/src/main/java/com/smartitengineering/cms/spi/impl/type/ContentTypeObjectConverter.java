@@ -66,6 +66,7 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
@@ -145,7 +146,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
       logger.debug("Set creation date if necessary and set last modification date");
       put.add(FAMILY_SIMPLE, CELL_LAST_MODIFIED_DATE, Utils.toBytes(lastModifiedDate));
       final Date creationDate;
-      if (instance.getMutableContentType().getCreationDate() == null) {
+      if (instance.getMutableContentType().getCreationDate() != null) {
         logger.debug("Using old creation date");
         creationDate = instance.getMutableContentType().getCreationDate();
       }
@@ -368,8 +369,8 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         final FastDateFormat formatter = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT;
         logger.debug(String.format("Creation date is %s and last modified date is %s", formatter.format(contentType.
             getCreationDate()), formatter.format(contentType.getLastModifiedDate())));
-        logger.debug(String.format("Id is %s and parent id is %s", contentType.getContentTypeID().toString(), contentType.
-            getParent().toString()));
+        logger.debug(String.format("Id is %s and parent id is %s", contentType.getContentTypeID().toString(), ObjectUtils.
+            toString(contentType.getParent())));
       }
       /*
        * Content status
@@ -593,6 +594,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
           variantMap.put(MediaType.fromString(Bytes.toString(mediaType)), Bytes.toString(variants.get(mediaType)));
         }
         contentType.setRepresentations(variantMap);
+        contentType.setFromPersistentStorage(true);
       }
       return persistentContentType;
     }

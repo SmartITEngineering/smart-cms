@@ -42,6 +42,7 @@ import com.smartitengineering.cms.api.type.MutableStringDataType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
+import com.smartitengineering.cms.spi.type.PersistableContentType;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -125,7 +126,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       resultingTypes.add(contentTypeImpl);
     }
     if (logger.isDebugEnabled()) {
-      logger.debug(new StringBuilder("After getting from persistent storage size is of 2bReturnedList is ").append(resultingTypes.
+      logger.debug(new StringBuilder("After getting from persistent storage size is of 2b ReturnedList is ").append(resultingTypes.
           size()).toString());
     }
     for (MutableContentType type : types) {
@@ -135,7 +136,9 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       int index = resultingTypes.indexOf(type);
       if (index >= 0) {
         logger.debug("Just merging");
-        merge(resultingTypes.get(index), type);
+        final ContentTypeImpl get = resultingTypes.get(index);
+        merge(get, type);
+        get.setFromPersistentStorage(true);
       }
       else {
         logger.debug("Adding to list");
@@ -169,8 +172,8 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       return collectionDataTypeImpl;
     }
     else {
-      throw new IllegalArgumentException("Argument can not be null or min size has to be non-negative or max size can"
-          + " not be smaller than min zie.");
+      throw new IllegalArgumentException("Argument can not be null or min size has to be non-negative or max size can" +
+          " not be smaller than min zie.");
     }
   }
 
@@ -268,7 +271,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
     typeImpl.setContentTypeID(contentType.getContentTypeID());
     typeImpl.setCreationDate(contentType.getCreationDate());
     typeImpl.setDisplayName(contentType.getDisplayName());
-    typeImpl.setFromPersistentStorage(contentType instanceof ContentTypeImpl ? ((ContentTypeImpl) contentType).
+    typeImpl.setFromPersistentStorage(contentType instanceof PersistableContentType ? ((PersistableContentType) contentType).
         isFromPersistentStorage() : false);
     typeImpl.setLastModifiedDate(contentType.getLastModifiedDate());
     typeImpl.setParent(contentType.getParent());
@@ -278,6 +281,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
     typeImpl.getMutableRepresentationDefs().addAll(contentType.getRepresentationDefs().values());
     typeImpl.getMutableStatuses().clear();
     typeImpl.getMutableStatuses().addAll(contentType.getStatuses().values());
+    typeImpl.setRepresentations(contentType.getRepresentations());
   }
 
   @Override

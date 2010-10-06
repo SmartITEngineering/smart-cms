@@ -18,9 +18,12 @@
  */
 package com.smartitengineering.cms.spi.impl;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.common.Lock;
 import com.smartitengineering.cms.spi.lock.Key;
 import com.smartitengineering.cms.spi.lock.LockHandler;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -28,13 +31,51 @@ import com.smartitengineering.cms.spi.lock.LockHandler;
  */
 public class DefaultLockHandler implements LockHandler {
 
+  @Inject
+  @Named("waitTime")
+  private Long waitTime;
+  @Inject
+  @Named("unit")
+  private TimeUnit waitUnit;
+
   @Override
   public Lock register(Key key) {
-    return null;
+    return new LockImpl();
   }
 
   @Override
   public void unregister(Key key) {
     return;
+  }
+
+  class LockImpl implements Lock {
+
+    @Override
+    public boolean isLockOwned() {
+      return true;
+    }
+
+    @Override
+    public void lock() {
+    }
+
+    @Override
+    public boolean tryLock() {
+      try {
+        return tryLock(waitTime, waitUnit);
+      }
+      catch (InterruptedException ex) {
+        return false;
+      }
+    }
+
+    @Override
+    public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+      return true;
+    }
+
+    @Override
+    public void unlock() {
+    }
   }
 }
