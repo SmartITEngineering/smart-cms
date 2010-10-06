@@ -19,12 +19,17 @@
 package com.smartitengineering.cms.client.impl;
 
 import com.google.inject.AbstractModule;
+import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.binder.guice.Initializer;
 import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
+import com.smartitengineering.cms.client.api.WorkspaceRepresentationResource;
+import com.smartitengineering.cms.client.api.WorkspaceRepresentationsResource;
+import com.smartitengineering.cms.ws.common.domains.ResourceTemplateImpl;
 import com.smartitengineering.cms.ws.common.domains.Workspace;
+import com.smartitengineering.cms.ws.common.domains.WorkspaceId;
 import com.smartitengineering.cms.ws.common.domains.WorkspaceImpl.WorkspaceIdImpl;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
 import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
@@ -48,6 +53,7 @@ import org.apache.abdera.model.Feed;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -336,6 +342,32 @@ public class AppTest {
     friendsResource.get();
     Collection<URI> frdUri = friendsResource.getLastReadStateOfEntity();
     Assert.assertNull(frdUri);
+  }
+
+  @Test
+  public void testCreateRepresentation() throws Exception {
+    WorkspaceId workspaceId = new WorkspaceIdImpl("atest2", "additional");
+
+    ResourceTemplateImpl template = new ResourceTemplateImpl();
+    String temp = "Template";
+    template.setName("rep");
+    final byte[] bytes = temp.getBytes();
+    template.setTemplate(bytes);
+    template.setTemplateType(TemplateType.JAVASCRIPT.toString());
+    template.setWorkspaceId(workspaceId);
+
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    WorkspaceRepresentationsResource representationsResource = feedResource.getRepresentations();
+    WorkspaceRepresentationResource representationResource = representationsResource.createRepresentations(template);
+    Assert.assertEquals("rep", representationResource.get().getName());
+    Assert.assertEquals(temp, new String(representationResource.get().getTemplate()));
+    Assert.assertEquals(TemplateType.JAVASCRIPT.toString(), representationResource.get().getTemplateType());
+    Assert.assertEquals(workspaceId.getGlobalNamespace(), representationResource.get().getWorkspaceId().
+        getGlobalNamespace());
+    Assert.assertEquals(workspaceId.getName(), representationResource.get().getWorkspaceId().getName());
   }
 
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
