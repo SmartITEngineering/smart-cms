@@ -20,6 +20,8 @@ package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
+import com.smartitengineering.cms.client.api.WorkspaceRepresentationsResource;
+import com.smartitengineering.cms.client.api.WorkspaceVariationsResource;
 import com.smartitengineering.util.rest.atom.AbstractFeedClientResource;
 import com.smartitengineering.util.rest.atom.AtomClientUtil;
 import com.smartitengineering.util.rest.client.Resource;
@@ -53,5 +55,17 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
   public WorkspaceFriendsResource getFriends() {
     return new WorkspaceFriendsResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
         getLink("friendlies")));
+  }
+
+  @Override
+  public WorkspaceRepresentationsResource getRepresentations() {
+    return new WorkspaceRepresentationsResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+        getLink("representations")));
+  }
+
+  @Override
+  public WorkspaceVariationsResource getVariations() {
+    return new WorkspaceVariationsResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+        getLink("variations")));
   }
 }
