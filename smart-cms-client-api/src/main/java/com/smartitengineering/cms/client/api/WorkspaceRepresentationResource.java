@@ -18,18 +18,20 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.util.rest.client.Resource;
+import com.smartitengineering.util.rest.client.WritableResource;
+import java.net.URI;
+import java.util.Collection;
 import org.apache.abdera.model.Feed;
 
 /**
  *
- * @author imyousuf
+ * @author kaisar
  */
-public interface WorkspaceFeedResource extends Resource<Feed> {
+public interface WorkspaceRepresentationResource extends WritableResource<Collection<URI>> {
 
-  WorkspaceFriendsResource getFriends();
+  public Feed getRepresentation(Collection<String> names);
 
-//  WorkspaceRepresentationsResource getRepresentations();
-  
-//  WorkspaceVariationsResource getVariations();
+//  public void createRepresentation();
+
+  public void deleteRepresentation(URI uri);
 }
