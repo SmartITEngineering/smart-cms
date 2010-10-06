@@ -111,7 +111,7 @@ public class WorkspaceRepresentationsResource extends AbstractResource {
     for (String name : nameList) {
       Link nameLink = getLink(getUriInfo().getBaseUriBuilder().path(WorkspaceResource.class).path(
           WorkspaceResource.REL_REPRESENTATIONS).path("name").path(name).build(workspace.getId().getGlobalNamespace(), workspace.
-          getId().getName()), Link.REL_ALTERNATE, MediaType.APPLICATION_ATOM_XML);
+          getId().getName()), Link.REL_ALTERNATE, MediaType.APPLICATION_JSON);
       Entry entry = getEntry(name, name, date, nameLink);
       feed.addEntry(entry);
     }
