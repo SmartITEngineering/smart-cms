@@ -23,7 +23,7 @@ import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
-import com.smartitengineering.cms.ws.common.domains.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.cms.ws.resources.domains.Factory;
 import com.smartitengineering.util.rest.server.AbstractResource;
@@ -54,10 +54,12 @@ public class WorkspaceVariationResource extends AbstractResource {
 
   private final String varName;
   private final VariationTemplate template;
+  private final Workspace workspace;
 
   public WorkspaceVariationResource(String varName, Workspace workspace, ServerResourceInjectables injectables) {
     super(injectables);
     this.varName = varName;
+    this.workspace = workspace;
     template = SmartContentAPI.getInstance().getWorkspaceApi().getVariationTemplate(workspace.getId(), varName);
   }
 
@@ -87,8 +89,8 @@ public class WorkspaceVariationResource extends AbstractResource {
   public Response put(com.smartitengineering.cms.ws.common.domains.ResourceTemplate template, @HeaderParam(
       HttpHeaders.IF_MATCH) String ifMatchHeader) {
     ResponseBuilder builder;
+    WorkspaceId id = workspace.getId();
     if (this.template == null) {
-      WorkspaceId id = template.getWorkspaceId();
       final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
       VariationTemplate created = workspaceApi.putVariationTemplate(workspaceApi.createWorkspaceId(
           id.getGlobalNamespace(), id.getName()), varName, TemplateType.valueOf(template.getTemplateType()), template.
@@ -111,7 +113,6 @@ public class WorkspaceVariationResource extends AbstractResource {
       EntityTag entityTag = new EntityTag(DigestUtils.md5Hex(Utils.getFormattedDate(lastModifiedDate)));
       builder = getContext().getRequest().evaluatePreconditions(lastModifiedDate, entityTag);
       if (builder == null) {
-        WorkspaceId id = template.getWorkspaceId();
         final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
         VariationTemplate put = workspaceApi.putVariationTemplate(workspaceApi.createWorkspaceId(id.getGlobalNamespace(), id.
             getName()), varName, TemplateType.valueOf(template.getTemplateType()), template.getTemplate());
