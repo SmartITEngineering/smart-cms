@@ -27,7 +27,6 @@ import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
-import com.smartitengineering.cms.api.type.MutableContentTypeId;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
 import com.smartitengineering.cms.api.type.MutableResourceUri;
@@ -114,7 +113,7 @@ public class XmlParser implements XmlConstants {
         }
         statuses = parseContentStatuses(contentTypeElement, STATUS);
         representationDefs = parseRepresentations(contentTypeElement, REPRESENTATIONS);
-        contentTypeId = parseContentTypeId(contentTypeElement, PARENT);
+        contentTypeId = parseContentTypeId(contentTypeElement, PARENT, workspaceId);
         mutableContent.setDisplayName(displayName);
         mutableContent.setParent(contentTypeId);
         mutableContent.getMutableFieldDefs().addAll(fieldDefs);
@@ -238,16 +237,15 @@ public class XmlParser implements XmlConstants {
     return resourceUri;
   }
 
-  protected ContentTypeId parseContentTypeId(Element rootElement, String elementName) throws IllegalStateException {
+  protected ContentTypeId parseContentTypeId(Element rootElement, String elementName, WorkspaceId workspaceId) throws
+      IllegalStateException {
     Elements elems = rootElement.getChildElements(elementName, NAMESPACE);
     if (elems.size() > 1) {
       throw new IllegalStateException("More than one " + elementName);
     }
-    MutableContentTypeId contentTypeId = SmartContentAPI.getInstance().getContentTypeLoader().
-        createMutableContentTypeID();
     if (elems.size() > 0) {
-      contentTypeId.setName(parseMandatoryStringElement(elems.get(0), TYPE_NAME));
-      contentTypeId.setNamespace(parseMandatoryStringElement(elems.get(0), TYPE_NS));
+      ContentTypeId contentTypeId = SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(workspaceId,
+          parseMandatoryStringElement(elems.get(0), TYPE_NS), parseMandatoryStringElement(elems.get(0), TYPE_NAME));
       return contentTypeId;
     }
     else {
