@@ -23,7 +23,7 @@ import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
-import com.smartitengineering.cms.ws.common.domains.WorkspaceId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.cms.ws.resources.domains.Factory;
 import com.smartitengineering.util.rest.server.AbstractResource;
@@ -54,10 +54,12 @@ public class WorkspaceRepresentationResource extends AbstractResource {
 
   private final String repName;
   private final RepresentationTemplate template;
+  private final Workspace workspace;
 
   public WorkspaceRepresentationResource(String repName, Workspace workspace, ServerResourceInjectables injectables) {
     super(injectables);
     this.repName = repName;
+    this.workspace = workspace;
     template = SmartContentAPI.getInstance().getWorkspaceApi().getRepresentationTemplate(workspace.getId(), repName);
   }
 
@@ -87,8 +89,9 @@ public class WorkspaceRepresentationResource extends AbstractResource {
   public Response put(com.smartitengineering.cms.ws.common.domains.ResourceTemplate template, @HeaderParam(
       HttpHeaders.IF_MATCH) String ifMatchHeader) {
     ResponseBuilder builder;
+    WorkspaceId id = workspace.getId();
     if (this.template == null) {
-      WorkspaceId id = template.getWorkspaceId();
+      
       final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
       RepresentationTemplate created = workspaceApi.putRepresentationTemplate(workspaceApi.createWorkspaceId(id.
           getGlobalNamespace(), id.getName()), repName, TemplateType.valueOf(template.getTemplateType()), template.
@@ -111,7 +114,6 @@ public class WorkspaceRepresentationResource extends AbstractResource {
       EntityTag entityTag = new EntityTag(DigestUtils.md5Hex(Utils.getFormattedDate(lastModifiedDate)));
       builder = getContext().getRequest().evaluatePreconditions(lastModifiedDate, entityTag);
       if (builder == null) {
-        WorkspaceId id = template.getWorkspaceId();
         final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
         RepresentationTemplate put = workspaceApi.putRepresentationTemplate(workspaceApi.createWorkspaceId(id.
             getGlobalNamespace(), id.getName()), repName, TemplateType.valueOf(template.getTemplateType()), template.
