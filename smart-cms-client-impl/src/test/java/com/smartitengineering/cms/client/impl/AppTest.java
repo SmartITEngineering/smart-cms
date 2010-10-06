@@ -28,11 +28,9 @@ import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
 import com.smartitengineering.cms.client.api.WorkspaceRepresentationResource;
 import com.smartitengineering.cms.client.api.WorkspaceRepresentationsResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationResource;
-import com.smartitengineering.cms.client.api.WorkspaceVariationResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationsResource;
 import com.smartitengineering.cms.ws.common.domains.ResourceTemplateImpl;
 import com.smartitengineering.cms.ws.common.domains.Workspace;
-import com.smartitengineering.cms.ws.common.domains.WorkspaceId;
 import com.smartitengineering.cms.ws.common.domains.WorkspaceImpl.WorkspaceIdImpl;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
 import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
@@ -40,6 +38,7 @@ import com.smartitengineering.util.rest.client.ClientUtil;
 import com.smartitengineering.util.rest.client.ConnectionConfig;
 import com.smartitengineering.util.rest.client.ResourceLink;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.File;
 import java.io.IOException;
@@ -386,6 +385,140 @@ public class AppTest {
     Assert.assertEquals("variation", variationResource.get().getName());
     Assert.assertEquals(temp, new String(variationResource.get().getTemplate()));
     Assert.assertEquals(TemplateType.VELOCITY.toString(), variationResource.get().getTemplateType());
+  }
+
+  @Test
+  public void testUpdateRepresentation() throws Exception {
+
+    ResourceTemplateImpl template = new ResourceTemplateImpl();
+    String temp = "newTemplate";
+    final byte[] bytes = temp.getBytes();
+    template.setTemplate(bytes);
+    template.setTemplateType(TemplateType.RUBY.toString());
+
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+
+    Collection<WorkspaceRepresentationResource> representationResources = feedResource.getRepresentations().
+        getRepresentationsResources();
+    Assert.assertEquals(1, representationResources.size());
+    Iterator<WorkspaceRepresentationResource> representationIterator = representationResources.iterator();
+    WorkspaceRepresentationResource representationResource = representationIterator.next();
+    representationResource.update(template);
+    Assert.assertEquals("rep", representationResource.get().getName());
+    Assert.assertEquals(temp, new String(representationResource.get().getTemplate()));
+    Assert.assertEquals(TemplateType.RUBY.toString(), representationResource.get().getTemplateType());
+    resource.getWorkspaceFeeds();
+    WorkspaceRepresentationResource secondRepresentationResource = resource.getWorkspaceFeeds().iterator().next().
+        getRepresentations().getRepresentationsResources().iterator().next();
+    template.setTemplateType(TemplateType.VELOCITY.name());
+    Thread.sleep(1100);
+    secondRepresentationResource.update(template);
+    Assert.assertEquals(TemplateType.VELOCITY.name(), new String(secondRepresentationResource.get().getTemplateType()));
+    try {
+      representationResource.update(template);
+      Assert.fail("Should not have been able to update!");
+    }
+    catch (UniformInterfaceException ex) {
+      //Exception expected
+      representationResource.get();
+      representationResource.update(template);
+    }
+  }
+
+  @Test
+  public void testUpdateVariation() throws Exception {
+
+    ResourceTemplateImpl template = new ResourceTemplateImpl();
+    String temp = "newTemplate";
+    final byte[] bytes = temp.getBytes();
+    template.setTemplate(bytes);
+    template.setTemplateType(TemplateType.RUBY.toString());
+
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+
+    Collection<WorkspaceVariationResource> variationResources = feedResource.getVariations().getVariationResources();
+    Assert.assertEquals(1, variationResources.size());
+    Iterator<WorkspaceVariationResource> VariationIterator = variationResources.iterator();
+    WorkspaceVariationResource variationResource = VariationIterator.next();
+    variationResource.update(template);
+    Assert.assertEquals("variation", variationResource.get().getName());
+    Assert.assertEquals(temp, new String(variationResource.get().getTemplate()));
+    Assert.assertEquals(TemplateType.RUBY.toString(), variationResource.get().getTemplateType());
+    resource.getWorkspaceFeeds();
+    WorkspaceVariationResource secondVariationResource = resource.getWorkspaceFeeds().iterator().next().
+        getVariations().getVariationResources().iterator().next();
+    template.setTemplateType(TemplateType.VELOCITY.name());
+    Thread.sleep(1100);
+    secondVariationResource.update(template);
+    Assert.assertEquals(TemplateType.VELOCITY.name(), new String(secondVariationResource.get().getTemplateType()));
+    try {
+      variationResource.update(template);
+      Assert.fail("Should not have been able to update!");
+    }
+    catch (UniformInterfaceException ex) {
+      //Exception expected
+      variationResource.get();
+      variationResource.update(template);
+    }
+  }
+
+  @Test
+  public void testDeleteRepresentation() throws Exception {
+    ResourceTemplateImpl template = new ResourceTemplateImpl();
+    String temp = "Template2";
+    template.setName("rep2");
+    final byte[] bytes = temp.getBytes();
+    template.setTemplate(bytes);
+    template.setTemplateType(TemplateType.JAVASCRIPT.toString());
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    final WorkspaceRepresentationsResource representationsResource = feedResource.getRepresentations();
+
+    Collection<WorkspaceRepresentationResource> representationResources = representationsResource.
+        getRepresentationsResources();
+    Assert.assertEquals(1, representationResources.size());
+    representationsResource.createRepresentations(template);
+    Iterator<WorkspaceRepresentationResource> representationIterator = representationResources.iterator();
+    WorkspaceRepresentationResource representationResource = representationIterator.next();
+
+    representationResource.delete(ClientResponse.Status.ACCEPTED);
+    Collection<WorkspaceRepresentationResource> secondRepresentationResources = resource.getWorkspaceFeeds().iterator().
+        next().getRepresentations().getRepresentationsResources();
+    Assert.assertEquals(1, secondRepresentationResources.size());
+  }
+
+  @Test
+  public void testDeleteVariation() throws Exception {
+    ResourceTemplateImpl template = new ResourceTemplateImpl();
+    String temp = "Template2";
+    template.setName("var2");
+    final byte[] bytes = temp.getBytes();
+    template.setTemplate(bytes);
+    template.setTemplateType(TemplateType.VELOCITY.name());
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    final WorkspaceVariationsResource VariationsResource = feedResource.getVariations();
+
+    Collection<WorkspaceVariationResource> VariationResources = VariationsResource.getVariationResources();
+    Assert.assertEquals(1, VariationResources.size());
+    VariationsResource.createVariation(template);
+    Iterator<WorkspaceVariationResource> VariationIterator = VariationResources.iterator();
+    WorkspaceVariationResource VariationResource = VariationIterator.next();
+
+    VariationResource.delete(ClientResponse.Status.ACCEPTED);
+    Collection<WorkspaceVariationResource> secondVariationResources = resource.getWorkspaceFeeds().iterator().
+        next().getVariations().getVariationResources();
+    Assert.assertEquals(1, secondVariationResources.size());
   }
 
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
