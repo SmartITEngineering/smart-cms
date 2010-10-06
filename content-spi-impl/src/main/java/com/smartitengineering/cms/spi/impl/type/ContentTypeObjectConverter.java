@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.spi.impl.type;
 
 import com.smartitengineering.cms.api.SmartContentAPI;
+import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
@@ -84,6 +85,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
   public final static byte[] FAMILY_FIELDS = Bytes.toBytes("fields");
   public final static byte[] FAMILY_REPRESENTATIONS = Bytes.toBytes("representations");
   public final static byte[] FAMILY_STATUSES = Bytes.toBytes("statuses");
+  public final static byte[] FAMILY_TYPE_REPRESENTATIONS = Bytes.toBytes("variants");
   public final static byte[] CELL_DISPLAY_NAME = Bytes.toBytes("displayName");
   public final static byte[] CELL_CREATION_DATE = Bytes.toBytes("creationDate");
   public final static byte[] CELL_LAST_MODIFIED_DATE = Bytes.toBytes("lastModifiedDate");
@@ -256,6 +258,20 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         if (logger.isDebugEnabled()) {
           logger.debug(new StringBuilder("Finished putting field with name ").append(entry.getKey()).toString());
         }
+      }
+      /*
+       * Variants of content type
+       */
+      Map<MediaType, String> reps = instance.getMutableContentType().getRepresentations();
+      for (MediaType type : reps.keySet()) {
+        String data = reps.get(type);
+        if (logger.isInfoEnabled()) {
+          logger.debug("Putting data as variant for " + type.toString());
+        }
+        if (logger.isDebugEnabled()) {
+          logger.debug("Putting " + data + " as variant for " + type.toString());
+        }
+        put.add(FAMILY_TYPE_REPRESENTATIONS, Bytes.toBytes(type.toString()), Bytes.toBytes(data));
       }
     }
     catch (Exception ex) {
@@ -566,6 +582,17 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         fieldDef.setSearchDefinition(searchDef);
         fieldDef.setVariations(fieldVariations.values());
         contentType.getMutableFieldDefs().add(fieldDef);
+      }
+      /*
+       * Variants of content type
+       */
+      Map<byte[], byte[]> variants = startRow.getFamilyMap(FAMILY_TYPE_REPRESENTATIONS);
+      if (variants != null && !variants.isEmpty()) {
+        final Map<MediaType, String> variantMap = new HashMap<MediaType, String>(variants.size());
+        for (byte[] mediaType : variants.keySet()) {
+          variantMap.put(MediaType.fromString(Bytes.toString(mediaType)), Bytes.toString(variants.get(mediaType)));
+        }
+        contentType.setRepresentations(variantMap);
       }
       return persistentContentType;
     }

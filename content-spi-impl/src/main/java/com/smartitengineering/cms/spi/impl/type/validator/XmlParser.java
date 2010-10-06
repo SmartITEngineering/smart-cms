@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.spi.impl.type.validator;
 
 import com.smartitengineering.cms.api.SmartContentAPI;
+import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
@@ -41,6 +42,7 @@ import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
+import com.smartitengineering.cms.spi.type.PersistableContentType;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,10 +50,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import nu.xom.Attribute;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Elements;
+import nu.xom.Node;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +92,7 @@ public class XmlParser implements XmlConstants {
       Element rootElement = document.getRootElement();
       Elements childRootElements = rootElement.getChildElements();
       for (int j = 0; j < childRootElements.size(); j++) {
-        MutableContentType mutableContent = SmartContentSPI.getInstance().getPersistableDomainFactory().
+        PersistableContentType mutableContent = SmartContentSPI.getInstance().getPersistableDomainFactory().
             createPersistableContentType();
         final Element contentTypeElement = childRootElements.get(j);
         Elements childElements = contentTypeElement.getChildElements();
@@ -118,12 +122,14 @@ public class XmlParser implements XmlConstants {
           mutableContent.getMutableRepresentationDefs().addAll(representationDefs);
         }
         mutableContent.getMutableStatuses().addAll(statuses);
+        mutableContent.setRepresentations(Collections.singletonMap(MediaType.APPLICATION_XML, createRootNodeAndAddChild(
+            contentTypeElement.copy()).toXML()));
         contentTypes.add(mutableContent);
         fieldDefs.clear();
       }
     }
     catch (Exception e) {
-      e.printStackTrace();
+      logger.warn(e.getMessage(), e);
     }
     return contentTypes;
   }
@@ -456,5 +462,18 @@ public class XmlParser implements XmlConstants {
     }
     return value;
   }
+
   /************************end of confsion **********************/
+  protected Element createRootNodeAndAddChild(Node childNode) {
+    Element root = new Element(XmlConstants.CONTENT_TYPES, XmlConstants.NAMESPACE);
+    Attribute attr = new Attribute("xsi:schemaLocation", XmlConstants.XSI_NAMESPACE, new StringBuilder(
+        XmlConstants.XSI_NAMESPACE).append(' ').append(
+        SmartContentSPI.getInstance().getSchemaLocationForContentTypeXml()).toString());
+    root.addAttribute(attr);
+    root.appendChild(childNode);
+    if (logger.isDebugEnabled()) {
+      logger.debug(root.toXML());
+    }
+    return root;
+  }
 }
