@@ -27,6 +27,9 @@ import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
 import com.smartitengineering.cms.client.api.WorkspaceRepresentationResource;
 import com.smartitengineering.cms.client.api.WorkspaceRepresentationsResource;
+import com.smartitengineering.cms.client.api.WorkspaceVariationResource;
+import com.smartitengineering.cms.client.api.WorkspaceVariationResource;
+import com.smartitengineering.cms.client.api.WorkspaceVariationsResource;
 import com.smartitengineering.cms.ws.common.domains.ResourceTemplateImpl;
 import com.smartitengineering.cms.ws.common.domains.Workspace;
 import com.smartitengineering.cms.ws.common.domains.WorkspaceId;
@@ -53,7 +56,6 @@ import org.apache.abdera.model.Feed;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -368,6 +370,32 @@ public class AppTest {
     Assert.assertEquals(workspaceId.getGlobalNamespace(), representationResource.get().getWorkspaceId().
         getGlobalNamespace());
     Assert.assertEquals(workspaceId.getName(), representationResource.get().getWorkspaceId().getName());
+  }
+
+  @Test
+  public void testCreateVariation() throws Exception {
+    WorkspaceId workspaceId = new WorkspaceIdImpl("atest2", "additional");
+
+    ResourceTemplateImpl template = new ResourceTemplateImpl();
+    String temp = "variationTemplate";
+    template.setName("variation");
+    final byte[] bytes = temp.getBytes();
+    template.setTemplate(bytes);
+    template.setTemplateType(TemplateType.VELOCITY.toString());
+    template.setWorkspaceId(workspaceId);
+
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    WorkspaceVariationsResource variationsResource = feedResource.getVariations();
+    WorkspaceVariationResource variationResource = variationsResource.createVariation(template);
+    Assert.assertEquals("variation", variationResource.get().getName());
+    Assert.assertEquals(temp, new String(variationResource.get().getTemplate()));
+    Assert.assertEquals(TemplateType.VELOCITY.toString(), variationResource.get().getTemplateType());
+    Assert.assertEquals(workspaceId.getGlobalNamespace(), variationResource.get().getWorkspaceId().
+        getGlobalNamespace());
+    Assert.assertEquals(workspaceId.getName(), variationResource.get().getWorkspaceId().getName());
   }
 
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
