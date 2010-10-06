@@ -29,7 +29,7 @@ public interface WorkspaceFeedResource extends Resource<Feed> {
 
   WorkspaceFriendsResource getFriends();
 
-//  WorkspaceRepresentationsResource getRepresentations();
-  
-//  WorkspaceVariationsResource getVariations();
+  WorkspaceRepresentationsResource getRepresentations();
+
+  WorkspaceVariationsResource getVariations();
 }
