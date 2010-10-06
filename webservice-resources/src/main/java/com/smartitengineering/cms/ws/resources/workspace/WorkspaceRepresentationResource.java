@@ -99,8 +99,7 @@ public class WorkspaceRepresentationResource extends AbstractResource {
       if (created != null) {
         UriBuilder uriBuilder = getAbsoluteURIBuilder().path(WorkspaceResource.class).path(
             WorkspaceResource.PATH_REPRESENTATIONS).path("name").path(repName);
-        builder = Response.created(uriBuilder.build(template.getWorkspaceId().getGlobalNamespace(), template.
-            getWorkspaceId().getName()));
+        builder = Response.created(uriBuilder.build(id.getGlobalNamespace(), id.getName()));
       }
       else {
         builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
