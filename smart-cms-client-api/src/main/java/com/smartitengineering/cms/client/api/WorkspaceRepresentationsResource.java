@@ -19,16 +19,19 @@
 package com.smartitengineering.cms.client.api;
 
 import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
+import com.smartitengineering.util.rest.client.PaginatedResource;
 import com.smartitengineering.util.rest.client.WritableResource;
+import java.util.Collection;
 import org.apache.abdera.model.Feed;
 
 /**
  *
  * @author kaisar
  */
-public interface WorkspaceRepresentationsResource extends WritableResource<Feed> {
+public interface WorkspaceRepresentationsResource extends WritableResource<Feed>,
+                                                          PaginatedResource<WorkspaceRepresentationsResource> {
 
-  public WorkspaceRepresentationResource getRepresentationsResources();
+  public Collection<WorkspaceRepresentationResource> getRepresentationsResources();
 
-  public void createRepresentations(ResourceTemplate resourceTemplate);
+  public WorkspaceRepresentationResource createRepresentations(ResourceTemplate resourceTemplate);
 }

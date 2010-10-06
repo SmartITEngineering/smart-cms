@@ -19,16 +19,19 @@
 package com.smartitengineering.cms.client.api;
 
 import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
+import com.smartitengineering.util.rest.client.PaginatedResource;
 import com.smartitengineering.util.rest.client.WritableResource;
+import java.util.Collection;
 import org.apache.abdera.model.Feed;
 
 /**
  *
  * @author kaisar
  */
-public interface WorkspaceVariationsResource extends WritableResource<Feed> {
+public interface WorkspaceVariationsResource extends WritableResource<Feed>,
+                                                     PaginatedResource<WorkspaceVariationsResource> {
 
-  public WorkspaceVariationResource getVariationResources();
+  public Collection<WorkspaceVariationResource> getVariationResources();
 
-  public void createVariation(ResourceTemplate resourceTemplate);
+  public WorkspaceVariationResource createVariation(ResourceTemplate resourceTemplate);
 }

@@ -18,20 +18,14 @@
  */
 package com.smartitengineering.cms.client.api;
 
+import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
 import com.smartitengineering.util.rest.client.WritableResource;
-import java.net.URI;
-import java.util.Collection;
-import org.apache.abdera.model.Feed;
 
 /**
  *
  * @author kaisar
  */
-public interface WorkspaceVariationResource extends WritableResource<Collection<URI>> {
+public interface WorkspaceVariationResource extends WritableResource<ResourceTemplate> {
 
-  public Feed getVariation(Collection<String> names);
-
-//  public void createVariation();
-
-  public void deleteVariation(URI uri);
+  void update(ResourceTemplate template);
 }
