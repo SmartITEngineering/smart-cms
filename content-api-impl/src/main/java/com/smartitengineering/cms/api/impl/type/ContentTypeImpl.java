@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
+import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
@@ -30,6 +31,7 @@ import com.smartitengineering.cms.spi.type.PersistableContentType;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -50,6 +52,7 @@ public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentTyp
   private Date creationDate;
   private Date lastModifiedDate;
   private boolean fromPersistentStorage;
+  private final Map<MediaType, String> representations = new HashMap<MediaType, String>();
 
   @Override
   public void setContentTypeID(ContentTypeId contentTypeID) throws IllegalArgumentException {
@@ -186,7 +189,7 @@ public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentTyp
     }
     final ContentType other = (ContentType) obj;
     if (this.contentTypeId != other.getContentTypeID() && (this.contentTypeId == null || !this.contentTypeId.equals(other.
-        getContentTypeID()))) {
+                                                           getContentTypeID()))) {
       return false;
     }
     return true;
@@ -197,5 +200,21 @@ public class ContentTypeImpl extends AbstractPersistableDomain<MutableContentTyp
     int hash = 7;
     hash = 61 * hash + (this.contentTypeId != null ? this.contentTypeId.hashCode() : 0);
     return hash;
+  }
+
+  @Override
+  public void setRepresentations(Map<MediaType, String> reps) {
+    representations.clear();
+    if (reps == null || reps.isEmpty()) {
+      return;
+    }
+    else {
+      representations.putAll(reps);
+    }
+  }
+
+  @Override
+  public Map<MediaType, String> getRepresentations() {
+    return Collections.unmodifiableMap(representations);
   }
 }

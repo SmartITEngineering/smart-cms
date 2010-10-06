@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import com.smartitengineering.cms.api.common.MediaType;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -60,4 +61,6 @@ public interface ContentType {
   public Date getCreationDate();
 
   public Date getLastModifiedDate();
+
+  public Map<MediaType, String> getRepresentations();
 }

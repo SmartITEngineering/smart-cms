@@ -18,8 +18,10 @@
  */
 package com.smartitengineering.cms.spi.type;
 
+import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import java.util.Date;
+import java.util.Map;
 
 /**
  *
@@ -34,4 +36,6 @@ public interface PersistableContentType extends MutableContentType {
   public void setCreationDate(Date creationDate);
 
   public void setLastModifiedDate(Date lastModifiedDate);
+
+  public void setRepresentations(Map<MediaType, String> reps);
 }
