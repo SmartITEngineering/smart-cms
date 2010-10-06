@@ -28,8 +28,4 @@ import org.apache.abdera.model.Feed;
 public interface WorkspaceFeedResource extends Resource<Feed> {
 
   WorkspaceFriendsResource getFriends();
-
-//  WorkspaceRepresentationsResource getRepresentations();
-  
-//  WorkspaceVariationsResource getVariations();
 }
