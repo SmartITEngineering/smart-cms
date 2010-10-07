@@ -117,7 +117,8 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
   public final static byte[] COLON = Bytes.toBytes(":");
   public static final String SPCL_FIELD_DATA_TYPE_PATTERN = ":(" + FieldValueType.COLLECTION.name() + "|" + FieldValueType.CONTENT.
       name() + "|" + FieldValueType.OTHER.name() + "|" + FieldValueType.STRING.name() + "):(.+)";
-  public static final String COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX = ":COLLECTION:" + CELL_FIELD_COLLECTION_ITEM;
+  public static final String COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX = ":COLLECTION:" + Bytes.toString(
+      CELL_FIELD_COLLECTION_ITEM);
 
   @Override
   protected String[] getTablesToAttainLock() {
@@ -310,8 +311,11 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
       case STRING:
         logger.debug("Working with STRING Special data type");
         StringDataType stringDataType = (StringDataType) valueDef;
-        put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_STRING_ENCODING),
-                Bytes.toBytes(stringDataType.getEncoding()));
+        final String encoding = stringDataType.getEncoding();
+        if (StringUtils.isNotBlank(encoding)) {
+          put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_STRING_ENCODING),
+                  Bytes.toBytes(encoding));
+        }
       case OTHER:
         logger.debug("Working with OTHER Special data type");
         OtherDataType otherDataType = (OtherDataType) valueDef;
@@ -564,7 +568,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
               else {
                 logger.debug("Its a special data type cell!");
                 final String specialFieldPatternPrefix = new StringBuilder(fieldName).append(':').append(
-                    CELL_FIELD_VAL_TYPE).toString();
+                    Bytes.toString(CELL_FIELD_VAL_TYPE)).toString();
                 mutableDataType = fillSpecialFields(specialFieldPatternPrefix, key, mutableDataType, value);
               }
             }
@@ -673,12 +677,14 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
           MutableCollectionDataType collectionDataType =
                                     (MutableCollectionDataType) mutableDataType;
           if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_MAX_SIZE)) {
-            logger.debug("Parsing collection's max size");
-            collectionDataType.setMaxSize(Bytes.toInt(value));
+            final int toInt = Bytes.toInt(value);
+            logger.debug("Parsing collection's max size " + toInt);
+            collectionDataType.setMaxSize(toInt);
           }
           else if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_MIN_SIZE)) {
-            logger.debug("Parsing collection's min size");
-            collectionDataType.setMinSize(Bytes.toInt(value));
+            final int toInt = Bytes.toInt(value);
+            logger.debug("Parsing collection's min size " + toInt);
+            collectionDataType.setMinSize(toInt);
           }
           else if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_ITEM_TYPE)) {
             logger.debug("Parsing collection's item data type");
