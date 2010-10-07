@@ -36,5 +36,5 @@ public interface MutableCollectionDataType
 
   public void setMaxSize(int maxSize);
 
-  public void setMinSeize(int minSize);
+  public void setMinSize(int minSize);
 }

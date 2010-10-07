@@ -44,7 +44,7 @@ public class CollectionDataTypeImpl implements MutableCollectionDataType {
   }
 
   @Override
-  public void setMinSeize(int minSize) {
+  public void setMinSize(int minSize) {
     this.minSize = minSize;
   }
 

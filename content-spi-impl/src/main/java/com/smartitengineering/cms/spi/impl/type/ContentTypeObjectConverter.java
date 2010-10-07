@@ -678,7 +678,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
           }
           else if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_MIN_SIZE)) {
             logger.debug("Parsing collection's min size");
-            collectionDataType.setMinSeize(Bytes.toInt(value));
+            collectionDataType.setMinSize(Bytes.toInt(value));
           }
           else if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_ITEM_TYPE)) {
             logger.debug("Parsing collection's item data type");

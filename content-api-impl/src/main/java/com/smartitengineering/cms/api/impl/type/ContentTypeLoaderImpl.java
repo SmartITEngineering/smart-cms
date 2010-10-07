@@ -168,7 +168,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       CollectionDataTypeImpl collectionDataTypeImpl = new CollectionDataTypeImpl();
       collectionDataTypeImpl.setItemDataType(collectionDataType.getItemDataType());
       collectionDataTypeImpl.setMaxSize(collectionDataType.getMaxSize());
-      collectionDataTypeImpl.setMinSeize(collectionDataType.getMinSize());
+      collectionDataTypeImpl.setMinSize(collectionDataType.getMinSize());
       return collectionDataTypeImpl;
     }
     else {
