@@ -21,6 +21,7 @@ package com.smartitengineering.cms.ws.resources.workspace;
 import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
@@ -28,6 +29,7 @@ import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.cms.ws.resources.domains.Factory;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
+import java.util.Arrays;
 import java.util.Date;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -45,6 +47,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -55,6 +59,7 @@ public class WorkspaceRepresentationResource extends AbstractResource {
   private final String repName;
   private final RepresentationTemplate template;
   private final Workspace workspace;
+  private static final Logger LOGGER = LoggerFactory.getLogger(WorkspaceRepresentationResource.class);
 
   public WorkspaceRepresentationResource(String repName, Workspace workspace, ServerResourceInjectables injectables) {
     super(injectables);
@@ -70,7 +75,7 @@ public class WorkspaceRepresentationResource extends AbstractResource {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
     Date lastModifiedDate = template.getLastModifiedDate();
-    EntityTag tag = new EntityTag(DigestUtils.md5Hex(Utils.getFormattedDate(lastModifiedDate)));
+    EntityTag tag = new EntityTag(getETag(template));
     ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(lastModifiedDate, tag);
     if (builder == null) {
       builder = Response.ok();
@@ -84,6 +89,17 @@ public class WorkspaceRepresentationResource extends AbstractResource {
     return builder.build();
   }
 
+  protected static String getETag(ResourceTemplate template) {
+    final String toString = new StringBuilder(Utils.getFormattedDate(template.getLastModifiedDate())).append(':').append(Arrays.
+        toString(template.getTemplate())).append(':').append(template.getTemplateType().name()).toString();
+    final String etag = DigestUtils.md5Hex(toString);
+        if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("String to use for digest " + toString + " and ETag calculated is " + etag);
+    }
+
+    return etag;
+  }
+
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
   public Response put(com.smartitengineering.cms.ws.common.domains.ResourceTemplate template, @HeaderParam(
@@ -91,7 +107,7 @@ public class WorkspaceRepresentationResource extends AbstractResource {
     ResponseBuilder builder;
     WorkspaceId id = workspace.getId();
     if (this.template == null) {
-      
+
       final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
       RepresentationTemplate created = workspaceApi.putRepresentationTemplate(workspaceApi.createWorkspaceId(id.
           getGlobalNamespace(), id.getName()), repName, TemplateType.valueOf(template.getTemplateType()), template.
@@ -110,7 +126,7 @@ public class WorkspaceRepresentationResource extends AbstractResource {
         return Response.status(Status.PRECONDITION_FAILED).build();
       }
       Date lastModifiedDate = this.template.getLastModifiedDate();
-      EntityTag entityTag = new EntityTag(DigestUtils.md5Hex(Utils.getFormattedDate(lastModifiedDate)));
+      EntityTag entityTag = new EntityTag(getETag(this.template));
       builder = getContext().getRequest().evaluatePreconditions(lastModifiedDate, entityTag);
       if (builder == null) {
         final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
@@ -137,7 +153,7 @@ public class WorkspaceRepresentationResource extends AbstractResource {
       return Response.status(Status.PRECONDITION_FAILED).build();
     }
     Date lastModifiedDate = template.getLastModifiedDate();
-    EntityTag entityTag = new EntityTag(DigestUtils.md5Hex(Utils.getFormattedDate(lastModifiedDate)));
+    EntityTag entityTag = new EntityTag(getETag(template));
     ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(lastModifiedDate, entityTag);
     if (builder == null) {
       final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();

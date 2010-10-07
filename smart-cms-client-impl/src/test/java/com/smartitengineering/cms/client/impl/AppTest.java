@@ -389,7 +389,7 @@ public class AppTest {
 
   @Test
   public void testUpdateRepresentation() throws Exception {
-
+    LOGGER.info(":::::::::::::: UPDATE REPRESENTATION RESOURCE TEST ::::::::::::::");
     ResourceTemplateImpl template = new ResourceTemplateImpl();
     String temp = "newTemplate";
     final byte[] bytes = temp.getBytes();
@@ -406,6 +406,7 @@ public class AppTest {
     Assert.assertEquals(1, representationResources.size());
     Iterator<WorkspaceRepresentationResource> representationIterator = representationResources.iterator();
     WorkspaceRepresentationResource representationResource = representationIterator.next();
+
     representationResource.update(template);
     Assert.assertEquals("rep", representationResource.get().getName());
     Assert.assertEquals(temp, new String(representationResource.get().getTemplate()));
@@ -414,9 +415,8 @@ public class AppTest {
     WorkspaceRepresentationResource secondRepresentationResource = resource.getWorkspaceFeeds().iterator().next().
         getRepresentations().getRepresentationsResources().iterator().next();
     template.setTemplateType(TemplateType.VELOCITY.name());
-    Thread.sleep(1100);
     secondRepresentationResource.update(template);
-    Assert.assertEquals(TemplateType.VELOCITY.name(), new String(secondRepresentationResource.get().getTemplateType()));
+    Assert.assertEquals(TemplateType.VELOCITY.name(), secondRepresentationResource.get().getTemplateType());
     try {
       representationResource.update(template);
       Assert.fail("Should not have been able to update!");
@@ -430,7 +430,7 @@ public class AppTest {
 
   @Test
   public void testUpdateVariation() throws Exception {
-
+    LOGGER.info(":::::::::::::: UPDATE VARIATION RESOURCE TEST ::::::::::::::");
     ResourceTemplateImpl template = new ResourceTemplateImpl();
     String temp = "newTemplate";
     final byte[] bytes = temp.getBytes();
@@ -454,9 +454,8 @@ public class AppTest {
     WorkspaceVariationResource secondVariationResource = resource.getWorkspaceFeeds().iterator().next().
         getVariations().getVariationResources().iterator().next();
     template.setTemplateType(TemplateType.VELOCITY.name());
-    Thread.sleep(1100);
     secondVariationResource.update(template);
-    Assert.assertEquals(TemplateType.VELOCITY.name(), new String(secondVariationResource.get().getTemplateType()));
+    Assert.assertEquals(TemplateType.VELOCITY.name(), secondVariationResource.get().getTemplateType());
     try {
       variationResource.update(template);
       Assert.fail("Should not have been able to update!");
@@ -470,6 +469,7 @@ public class AppTest {
 
   @Test
   public void testDeleteRepresentation() throws Exception {
+    LOGGER.info(":::::::::::::: DELETE REPRESENTATION RESOURCE TEST ::::::::::::::");
     ResourceTemplateImpl template = new ResourceTemplateImpl();
     String temp = "Template2";
     template.setName("rep2");
@@ -497,9 +497,10 @@ public class AppTest {
 
   @Test
   public void testDeleteVariation() throws Exception {
+    LOGGER.info(":::::::::::::: DELETE VARIATION RESOURCE TEST ::::::::::::::");
     ResourceTemplateImpl template = new ResourceTemplateImpl();
     String temp = "Template2";
-    template.setName("var2");
+    template.setName("aaavar2");
     final byte[] bytes = temp.getBytes();
     template.setTemplate(bytes);
     template.setTemplateType(TemplateType.VELOCITY.name());
@@ -507,15 +508,17 @@ public class AppTest {
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
-    final WorkspaceVariationsResource VariationsResource = feedResource.getVariations();
+    final WorkspaceVariationsResource variationsResource = feedResource.getVariations();
 
-    Collection<WorkspaceVariationResource> VariationResources = VariationsResource.getVariationResources();
-    Assert.assertEquals(1, VariationResources.size());
-    VariationsResource.createVariation(template);
-    Iterator<WorkspaceVariationResource> VariationIterator = VariationResources.iterator();
-    WorkspaceVariationResource VariationResource = VariationIterator.next();
+    Collection<WorkspaceVariationResource> variationResources = variationsResource.getVariationResources();
+    Assert.assertEquals(1, variationResources.size());
+    variationsResource.createVariation(template);
+    variationsResource.get();
+    variationResources = variationsResource.getVariationResources();
+    Iterator<WorkspaceVariationResource> variationIterator = variationResources.iterator();
+    WorkspaceVariationResource variationResource = variationIterator.next();
 
-    VariationResource.delete(ClientResponse.Status.ACCEPTED);
+    variationResource.delete(ClientResponse.Status.ACCEPTED);
     Collection<WorkspaceVariationResource> secondVariationResources = resource.getWorkspaceFeeds().iterator().
         next().getVariations().getVariationResources();
     Assert.assertEquals(1, secondVariationResources.size());
