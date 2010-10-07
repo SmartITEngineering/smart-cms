@@ -30,9 +30,11 @@ import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
+import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
@@ -209,6 +211,8 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals(4, fieldDefs.size());
     FieldDef fieldDef = fieldIterator.next();
 
+    Assert.assertEquals(2, fieldDef.getVariations().size());
+    Assert.assertEquals(FieldValueType.CONTENT.name(), fieldDef.getValueDef().getType().name());
 
     Assert.assertEquals("fieldA", fieldDef.getName());
     Assert.assertEquals(2, fieldDef.getVariations().size());
@@ -270,7 +274,7 @@ public class XMLContentTypeDefnitionParserTest {
       logger.debug(new StringBuffer("First ContentType's 2nd field's validition Require value is ").append(fieldDef.
           isRequired()).toString());
     }
-
+    Assert.assertEquals(FieldValueType.COLLECTION.name(), fieldDef.getValueDef().getType().name());
     Assert.assertEquals("fieldB", fieldDef.getName());
     Assert.assertEquals(ValidatorType.JAVASCRIPT, fieldDef.getCustomValidator().geType());
     Assert.assertEquals(Type.INTERNAL, fieldDef.getCustomValidator().getUri().getType());
@@ -289,7 +293,7 @@ public class XMLContentTypeDefnitionParserTest {
       logger.debug(new StringBuffer("First ContentType's 3rdd field's validition ResourceUri's value is ").append(
           fieldDef.getCustomValidator().getUri().getValue()).toString());
     }
-
+    Assert.assertEquals(FieldValueType.CONTENT.name(), fieldDef.getValueDef().getType().name());
     Assert.assertEquals("fieldC", fieldDef.getName());
     Assert.assertEquals(ValidatorType.GROOVY, fieldDef.getCustomValidator().geType());
     Assert.assertEquals(Type.EXTERNAL, fieldDef.getCustomValidator().getUri().getType());
