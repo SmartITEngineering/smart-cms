@@ -31,6 +31,7 @@ import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
 import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.type.FieldDef;
@@ -211,8 +212,17 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals(4, fieldDefs.size());
     FieldDef fieldDef = fieldIterator.next();
 
+
+
     Assert.assertEquals(2, fieldDef.getVariations().size());
     Assert.assertEquals(FieldValueType.CONTENT.name(), fieldDef.getValueDef().getType().name());
+
+    ContentDataType contentDataType = (ContentDataType) fieldDef.getValueDef();
+    Assert.assertNull(contentDataType.getBidirectionalFieldName());
+    Assert.assertEquals("XYZ", contentDataType.getTypeDef().getName());
+    Assert.assertEquals("asdfasdf1", contentDataType.getTypeDef().getNamespace());
+    Assert.assertEquals("testWS", contentDataType.getTypeDef().getWorkspace().getGlobalNamespace());
+    Assert.assertEquals("test", contentDataType.getTypeDef().getWorkspace().getName());
 
     Assert.assertEquals("fieldA", fieldDef.getName());
     Assert.assertEquals(2, fieldDef.getVariations().size());
@@ -275,6 +285,12 @@ public class XMLContentTypeDefnitionParserTest {
           isRequired()).toString());
     }
     Assert.assertEquals(FieldValueType.COLLECTION.name(), fieldDef.getValueDef().getType().name());
+
+    CollectionDataType collectionDataType = (CollectionDataType) fieldDef.getValueDef();
+    Assert.assertEquals(10, collectionDataType.getMaxSize());
+    Assert.assertEquals(0, collectionDataType.getMinSize());
+    Assert.assertEquals(FieldValueType.INTEGER.name(), collectionDataType.getItemDataType().getType().name());
+
     Assert.assertEquals("fieldB", fieldDef.getName());
     Assert.assertEquals(ValidatorType.JAVASCRIPT, fieldDef.getCustomValidator().geType());
     Assert.assertEquals(Type.INTERNAL, fieldDef.getCustomValidator().getUri().getType());
@@ -293,7 +309,21 @@ public class XMLContentTypeDefnitionParserTest {
       logger.debug(new StringBuffer("First ContentType's 3rdd field's validition ResourceUri's value is ").append(
           fieldDef.getCustomValidator().getUri().getValue()).toString());
     }
-    Assert.assertEquals(FieldValueType.CONTENT.name(), fieldDef.getValueDef().getType().name());
+    Assert.assertEquals(FieldValueType.COLLECTION.name(), fieldDef.getValueDef().getType().name());
+
+    CollectionDataType collectionDataType1 = (CollectionDataType) fieldDef.getValueDef();
+    Assert.assertEquals(0, collectionDataType1.getMaxSize());
+    Assert.assertEquals(2, collectionDataType1.getMinSize());
+
+    Assert.assertEquals(FieldValueType.CONTENT.name(), collectionDataType1.getItemDataType().getType().name());
+    ContentDataType contentDataType1 = (ContentDataType) collectionDataType1.getItemDataType();
+
+    Assert.assertNull(contentDataType1.getBidirectionalFieldName());
+    Assert.assertEquals("RST", contentDataType1.getTypeDef().getName());
+    Assert.assertEquals("jpeg", contentDataType1.getTypeDef().getNamespace());
+    Assert.assertEquals("testWS", contentDataType1.getTypeDef().getWorkspace().getGlobalNamespace());
+    Assert.assertEquals("test", contentDataType1.getTypeDef().getWorkspace().getName());
+
     Assert.assertEquals("fieldC", fieldDef.getName());
     Assert.assertEquals(ValidatorType.GROOVY, fieldDef.getCustomValidator().geType());
     Assert.assertEquals(Type.EXTERNAL, fieldDef.getCustomValidator().getUri().getType());
