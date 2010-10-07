@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.ws.resources.type;
 
 import com.smartitengineering.cms.api.SmartContentAPI;
+import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.ContentTypeLoader;
@@ -123,6 +124,10 @@ public class ContentTypesResource extends AbstractResource {
         type.put();
       }
       return Response.status(Response.Status.ACCEPTED).build();
+    }
+    catch (InvalidReferenceException ex) {
+      logger.warn(ex.getMessage(), ex);
+      return Response.status(Response.Status.BAD_REQUEST).build();
     }
     catch (Exception ex) {
       logger.error(ex.getMessage(), ex);

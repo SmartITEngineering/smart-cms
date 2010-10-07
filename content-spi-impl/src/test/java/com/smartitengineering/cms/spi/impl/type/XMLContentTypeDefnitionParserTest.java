@@ -386,7 +386,7 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals(def1.getTemplateType(), defFromXml1.getTemplateType());
   }
 
-  protected Collection<MutableContentType> init() throws NullPointerException, IOException {
+  protected Collection<MutableContentType> init() throws Exception {
     InputStream inputStream = getClass().getClassLoader().getResourceAsStream("content-type-def-1.xml");
     Assert.assertNotNull(inputStream);
     Collection<MutableContentType> collection;

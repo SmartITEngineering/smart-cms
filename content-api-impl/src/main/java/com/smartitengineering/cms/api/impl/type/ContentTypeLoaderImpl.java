@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
@@ -80,7 +81,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   @Override
   public Collection<MutableContentType> parseContentTypes(WorkspaceId workspaceId,
                                                           InputStream contentTypeDefinitionStream, MediaType mediaType)
-      throws NullPointerException, IOException {
+      throws NullPointerException, InvalidReferenceException, IOException {
     TypeValidator validator = SmartContentSPI.getInstance().getTypeValidators().getValidators().get(mediaType);
     ContentTypeDefinitionParser parser = SmartContentSPI.getInstance().getContentTypeDefinitionParsers().getParsers().
         get(mediaType);

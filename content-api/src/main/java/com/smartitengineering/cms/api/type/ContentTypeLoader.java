@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.type;
 
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -53,8 +54,7 @@ public interface ContentTypeLoader {
    */
   public Collection<MutableContentType> parseContentTypes(WorkspaceId workspaceId,
                                                           InputStream contentTypeDefinitionStream, MediaType mediaType)
-      throws NullPointerException,
-             IOException;
+      throws NullPointerException, InvalidReferenceException, IOException;
 
   public MutableContentType getMutableContentType(ContentType contentType);
 
