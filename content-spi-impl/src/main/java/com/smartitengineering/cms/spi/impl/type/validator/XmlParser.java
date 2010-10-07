@@ -21,16 +21,22 @@ package com.smartitengineering.cms.spi.impl.type.validator;
 import com.smartitengineering.cms.api.SmartContentAPI;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.type.MutableCollectionDataType;
+import com.smartitengineering.cms.api.type.MutableContentDataType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
+import com.smartitengineering.cms.api.type.MutableOtherDataType;
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
 import com.smartitengineering.cms.api.type.MutableResourceUri;
 import com.smartitengineering.cms.api.type.MutableSearchDef;
+import com.smartitengineering.cms.api.type.MutableStringDataType;
 import com.smartitengineering.cms.api.type.MutableValidatorDef;
 import com.smartitengineering.cms.api.type.MutableVariationDef;
 import com.smartitengineering.cms.api.type.RepresentationDef;
@@ -46,9 +52,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import nu.xom.Attribute;
 import nu.xom.Builder;
 import nu.xom.Document;
@@ -56,6 +60,7 @@ import nu.xom.Element;
 import nu.xom.Elements;
 import nu.xom.Node;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,6 +140,11 @@ public class XmlParser implements XmlConstants {
 
   protected String parseMandatoryStringElement(Element rootElement, final String elementName) throws
       IllegalStateException {
+    Element elem = getChildNode(rootElement, elementName);
+    return elem.getValue();
+  }
+
+  protected Element getChildNode(Element rootElement, final String elementName) throws IllegalStateException {
     Elements elems = rootElement.getChildElements(elementName, NAMESPACE);
     if (elems.size() < 1) {
       throw new IllegalStateException("No " + elementName);
@@ -143,7 +153,7 @@ public class XmlParser implements XmlConstants {
       throw new IllegalStateException("More than one " + elementName);
     }
     Element elem = elems.get(0);
-    return elem.getValue();
+    return elem;
   }
 
   protected String parseOptionalStringElement(Element rootElement, final String elementName) throws
@@ -245,7 +255,8 @@ public class XmlParser implements XmlConstants {
     }
     if (elems.size() > 0) {
       ContentTypeId contentTypeId = SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(workspaceId,
-          parseMandatoryStringElement(elems.get(0), TYPE_NS), parseMandatoryStringElement(elems.get(0), TYPE_NAME));
+                                                                                                             parseMandatoryStringElement(elems.
+          get(0), TYPE_NS), parseMandatoryStringElement(elems.get(0), TYPE_NAME));
       return contentTypeId;
     }
     else {
@@ -253,55 +264,67 @@ public class XmlParser implements XmlConstants {
     }
   }
 
-  protected Map<String, String> parseContent(Element rootElement) {
-    Map<String, String> content = new HashMap<String, String>();
+  protected ContentDataType parseContent(Element rootElement) {
+    MutableContentDataType type = SmartContentAPI.getInstance().getContentTypeLoader().createMutableContentDataType();
     for (int i = 0; i < rootElement.getChildElements().size(); i++) {
       if (StringUtils.equalsIgnoreCase(rootElement.getChildElements().get(i).getLocalName(), DEFINITION)) {
-        content.putAll(parseDefinition(rootElement.getChildElements().get(i)));
+        type.setTypeDef(parseContentTypeId(rootElement, DEFINITION, workspaceId));
       }
       if (StringUtils.equalsIgnoreCase(rootElement.getChildElements().get(i).getLocalName(), BIDIRECTIONAL)) {
-        content.put(BIDIRECTIONAL, parseOptionalStringElement(rootElement.getChildElements().get(i), BIDIRECTIONAL));
+        type.setBiBidirectionalFieldName(
+            parseOptionalStringElement(rootElement.getChildElements().get(i), BIDIRECTIONAL));
       }
     }
-    return content;
+    return type;
   }
 
-  protected Map<String, String> parseDefinition(Element rootElement) {
-    Map<String, String> definition = new HashMap<String, String>();
+  protected CollectionDataType parseCollection(Element rootElement) {
+    MutableCollectionDataType type = SmartContentAPI.getInstance().getContentTypeLoader().
+        createMutableCollectionDataType();
     for (int i = 0; i < rootElement.getChildElements().size(); i++) {
-      String key = rootElement.getChildElements().get(i).getLocalName();
-      String value = rootElement.getChildElements().get(i).getValue();
-      definition.put(key, value);
+      final Element element = rootElement.getChildElements().get(i);
+      if (StringUtils.equalsIgnoreCase(element.getLocalName(), SIMPLE_VALUE)) {
+        type.setItemDataType(parseSimpleValue(element));
+      }
+      else if (StringUtils.equalsIgnoreCase(element.getLocalName(), MIN_SIZE)) {
+        type.setMinSize(NumberUtils.toInt(parseOptionalStringElement(element, MIN_SIZE), -1));
+      }
+      else if (StringUtils.equalsIgnoreCase(element.getLocalName(), MAX_SIZE)) {
+        type.setMaxSize(NumberUtils.toInt(parseOptionalStringElement(element, MAX_SIZE), -1));
+      }
     }
-    return definition;
+    return type;
   }
 
-  protected Map<String, String> parseCollection(Element rootElement) {
-    Map<String, String> collection = new HashMap<String, String>();
-    for (int i = 0; i < rootElement.getChildElements().size(); i++) {
-      if (StringUtils.equalsIgnoreCase(rootElement.getChildElements().get(i).getLocalName(), SIMPLE_VALUE)) {
-        collection.putAll(parseSimpleValue(rootElement.getChildElements().get(i)));
+  protected DataType parseSimpleValue(Element rootElement) {
+    final Element element = (Element) rootElement.getChild(0);
+    final String localName = element.getLocalName();
+    if (StringUtils.equalsIgnoreCase(localName, CONTENT)) {
+      return parseContent(element);
+    }
+    else if (StringUtils.equalsIgnoreCase(localName, OTHER)) {
+      return parseOtherDataType(element);
+    }
+    else if (StringUtils.equalsIgnoreCase(localName, STRING)) {
+      return parseStringDataType(element);
+    }
+    else {
+      if (StringUtils.equalsIgnoreCase(localName, LONG)) {
+        return DataType.LONG;
+      }
+      else if (StringUtils.equalsIgnoreCase(localName, DOUBLE)) {
+        return DataType.DOUBLE;
+      }
+      else if (StringUtils.equalsIgnoreCase(localName, DATE_TIME)) {
+        return DataType.DATE_TIME;
+      }
+      else if (StringUtils.equalsIgnoreCase(localName, BOOLEAN)) {
+        return DataType.BOOLEAN;
       }
       else {
-        collection.put(rootElement.getChildElements().get(i).getLocalName(), rootElement.getChildElements().get(i).
-            getValue());
+        return DataType.INTEGER;
       }
     }
-    return collection;
-  }
-
-  protected Map<String, String> parseSimpleValue(Element rootElement) {
-    Map<String, String> simple_value = new HashMap<String, String>();
-    for (int i = 0; i < rootElement.getChildElements().size(); i++) {
-      if (StringUtils.equalsIgnoreCase(rootElement.getChildElements().get(i).getLocalName(), CONTENT)) {
-        simple_value.putAll(parseContent(rootElement.getChildElements().get(i)));
-      }
-      else {
-        simple_value.put(rootElement.getChildElements().get(i).getLocalName(), rootElement.getChildElements().get(i).
-            getValue());
-      }
-    }
-    return simple_value;
   }
 
   protected Collection<FieldDef> parseFieldDefs(Element rootElement) {
@@ -320,7 +343,7 @@ public class XmlParser implements XmlConstants {
     fieldDef.setName(parseMandatoryStringElement(rootElement, NAME));
     fieldDef.setRequired(Boolean.parseBoolean(parseOptionalStringElement(rootElement, REQUIRED)));
     fieldDef.setSearchDefinition(parseSearchDef(rootElement, SEARCH));
-    fieldDef.setValueDef(DataType.INTEGER);
+    fieldDef.setValueDef(parseValueDef(rootElement, VALUE));
     if (parseVariations(rootElement, VARIATIONS) != null) {
       fieldDef.setVariations(parseVariations(rootElement, VARIATIONS));
     }
@@ -440,25 +463,18 @@ public class XmlParser implements XmlConstants {
   }
 
   /********************************** CONFUSED ****************************************/
-  protected DataType parseValueDef(Element rootElement) {
-    return DataType.LONG;
+  protected DataType parseValueDef(Element rootElement, String elementName) {
+    return parseValue(getChildNode(rootElement, elementName));
   }
 
-  protected Map<String, String> parseValue(Element rootElement) {
-    Map<String, String> value = new HashMap<String, String>();
-    Elements elements;
-    elements = rootElement.getChildElements();
-    for (int i = 0; i < elements.size(); i++) {
-      if (StringUtils.equalsIgnoreCase(elements.get(i).getLocalName(), CONTENT)) {
-        value.putAll(parseContent(rootElement.getChildElements().get(i)));
-      }
-      else if (StringUtils.equalsIgnoreCase(elements.get(i).getLocalName(), COLLECTION)) {
-        value.putAll(parseCollection(rootElement.getChildElements().get(i)));
-      }
-      else {
-      }
+  protected DataType parseValue(Element valueElement) {
+    final Element element = (Element) valueElement.getChild(0);
+    if (StringUtils.equalsIgnoreCase(element.getLocalName(), COLLECTION)) {
+      return parseCollection(element);
     }
-    return value;
+    else {
+      return parseSimpleValue(element);
+    }
   }
 
   /************************end of confsion **********************/
@@ -473,5 +489,18 @@ public class XmlParser implements XmlConstants {
       logger.debug(root.toXML());
     }
     return root;
+  }
+
+  private DataType parseOtherDataType(Element element) {
+    MutableOtherDataType type = SmartContentAPI.getInstance().getContentTypeLoader().createMutableOtherDataType();
+    type.setMIMEType(parseMandatoryStringElement(element, MIME_TYPE));
+    return type;
+  }
+
+  private DataType parseStringDataType(Element element) {
+    MutableStringDataType type = SmartContentAPI.getInstance().getContentTypeLoader().createMutableStringDataType();
+    type.setMIMEType(parseMandatoryStringElement(element, MIME_TYPE));
+    type.setEncoding(parseOptionalStringElement(element, ENCODING));
+    return type;
   }
 }
