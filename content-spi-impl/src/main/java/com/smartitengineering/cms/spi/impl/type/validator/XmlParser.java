@@ -284,7 +284,8 @@ public class XmlParser implements XmlConstants {
     for (int i = 0; i < rootElement.getChildElements().size(); i++) {
       final Element element = rootElement.getChildElements().get(i);
       if (StringUtils.equalsIgnoreCase(element.getLocalName(), SIMPLE_VALUE)) {
-        type.setItemDataType(parseSimpleValue(element));
+        final Element simpleElement = (Element) element.getChild(1);
+        type.setItemDataType(parseSimpleValue(simpleElement));
       }
       else if (StringUtils.equalsIgnoreCase(element.getLocalName(), MIN_SIZE)) {
         type.setMinSize(NumberUtils.toInt(parseOptionalStringElement(element, MIN_SIZE), -1));
@@ -297,16 +298,18 @@ public class XmlParser implements XmlConstants {
   }
 
   protected DataType parseSimpleValue(Element rootElement) {
-    final Element element = (Element) rootElement.getChild(1);
-    final String localName = element.getLocalName();
+    final String localName = rootElement.getLocalName();
+    if (logger.isDebugEnabled()) {
+      logger.debug("Local name for simple value " + localName);
+    }
     if (StringUtils.equalsIgnoreCase(localName, CONTENT)) {
-      return parseContent(element);
+      return parseContent(rootElement);
     }
     else if (StringUtils.equalsIgnoreCase(localName, OTHER)) {
-      return parseOtherDataType(element);
+      return parseOtherDataType(rootElement);
     }
     else if (StringUtils.equalsIgnoreCase(localName, STRING)) {
-      return parseStringDataType(element);
+      return parseStringDataType(rootElement);
     }
     else {
       if (StringUtils.equalsIgnoreCase(localName, LONG)) {
@@ -464,11 +467,20 @@ public class XmlParser implements XmlConstants {
 
   /********************************** CONFUSED ****************************************/
   protected DataType parseValueDef(Element rootElement, String elementName) {
-    return parseValue(getChildNode(rootElement, elementName));
+    final Element childNode = getChildNode(rootElement, elementName);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Local name for root element " + rootElement.getLocalName());
+      logger.debug("Local name for child element " + childNode.getLocalName());
+    }
+    return parseValue(childNode);
   }
 
   protected DataType parseValue(Element valueElement) {
     final Element element = (Element) valueElement.getChild(1);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Local name for value element " + valueElement.getLocalName());
+      logger.debug("Local name for main element " + element.getLocalName());
+    }
     if (StringUtils.equalsIgnoreCase(element.getLocalName(), COLLECTION)) {
       return parseCollection(element);
     }

@@ -72,6 +72,7 @@
             <simple-value>
               <integer />
             </simple-value>
+            <maxSize>10</maxSize>
           </collection>
         </value>
         <required>true</required>
@@ -103,6 +104,30 @@
           <validatorType>groovy</validatorType>
           <uri>
             <external>http://some/uri</external>
+          </uri>
+        </validator>
+      </field>
+      <field>
+        <name>fieldD</name>
+        <value>
+          <collection>
+            <simple-value>
+              <content>
+                <definition>
+                  <typeNS>jpeg</typeNS>
+                  <typeName>RST</typeName>
+                </definition>
+              </content>
+            </simple-value>
+          </collection>
+        </value>
+        <required>true</required>
+        <validator>
+          <validatorType>javascript</validatorType>
+          <uri>
+            <internal>
+              <name>internalvar</name>
+            </internal>
           </uri>
         </validator>
       </field>

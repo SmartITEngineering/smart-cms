@@ -45,7 +45,7 @@ public interface XmlConstants {
   public String SIZE = "size";
   public String MIN_SIZE = "minSize";
   public String MAX_SIZE = "maxSize";
-  public String COLLECTION = "collecton";
+  public String COLLECTION = "collection";
   public String VALUE = "value";
   public String SIMPLE_VALUE = "simple-value";
   public String REQUIRED = "required";

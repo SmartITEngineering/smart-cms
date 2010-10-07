@@ -190,7 +190,7 @@ public class XMLContentTypeDefnitionParserTest {
     if (logger.isInfoEnabled()) {
       logger.debug(new StringBuffer("first Fileds size is ").append(contentType.getFieldDefs().size()).toString());
     }
-    Assert.assertEquals(3, contentType.getFieldDefs().size());
+    Assert.assertEquals(4, contentType.getFieldDefs().size());
     contentType = iterator.next();
 
     if (logger.isInfoEnabled()) {
@@ -206,7 +206,7 @@ public class XMLContentTypeDefnitionParserTest {
     Iterator<MutableContentType> iterator = collection.iterator();
     Collection<FieldDef> fieldDefs = iterator.next().getMutableFieldDefs();
     Iterator<FieldDef> fieldIterator = fieldDefs.iterator();
-    Assert.assertEquals(3, fieldDefs.size());
+    Assert.assertEquals(4, fieldDefs.size());
     FieldDef fieldDef = fieldIterator.next();
 
 
