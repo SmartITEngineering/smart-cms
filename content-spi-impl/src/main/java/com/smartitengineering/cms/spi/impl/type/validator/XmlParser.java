@@ -297,7 +297,7 @@ public class XmlParser implements XmlConstants {
   }
 
   protected DataType parseSimpleValue(Element rootElement) {
-    final Element element = (Element) rootElement.getChild(0);
+    final Element element = (Element) rootElement.getChild(1);
     final String localName = element.getLocalName();
     if (StringUtils.equalsIgnoreCase(localName, CONTENT)) {
       return parseContent(element);
@@ -468,7 +468,7 @@ public class XmlParser implements XmlConstants {
   }
 
   protected DataType parseValue(Element valueElement) {
-    final Element element = (Element) valueElement.getChild(0);
+    final Element element = (Element) valueElement.getChild(1);
     if (StringUtils.equalsIgnoreCase(element.getLocalName(), COLLECTION)) {
       return parseCollection(element);
     }
