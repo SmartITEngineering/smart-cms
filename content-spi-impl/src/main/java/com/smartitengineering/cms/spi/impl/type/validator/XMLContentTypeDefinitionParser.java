@@ -18,13 +18,23 @@
  */
 package com.smartitengineering.cms.spi.impl.type.validator;
 
+import com.smartitengineering.cms.type.xml.XmlParser;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
+import com.smartitengineering.cms.spi.type.PersistableContentType;
+import com.smartitengineering.cms.type.xml.XMLParserIntrospector;
+import com.smartitengineering.cms.type.xml.XmlConstants;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
+import nu.xom.Attribute;
+import nu.xom.Element;
+import nu.xom.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,14 +42,44 @@ import java.util.Collections;
  */
 public class XMLContentTypeDefinitionParser implements ContentTypeDefinitionParser {
 
+  private Logger logger = LoggerFactory.getLogger(getClass());
+
   @Override
   public Collection<MutableContentType> parseStream(WorkspaceId workspaceId, InputStream inputStream) {
-    XmlParser parser = new XmlParser(workspaceId, inputStream);
+    XmlParser parser = new XmlParser(workspaceId, inputStream, new XMLParserIntrospector() {
+
+      @Override
+      public MutableContentType createMutableContentType() {
+        return SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContentType();
+      }
+
+      @Override
+      public void processMutableContentType(MutableContentType type, Element element) {
+        if (type instanceof PersistableContentType) {
+          PersistableContentType contentType = (PersistableContentType) type;
+          contentType.setRepresentations(Collections.singletonMap(MediaType.APPLICATION_XML, createRootNodeAndAddChild(
+              element.copy()).toXML()));
+        }
+      }
+    });
     return parser.parse();
   }
 
   @Override
   public Collection<MediaType> getSupportedTypes() {
     return Collections.singletonList(MediaType.APPLICATION_XML);
+  }
+
+  protected Element createRootNodeAndAddChild(Node childNode) {
+    Element root = new Element(XmlConstants.CONTENT_TYPES, XmlConstants.NAMESPACE);
+    Attribute attr = new Attribute("xsi:schemaLocation", XmlConstants.XSI_NAMESPACE, new StringBuilder(
+        XmlConstants.XSI_NAMESPACE).append(' ').append(
+        SmartContentSPI.getInstance().getSchemaLocationForContentTypeXml()).toString());
+    root.addAttribute(attr);
+    root.appendChild(childNode);
+    if (logger.isDebugEnabled()) {
+      logger.debug(root.toXML());
+    }
+    return root;
   }
 }

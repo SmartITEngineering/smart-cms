@@ -16,11 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.impl.type.validator;
+package com.smartitengineering.cms.type.xml;
 
-import com.smartitengineering.cms.api.factory.SmartContentAPI;
-import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.impl.type.CollectionDataTypeImpl;
+import com.smartitengineering.cms.api.impl.type.ContentDataTypeImpl;
+import com.smartitengineering.cms.api.impl.type.ContentStatusImpl;
+import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
+import com.smartitengineering.cms.api.impl.type.FieldDefImpl;
+import com.smartitengineering.cms.api.impl.type.OtherDataTypeImpl;
+import com.smartitengineering.cms.api.impl.type.RepresentationDefImpl;
+import com.smartitengineering.cms.api.impl.type.ResourceUriImpl;
+import com.smartitengineering.cms.api.impl.type.SearchDefImpl;
+import com.smartitengineering.cms.api.impl.type.StringDataTypeImpl;
+import com.smartitengineering.cms.api.impl.type.ValidatorDefImpl;
+import com.smartitengineering.cms.api.impl.type.VariationDefImpl;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
@@ -46,19 +56,15 @@ import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
-import com.smartitengineering.cms.spi.SmartContentSPI;
-import com.smartitengineering.cms.spi.type.PersistableContentType;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import nu.xom.Attribute;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Elements;
-import nu.xom.Node;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
@@ -73,13 +79,15 @@ public class XmlParser implements XmlConstants {
   private final InputStream source;
   private final WorkspaceId workspaceId;
   private final Logger logger = LoggerFactory.getLogger(getClass());
+  private final XMLParserIntrospector introspector;
 
-  public XmlParser(WorkspaceId workspaceId, InputStream stream) {
-    if (stream == null || workspaceId == null) {
-      throw new IllegalArgumentException("Source stream or workspace id can not be null!");
+  public XmlParser(WorkspaceId workspaceId, InputStream stream, XMLParserIntrospector introspector) {
+    if (stream == null || workspaceId == null || introspector == null) {
+      throw new IllegalArgumentException("Source stream or workspace id or instrospector can not be null!");
     }
     this.workspaceId = workspaceId;
     this.source = stream;
+    this.introspector = introspector;
   }
 
   public Collection<MutableContentType> parse() {
@@ -96,8 +104,7 @@ public class XmlParser implements XmlConstants {
       Element rootElement = document.getRootElement();
       Elements childRootElements = rootElement.getChildElements();
       for (int j = 0; j < childRootElements.size(); j++) {
-        PersistableContentType mutableContent = SmartContentSPI.getInstance().getPersistableDomainFactory().
-            createPersistableContentType();
+        MutableContentType mutableContent = introspector.createMutableContentType();
         final Element contentTypeElement = childRootElements.get(j);
         Elements childElements = contentTypeElement.getChildElements();
         String name = parseMandatoryStringElement(contentTypeElement, NAME); //max=1,min=1
@@ -107,8 +114,7 @@ public class XmlParser implements XmlConstants {
           logger.debug(new StringBuilder("Namespace ").append(namespace).toString());
           logger.debug(new StringBuilder("Name ").append(name).toString());
         }
-        contentTypeId = SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(workspaceId,
-                                                                                                 namespace, name);
+        contentTypeId = getContentTypeId(workspaceId, namespace, name);
         mutableContent.setContentTypeID(contentTypeId);
         displayName = parseOptionalStringElement(contentTypeElement, DISPLAY_NAME); //min=0,max=1
         for (int child = 0; child < childElements.size(); child++) {//fields min=1,max=unbounted
@@ -126,8 +132,6 @@ public class XmlParser implements XmlConstants {
           mutableContent.getMutableRepresentationDefs().addAll(representationDefs);
         }
         mutableContent.getMutableStatuses().addAll(statuses);
-        mutableContent.setRepresentations(Collections.singletonMap(MediaType.APPLICATION_XML, createRootNodeAndAddChild(
-            contentTypeElement.copy()).toXML()));
         contentTypes.add(mutableContent);
         fieldDefs.clear();
       }
@@ -136,6 +140,15 @@ public class XmlParser implements XmlConstants {
       logger.warn(e.getMessage(), e);
     }
     return contentTypes;
+  }
+
+  protected ContentTypeId getContentTypeId(WorkspaceId id, String namespace, String name) throws
+      IllegalArgumentException {
+    ContentTypeIdImpl contentTypeId = new ContentTypeIdImpl();
+    contentTypeId.setWorkspace(workspaceId);
+    contentTypeId.setNamespace(namespace);
+    contentTypeId.setName(name);
+    return contentTypeId;
   }
 
   protected String parseMandatoryStringElement(Element rootElement, final String elementName) throws
@@ -183,8 +196,7 @@ public class XmlParser implements XmlConstants {
     }
     List<RepresentationDef> representations = new ArrayList<RepresentationDef>();
     if (elems.size() > 0) {
-      RepresentationDef representation = SmartContentAPI.getInstance().getContentTypeLoader().
-          createMutableRepresentationDef();
+      RepresentationDef representation;
       Elements elements = elems.get(0).getChildElements(REPRESENTATION, NAMESPACE);
       for (int i = 0; i < elements.size(); i++) {
         representation = parseRepresentation(elements.get(i));
@@ -198,8 +210,7 @@ public class XmlParser implements XmlConstants {
   }
 
   protected RepresentationDef parseRepresentation(Element rootElement) {
-    MutableRepresentationDef representationDef = SmartContentAPI.getInstance().getContentTypeLoader().
-        createMutableRepresentationDef();
+    MutableRepresentationDef representationDef = new RepresentationDefImpl();
     Elements childElements = rootElement.getChildElements();
     for (int i = 0; i < childElements.size(); i++) {
       if (StringUtils.equals(childElements.get(i).getLocalName(), NAME)) {
@@ -228,7 +239,7 @@ public class XmlParser implements XmlConstants {
   }
 
   protected ResourceUri parseUri(Element rootElement, String elementName) throws IllegalStateException {
-    MutableResourceUri resourceUri = SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
+    MutableResourceUri resourceUri = new ResourceUriImpl();
     Elements elems = rootElement.getChildElements(elementName, NAMESPACE);
     if (elems.size() < 1) {
       throw new IllegalStateException("No " + elementName);
@@ -254,9 +265,8 @@ public class XmlParser implements XmlConstants {
       throw new IllegalStateException("More than one " + elementName);
     }
     if (elems.size() > 0) {
-      ContentTypeId contentTypeId = SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(workspaceId,
-                                                                                                             parseMandatoryStringElement(elems.
-          get(0), TYPE_NS), parseMandatoryStringElement(elems.get(0), TYPE_NAME));
+      ContentTypeId contentTypeId = getContentTypeId(workspaceId, parseMandatoryStringElement(elems.get(0), TYPE_NS), parseMandatoryStringElement(elems.
+          get(0), TYPE_NAME));
       return contentTypeId;
     }
     else {
@@ -265,7 +275,7 @@ public class XmlParser implements XmlConstants {
   }
 
   protected ContentDataType parseContent(Element rootElement) {
-    MutableContentDataType type = SmartContentAPI.getInstance().getContentTypeLoader().createMutableContentDataType();
+    MutableContentDataType type = new ContentDataTypeImpl();
     for (int i = 0; i < rootElement.getChildElements().size(); i++) {
       if (StringUtils.equalsIgnoreCase(rootElement.getChildElements().get(i).getLocalName(), DEFINITION)) {
         type.setTypeDef(parseContentTypeId(rootElement, DEFINITION, workspaceId));
@@ -279,8 +289,7 @@ public class XmlParser implements XmlConstants {
   }
 
   protected CollectionDataType parseCollection(Element rootElement) {
-    MutableCollectionDataType type = SmartContentAPI.getInstance().getContentTypeLoader().
-        createMutableCollectionDataType();
+    MutableCollectionDataType type = new CollectionDataTypeImpl();
     for (int i = 0; i < rootElement.getChildElements().size(); i++) {
       final Element element = rootElement.getChildElements().get(i);
       if (StringUtils.equalsIgnoreCase(element.getLocalName(), SIMPLE_VALUE)) {
@@ -339,7 +348,7 @@ public class XmlParser implements XmlConstants {
   }
 
   protected FieldDef parseFieldDef(Element rootElement) {
-    MutableFieldDef fieldDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableFieldDef();
+    MutableFieldDef fieldDef = new FieldDefImpl();
     fieldDef.setCustomValidator(parseValidator(rootElement, VALIDATOR));
     fieldDef.setFieldStandaloneUpdateAble(Boolean.parseBoolean(
         parseOptionalStringElement(rootElement, UPDATE_STANDALONE)));
@@ -377,8 +386,7 @@ public class XmlParser implements XmlConstants {
       throw new IllegalStateException("Minimum No. of variation should 1");
     }
     else {
-      MutableVariationDef variationDef =
-                          SmartContentAPI.getInstance().getContentTypeLoader().createMutableVariationDef();
+      MutableVariationDef variationDef = new VariationDefImpl();
       variationDef.setName(parseMandatoryStringElement(rootElement, NAME));
       variationDef.setMIMEType(parseMandatoryStringElement(rootElement, MIME_TYPE));
       variationDef.setResourceUri(parseUri(rootElement, URI));
@@ -399,7 +407,7 @@ public class XmlParser implements XmlConstants {
   }
 
   protected ValidatorDef parseValidator(Element rootElement, String elementName) throws IllegalStateException {
-    MutableValidatorDef validatorDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableValidatorDef();
+    MutableValidatorDef validatorDef = new ValidatorDefImpl();
     Elements elems = rootElement.getChildElements(elementName, NAMESPACE);
     if (elems.size() > 1) {
       throw new IllegalStateException("More than one " + elementName);
@@ -425,7 +433,7 @@ public class XmlParser implements XmlConstants {
   }
 
   protected SearchDef parseSearchDef(Element rootElement, String elementName) {
-    MutableSearchDef searchDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableSearchDef();
+    MutableSearchDef searchDef = new SearchDefImpl();
     Elements elems = rootElement.getChildElements(elementName, NAMESPACE);
     if (elems.size() > 1) {
       throw new IllegalStateException("More than one " + elementName);
@@ -450,8 +458,7 @@ public class XmlParser implements XmlConstants {
     if (elems.size() > 0) {
       List<ContentStatus> contentStatuses = new ArrayList<ContentStatus>();
       for (int i = 0; i < elems.get(0).getChildElements().size(); i++) {
-        MutableContentStatus contentStatus =
-                             SmartContentAPI.getInstance().getContentTypeLoader().createMutableContentStatus();
+        MutableContentStatus contentStatus = new ContentStatusImpl();
         if (StringUtils.equalsIgnoreCase(elems.get(0).getChildElements().get(i).getLocalName(), STATUS_NAME)) {
           contentStatus.setName(elems.get(0).getChildElements().get(i).getValue());
         }
@@ -490,27 +497,14 @@ public class XmlParser implements XmlConstants {
   }
 
   /************************end of confsion **********************/
-  protected Element createRootNodeAndAddChild(Node childNode) {
-    Element root = new Element(XmlConstants.CONTENT_TYPES, XmlConstants.NAMESPACE);
-    Attribute attr = new Attribute("xsi:schemaLocation", XmlConstants.XSI_NAMESPACE, new StringBuilder(
-        XmlConstants.XSI_NAMESPACE).append(' ').append(
-        SmartContentSPI.getInstance().getSchemaLocationForContentTypeXml()).toString());
-    root.addAttribute(attr);
-    root.appendChild(childNode);
-    if (logger.isDebugEnabled()) {
-      logger.debug(root.toXML());
-    }
-    return root;
-  }
-
   private DataType parseOtherDataType(Element element) {
-    MutableOtherDataType type = SmartContentAPI.getInstance().getContentTypeLoader().createMutableOtherDataType();
+    MutableOtherDataType type = new OtherDataTypeImpl();
     type.setMIMEType(parseMandatoryStringElement(element, MIME_TYPE));
     return type;
   }
 
   private DataType parseStringDataType(Element element) {
-    MutableStringDataType type = SmartContentAPI.getInstance().getContentTypeLoader().createMutableStringDataType();
+    MutableStringDataType type = new StringDataTypeImpl();
     type.setMIMEType(parseMandatoryStringElement(element, MIME_TYPE));
     type.setEncoding(parseOptionalStringElement(element, ENCODING));
     return type;

@@ -58,7 +58,6 @@ import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;

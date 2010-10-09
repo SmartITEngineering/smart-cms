@@ -50,8 +50,9 @@ The module is responsible for Implementing the SPI for the CMS.
       <artifactId>guice</artifactId>
     </dependency>
     <dependency>
-      <groupId>xom</groupId>
-      <artifactId>xom</artifactId>
+      <groupId>com.smartitengineering.smart-cms</groupId>
+      <artifactId>content-type-xml</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
