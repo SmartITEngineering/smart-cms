@@ -22,7 +22,6 @@ import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
-import com.smartitengineering.cms.api.content.MutableContent;
 import com.smartitengineering.cms.api.content.Representation;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;

@@ -18,10 +18,9 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.cms.ws.common.domains.Workspace;
-import com.smartitengineering.cms.ws.common.domains.WorkspaceId;
+import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
+import com.smartitengineering.util.rest.client.PaginatedResource;
 import com.smartitengineering.util.rest.client.WritableResource;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import org.apache.abdera.model.Feed;
 
@@ -29,13 +28,11 @@ import org.apache.abdera.model.Feed;
  *
  * @author kaisar
  */
-public interface RootResource extends WritableResource<Feed> {
+public interface ContentTypesResource extends WritableResource<Feed>, PaginatedResource<WorkspaceVariationsResource> {
 
-  public Collection<WorkspaceContentResouce> getWorkspaces();
+  public Collection<ContentTypeResource> getContentTypes();
 
-  public Collection<WorkspaceFeedResource> getWorkspaceFeeds();
+  public ContentTypeResource createContentType(ResourceTemplate resourceTemplate);
 
-  public Workspace createWorkspace(WorkspaceId workspaceId) throws URISyntaxException;
-
-  public ContentTypesResource getContentTypes();
+  public ContentTypeResource updateContentType(ResourceTemplate resourceTemplate);
 }
