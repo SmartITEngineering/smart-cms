@@ -41,6 +41,11 @@ The module is responsible for Implementing the API for the CMS.
 						<artifactId>content-api</artifactId>
 						<version>${project.version}</version>
 				</dependency>
+        <dependency>
+						<groupId>com.smartitengineering.smart-cms</groupId>
+						<artifactId>content-api-impl-generic</artifactId>
+						<version>${project.version}</version>
+				</dependency>
 				<dependency>
 						<groupId>com.smartitengineering.smart-cms</groupId>
 						<artifactId>content-spi</artifactId>

@@ -161,4 +161,6 @@ public interface ContentTypeLoader {
   public MutableOtherDataType createMutableOtherDataType();
 
   public MutableStringDataType createMutableStringDataType();
+
+  public String getSearchFieldName(FieldDef fieldDef);
 }

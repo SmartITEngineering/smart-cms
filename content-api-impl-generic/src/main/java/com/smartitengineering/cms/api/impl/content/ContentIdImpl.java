@@ -23,7 +23,6 @@ import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.impl.Utils;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
-import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -64,8 +63,7 @@ public class ContentIdImpl implements ContentId {
 
   @Override
   public String toString() {
-    return new StringBuilder().append(workspaceId).append(SmartContentSPI.getInstance().getContentIdProcessor().
-        getIdAsString(id)).toString();
+    return new StringBuilder().append(workspaceId).append(new String(id)).toString();
   }
 
   @Override
@@ -80,7 +78,7 @@ public class ContentIdImpl implements ContentId {
       throw new IOException("No content!");
     }
     String[] params = idString.split(":");
-    if (params == null || params.length != 4) {
+    if (params == null || params.length != 3) {
       throw new IOException(
           "Object should have been in the format globalNamespace:workspace-name:type-namespace:type-name!");
     }
@@ -88,7 +86,7 @@ public class ContentIdImpl implements ContentId {
     workspaceIdImpl.setGlobalNamespace(params[0]);
     workspaceIdImpl.setName(params[1]);
     setWorkspaceId(workspaceIdImpl);
-    setId(SmartContentSPI.getInstance().getContentIdProcessor().getStringAsId(params[2]));
+    setId(params[2].getBytes());
   }
 
   @Override

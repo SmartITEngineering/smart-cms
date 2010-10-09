@@ -319,4 +319,9 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   public MutableStringDataType createMutableStringDataType() {
     return new StringDataTypeImpl();
   }
+
+  @Override
+  public String getSearchFieldName(FieldDef fieldDef) {
+    return SmartContentSPI.getInstance().getSearchFieldNameGenerator().getSearchFieldName(fieldDef);
+  }
 }

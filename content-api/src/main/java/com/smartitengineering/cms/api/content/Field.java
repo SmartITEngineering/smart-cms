@@ -30,7 +30,5 @@ public interface Field {
 
   public String getName();
 
-  public Variation getVariation(String varName);
-
   public FieldValue getValue();
 }

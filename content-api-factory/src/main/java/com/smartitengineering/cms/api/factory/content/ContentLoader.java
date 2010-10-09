@@ -37,6 +37,7 @@ import com.smartitengineering.cms.api.content.MutableStringFieldValue;
 import com.smartitengineering.cms.api.content.NumberFieldValue;
 import com.smartitengineering.cms.api.content.OtherFieldValue;
 import com.smartitengineering.cms.api.content.StringFieldValue;
+import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.type.FieldDef;
 import java.util.Set;
@@ -86,4 +87,6 @@ public interface ContentLoader {
   Filter craeteFilter();
 
   Set<Content> search(Filter filter);
+
+  Variation getVariation(Field field, String name);
 }

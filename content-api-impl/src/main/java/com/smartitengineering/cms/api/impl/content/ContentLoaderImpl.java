@@ -23,6 +23,7 @@ import com.smartitengineering.cms.api.content.CollectionFieldValue;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentFieldValue;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.content.DateTimeFieldValue;
 import com.smartitengineering.cms.api.content.Field;
@@ -228,5 +229,10 @@ public class ContentLoaderImpl implements ContentLoader {
   @Override
   public MutableStringFieldValue createStringFieldValue() {
     return new StringFieldValueImpl();
+  }
+
+  @Override
+  public Variation getVariation(Field field, String name) {
+    return SmartContentSPI.getInstance().getVariationProvider().getVariation(name, field.getFieldDef(), field);
   }
 }
