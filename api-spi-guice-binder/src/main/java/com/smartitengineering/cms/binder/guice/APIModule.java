@@ -20,12 +20,12 @@ package com.smartitengineering.cms.binder.guice;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
-import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
-import com.smartitengineering.cms.api.content.ContentLoader;
+import com.smartitengineering.cms.api.factory.content.ContentLoader;
+import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
+import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.content.ContentLoaderImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
-import com.smartitengineering.cms.api.type.ContentTypeLoader;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

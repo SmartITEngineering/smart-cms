@@ -124,5 +124,6 @@
     <module>smart-cms-client-impl</module>
     <module>webservice-resources</module>
     <module>webservice-common</module>
+    <module>content-api-factory</module>
   </modules>
 </project>

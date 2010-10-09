@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.workspace;
 
-import com.smartitengineering.cms.api.SmartContentAPI;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;

@@ -18,14 +18,14 @@
  */
 package com.smartitengineering.cms.ws.resources.type;
 
-import com.smartitengineering.cms.api.SmartContentAPI;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
-import com.smartitengineering.cms.api.type.ContentTypeLoader;
+import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.workspace.Workspace;
-import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
+import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.ws.resources.workspace.WorkspaceResource;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import java.io.InputStream;

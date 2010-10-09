@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.type;
 
-import com.smartitengineering.cms.api.SmartContentAPI;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;

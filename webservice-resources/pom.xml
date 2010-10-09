@@ -46,7 +46,7 @@
     </dependency>
     <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
-      <artifactId>content-api</artifactId>
+      <artifactId>content-api-factory</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>

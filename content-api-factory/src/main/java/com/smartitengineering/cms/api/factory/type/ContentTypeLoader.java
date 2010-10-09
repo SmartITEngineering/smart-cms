@@ -16,11 +16,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.type;
+package com.smartitengineering.cms.api.factory.type;
 
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.exception.InvalidReferenceException;
+import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.ContentDataType;
+import com.smartitengineering.cms.api.type.ContentStatus;
+import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.type.MutableCollectionDataType;
+import com.smartitengineering.cms.api.type.MutableContentDataType;
+import com.smartitengineering.cms.api.type.MutableContentStatus;
+import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.api.type.MutableContentTypeId;
+import com.smartitengineering.cms.api.type.MutableFieldDef;
+import com.smartitengineering.cms.api.type.MutableOtherDataType;
+import com.smartitengineering.cms.api.type.MutableRepresentationDef;
+import com.smartitengineering.cms.api.type.MutableResourceUri;
+import com.smartitengineering.cms.api.type.MutableSearchDef;
+import com.smartitengineering.cms.api.type.MutableStringDataType;
+import com.smartitengineering.cms.api.type.MutableValidatorDef;
+import com.smartitengineering.cms.api.type.MutableVariationDef;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;

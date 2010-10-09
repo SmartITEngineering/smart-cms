@@ -18,12 +18,12 @@
  */
 package com.smartitengineering.cms.ws.resources.workspace;
 
-import com.smartitengineering.cms.api.SmartContentAPI;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
-import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
+import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.cms.ws.resources.domains.Factory;

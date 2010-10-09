@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api;
+package com.smartitengineering.cms.api.factory;
 
-import com.smartitengineering.cms.api.workspace.WorkspaceAPI;
-import com.smartitengineering.cms.api.content.ContentLoader;
-import com.smartitengineering.cms.api.type.ContentTypeLoader;
+import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
+import com.smartitengineering.cms.api.factory.content.ContentLoader;
+import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
 import com.smartitengineering.util.bean.annotations.InjectableField;

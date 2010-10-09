@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.ws.resources.type;
 
-import com.smartitengineering.cms.api.SmartContentAPI;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.ws.common.utils.Utils;

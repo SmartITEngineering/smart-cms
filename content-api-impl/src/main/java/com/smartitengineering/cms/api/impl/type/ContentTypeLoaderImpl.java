@@ -25,7 +25,7 @@ import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
-import com.smartitengineering.cms.api.type.ContentTypeLoader;
+import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableCollectionDataType;
 import com.smartitengineering.cms.api.type.MutableContentDataType;

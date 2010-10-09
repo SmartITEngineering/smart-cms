@@ -16,8 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.content;
+package com.smartitengineering.cms.api.factory.content;
 
+import com.smartitengineering.cms.api.content.BooleanFieldValue;
+import com.smartitengineering.cms.api.content.CollectionFieldValue;
+import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.content.ContentFieldValue;
+import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.content.DateTimeFieldValue;
+import com.smartitengineering.cms.api.content.Field;
+import com.smartitengineering.cms.api.content.Filter;
+import com.smartitengineering.cms.api.content.MutableBooleanFieldValue;
+import com.smartitengineering.cms.api.content.MutableCollectionFieldValue;
+import com.smartitengineering.cms.api.content.MutableContentFieldValue;
+import com.smartitengineering.cms.api.content.MutableDateTimeFieldValue;
+import com.smartitengineering.cms.api.content.MutableField;
+import com.smartitengineering.cms.api.content.MutableNumberFieldValue;
+import com.smartitengineering.cms.api.content.MutableOtherFieldValue;
+import com.smartitengineering.cms.api.content.MutableStringFieldValue;
+import com.smartitengineering.cms.api.content.NumberFieldValue;
+import com.smartitengineering.cms.api.content.OtherFieldValue;
+import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.type.FieldDef;
 import java.util.Set;

@@ -23,7 +23,7 @@ import com.smartitengineering.cms.api.content.CollectionFieldValue;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentFieldValue;
 import com.smartitengineering.cms.api.content.ContentId;
-import com.smartitengineering.cms.api.content.ContentLoader;
+import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.content.DateTimeFieldValue;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.Filter;
