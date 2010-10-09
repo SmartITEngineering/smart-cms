@@ -21,6 +21,7 @@ package com.smartitengineering.cms.spi.impl.type.validator;
 import com.smartitengineering.cms.type.xml.XmlParser;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
@@ -28,8 +29,10 @@ import com.smartitengineering.cms.spi.type.PersistableContentType;
 import com.smartitengineering.cms.type.xml.XMLParserIntrospector;
 import com.smartitengineering.cms.type.xml.XmlConstants;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
@@ -45,7 +48,7 @@ public class XMLContentTypeDefinitionParser implements ContentTypeDefinitionPars
   private Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
-  public Collection<MutableContentType> parseStream(WorkspaceId workspaceId, InputStream inputStream) {
+  public Collection<WritableContentType> parseStream(WorkspaceId workspaceId, InputStream inputStream) {
     XmlParser parser = new XmlParser(workspaceId, inputStream, new XMLParserIntrospector() {
 
       @Override
@@ -62,7 +65,12 @@ public class XMLContentTypeDefinitionParser implements ContentTypeDefinitionPars
         }
       }
     });
-    return parser.parse();
+    final Collection<MutableContentType> parse = parser.parse();
+    final List<WritableContentType> list = new ArrayList<WritableContentType>(parse.size());
+    for(MutableContentType type : parse) {
+      list.add((WritableContentType) type);
+    }
+    return list;
   }
 
   @Override

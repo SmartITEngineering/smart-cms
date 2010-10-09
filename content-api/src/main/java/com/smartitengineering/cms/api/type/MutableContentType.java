@@ -18,7 +18,6 @@
  */
 package com.smartitengineering.cms.api.type;
 
-import com.smartitengineering.cms.api.common.PersistentWriter;
 import java.util.Collection;
 
 /**
@@ -28,8 +27,7 @@ import java.util.Collection;
  * @since 0.1
  */
 public interface MutableContentType
-    extends PersistentWriter,
-            ContentType {
+    extends ContentType {
 
   /**
    * Set the content type identifier for the content type.

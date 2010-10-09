@@ -20,9 +20,9 @@ package com.smartitengineering.cms.spi.impl.type;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
-import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
@@ -43,16 +43,16 @@ import java.util.Set;
  * @author imyousuf
  */
 @Singleton
-public class ContentTypePersistentService implements PersistentService<MutableContentType>, PersistentContentTypeReader {
+public class ContentTypePersistentService implements PersistentService<WritableContentType>, PersistentContentTypeReader {
 
   @Inject
-  private GenericAdapter<MutableContentType, PersistentContentType> adapter;
+  private GenericAdapter<WritableContentType, PersistentContentType> adapter;
   @Inject
   private CommonReadDao<PersistentContentType, ContentTypeId> commonReadDao;
   @Inject
   private CommonWriteDao<PersistentContentType> commonWriteDao;
 
-  public GenericAdapter<MutableContentType, PersistentContentType> getAdapter() {
+  public GenericAdapter<WritableContentType, PersistentContentType> getAdapter() {
     return adapter;
   }
 
@@ -65,17 +65,17 @@ public class ContentTypePersistentService implements PersistentService<MutableCo
   }
 
   @Override
-  public void create(MutableContentType bean) throws Exception {
+  public void create(WritableContentType bean) throws Exception {
     commonWriteDao.save(getAdapter().convert(bean));
   }
 
   @Override
-  public void update(MutableContentType bean) throws Exception {
+  public void update(WritableContentType bean) throws Exception {
     commonWriteDao.update(getAdapter().convert(bean));
   }
 
   @Override
-  public void delete(MutableContentType bean) throws Exception {
+  public void delete(WritableContentType bean) throws Exception {
     commonWriteDao.delete(getAdapter().convert(bean));
   }
 

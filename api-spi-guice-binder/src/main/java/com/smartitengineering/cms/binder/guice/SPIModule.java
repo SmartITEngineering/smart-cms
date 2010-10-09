@@ -26,10 +26,10 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
-import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
@@ -131,10 +131,10 @@ public class SPIModule extends PrivateModule {
     }).toProvider(ContentTypeSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);
     bind(new TypeLiteral<FilterConfigs<PersistentContentType>>() {
     }).toProvider(ContentTypeFilterConfigsProvider.class).in(Scopes.SINGLETON);
-    bind(new TypeLiteral<GenericAdapter<MutableContentType, PersistentContentType>>() {
-    }).to(new TypeLiteral<GenericAdapterImpl<MutableContentType, PersistentContentType>>() {
+    bind(new TypeLiteral<GenericAdapter<WritableContentType, PersistentContentType>>() {
+    }).to(new TypeLiteral<GenericAdapterImpl<WritableContentType, PersistentContentType>>() {
     }).in(Scopes.SINGLETON);
-    bind(new TypeLiteral<AbstractAdapterHelper<MutableContentType, PersistentContentType>>() {
+    bind(new TypeLiteral<AbstractAdapterHelper<WritableContentType, PersistentContentType>>() {
     }).to(ContentTypeAdapterHelper.class).in(Scopes.SINGLETON);
     bind(PersistentContentTypeReader.class).to(ContentTypePersistentService.class);
     binder().expose(PersistentContentTypeReader.class);
@@ -148,7 +148,7 @@ public class SPIModule extends PrivateModule {
     binder().expose(TypeValidators.class);
     MapBinder<Class, PersistentService> serviceBinder = MapBinder.newMapBinder(binder(), Class.class,
                                                                                PersistentService.class);
-    serviceBinder.addBinding(MutableContentType.class).to(ContentTypePersistentService.class);
+    serviceBinder.addBinding(WritableContentType.class).to(ContentTypePersistentService.class);
     bind(PersistentServiceRegistrar.class).to(
         com.smartitengineering.cms.spi.impl.content.PersistentServiceRegistrar.class);
     binder().expose(PersistentServiceRegistrar.class);

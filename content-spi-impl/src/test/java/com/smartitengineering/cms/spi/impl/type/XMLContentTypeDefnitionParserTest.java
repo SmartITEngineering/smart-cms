@@ -34,6 +34,7 @@ import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
+import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
@@ -116,8 +117,8 @@ public class XMLContentTypeDefnitionParserTest {
 
   @Test
   public void testParsingContentId() throws Exception { //done
-    Collection<MutableContentType> collection = init();
-    Iterator<MutableContentType> iterator = collection.iterator();
+    Collection<WritableContentType> collection = init();
+    Iterator<WritableContentType> iterator = collection.iterator();
     MutableContentType contentType = iterator.next();
     Assert.assertEquals(SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(TEST_WS_ID, "asdfasdf1",
                                                                                                  "XYZ"), contentType.
@@ -130,8 +131,8 @@ public class XMLContentTypeDefnitionParserTest {
 
   @Test
   public void testDisplayName() throws Exception {  //done
-    Collection<MutableContentType> collection = init();
-    Iterator<MutableContentType> iterator = collection.iterator();
+    Collection<WritableContentType> collection = init();
+    Iterator<WritableContentType> iterator = collection.iterator();
     MutableContentType contentType = iterator.next();
     contentType = iterator.next();
     if (logger.isInfoEnabled()) {
@@ -142,8 +143,8 @@ public class XMLContentTypeDefnitionParserTest {
 
   @Test
   public void testParent() throws Exception { //done
-    Collection<MutableContentType> collections = init();
-    Iterator<MutableContentType> iterator = collections.iterator();
+    Collection<WritableContentType> collections = init();
+    Iterator<WritableContentType> iterator = collections.iterator();
     MutableContentType contentType = iterator.next();
     if (logger.isInfoEnabled()) {
       logger.debug(new StringBuffer("Parent's Name is ").append(contentType.getParent().getName()).toString());
@@ -155,8 +156,8 @@ public class XMLContentTypeDefnitionParserTest {
 
   @Test
   public void testParsingSataus() throws Exception {  //done
-    Collection<MutableContentType> collection = init();
-    Iterator<MutableContentType> iterator = collection.iterator();
+    Collection<WritableContentType> collection = init();
+    Iterator<WritableContentType> iterator = collection.iterator();
     MutableContentType contentType = iterator.next();
     if (logger.isInfoEnabled()) {
       logger.debug(new StringBuffer("First status size is ").append(contentType.getStatuses().size()).toString());
@@ -185,8 +186,8 @@ public class XMLContentTypeDefnitionParserTest {
 
   @Test
   public void testParsingFileds() throws Exception {  //done
-    Collection<MutableContentType> collection = init();
-    Iterator<MutableContentType> iterator = collection.iterator();
+    Collection<WritableContentType> collection = init();
+    Iterator<WritableContentType> iterator = collection.iterator();
     MutableContentType contentType = iterator.next();
 
     if (logger.isInfoEnabled()) {
@@ -204,8 +205,8 @@ public class XMLContentTypeDefnitionParserTest {
 
   @Test
   public void testParsingField() throws Exception {// done without value
-    Collection<MutableContentType> collection = init();
-    Iterator<MutableContentType> iterator = collection.iterator();
+    Collection<WritableContentType> collection = init();
+    Iterator<WritableContentType> iterator = collection.iterator();
     Collection<FieldDef> fieldDefs = iterator.next().getMutableFieldDefs();
     Iterator<FieldDef> fieldIterator = fieldDefs.iterator();
     Assert.assertEquals(4, fieldDefs.size());
@@ -344,8 +345,8 @@ public class XMLContentTypeDefnitionParserTest {
 
   @Test
   public void testParsingRepresentations() throws Exception { //done
-    Collection<MutableContentType> collection = init();
-    Iterator<MutableContentType> iterator = collection.iterator();
+    Collection<WritableContentType> collection = init();
+    Iterator<WritableContentType> iterator = collection.iterator();
     MutableContentType contentType = iterator.next();
     if (logger.isInfoEnabled()) {
       logger.debug(new StringBuffer("First ContentType contains ").append(contentType.getRepresentationDefs().size()).
@@ -376,8 +377,7 @@ public class XMLContentTypeDefnitionParserTest {
     final RepresentationDef defFromXml = contentType.getRepresentationDefs().get("arep");
     logger.debug(def.getName() + " Name " + defFromXml.getName());
     logger.debug(def.getMIMEType() + " mime type " + defFromXml.getMIMEType());
-    logger.debug(def.getResourceUri().getType().name() + " Uri Type "
-        + defFromXml.getResourceUri().getType().name());
+    logger.debug(def.getResourceUri().getType().name() + " Uri Type " + defFromXml.getResourceUri().getType().name());
     logger.debug(def.getResourceUri().getValue() + " RESOURCE URI " + defFromXml.getResourceUri().getValue());
     logger.debug(def.getTemplateType().name() + " TEMPLATE TYPE " + defFromXml.getTemplateType().name());
     logger.debug(def.hashCode() + " Hash COde " + defFromXml.hashCode());
@@ -405,8 +405,7 @@ public class XMLContentTypeDefnitionParserTest {
     final RepresentationDef defFromXml1 = contentType.getRepresentationDefs().get("anotherrep");
     logger.debug(def1.getName() + " Name " + defFromXml1.getName());
     logger.debug(def1.getMIMEType() + " mime type " + defFromXml1.getMIMEType());
-    logger.debug(def1.getResourceUri().getType().name() + " Uri Type "
-        + defFromXml1.getResourceUri().getType().name());
+    logger.debug(def1.getResourceUri().getType().name() + " Uri Type " + defFromXml1.getResourceUri().getType().name());
     logger.debug(def1.getResourceUri().getValue() + " RESOURCE URI " + defFromXml1.getResourceUri().getValue());
     logger.debug(def1.getTemplateType().name() + " TEMPLATE TYPE " + defFromXml1.getTemplateType().name());
     logger.debug(def1.hashCode() + " Hash COde " + defFromXml1.hashCode());
@@ -419,13 +418,12 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals(def1.getTemplateType(), defFromXml1.getTemplateType());
   }
 
-  protected Collection<MutableContentType> init() throws Exception {
+  protected Collection<WritableContentType> init() throws Exception {
     InputStream inputStream = getClass().getClassLoader().getResourceAsStream("content-type-def-1.xml");
     Assert.assertNotNull(inputStream);
-    Collection<MutableContentType> collection;
-    collection =
-    SmartContentAPI.getInstance().getContentTypeLoader().
-        parseContentTypes(TEST_WS_ID, inputStream, MediaType.APPLICATION_XML);
+    Collection<WritableContentType> collection;
+    collection = SmartContentAPI.getInstance().getContentTypeLoader().parseContentTypes(TEST_WS_ID, inputStream,
+                                                                                        MediaType.APPLICATION_XML);
     Assert.assertNotNull(collection);
     Assert.assertFalse(collection.isEmpty());
     Assert.assertEquals(2, collection.size());
@@ -465,7 +463,7 @@ public class XMLContentTypeDefnitionParserTest {
       });
       MapBinder<Class, PersistentService> serviceBinder = MapBinder.newMapBinder(binder(), Class.class,
                                                                                  PersistentService.class);
-      serviceBinder.addBinding(MutableContentType.class).toInstance(mockery.mock(PersistentService.class));
+      serviceBinder.addBinding(WritableContentType.class).toInstance(mockery.mock(PersistentService.class));
       bind(com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar.class).to(
           PersistentServiceRegistrar.class);
     }

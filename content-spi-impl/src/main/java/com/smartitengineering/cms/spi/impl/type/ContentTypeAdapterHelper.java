@@ -18,14 +18,14 @@
  */
 package com.smartitengineering.cms.spi.impl.type;
 
-import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 
 /**
  *
  * @author imyousuf
  */
-public class ContentTypeAdapterHelper extends AbstractAdapterHelper<MutableContentType, PersistentContentType> {
+public class ContentTypeAdapterHelper extends AbstractAdapterHelper<WritableContentType, PersistentContentType> {
 
   @Override
   protected PersistentContentType newTInstance() {
@@ -33,12 +33,12 @@ public class ContentTypeAdapterHelper extends AbstractAdapterHelper<MutableConte
   }
 
   @Override
-  protected void mergeFromF2T(MutableContentType fromBean, PersistentContentType toBean) {
+  protected void mergeFromF2T(WritableContentType fromBean, PersistentContentType toBean) {
     toBean.setMutableContentType(fromBean);
   }
 
   @Override
-  protected MutableContentType convertFromT2F(PersistentContentType toBean) {
+  protected WritableContentType convertFromT2F(PersistentContentType toBean) {
     return toBean.getMutableContentType();
   }
 }

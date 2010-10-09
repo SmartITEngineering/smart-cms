@@ -16,24 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.content;
+package com.smartitengineering.cms.api.factory.content;
 
-import com.smartitengineering.cms.api.type.ContentStatus;
-import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.content.MutableContent;
+import com.smartitengineering.cms.api.common.PersistentWriter;
 
 /**
  *
  * @author imyousuf
  */
-public interface MutableContent extends Content {
-
-  public void setParentId(ContentId contentId);
-
-  public void setContentDefinition(ContentType contentType);
-
-  public void setField(Field field);
-
-  public void removeField(String fieldName);
-
-  public void setStatus(ContentStatus contentStatus);
+public interface WriteableContent extends MutableContent, PersistentWriter {
 }

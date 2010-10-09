@@ -19,8 +19,8 @@
 package com.smartitengineering.cms.ws.resources.type;
 
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.ContentType;
-import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
@@ -78,7 +78,7 @@ public class ContentTypeResource extends AbstractResource {
     if (builder != null) {
       return builder.build();
     }
-    MutableContentType contentType = SmartContentAPI.getInstance().getContentTypeLoader().getMutableContentType(type);
+    WritableContentType contentType = SmartContentAPI.getInstance().getContentTypeLoader().getWritableContentType(type);
     try {
       contentType.delete();
       return Response.ok().build();

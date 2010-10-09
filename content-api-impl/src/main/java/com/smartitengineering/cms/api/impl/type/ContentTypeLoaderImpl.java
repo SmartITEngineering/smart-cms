@@ -26,6 +26,7 @@ import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
+import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableCollectionDataType;
 import com.smartitengineering.cms.api.type.MutableContentDataType;
@@ -79,7 +80,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   }
 
   @Override
-  public Collection<MutableContentType> parseContentTypes(WorkspaceId workspaceId,
+  public Collection<WritableContentType> parseContentTypes(WorkspaceId workspaceId,
                                                           InputStream contentTypeDefinitionStream, MediaType mediaType)
       throws NullPointerException, InvalidReferenceException, IOException {
     TypeValidator validator = SmartContentSPI.getInstance().getTypeValidators().getValidators().get(mediaType);
@@ -95,21 +96,21 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       if (!validator.isValid(contentTypeDefinitionStream)) {
         throw new IOException("Content does not meet definition!");
       }
-      final Collection<MutableContentType> types = parser.parseStream(workspaceId, contentTypeDefinitionStream);
+      final Collection<WritableContentType> types = parser.parseStream(workspaceId, contentTypeDefinitionStream);
       if (logger.isDebugEnabled()) {
-        for (MutableContentType contentType : types) {
+        for (WritableContentType contentType : types) {
           logger.debug("ID " + contentType.getContentTypeID());
         }
       }
       List<ContentTypeImpl> resultingTypes = mergeWithStoredContentTypes(types);
-      return Collections.<MutableContentType>unmodifiableCollection(resultingTypes);
+      return Collections.<WritableContentType>unmodifiableCollection(resultingTypes);
     }
     catch (Exception ex) {
       throw new IOException(ex);
     }
   }
 
-  protected List<ContentTypeImpl> mergeWithStoredContentTypes(final Collection<MutableContentType> types) throws
+  protected List<ContentTypeImpl> mergeWithStoredContentTypes(final Collection<WritableContentType> types) throws
       IllegalArgumentException {
     final List<ContentTypeImpl> resultingTypes =
                                 new ArrayList<ContentTypeImpl>(types.size());
@@ -323,5 +324,10 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   @Override
   public String getSearchFieldName(FieldDef fieldDef) {
     return SmartContentSPI.getInstance().getSearchFieldNameGenerator().getSearchFieldName(fieldDef);
+  }
+
+  @Override
+  public WritableContentType getWritableContentType(ContentType contentType) {
+    return getContentTypeImpl(contentType);
   }
 }

@@ -20,7 +20,7 @@ package com.smartitengineering.cms.spi.type;
 
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
-import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import java.io.InputStream;
 import java.util.Collection;
 
@@ -30,7 +30,7 @@ import java.util.Collection;
  */
 public interface ContentTypeDefinitionParser {
 
-  public Collection<MutableContentType> parseStream(WorkspaceId workspaceId, InputStream inputStream);
+  public Collection<WritableContentType> parseStream(WorkspaceId workspaceId, InputStream inputStream);
 
   public Collection<MediaType> getSupportedTypes();
 }

@@ -19,7 +19,7 @@
 package com.smartitengineering.cms.spi.type;
 
 import com.smartitengineering.cms.api.common.MediaType;
-import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import java.util.Date;
 import java.util.Map;
 
@@ -27,7 +27,7 @@ import java.util.Map;
  *
  * @author imyousuf
  */
-public interface PersistableContentType extends MutableContentType {
+public interface PersistableContentType extends WritableContentType {
 
   public boolean isFromPersistentStorage();
 

@@ -18,8 +18,8 @@
  */
 package com.smartitengineering.cms.spi.impl.type;
 
+import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
-import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.domain.AbstractGenericPersistentDTO;
 import org.apache.commons.lang.StringUtils;
 
@@ -29,16 +29,16 @@ import org.apache.commons.lang.StringUtils;
  */
 public class PersistentContentType extends AbstractGenericPersistentDTO<PersistentContentType, ContentTypeId, Long> {
 
-  private MutableContentType mutableContentType;
+  private WritableContentType mutableContentType;
 
   public PersistentContentType() {
   }
 
-  public MutableContentType getMutableContentType() {
+  public WritableContentType getMutableContentType() {
     return mutableContentType;
   }
 
-  public void setMutableContentType(MutableContentType mutableContentType) {
+  public void setMutableContentType(WritableContentType mutableContentType) {
     this.mutableContentType = mutableContentType;
   }
 

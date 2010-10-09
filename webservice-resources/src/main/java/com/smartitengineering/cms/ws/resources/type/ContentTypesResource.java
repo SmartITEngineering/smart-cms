@@ -23,7 +23,7 @@ import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
-import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.ws.resources.workspace.WorkspaceResource;
@@ -117,10 +117,10 @@ public class ContentTypesResource extends AbstractResource {
   public Response post(InputStream stream) {
     try {
       final ContentTypeLoader contentTypeLoader = SmartContentAPI.getInstance().getContentTypeLoader();
-      final Collection<MutableContentType> types;
+      final Collection<WritableContentType> types;
       types = contentTypeLoader.parseContentTypes(workspace.getId(), stream,
                                                   com.smartitengineering.cms.api.common.MediaType.APPLICATION_XML);
-      for (MutableContentType type : types) {
+      for (WritableContentType type : types) {
         type.put();
       }
       return Response.status(Response.Status.ACCEPTED).build();

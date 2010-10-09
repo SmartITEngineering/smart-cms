@@ -71,11 +71,13 @@ public interface ContentTypeLoader {
    * @throws NullPointerException If contentTypeDefinition is null
    * @throws IOException If there is any error during parsing.
    */
-  public Collection<MutableContentType> parseContentTypes(WorkspaceId workspaceId,
+  public Collection<WritableContentType> parseContentTypes(WorkspaceId workspaceId,
                                                           InputStream contentTypeDefinitionStream, MediaType mediaType)
       throws NullPointerException, InvalidReferenceException, IOException;
 
   public MutableContentType getMutableContentType(ContentType contentType);
+
+  public WritableContentType getWritableContentType(ContentType contentType);
 
   /**
    * Get the mutable version of the content data type.

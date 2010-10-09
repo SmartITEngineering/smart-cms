@@ -24,6 +24,7 @@ import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.MutableContent;
 import com.smartitengineering.cms.api.content.Representation;
+import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
@@ -37,7 +38,7 @@ import java.util.Map;
  *
  * @author kaisar
  */
-public class ContentImpl extends AbstractPersistableDomain<MutableContent> implements MutableContent {
+public class ContentImpl extends AbstractPersistableDomain<WriteableContent> implements WriteableContent {
 
   private ContentId contentId;
   private ContentId parentId;
