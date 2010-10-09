@@ -18,8 +18,6 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
-import com.smartitengineering.util.rest.client.PaginatedResource;
 import com.smartitengineering.util.rest.client.WritableResource;
 import java.util.Collection;
 import org.apache.abdera.model.Feed;
@@ -28,11 +26,9 @@ import org.apache.abdera.model.Feed;
  *
  * @author kaisar
  */
-public interface ContentTypesResource extends WritableResource<Feed>, PaginatedResource<WorkspaceVariationsResource> {
+public interface ContentTypesResource extends WritableResource<Feed> {
 
   public Collection<ContentTypeResource> getContentTypes();
 
-  public ContentTypeResource createContentType(ResourceTemplate resourceTemplate);
-
-  public ContentTypeResource updateContentType(ResourceTemplate resourceTemplate);
+  public void createContentType(String contentType);
 }
