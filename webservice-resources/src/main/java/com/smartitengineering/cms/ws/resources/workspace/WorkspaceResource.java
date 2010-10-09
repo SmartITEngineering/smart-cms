@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
 import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.cms.ws.resources.domains.Factory;
+import com.smartitengineering.cms.ws.resources.type.ContentTypesResource;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -70,6 +71,7 @@ public class WorkspaceResource extends AbstractResource {
   public static final String REL_FRIENDLIES = "friendlies";
   public static final String REL_REPRESENTATIONS = "representations";
   public static final String REL_VARIATIONS = "variations";
+  public static final String REL_CONTENT_TYPES = "content-types";
   public static final String REL_WORKSPACE_CONTENT = "workspaceContent";
   public static final Pattern PATTERN = Pattern.compile("(/)?ws/([\\w\\s\\._-]+)/([\\w\\s]+)");
   private final String namespace;
@@ -119,11 +121,15 @@ public class WorkspaceResource extends AbstractResource {
           getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_FRIENDLIES).build(namespace, workspaceName),
           REL_FRIENDLIES, TextURIListProvider.TEXT_URI_LIST));
       feed.addLink(getLink(
-          getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_REPRESENTATIONS).build(namespace, workspaceName),
+          getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_REPRESENTATIONS).build(namespace,
+                                                                                                 workspaceName),
           REL_REPRESENTATIONS, MediaType.APPLICATION_ATOM_XML));
       feed.addLink(getLink(
           getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_VARIATIONS).build(namespace, workspaceName),
           REL_VARIATIONS, MediaType.APPLICATION_ATOM_XML));
+      feed.addLink(getLink(
+          getAbsoluteURIBuilder().path(ContentTypesResource.class).build(namespace, workspaceName), REL_CONTENT_TYPES,
+          MediaType.APPLICATION_ATOM_XML));
       feed.addLink(getLink(getUriInfo().getRequestUri(), Link.REL_ALTERNATE, MediaType.APPLICATION_JSON));
       ResponseBuilder builder = Response.ok(feed);
       builder.lastModified(creationDate);
@@ -175,7 +181,7 @@ public class WorkspaceResource extends AbstractResource {
     String path = URLDecoder.decode(uri.getPath());
     String basePath = uriInfo.getBaseUri().getPath();
     String fullPath = uriInfo.getBaseUri().toASCIIString();
-    if(LOGGER.isDebugEnabled()) {
+    if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("PATH to parse " + path);
       LOGGER.debug("BASE PATH to parse " + basePath);
       LOGGER.debug("FULL PATH to parse " + fullPath);
