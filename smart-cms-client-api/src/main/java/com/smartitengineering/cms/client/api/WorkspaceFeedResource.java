@@ -32,4 +32,6 @@ public interface WorkspaceFeedResource extends Resource<Feed> {
   WorkspaceRepresentationsResource getRepresentations();
 
   WorkspaceVariationsResource getVariations();
+
+  ContentTypesResource getContentTypes();
 }

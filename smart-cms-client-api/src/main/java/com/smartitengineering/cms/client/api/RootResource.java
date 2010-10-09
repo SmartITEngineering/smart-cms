@@ -36,6 +36,4 @@ public interface RootResource extends WritableResource<Feed> {
   public Collection<WorkspaceFeedResource> getWorkspaceFeeds();
 
   public Workspace createWorkspace(WorkspaceId workspaceId) throws URISyntaxException;
-
-  public ContentTypesResource getContentTypes();
 }
