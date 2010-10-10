@@ -16,27 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.persistence;
+package com.smartitengineering.cms.spi.content;
 
-import com.smartitengineering.cms.spi.content.PersistableContent;
-import com.smartitengineering.cms.spi.type.PersistableContentType;
-import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
-import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
-import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
+import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.factory.content.WriteableContent;
+import java.util.Date;
 
 /**
  *
  * @author imyousuf
  */
-public interface PersistableDomainFactory {
+public interface PersistableContent extends WriteableContent {
 
-  PersistableContentType createPersistableContentType();
+  public void setContentId(ContentId contentId);
 
-  PersistableContent createPersistableContent();
+  public void setCreationDate(Date creationDate);
 
-  PersistableWorkspace createPersistentWorkspace();
-
-  PersistableRepresentationTemplate createPersistableRepresentationTemplate();
-
-  PersistableVariationTemplate createPersistableVariationTemplate();
+  public void setLastModifiedDate(Date lastModifiedDate);
 }

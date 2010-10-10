@@ -23,11 +23,13 @@ import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.Representation;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.spi.SmartContentSPI;
+import com.smartitengineering.cms.spi.content.PersistableContent;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,11 +39,10 @@ import java.util.Map;
  *
  * @author kaisar
  */
-public class ContentImpl extends AbstractPersistableDomain<WriteableContent> implements WriteableContent {
+public class ContentImpl extends AbstractPersistableDomain<WriteableContent> implements PersistableContent {
 
   private ContentId contentId;
   private ContentId parentId;
-  private Content parentContent;
   private ContentType contentDef;
   private ContentStatus contentStatus;
   private Date creationDate;
@@ -50,6 +51,12 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
 
   @Override
   public void setParentId(ContentId contentId) {
+    if (contentDef == null) {
+      throw new IllegalArgumentException("Content Type Definition must be set before setting parent content ID");
+    }
+    if (contentId != null && SmartContentAPI.getInstance().getContentLoader().loadContent(contentId) == null) {
+      throw new IllegalArgumentException("Parent must exist for it to be set!");
+    }
     this.parentId = contentId;
   }
 
@@ -80,7 +87,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
 
   @Override
   public Content getParent() {
-    return this.parentContent;
+    return SmartContentAPI.getInstance().getContentLoader().loadContent(parentId);
   }
 
   @Override
@@ -127,7 +134,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
 
   @Override
   public boolean isPersisted() {
-    return contentId != null;
+    return creationDate != null;
   }
 
   @Override
@@ -146,20 +153,19 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
     map.remove(fieldName);
   }
 
+  @Override
   public void setContentId(ContentId contentId) {
     this.contentId = contentId;
   }
 
+  @Override
   public void setCreationDate(Date creationDate) {
     this.creationDate = creationDate;
   }
 
+  @Override
   public void setLastModifiedDate(Date lastModifiedDate) {
     this.lastModifiedDate = lastModifiedDate;
-  }
-
-  public void setParentContent(Content parentContent) {
-    this.parentContent = parentContent;
   }
 
   @Override
@@ -171,8 +177,8 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
       return false;
     }
     final Content other = (Content) obj;
-    if (this.contentId != other.getContentId() && (this.contentId == null
-        || !this.contentId.equals(other.getContentId()))) {
+    if (this.contentId != other.getContentId() && (this.contentId == null ||
+                                                   !this.contentId.equals(other.getContentId()))) {
       return false;
     }
     return true;
