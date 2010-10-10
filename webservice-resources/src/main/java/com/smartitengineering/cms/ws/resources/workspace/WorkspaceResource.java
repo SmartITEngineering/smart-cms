@@ -21,17 +21,13 @@ package com.smartitengineering.cms.ws.resources.workspace;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
-import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
 import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.cms.ws.resources.domains.Factory;
 import com.smartitengineering.cms.ws.resources.type.ContentTypesResource;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import java.net.URI;
-import java.net.URLDecoder;
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -47,11 +43,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +67,6 @@ public class WorkspaceResource extends AbstractResource {
   public static final String REL_VARIATIONS = "variations";
   public static final String REL_CONTENT_TYPES = "content-types";
   public static final String REL_WORKSPACE_CONTENT = "workspaceContent";
-  public static final Pattern PATTERN = Pattern.compile("(/)?ws/([\\w\\s\\._-]+)/([\\w\\s]+)");
   private final String namespace;
   private final String workspaceName;
   private final Workspace workspace;
@@ -111,7 +104,7 @@ public class WorkspaceResource extends AbstractResource {
 
   @GET
   @Produces(MediaType.APPLICATION_ATOM_XML)
-  public Response getWorkspace() {
+  public Response getWorkspaceFeed() {
     final Date creationDate = workspace.getCreationDate();
     final EntityTag tag = new EntityTag(DigestUtils.md5Hex(Utils.getFormattedDate(creationDate)));
     if ((ifModifiedSince == null || ifModifiedSince.before(creationDate)) && (entityTag == null ||
@@ -177,39 +170,8 @@ public class WorkspaceResource extends AbstractResource {
     return null;
   }
 
-  public static WorkspaceId parseWorkspaceId(UriInfo uriInfo, URI uri) {
-    String path = URLDecoder.decode(uri.getPath());
-    String basePath = uriInfo.getBaseUri().getPath();
-    String fullPath = uriInfo.getBaseUri().toASCIIString();
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("PATH to parse " + path);
-      LOGGER.debug("BASE PATH to parse " + basePath);
-      LOGGER.debug("FULL PATH to parse " + fullPath);
-    }
-    if (StringUtils.isBlank(path)) {
-      return null;
-    }
-    final String pathToWorkspace;
-    if (path.startsWith(fullPath)) {
-      pathToWorkspace = path.substring(fullPath.length());
-    }
-    else if (path.startsWith(basePath)) {
-      pathToWorkspace = path.substring(basePath.length());
-    }
-    else {
-      pathToWorkspace = path;
-    }
-    Matcher matcher = PATTERN.matcher(pathToWorkspace);
-    if (matcher.matches()) {
-      final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
-      final String namespace = matcher.group(2);
-      final String name = matcher.group(3);
-      return workspaceApi.getWorkspaceIdIfExists(workspaceApi.createWorkspaceId(namespace, name));
-    }
-    else {
-      LOGGER.debug("PATTERN does not match");
-      return null;
-    }
+  public Workspace getWorkspace() {
+    return workspace;
   }
 
   @Override

@@ -95,7 +95,7 @@ public class WorkspaceFriendliesResource extends AbstractResource {
         if (logger.isDebugEnabled()) {
           logger.debug("URI to parse " + uri.toASCIIString());
         }
-        WorkspaceId id = WorkspaceResource.parseWorkspaceId(getUriInfo(), uri);
+        WorkspaceId id = getResourceContext().matchResource(uri, WorkspaceResource.class).getWorkspace().getId();
         if (id == null) {
           return Response.status(Response.Status.BAD_REQUEST).entity("Some URIs could not be resolved internally!").
               build();
@@ -129,10 +129,11 @@ public class WorkspaceFriendliesResource extends AbstractResource {
     else {
       WorkspaceId workspaceId = null;
       try {
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
           logger.debug("Trying to add " + uri);
         }
-        workspaceId = WorkspaceResource.parseWorkspaceId(getUriInfo(), new URI(uri));
+        WorkspaceResource resource = getResourceContext().matchResource(new URI(uri), WorkspaceResource.class);
+        workspaceId = resource.getWorkspace().getId();
       }
       catch (Exception ex) {
         logger.warn(ex.getMessage(), ex);
