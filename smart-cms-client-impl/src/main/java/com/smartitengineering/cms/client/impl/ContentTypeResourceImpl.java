@@ -63,7 +63,7 @@ public class ContentTypeResourceImpl extends AbstractClientResource<ResourceTemp
 
   @Override
   public String getContentType() {
-    final String contentType = getLastReadStateOfEntity().getTemplateType();
+    final String contentType = getResourceRepresentationType();
     return contentType;
   }
 }

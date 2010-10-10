@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *
+ * This is a simple Content Management System (CMS)
+ * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!--
+    Document   : content-type-def-product.xml
+    Created on : September 25, 2009, 5:20 PM
+    Author     : imyousuf
+    Description:
+        A sample content type definition in context of smart shopping
+-->
+<contentTypes xmlns="http://www.smartitengineering.com/smart-cms/content/content-type-schema"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://www.smartitengineering.com/smart-cms/content/content-type-schema http://github.com/smart-it/smart-cms/raw/master/content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd">
+  <contentType namespace="com.smartitengineering.smart-shopping.content">
+    <name>Product</name>
+    <fields>
+      <field>
+        <name>manufactureID</name>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+        <required>true</required>
+      </field>
+      <field>
+        <name>name</name>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+        <required>true</required>
+      </field>
+      <field>
+        <name>description</name>
+        <value>
+          <string>
+            <mimeType>application/xml</mimeType>
+          </string>
+        </value>
+      </field>
+    </fields>
+    <status>
+      <statusName>draft-update</statusName>
+      <statusName>marketed-update</statusName>
+      <statusName>withdrawn-update</statusName>
+      <statusName>obselete-update</statusName>
+    </status>
+  </contentType>
+
+  <contentType namespace="com.smartitengineering.smart-shopping.content">
+    <name>Book</name>
+    <parent>
+      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+      <typeName>Product</typeName>
+    </parent>
+    <fields>
+      <field>
+        <name>isbn</name>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+        <required>true</required>
+      </field>
+      <field>
+        <name>publishers</name>
+        <value>
+          <collection>
+            <simple-value>
+              <content>
+                <definition>
+                  <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+                  <typeName>Publisher</typeName>
+                </definition>
+              </content>
+            </simple-value>
+            <maxSize>30</maxSize>
+          </collection>
+        </value>
+        <required>true</required>
+      </field>
+      <field>
+        <name>authors</name>
+        <value>
+          <collection>
+            <simple-value>
+              <content>
+                <definition>
+                  <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+                  <typeName>Author</typeName>
+                </definition>
+                <bidirectional>books</bidirectional>
+              </content>
+            </simple-value>
+          </collection>
+        </value>
+        <required>true</required>
+      </field>
+    </fields>
+    <status>
+      <statusName>draft</statusName>
+      <statusName>marketed</statusName>
+      <statusName>obselete</statusName>
+    </status>
+  </contentType>
+
+  <contentType namespace="com.smartitengineering.smart-shopping.content">
+    <name>Publisher</name>
+    <parent>
+      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+      <typeName>Book</typeName>
+    </parent>
+    <fields>
+      <field>
+        <name>name</name>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+        <required>true</required>
+      </field>
+      <field>
+        <name>publicationHouse</name>
+        <value>
+          <content>
+            <definition>
+              <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+              <typeName>PublicationHouse</typeName>
+            </definition>
+          </content>
+        </value>
+        <required>true</required>
+      </field>
+    </fields>
+    <status>
+      <statusName>draft</statusName>
+      <statusName>marketed</statusName>
+      <statusName>obselete</statusName>
+    </status>
+  </contentType>
+
+  <contentType namespace="com.smartitengineering.smart-shopping.content">
+    <name>PublicationHouse</name>
+    <parent>
+      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+      <typeName>Product</typeName>
+    </parent>
+    <fields>
+      <field>
+        <name>name</name>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+        <required>true</required>
+      </field>
+      <field>
+        <name>adress</name>
+        <value>
+          <content>
+            <definition>
+              <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+              <typeName>Address</typeName>
+            </definition>
+          </content>
+        </value>
+        <required>true</required>
+      </field>
+    </fields>
+    <status>
+      <statusName>draft</statusName>
+      <statusName>marketed</statusName>
+      <statusName>obselete</statusName>
+    </status>
+  </contentType>
+
+  <contentType namespace="com.smartitengineering.smart-shopping.content">
+    <name>Address</name>
+    <parent>
+      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+      <typeName>PublicationHouse</typeName>
+    </parent>
+    <fields>
+      <field>
+        <name>streetAddress</name>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+      </field>
+      <field>
+        <name>state</name>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+      </field>
+      <field>
+        <name>city</name>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+      </field>
+      <field>
+        <name>country</name>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+      </field>
+      <field>
+        <name>zipCode</name>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+      </field>
+    </fields>
+    <status>
+      <statusName>published</statusName>
+    </status>
+  </contentType>
+
+  <contentType namespace="com.smartitengineering.smart-shopping.content">
+    <name>Author</name>
+    <parent>
+      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+      <typeName>Book</typeName>
+    </parent>
+    <fields>
+      <field>
+        <name>name</name>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+      </field>
+      <field>
+        <name>books</name>
+        <value>
+          <collection>
+            <simple-value>
+              <content>
+                <definition>
+                  <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+                  <typeName>Book</typeName>
+                </definition>
+                <bidirectional>authors</bidirectional>
+              </content>
+            </simple-value>
+          </collection>
+        </value>
+      </field>
+    </fields>
+    <status>
+      <statusName>draft</statusName>
+      <statusName>published</statusName>
+    </status>
+  </contentType>
+</contentTypes>

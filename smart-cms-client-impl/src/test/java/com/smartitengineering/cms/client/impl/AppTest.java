@@ -21,6 +21,8 @@ package com.smartitengineering.cms.client.impl;
 import com.google.inject.AbstractModule;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.binder.guice.Initializer;
+import com.smartitengineering.cms.client.api.ContentTypeResource;
+import com.smartitengineering.cms.client.api.ContentTypesResource;
 import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
@@ -57,6 +59,7 @@ import org.apache.abdera.model.Feed;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.eclipse.jetty.server.Server;
@@ -517,6 +520,25 @@ public class AppTest {
     Collection<WorkspaceVariationResource> secondVariationResources = resource.getWorkspaceFeeds().iterator().
         next().getVariations().getVariationResources();
     Assert.assertEquals(1, secondVariationResources.size());
+  }
+
+  @Test
+  public void testCreateContentType() throws Exception {
+    LOGGER.info(":::::::::::::: CREATE CONTENT_TYPE RESOURCE TEST ::::::::::::::");
+    String XML = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("content-type-def-shopping.xml"));
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    ContentTypesResource contentTypesResource = feedResource.getContentTypes();
+    contentTypesResource.get();
+    Collection<ContentTypeResource> collection1 = contentTypesResource.getContentTypes();
+    Assert.assertEquals(0, collection1.size());
+    contentTypesResource.createContentType(XML);
+    contentTypesResource.get();
+    Collection<ContentTypeResource> collection = contentTypesResource.getContentTypes();
+    Assert.assertEquals(6, collection.size());
+
   }
 
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
