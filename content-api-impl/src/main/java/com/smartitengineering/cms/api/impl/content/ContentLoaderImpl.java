@@ -39,9 +39,12 @@ import com.smartitengineering.cms.api.content.MutableStringFieldValue;
 import com.smartitengineering.cms.api.content.NumberFieldValue;
 import com.smartitengineering.cms.api.content.OtherFieldValue;
 import com.smartitengineering.cms.api.content.StringFieldValue;
+import com.smartitengineering.cms.api.factory.content.WriteableContent;
+import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
+import com.smartitengineering.cms.spi.content.PersistableContent;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -233,5 +236,28 @@ public class ContentLoaderImpl implements ContentLoader {
   @Override
   public Variation getVariation(Field field, String name) {
     return SmartContentSPI.getInstance().getVariationProvider().getVariation(name, field.getFieldDef(), field);
+  }
+
+  @Override
+  public WriteableContent createContent(ContentType contentType) {
+    PersistableContent content = SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContent();
+    content.setContentDefinition(contentType);
+    return content;
+  }
+
+  @Override
+  public WriteableContent getWritableContent(Content content) {
+    PersistableContent mutableContent = SmartContentSPI.getInstance().getPersistableDomainFactory().
+        createPersistableContent();
+    mutableContent.setContentDefinition(content.getContentDefinition());
+    mutableContent.setContentId(content.getContentId());
+    mutableContent.setCreationDate(content.getCreationDate());
+    mutableContent.setLastModifiedDate(content.getLastModifiedDate());
+    mutableContent.setParentId(content.getParentId());
+    mutableContent.setStatus(content.getStatus());
+    for (Field field : content.getFields().values()) {
+      mutableContent.setField(field);
+    }
+    return mutableContent;
   }
 }
