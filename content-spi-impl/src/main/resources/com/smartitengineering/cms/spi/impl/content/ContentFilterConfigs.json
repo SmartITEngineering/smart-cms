@@ -1,0 +1,12 @@
+{
+  "configs": {
+    "id": {
+      "columnFamilyAsString":"self",
+      "columnQualifierAsString":"id",
+      "filterOnIfMissing":false,
+      "filterOnLatestVersionOnly":true,
+      "qualifierARangePrefix":false,
+      "filterOnRowId":true
+    }
+  }
+}
