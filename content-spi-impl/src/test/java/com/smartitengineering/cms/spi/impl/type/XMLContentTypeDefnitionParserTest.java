@@ -46,7 +46,7 @@ import com.smartitengineering.cms.api.type.ResourceUri.Type;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
-import com.smartitengineering.cms.spi.impl.content.PersistentServiceRegistrar;
+import com.smartitengineering.cms.spi.impl.PersistentServiceRegistrar;
 import com.smartitengineering.cms.spi.impl.type.validator.ContentTypeDefinitionParsers;
 import com.smartitengineering.cms.spi.impl.type.validator.TypeValidators;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLContentTypeDefinitionParser;

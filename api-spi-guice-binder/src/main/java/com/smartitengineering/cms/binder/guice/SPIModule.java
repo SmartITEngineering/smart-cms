@@ -150,7 +150,7 @@ public class SPIModule extends PrivateModule {
                                                                                PersistentService.class);
     serviceBinder.addBinding(WritableContentType.class).to(ContentTypePersistentService.class);
     bind(PersistentServiceRegistrar.class).to(
-        com.smartitengineering.cms.spi.impl.content.PersistentServiceRegistrar.class);
+        com.smartitengineering.cms.spi.impl.PersistentServiceRegistrar.class);
     binder().expose(PersistentServiceRegistrar.class);
     MapBinder<MediaType, ContentTypeDefinitionParser> parserBinder =
                                                       MapBinder.newMapBinder(binder(), MediaType.class,

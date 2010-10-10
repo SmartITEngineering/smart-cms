@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.impl.content;
+package com.smartitengineering.cms.spi.impl;
 
 import com.google.inject.Inject;
 import com.smartitengineering.cms.api.common.PersistentWriter;
