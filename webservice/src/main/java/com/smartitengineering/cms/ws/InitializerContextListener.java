@@ -19,8 +19,15 @@
 package com.smartitengineering.cms.ws;
 
 import com.smartitengineering.cms.binder.guice.Initializer;
+import com.smartitengineering.dao.hbase.ddl.HBaseTableGenerator;
+import com.smartitengineering.dao.hbase.ddl.config.json.ConfigurationJsonParser;
+import com.smartitengineering.dao.impl.hbase.HBaseConfigurationFactory;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.MasterNotRunningException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -28,9 +35,25 @@ import javax.servlet.ServletContextListener;
  */
 public class InitializerContextListener implements ServletContextListener {
 
+  private final Logger logger = LoggerFactory.getLogger(getClass());
+
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     Initializer.init();
+    Configuration config = HBaseConfigurationFactory.getConfigurationInstance();
+    if (config == null) {
+      config = HBaseConfigurationFactory.initConfiguration();
+    }
+    try {
+      new HBaseTableGenerator(ConfigurationJsonParser.getConfigurations(getClass().getClassLoader().
+          getResourceAsStream("com/smartitengineering/cms/spi/impl/schema.json")), config, false).generateTables();
+    }
+    catch (MasterNotRunningException ex) {
+      logger.error("Master could not be found!", ex);
+    }
+    catch (Exception ex) {
+      logger.error("Could not create table!", ex);
+    }
   }
 
   @Override
