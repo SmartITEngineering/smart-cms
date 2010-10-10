@@ -49,6 +49,11 @@
       <artifactId>junit</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.smartitengineering.smart-dao</groupId>
+      <artifactId>hbase-ddl-util</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-webapp</artifactId>
       <scope>test</scope>

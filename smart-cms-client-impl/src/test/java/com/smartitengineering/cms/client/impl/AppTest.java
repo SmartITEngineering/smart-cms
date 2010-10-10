@@ -32,6 +32,8 @@ import com.smartitengineering.cms.client.api.WorkspaceVariationsResource;
 import com.smartitengineering.cms.ws.common.domains.ResourceTemplateImpl;
 import com.smartitengineering.cms.ws.common.domains.Workspace;
 import com.smartitengineering.cms.ws.common.domains.WorkspaceImpl.WorkspaceIdImpl;
+import com.smartitengineering.dao.hbase.ddl.HBaseTableGenerator;
+import com.smartitengineering.dao.hbase.ddl.config.json.ConfigurationJsonParser;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
 import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ClientUtil;
@@ -57,9 +59,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
@@ -88,21 +87,17 @@ public class AppTest {
     /*
      * Start HBase and initialize tables
      */
+    //-Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl
+    System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
+                       "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
     try {
       TEST_UTIL.startMiniCluster();
     }
     catch (Exception ex) {
       LOGGER.error(ex.getMessage(), ex);
     }
-    HBaseAdmin admin = new HBaseAdmin(TEST_UTIL.getConfiguration());
-    HTableDescriptor workspaceTable = new HTableDescriptor("workspace");
-    workspaceTable.addFamily(new HColumnDescriptor("self"));
-    workspaceTable.addFamily(new HColumnDescriptor("repInfo"));
-    workspaceTable.addFamily(new HColumnDescriptor("repData"));
-    workspaceTable.addFamily(new HColumnDescriptor("varInfo"));
-    workspaceTable.addFamily(new HColumnDescriptor("varData"));
-    workspaceTable.addFamily(new HColumnDescriptor("friendlies"));
-    admin.createTable(workspaceTable);
+    new HBaseTableGenerator(ConfigurationJsonParser.getConfigurations(AppTest.class.getClassLoader().getResourceAsStream(
+        "com/smartitengineering/cms/spi/impl/schema.json")), TEST_UTIL.getConfiguration(), true).generateTables();
 
     /*
      * Ensure DIs done

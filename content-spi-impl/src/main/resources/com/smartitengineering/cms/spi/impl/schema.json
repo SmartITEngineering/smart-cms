@@ -1,0 +1,45 @@
+[
+  {
+    "tableName": "workspace",
+    "columnFamilyConfigurations": [
+      {
+        "familyName": "self"
+      },
+      {
+        "familyName": "repInfo"
+      },
+      {
+        "familyName": "repData"
+      },
+      {
+        "familyName": "varInfo"
+      },
+      {
+        "familyName": "varData"
+      },
+      {
+        "familyName": "friendlies"
+      }
+    ]
+  },
+  {
+    "tableName": "content-type",
+    "columnFamilyConfigurations": [
+      {
+        "familyName": "simple"
+      },
+      {
+        "familyName": "fields"
+      },
+      {
+        "familyName": "representations"
+      },
+      {
+        "familyName": "statuses"
+      },
+      {
+        "familyName": "variants"
+      }
+    ]
+  }
+]
