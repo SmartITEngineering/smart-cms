@@ -19,14 +19,14 @@
 package com.smartitengineering.cms.spi.content;
 
 import com.smartitengineering.cms.api.content.Content;
-import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.content.Filter;
 import java.util.Collection;
 
 /**
  *
  * @author imyousuf
  */
-public interface PersistentContentReader {
+public interface ContentSearcher {
 
-  Collection<Content> readContentsFromPersistentStorage(ContentId... ids);
+  Collection<Content> search(Filter filter);
 }

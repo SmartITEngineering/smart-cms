@@ -191,9 +191,8 @@ public class ContentLoaderImpl implements ContentLoader {
 
   @Override
   public Set<Content> search(Filter filter) {
-    return Collections.unmodifiableSet(new LinkedHashSet<Content>(SmartContentSPI.getInstance().getContentReader().
-        search(
-        filter)));
+    return Collections.unmodifiableSet(new LinkedHashSet<Content>(SmartContentSPI.getInstance().getContentSearcher().
+        search(filter)));
   }
 
   @Override

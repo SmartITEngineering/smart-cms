@@ -22,6 +22,7 @@ import com.smartitengineering.cms.api.common.PersistentWriter;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.spi.content.ContentIdProcessor;
+import com.smartitengineering.cms.spi.content.ContentSearcher;
 import com.smartitengineering.cms.spi.content.PersistentContentReader;
 import com.smartitengineering.cms.spi.content.RepresentationProvider;
 import com.smartitengineering.cms.spi.content.VariationProvider;
@@ -87,6 +88,12 @@ public final class SmartContentSPI {
   private PersistableDomainFactory persistableDomainFactory;
   @InjectableField(beanName = "schemaLocationForContentTypeXml")
   private String schemaLocationForContentTypeXml;
+  @InjectableField
+  private ContentSearcher contentSearcher;
+
+  public ContentSearcher getContentSearcher() {
+    return contentSearcher;
+  }
 
   public String getSchemaLocationForContentTypeXml() {
     return schemaLocationForContentTypeXml;
