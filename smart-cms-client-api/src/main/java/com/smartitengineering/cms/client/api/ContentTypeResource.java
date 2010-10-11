@@ -18,14 +18,12 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
 import com.smartitengineering.util.rest.client.WritableResource;
 
 /**
  *
  * @author kaisar
  */
-public interface ContentTypeResource extends WritableResource<ResourceTemplate> {
+public interface ContentTypeResource extends WritableResource<String> {
 
-  public String getContentType();
 }

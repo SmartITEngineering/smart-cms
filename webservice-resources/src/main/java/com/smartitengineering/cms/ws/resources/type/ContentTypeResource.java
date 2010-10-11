@@ -74,6 +74,10 @@ public class ContentTypeResource extends AbstractResource {
 
   @DELETE
   public Response delete() {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Delete content type with id " + type.getContentTypeID().toString() + " with last-modified "
+          + lastModified + " " + tag.getValue());
+    }
     ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(lastModified, tag);
     if (builder != null) {
       return builder.build();
