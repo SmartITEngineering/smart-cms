@@ -19,7 +19,6 @@
 package com.smartitengineering.cms.spi.impl.type.validator;
 
 import com.smartitengineering.cms.api.exception.InvalidReferenceException;
-import com.smartitengineering.cms.type.xml.XmlParser;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;

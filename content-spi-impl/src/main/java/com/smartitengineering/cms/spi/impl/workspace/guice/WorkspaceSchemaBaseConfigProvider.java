@@ -20,7 +20,6 @@ package com.smartitengineering.cms.spi.impl.workspace.guice;
 
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.cms.spi.impl.workspace.PersistentWorkspace;
 import com.smartitengineering.dao.impl.hbase.spi.impl.JsonConfigLoader;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
