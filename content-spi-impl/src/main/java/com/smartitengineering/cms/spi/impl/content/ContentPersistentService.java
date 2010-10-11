@@ -22,7 +22,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
+import com.smartitengineering.cms.spi.SmartContentSPI;
+import com.smartitengineering.cms.spi.content.PersistableContent;
 import com.smartitengineering.cms.spi.content.PersistentContentReader;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.dao.common.CommonReadDao;
@@ -31,6 +34,7 @@ import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Set;
 
 /**
@@ -61,12 +65,32 @@ public class ContentPersistentService implements PersistentService<WriteableCont
 
   @Override
   public void create(WriteableContent bean) throws Exception {
-    commonWriteDao.save(adapter.convert(bean));
+    final PersistableContent content;
+    if (bean instanceof PersistableContent) {
+      content = (PersistableContent) bean;
+    }
+    else {
+      content = SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContent();
+      copy(bean, content);
+    }
+    Date date = new Date();
+    content.setCreationDate(date);
+    content.setLastModifiedDate(date);
+    commonWriteDao.save(adapter.convert(content));
   }
 
   @Override
   public void update(WriteableContent bean) throws Exception {
-    commonWriteDao.update(adapter.convert(bean));
+    final PersistableContent content;
+    if (bean instanceof PersistableContent) {
+      content = (PersistableContent) bean;
+    }
+    else {
+      content = SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContent();
+      copy(bean, content);
+    }
+    content.setLastModifiedDate(new Date());
+    commonWriteDao.update(adapter.convert(content));
   }
 
   @Override
@@ -79,5 +103,17 @@ public class ContentPersistentService implements PersistentService<WriteableCont
     final Set<PersistentContent> byIds = commonReadDao.getByIds(Arrays.asList(ids));
     return Collections.<Content>unmodifiableCollection(adapter.convertInversely(byIds.toArray(new PersistentContent[byIds.
         size()])));
+  }
+
+  protected void copy(WriteableContent from, PersistableContent to) {
+    to.setContentDefinition(from.getContentDefinition());
+    to.setContentId(from.getContentId());
+    to.setCreationDate(from.getCreationDate());
+    to.setLastModifiedDate(from.getLastModifiedDate());
+    to.setParentId(from.getParentId());
+    to.setStatus(from.getStatus());
+    for (Field field : from.getFields().values()) {
+      to.setField(field);
+    }
   }
 }
