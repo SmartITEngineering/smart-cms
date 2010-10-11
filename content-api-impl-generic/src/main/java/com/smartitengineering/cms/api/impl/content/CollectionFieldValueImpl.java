@@ -20,11 +20,49 @@ package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.MutableCollectionFieldValue;
+import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.Collection;
+import org.codehaus.jackson.JsonGenerator.Feature;
+import org.codehaus.jackson.impl.WriterBasedGenerator;
+import org.codehaus.jackson.io.IOContext;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.util.BufferRecycler;
 
 /**
  *
  * @author kaisar
  */
-public class CollectionFieldValueImpl extends FieldValueImpl<Collection<FieldValue>> implements MutableCollectionFieldValue{
+public class CollectionFieldValueImpl extends FieldValueImpl<Collection<FieldValue>> implements
+    MutableCollectionFieldValue {
+
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+
+  @Override
+  protected String getValueAsString() {
+    Collection<FieldValue> fieldValues = getValue();
+    if (fieldValues != null) {
+      JsonNodeFactory factory = MAPPER.getNodeFactory();
+      ArrayNode arrayNode = new ArrayNode(factory);
+      for (FieldValue fieldValue : fieldValues) {
+        arrayNode.add(fieldValue.toString());
+      }
+      final StringWriter stringWriter = new StringWriter();
+      String toString;
+      try {
+        new WriterBasedGenerator(new IOContext(new BufferRecycler(), new Object(), true), Feature.collectDefaults(),
+                                 MAPPER, stringWriter).writeTree(arrayNode);
+        toString = stringWriter.toString();
+        return toString;
+      }
+      catch (Exception ex) {
+        logger.warn("Could not serialize JSON node", ex);
+      }
+      toString = Arrays.toString(fieldValues.toArray());
+      return toString;
+    }
+    return super.getValueAsString();
+  }
 }

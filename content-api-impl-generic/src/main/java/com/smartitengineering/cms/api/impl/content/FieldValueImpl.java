@@ -21,6 +21,8 @@ package com.smartitengineering.cms.api.impl.content;
 import com.smartitengineering.cms.api.content.MutableFieldValue;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -30,6 +32,7 @@ public class FieldValueImpl<V> implements MutableFieldValue<V> {
 
   private FieldValueType fieldValueType;
   private V value;
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public void setValue(V newV) {
