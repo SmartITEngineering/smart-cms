@@ -298,10 +298,16 @@ public class XmlParser implements XmlConstants {
         type.setItemDataType(parseSimpleValue(simpleElement));
       }
       else if (StringUtils.equalsIgnoreCase(element.getLocalName(), MIN_SIZE)) {
-        type.setMinSize(NumberUtils.toInt(parseOptionalStringElement(rootElement, MIN_SIZE), -1));
+        type.setMinSize(NumberUtils.toInt(parseOptionalStringElement(rootElement, MIN_SIZE), Integer.MIN_VALUE));
+        if (logger.isDebugEnabled()) {
+          logger.debug("minSize of collection " + type.getMinSize());
+        }
       }
       else if (StringUtils.equalsIgnoreCase(element.getLocalName(), MAX_SIZE)) {
-        type.setMaxSize(NumberUtils.toInt(parseOptionalStringElement(rootElement, MAX_SIZE), -1));
+        type.setMaxSize(NumberUtils.toInt(parseOptionalStringElement(rootElement, MAX_SIZE), Integer.MAX_VALUE));
+        if (logger.isDebugEnabled()) {
+          logger.debug("maxSize of collection " + type.getMaxSize());
+        }
       }
     }
     return type;

@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.type.validator;
 
-import com.smartitengineering.cms.type.xml.XmlParser;
+import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
@@ -49,7 +50,7 @@ public class XMLContentTypeDefinitionParser implements ContentTypeDefinitionPars
 
   @Override
   public Collection<WritableContentType> parseStream(WorkspaceId workspaceId, InputStream inputStream) {
-    XmlParser parser = new XmlParser(workspaceId, inputStream, new XMLParserIntrospector() {
+    ContentTypeDefinitionValidator parser = new ContentTypeDefinitionValidator(workspaceId, inputStream, new XMLParserIntrospector() {
 
       @Override
       public MutableContentType createMutableContentType() {
@@ -65,9 +66,15 @@ public class XMLContentTypeDefinitionParser implements ContentTypeDefinitionPars
         }
       }
     });
-    final Collection<MutableContentType> parse = parser.parse();
+    Collection<MutableContentType> parse = new ArrayList<MutableContentType>();
+    try {
+      parse = parser.getIfValid();
+    }
+    catch (InvalidReferenceException ex) {
+      java.util.logging.Logger.getLogger(XMLContentTypeDefinitionParser.class.getName()).log(Level.SEVERE, null, ex);
+    }
     final List<WritableContentType> list = new ArrayList<WritableContentType>(parse.size());
-    for(MutableContentType type : parse) {
+    for (MutableContentType type : parse) {
       list.add((WritableContentType) type);
     }
     return list;

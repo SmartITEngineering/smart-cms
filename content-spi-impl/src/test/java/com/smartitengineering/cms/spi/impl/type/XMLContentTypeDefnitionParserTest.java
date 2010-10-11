@@ -150,8 +150,8 @@ public class XMLContentTypeDefnitionParserTest {
       logger.debug(new StringBuffer("Parent's Name is ").append(contentType.getParent().getName()).toString());
       logger.debug(new StringBuffer("Parent's NameSpace is ").append(contentType.getParent().getNamespace()).toString());
     }
-    Assert.assertEquals("com.smartitengineering.smart-shopping.content", contentType.getParent().getNamespace());
-    Assert.assertEquals("Product", contentType.getParent().getName());
+    Assert.assertEquals("jpeg", contentType.getParent().getNamespace());
+    Assert.assertEquals("RST", contentType.getParent().getName());
   }
 
   @Test

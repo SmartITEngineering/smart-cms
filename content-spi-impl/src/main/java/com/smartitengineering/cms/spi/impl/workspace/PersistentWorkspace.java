@@ -38,7 +38,8 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
   private boolean representationPopulated;
   private boolean variationPopulated;
   private boolean friendliesPopulated;
-  private final List<PersistableRepresentationTemplate> representationTemplates = new ArrayList<PersistableRepresentationTemplate>();
+  private final List<PersistableRepresentationTemplate> representationTemplates =
+                                                        new ArrayList<PersistableRepresentationTemplate>();
   private final List<PersistableVariationTemplate> variationTemplates = new ArrayList<PersistableVariationTemplate>();
   private final List<WorkspaceId> friendlies = new ArrayList<WorkspaceId>();
 

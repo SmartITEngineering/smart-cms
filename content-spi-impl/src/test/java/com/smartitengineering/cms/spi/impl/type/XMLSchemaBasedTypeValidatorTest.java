@@ -29,32 +29,32 @@ import junit.framework.TestCase;
  * @author imyousuf
  */
 public class XMLSchemaBasedTypeValidatorTest
-				extends TestCase {
+    extends TestCase {
 
-		public XMLSchemaBasedTypeValidatorTest(String testName) {
-				super(testName);
-		}
+  public XMLSchemaBasedTypeValidatorTest(String testName) {
+    super(testName);
+  }
 
-		@Override
-		protected void setUp()
-						throws Exception {
-				super.setUp();
-		}
+  @Override
+  protected void setUp()
+      throws Exception {
+    super.setUp();
+  }
 
-		/**
-		 * Test of isValid method, of class XMLSchemaBasedTypeValidator.
-		 */
-		public void testIsValid()
-						throws Exception {
-				TypeValidator validator = new XMLSchemaBasedTypeValidator();
-				URL def1 = getClass().getClassLoader().getResource(
-								"content-type-def-1.xml");
-				File file = new File(def1.toURI());
-				assertTrue(validator.isValid(file));
-				URL shopping = getClass().getClassLoader().getResource(
-								"content-type-def-shopping.xml");
-				file = new File(shopping.toURI());
-				assertTrue(validator.isValid(file));
-				assertFalse(validator.isValid((File)null));
-		}
+  /**
+   * Test of isValid method, of class XMLSchemaBasedTypeValidator.
+   */
+  public void testIsValid()
+      throws Exception {
+    TypeValidator validator = new XMLSchemaBasedTypeValidator();
+    URL def1 = getClass().getClassLoader().getResource(
+        "content-type-def-1.xml");
+    File file = new File(def1.toURI());
+    assertTrue(validator.isValid(file));
+    URL shopping = getClass().getClassLoader().getResource(
+        "content-type-def-shopping.xml");
+    file = new File(shopping.toURI());
+    assertTrue(validator.isValid(file));
+    assertFalse(validator.isValid((File) null));
+  }
 }

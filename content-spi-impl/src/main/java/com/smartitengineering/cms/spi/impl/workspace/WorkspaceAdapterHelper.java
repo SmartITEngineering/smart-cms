@@ -25,7 +25,7 @@ import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
  *
  * @author imyousuf
  */
-public class WorkspaceAdapterHelper extends AbstractAdapterHelper<Workspace, PersistentWorkspace>{
+public class WorkspaceAdapterHelper extends AbstractAdapterHelper<Workspace, PersistentWorkspace> {
 
   @Override
   protected PersistentWorkspace newTInstance() {
@@ -41,5 +41,4 @@ public class WorkspaceAdapterHelper extends AbstractAdapterHelper<Workspace, Per
   protected Workspace convertFromT2F(PersistentWorkspace toBean) {
     return toBean.getWorkspace();
   }
-
 }

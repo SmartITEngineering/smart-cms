@@ -30,8 +30,8 @@
   <contentType namespace="asdfasdf1">
     <name>XYZ</name>
     <parent>
-      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-      <typeName>Product</typeName>
+      <typeNS>jpeg</typeNS>
+      <typeName>RST</typeName>
     </parent>
     <fields>
       <field>

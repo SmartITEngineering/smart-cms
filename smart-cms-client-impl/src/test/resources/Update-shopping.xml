@@ -58,10 +58,48 @@
       </field>
     </fields>
     <status>
-      <statusName>draft-update</statusName>
-      <statusName>marketed-update</statusName>
-      <statusName>withdrawn-update</statusName>
-      <statusName>obselete-update</statusName>
+      <statusName>draft</statusName>
+      <statusName>marketed</statusName>
+      <statusName>withdrawn</statusName>
+      <statusName>obselete</statusName>
+    </status>
+  </contentType>
+
+   <contentType namespace="com.smartitengineering.smart-shopping.content">
+    <name>Product-name</name>
+    <fields>
+      <field>
+        <name>manufactureID</name>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+        <required>true</required>
+      </field>
+      <field>
+        <name>name</name>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+        <required>true</required>
+      </field>
+      <field>
+        <name>description</name>
+        <value>
+          <string>
+            <mimeType>application/xml</mimeType>
+          </string>
+        </value>
+      </field>
+    </fields>
+    <status>
+      <statusName>draft</statusName>
+      <statusName>marketed</statusName>
+      <statusName>withdrawn</statusName>
+      <statusName>obselete</statusName>
     </status>
   </contentType>
 
@@ -253,43 +291,6 @@
     <parent>
       <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
       <typeName>Book</typeName>
-    </parent>
-    <fields>
-      <field>
-        <name>name</name>
-        <value>
-          <string>
-            <mimeType>text/plain</mimeType>
-          </string>
-        </value>
-      </field>
-      <field>
-        <name>books</name>
-        <value>
-          <collection>
-            <simple-value>
-              <content>
-                <definition>
-                  <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-                  <typeName>Book</typeName>
-                </definition>
-                <bidirectional>authors</bidirectional>
-              </content>
-            </simple-value>
-          </collection>
-        </value>
-      </field>
-    </fields>
-    <status>
-      <statusName>draft</statusName>
-      <statusName>published</statusName>
-    </status>
-  </contentType>
-  <contentType namespace="com.smartitengineering.smart-shopping.content">
-    <name>Shop</name>
-    <parent>
-      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-      <typeName>Publication</typeName>
     </parent>
     <fields>
       <field>

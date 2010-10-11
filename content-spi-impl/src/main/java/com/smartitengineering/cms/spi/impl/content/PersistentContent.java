@@ -34,8 +34,8 @@ public class PersistentContent extends AbstractGenericPersistentDTO<PersistentCo
 
   @Override
   public boolean isValid() {
-    return mutableContent != null && mutableContent.getContentId() != null && mutableContent.getContentDefinition() !=
-        null && isMandatoryFieldsPresent();
+    return mutableContent != null && mutableContent.getContentId() != null && mutableContent.getContentDefinition()
+        != null && isMandatoryFieldsPresent();
   }
 
   protected boolean isMandatoryFieldsPresent() {
