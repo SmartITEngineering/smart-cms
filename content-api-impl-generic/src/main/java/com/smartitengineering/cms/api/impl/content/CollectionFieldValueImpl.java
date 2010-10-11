@@ -38,7 +38,7 @@ import org.codehaus.jackson.util.BufferRecycler;
 public class CollectionFieldValueImpl extends FieldValueImpl<Collection<FieldValue>> implements
     MutableCollectionFieldValue {
 
-  private static final ObjectMapper MAPPER = new ObjectMapper();
+  static final ObjectMapper MAPPER = new ObjectMapper();
 
   @Override
   protected String getValueAsString() {

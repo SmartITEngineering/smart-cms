@@ -59,6 +59,11 @@ The module is responsible for Implementing the API for the CMS.
 						<groupId>org.slf4j</groupId>
 						<artifactId>slf4j-api</artifactId>
 				</dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <scope>test</scope>
+        </dependency>
 				<dependency>
 						<groupId>junit</groupId>
 						<artifactId>junit</artifactId>

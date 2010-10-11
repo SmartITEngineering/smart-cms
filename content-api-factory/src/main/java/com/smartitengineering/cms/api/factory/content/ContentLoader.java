@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.content.ContentFieldValue;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.DateTimeFieldValue;
 import com.smartitengineering.cms.api.content.Field;
+import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.Filter;
 import com.smartitengineering.cms.api.content.MutableBooleanFieldValue;
 import com.smartitengineering.cms.api.content.MutableCollectionFieldValue;
@@ -80,6 +81,8 @@ public interface ContentLoader {
   MutableStringFieldValue createStringFieldValue();
 
   MutableStringFieldValue createStringFieldValue(StringFieldValue fieldValue);
+
+  FieldValue getValueFor(String value, FieldDef fieldDef);
 
   ContentId createContentId(WorkspaceId workspaceId, byte[] id);
 
