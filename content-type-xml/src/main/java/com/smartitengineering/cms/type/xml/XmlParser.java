@@ -133,6 +133,7 @@ public class XmlParser implements XmlConstants {
         }
         mutableContent.getMutableStatuses().addAll(statuses);
         contentTypes.add(mutableContent);
+        introspector.processMutableContentType(mutableContent, contentTypeElement);
         fieldDefs.clear();
       }
     }
