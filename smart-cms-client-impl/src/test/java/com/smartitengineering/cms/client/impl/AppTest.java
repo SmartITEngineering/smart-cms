@@ -541,6 +541,23 @@ public class AppTest {
 
   }
 
+  @Test
+  public void testUpdateContentType() throws Exception {
+    LOGGER.info(":::::::::::::: UPDATE CONTENT_TYPE RESOURCE TEST ::::::::::::::");
+    String XML = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Update-shopping.xml"));
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    ContentTypesResource contentTypesResource = feedResource.getContentTypes();
+    Collection<ContentTypeResource> collection = contentTypesResource.getContentTypes();
+    Assert.assertEquals(6, collection.size());
+    contentTypesResource.createContentType(XML);
+    contentTypesResource.get();
+    Collection<ContentTypeResource> collection1 = contentTypesResource.getContentTypes();
+    Assert.assertEquals(7, collection1.size());
+  }
+
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
     HttpClient client = new HttpClient();
     GetMethod method = new GetMethod(uri);

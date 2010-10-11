@@ -31,7 +31,7 @@ import javax.ws.rs.core.MediaType;
  *
  * @author kaisar
  */
-public class ContentTypeResourceImpl extends AbstractClientResource<ResourceTemplate, Resource> implements
+public class ContentTypeResourceImpl extends AbstractClientResource<String, Resource> implements
     ContentTypeResource {
 
   public ContentTypeResourceImpl(Resource referer, ResourceLink link) {
@@ -39,7 +39,7 @@ public class ContentTypeResourceImpl extends AbstractClientResource<ResourceTemp
   }
 
   public ContentTypeResourceImpl(Resource referer, URI uri) {
-    super(referer, uri, MediaType.APPLICATION_JSON, ResourceTemplate.class);
+    super(referer, uri, MediaType.APPLICATION_XML, String.class);
   }
 
   @Override
@@ -61,9 +61,4 @@ public class ContentTypeResourceImpl extends AbstractClientResource<ResourceTemp
     return null;
   }
 
-  @Override
-  public String getContentType() {
-    final String contentType = getResourceRepresentationType();
-    return contentType;
-  }
 }
