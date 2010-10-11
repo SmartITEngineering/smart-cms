@@ -558,6 +558,30 @@ public class AppTest {
     Assert.assertEquals(7, collection1.size());
   }
 
+  @Test
+  public void testDeleteContentType() throws Exception {
+    LOGGER.info(":::::::::::::: DELETE CONTENT_TYPE RESOURCE TEST ::::::::::::::");
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    ContentTypesResource contentTypesResource = feedResource.getContentTypes();
+    Collection<ContentTypeResource> collection = contentTypesResource.getContentTypes();
+    Assert.assertEquals(7, collection.size());
+    ContentTypeResource contentTypeResource = collection.iterator().next();
+    Assert.assertNotNull(contentTypeResource.get());
+    contentTypeResource.delete(ClientResponse.Status.OK);
+    try {
+      contentTypeResource.get();
+    }
+    catch (UniformInterfaceException exception) {
+      Assert.assertEquals(404, exception.getResponse().getStatus());
+    }
+    contentTypesResource.get();
+    Collection<ContentTypeResource> collection1 = contentTypesResource.getContentTypes();
+    Assert.assertEquals(6, collection1.size());
+  }
+
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {
     HttpClient client = new HttpClient();
     GetMethod method = new GetMethod(uri);
