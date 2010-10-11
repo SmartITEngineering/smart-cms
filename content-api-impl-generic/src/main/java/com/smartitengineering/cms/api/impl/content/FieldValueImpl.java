@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.content.MutableFieldValue;
 import com.smartitengineering.cms.api.type.FieldValueType;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -43,5 +44,17 @@ public class FieldValueImpl<V> implements MutableFieldValue<V> {
   @Override
   public V getValue() {
     return value;
+  }
+
+  protected String getValueAsString() {
+    if (getValue() == null) {
+      return null;
+    }
+    return getValue().toString();
+  }
+
+  @Override
+  public final String toString() {
+    return StringUtils.defaultIfEmpty(getValueAsString(), "NULL");
   }
 }
