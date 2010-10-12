@@ -81,7 +81,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
 
   @Override
   public Collection<WritableContentType> parseContentTypes(WorkspaceId workspaceId,
-                                                          InputStream contentTypeDefinitionStream, MediaType mediaType)
+                                                           InputStream contentTypeDefinitionStream, MediaType mediaType)
       throws NullPointerException, InvalidReferenceException, IOException {
     TypeValidator validator = SmartContentSPI.getInstance().getTypeValidators().getValidators().get(mediaType);
     ContentTypeDefinitionParser parser = SmartContentSPI.getInstance().getContentTypeDefinitionParsers().getParsers().
@@ -174,8 +174,8 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       return collectionDataTypeImpl;
     }
     else {
-      throw new IllegalArgumentException("Argument can not be null or min size has to be non-negative or max size can" +
-          " not be smaller than min zie.");
+      throw new IllegalArgumentException("Argument can not be null or min size has to be non-negative or max size can"
+          + " not be smaller than min zie.");
     }
   }
 

@@ -128,7 +128,7 @@ public class ContentTypeDefinitionValidator {
                   }
                   else if (dataType.getItemDataType() == null || dataType.getItemDataType().getType() == null) {
                     if (logger.isDebugEnabled()) {
-                      logger.error("Collection's Item tyoe is empty");
+                      logger.error("Collection's Item type is empty");
                     }
                     isValid = false;
                   }
