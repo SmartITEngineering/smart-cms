@@ -20,6 +20,7 @@ package com.smartitengineering.cms.spi.type;
 
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import java.io.InputStream;
 import java.util.Collection;
@@ -30,7 +31,7 @@ import java.util.Collection;
  */
 public interface ContentTypeDefinitionParser {
 
-  public Collection<WritableContentType> parseStream(WorkspaceId workspaceId, InputStream inputStream);
+  public Collection<WritableContentType> parseStream(WorkspaceId workspaceId, InputStream inputStream) throws InvalidReferenceException;
 
   public Collection<MediaType> getSupportedTypes();
 }

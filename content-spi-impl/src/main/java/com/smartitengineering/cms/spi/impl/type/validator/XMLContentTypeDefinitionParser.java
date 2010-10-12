@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
@@ -49,7 +48,8 @@ public class XMLContentTypeDefinitionParser implements ContentTypeDefinitionPars
   private Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
-  public Collection<WritableContentType> parseStream(WorkspaceId workspaceId, InputStream inputStream) {
+  public Collection<WritableContentType> parseStream(WorkspaceId workspaceId, InputStream inputStream) throws
+      InvalidReferenceException {
     ContentTypeDefinitionValidator parser = new ContentTypeDefinitionValidator(workspaceId, inputStream, new XMLParserIntrospector() {
 
       @Override
@@ -67,12 +67,9 @@ public class XMLContentTypeDefinitionParser implements ContentTypeDefinitionPars
       }
     });
     Collection<MutableContentType> parse = new ArrayList<MutableContentType>();
-    try {
-      parse = parser.getIfValid();
-    }
-    catch (InvalidReferenceException ex) {
-      java.util.logging.Logger.getLogger(XMLContentTypeDefinitionParser.class.getName()).log(Level.SEVERE, null, ex);
-    }
+
+    parse = parser.getIfValid();
+
     final List<WritableContentType> list = new ArrayList<WritableContentType>(parse.size());
     for (MutableContentType type : parse) {
       list.add((WritableContentType) type);
