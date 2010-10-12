@@ -542,6 +542,25 @@ public class AppTest {
   }
 
   @Test
+  public void testCreateContentTypeWithInvalidXML() throws Exception {
+    LOGGER.info(":::::::::::::: CREATE CONTENT_TYPE RESOURCE WITH INVALID XML TEST ::::::::::::::");
+    String XML = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("InvalidValueType.xml"));
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    ContentTypesResource contentTypesResource = feedResource.getContentTypes();
+    contentTypesResource.get();
+    try {
+      contentTypesResource.createContentType(XML);
+      Assert.fail("Should not be able to create!");
+    }
+    catch (UniformInterfaceException ex) {
+      Assert.assertEquals(400, ex.getResponse().getStatus());
+    }
+  }
+
+  @Test
   public void testUpdateContentType() throws Exception {
     LOGGER.info(":::::::::::::: UPDATE CONTENT_TYPE RESOURCE TEST ::::::::::::::");
     String XML = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Update-shopping.xml"));

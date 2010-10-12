@@ -434,8 +434,10 @@ public class XMLContentTypeDefnitionParserTest {
                                                                                           MediaType.APPLICATION_XML);
       Assert.fail("Parent is Invalid");
     }
-    catch (Exception e) {
-      e.printStackTrace();
+    catch (InvalidReferenceException e) {
+    }
+    catch(Exception ex) {
+      Assert.fail("Unexpected exception! " + ex.getMessage());
     }
   }
 
@@ -452,8 +454,10 @@ public class XMLContentTypeDefnitionParserTest {
                                                                                           MediaType.APPLICATION_XML);
       Assert.fail("minSize is Grater than maxSize");
     }
-    catch (Exception e) {
-      e.printStackTrace();
+    catch (InvalidReferenceException e) {
+    }
+    catch(Exception ex) {
+      Assert.fail("Unexpected exception! " + ex.getMessage());
     }
   }
 
@@ -470,8 +474,10 @@ public class XMLContentTypeDefnitionParserTest {
                                                                                           MediaType.APPLICATION_XML);
       Assert.fail("Invalid Value type inside the collection");
     }
-    catch (Exception e) {
-      e.printStackTrace();
+    catch (InvalidReferenceException e) {
+    }
+    catch(Exception ex) {
+      Assert.fail("Unexpected exception! " + ex.getMessage());
     }
   }
 

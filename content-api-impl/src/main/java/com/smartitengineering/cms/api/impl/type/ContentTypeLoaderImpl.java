@@ -105,6 +105,9 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       List<ContentTypeImpl> resultingTypes = mergeWithStoredContentTypes(types);
       return Collections.<WritableContentType>unmodifiableCollection(resultingTypes);
     }
+    catch (InvalidReferenceException ex) {
+      throw ex;
+    }
     catch (Exception ex) {
       throw new IOException(ex);
     }
