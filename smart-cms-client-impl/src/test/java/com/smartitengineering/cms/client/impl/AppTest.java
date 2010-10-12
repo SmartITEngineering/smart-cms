@@ -20,6 +20,13 @@ package com.smartitengineering.cms.client.impl;
 
 import com.google.inject.AbstractModule;
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.factory.type.WritableContentType;
+import com.smartitengineering.cms.api.type.ContentStatus;
+import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.MutableContentStatus;
+import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.binder.guice.Initializer;
 import com.smartitengineering.cms.client.api.ContentTypeResource;
 import com.smartitengineering.cms.client.api.ContentTypesResource;
@@ -46,11 +53,13 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -555,7 +564,46 @@ public class AppTest {
     contentTypesResource.createContentType(XML);
     contentTypesResource.get();
     Collection<ContentTypeResource> collection1 = contentTypesResource.getContentTypes();
-    Assert.assertEquals(7, collection1.size());
+    Assert.assertEquals(6, collection1.size());
+  }
+
+  @Test
+  public void testIsUpdated() throws Exception {
+    LOGGER.info(":::::::::::::: TEST IS UPDATED OCCURED ::::::::::::::");
+
+    WorkspaceId workspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId("additional");
+
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+
+    ContentTypesResource contentTypesResource = feedResource.getContentTypes();
+    Collection<ContentTypeResource> collection = contentTypesResource.getContentTypes();
+    Iterator<ContentTypeResource> iterator1 = collection.iterator();
+
+    ContentTypeResource contentTypeResource = iterator1.next();
+    contentTypeResource = iterator1.next();
+    contentTypeResource = iterator1.next();
+    contentTypeResource = iterator1.next();
+
+    String content = contentTypeResource.get();
+    InputStream inputStream = IOUtils.toInputStream(content);
+
+    Collection<WritableContentType> objContentType = SmartContentAPI.getInstance().getContentTypeLoader().
+        parseContentTypes(workspaceId, inputStream, com.smartitengineering.cms.api.common.MediaType.APPLICATION_XML);
+
+    Iterator<WritableContentType> iterator2 = objContentType.iterator();
+    MutableContentType contentType = iterator2.next();
+    Assert.assertEquals(4, contentType.getStatuses().size());
+
+    String[] name = {"update-draft", "update-marketed", "update-obselete", "update-withdrawn"};
+    for (int i = 0; i < 4; i++) {
+      MutableContentStatus contentStatus = SmartContentAPI.getInstance().getContentTypeLoader().
+          createMutableContentStatus();
+      contentStatus.setName(name[i]);
+      Assert.assertEquals(contentStatus, contentType.getStatuses().get(name[i]));
+    }
   }
 
   @Test
@@ -567,7 +615,7 @@ public class AppTest {
     WorkspaceFeedResource feedResource = iterator.next();
     ContentTypesResource contentTypesResource = feedResource.getContentTypes();
     Collection<ContentTypeResource> collection = contentTypesResource.getContentTypes();
-    Assert.assertEquals(7, collection.size());
+    Assert.assertEquals(6, collection.size());
     ContentTypeResource contentTypeResource = collection.iterator().next();
     Assert.assertNotNull(contentTypeResource.get());
     contentTypeResource.delete(ClientResponse.Status.OK);
@@ -578,8 +626,19 @@ public class AppTest {
       Assert.assertEquals(404, exception.getResponse().getStatus());
     }
     contentTypesResource.get();
+    Collection<ContentTypeResource> collection2 = contentTypesResource.getContentTypes();
+    contentTypeResource = collection2.iterator().next();
+    Assert.assertNotNull(contentTypeResource.get());
+    contentTypeResource.delete(ClientResponse.Status.OK);
+    try {
+      contentTypeResource.get();
+    }
+    catch (UniformInterfaceException exception) {
+      Assert.assertEquals(404, exception.getResponse().getStatus());
+    }
+    contentTypesResource.get();
     Collection<ContentTypeResource> collection1 = contentTypesResource.getContentTypes();
-    Assert.assertEquals(6, collection1.size());
+    Assert.assertEquals(4, collection1.size());
   }
 
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {

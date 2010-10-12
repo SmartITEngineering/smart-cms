@@ -58,48 +58,10 @@
       </field>
     </fields>
     <status>
-      <statusName>draft</statusName>
-      <statusName>marketed</statusName>
-      <statusName>withdrawn</statusName>
-      <statusName>obselete</statusName>
-    </status>
-  </contentType>
-
-   <contentType namespace="com.smartitengineering.smart-shopping.content">
-    <name>Product-name</name>
-    <fields>
-      <field>
-        <name>manufactureID</name>
-        <value>
-          <string>
-            <mimeType>text/plain</mimeType>
-          </string>
-        </value>
-        <required>true</required>
-      </field>
-      <field>
-        <name>name</name>
-        <value>
-          <string>
-            <mimeType>text/plain</mimeType>
-          </string>
-        </value>
-        <required>true</required>
-      </field>
-      <field>
-        <name>description</name>
-        <value>
-          <string>
-            <mimeType>application/xml</mimeType>
-          </string>
-        </value>
-      </field>
-    </fields>
-    <status>
-      <statusName>draft</statusName>
-      <statusName>marketed</statusName>
-      <statusName>withdrawn</statusName>
-      <statusName>obselete</statusName>
+      <statusName>update-draft</statusName>
+      <statusName>update-marketed</statusName>
+      <statusName>update-obselete</statusName>
+      <statusName>update-withdrawn</statusName>
     </status>
   </contentType>
 
@@ -163,10 +125,6 @@
 
   <contentType namespace="com.smartitengineering.smart-shopping.content">
     <name>Publisher</name>
-    <parent>
-      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-      <typeName>Book</typeName>
-    </parent>
     <fields>
       <field>
         <name>name</name>
@@ -199,10 +157,6 @@
 
   <contentType namespace="com.smartitengineering.smart-shopping.content">
     <name>PublicationHouse</name>
-    <parent>
-      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-      <typeName>Product</typeName>
-    </parent>
     <fields>
       <field>
         <name>name</name>
@@ -235,10 +189,6 @@
 
   <contentType namespace="com.smartitengineering.smart-shopping.content">
     <name>Address</name>
-    <parent>
-      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-      <typeName>PublicationHouse</typeName>
-    </parent>
     <fields>
       <field>
         <name>streetAddress</name>
@@ -288,10 +238,6 @@
 
   <contentType namespace="com.smartitengineering.smart-shopping.content">
     <name>Author</name>
-    <parent>
-      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-      <typeName>Book</typeName>
-    </parent>
     <fields>
       <field>
         <name>name</name>
