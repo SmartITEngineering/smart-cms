@@ -27,6 +27,7 @@ import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
@@ -59,7 +60,9 @@ import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -416,6 +419,60 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals(def1.getResourceUri().getType(), defFromXml1.getResourceUri().getType());
     Assert.assertEquals(def1.getResourceUri().getValue(), defFromXml1.getResourceUri().getValue());
     Assert.assertEquals(def1.getTemplateType(), defFromXml1.getTemplateType());
+  }
+
+  @Test
+  public void testInvalidParent() {
+
+    System.out.println(":::::::::::::::::::::::::: TESTING PARENT ::::::::::::::::::::::::::");
+
+    InputStream inputStream = getClass().getClassLoader().getResourceAsStream("Invalid-Parent.xml");
+    Assert.assertNotNull(inputStream);
+    Collection<WritableContentType> collection = new ArrayList<WritableContentType>();
+    try {
+      collection = SmartContentAPI.getInstance().getContentTypeLoader().parseContentTypes(TEST_WS_ID, inputStream,
+                                                                                          MediaType.APPLICATION_XML);
+      Assert.fail("Parent is Invalid");
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testInvalidMinSize() {
+
+    System.out.println(":::::::::::::::::::::::::: TESTING MAX MIN ::::::::::::::::::::::::::");
+
+    InputStream inputStream = getClass().getClassLoader().getResourceAsStream("TestMinMax.xml");
+    Assert.assertNotNull(inputStream);
+    Collection<WritableContentType> collection = new ArrayList<WritableContentType>();
+    try {
+      collection = SmartContentAPI.getInstance().getContentTypeLoader().parseContentTypes(TEST_WS_ID, inputStream,
+                                                                                          MediaType.APPLICATION_XML);
+      Assert.fail("minSize is Grater than maxSize");
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testInvalidValueType() {
+
+    System.out.println(":::::::::::::::::::::::::: TESTING COLLECTION VALUE ::::::::::::::::::::::::::");
+
+    InputStream inputStream = getClass().getClassLoader().getResourceAsStream("InvalidValueType.xml");
+    Assert.assertNotNull(inputStream);
+    Collection<WritableContentType> collection = new ArrayList<WritableContentType>();
+    try {
+      collection = SmartContentAPI.getInstance().getContentTypeLoader().parseContentTypes(TEST_WS_ID, inputStream,
+                                                                                          MediaType.APPLICATION_XML);
+      Assert.fail("Invalid Value type inside the collection");
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   protected Collection<WritableContentType> init() throws Exception {
