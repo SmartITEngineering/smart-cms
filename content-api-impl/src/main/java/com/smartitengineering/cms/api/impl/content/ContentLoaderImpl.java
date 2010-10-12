@@ -50,11 +50,13 @@ import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.PersistableContent;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 import org.apache.commons.lang.math.NumberUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
@@ -358,5 +360,16 @@ public class ContentLoaderImpl implements ContentLoader {
         result = fieldValue;
     }
     return result;
+  }
+
+  @Override
+  public ContentId generateContentId(WorkspaceId workspaceId) {
+    UUID uid = UUID.randomUUID();
+    try {
+      return createContentId(workspaceId, uid.toString().getBytes("UTF-8"));
+    }
+    catch (UnsupportedEncodingException ex) {
+      throw new RuntimeException(ex);
+    }
   }
 }

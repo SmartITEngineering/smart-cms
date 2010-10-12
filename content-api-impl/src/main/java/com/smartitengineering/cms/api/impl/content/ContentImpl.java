@@ -30,6 +30,7 @@ import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.PersistableContent;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -169,6 +170,17 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   }
 
   @Override
+  protected void create() throws IOException {
+    if (contentId == null && contentDef != null && contentDef.getContentTypeID() != null) {
+      createContentId(contentDef.getContentTypeID().getWorkspace());
+    }
+    else if (contentId == null && (contentDef == null || contentDef.getContentTypeID() == null)) {
+      throw new IOException("Content ID and Content Type Definition is not set!");
+    }
+    super.create();
+  }
+
+  @Override
   public boolean equals(Object obj) {
     if (obj == null) {
       return false;
@@ -189,5 +201,13 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
     int hash = 7;
     hash = 29 * hash + (this.contentId != null ? this.contentId.hashCode() : 0);
     return hash;
+  }
+
+  @Override
+  public void createContentId(WorkspaceId workspace) {
+    if (workspace == null) {
+      throw new IllegalArgumentException("Workspace ID can not be null!");
+    }
+    setContentId(SmartContentAPI.getInstance().getContentLoader().generateContentId(workspace));
   }
 }
