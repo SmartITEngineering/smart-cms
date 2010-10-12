@@ -26,11 +26,20 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.spi.content.PersistentContentReader;
 import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
+import com.smartitengineering.cms.spi.impl.content.ContentAdapterHelper;
+import com.smartitengineering.cms.spi.impl.content.ContentObjectConverter;
+import com.smartitengineering.cms.spi.impl.content.ContentPersistentService;
+import com.smartitengineering.cms.spi.impl.content.PersistentContent;
+import com.smartitengineering.cms.spi.impl.content.guice.ContentFilterConfigsProvider;
+import com.smartitengineering.cms.spi.impl.content.guice.ContentSchemaBaseConfigProvider;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
 import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
@@ -96,7 +105,7 @@ public class SPIModule extends PrivateModule {
     binder().expose(AsyncExecutorService.class);
     bind(ExecutorService.class).toInstance(Executors.newCachedThreadPool());
     binder().expose(ExecutorService.class);
-    bind(Integer.class).annotatedWith(Names.named("maxRows")).toInstance(new Integer(50));
+    bind(Integer.class).annotatedWith(Names.named("maxRows")).toInstance(new Integer(100));
     bind(Long.class).annotatedWith(Names.named("waitTime")).toInstance(new Long(10));
     binder().expose(Long.class).annotatedWith(Names.named("waitTime"));
     bind(TimeUnit.class).annotatedWith(Names.named("unit")).toInstance(TimeUnit.SECONDS);
@@ -141,6 +150,39 @@ public class SPIModule extends PrivateModule {
     /*
      * End injection specific to common dao of content type
      */
+    /*
+     * Start injection specific to common dao of content
+     */
+    bind(new TypeLiteral<ObjectRowConverter<PersistentContent>>() {
+    }).to(ContentObjectConverter.class).in(Singleton.class);
+    bind(new TypeLiteral<CommonReadDao<PersistentContent, ContentId>>() {
+    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContent, ContentId>>() {
+    }).in(Singleton.class);
+    bind(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
+    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContent, ContentId>>() {
+    }).in(Singleton.class);
+    bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContent, ContentId>>() {
+    }).to(new TypeLiteral<CommonDao<PersistentContent, ContentId>>() {
+    }).in(Singleton.class);
+    bind(new TypeLiteral<Class<ContentId>>() {
+    }).toInstance(ContentId.class);
+    bind(new TypeLiteral<SchemaInfoProvider<PersistentContent, ContentId>>() {
+    }).to(new TypeLiteral<SchemaInfoProviderImpl<PersistentContent, ContentId>>() {
+    }).in(Singleton.class);
+    bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistentContent>>() {
+    }).toProvider(ContentSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<FilterConfigs<PersistentContent>>() {
+    }).toProvider(ContentFilterConfigsProvider.class).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<GenericAdapter<WriteableContent, PersistentContent>>() {
+    }).to(new TypeLiteral<GenericAdapterImpl<WriteableContent, PersistentContent>>() {
+    }).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<AbstractAdapterHelper<WriteableContent, PersistentContent>>() {
+    }).to(ContentAdapterHelper.class).in(Scopes.SINGLETON);
+    bind(PersistentContentReader.class).to(ContentPersistentService.class);
+    binder().expose(PersistentContentReader.class);
+    /*
+     * End injection specific to common dao of content
+     */
     MapBinder<MediaType, TypeValidator> validatorBinder = MapBinder.newMapBinder(binder(), MediaType.class,
                                                                                  TypeValidator.class);
     validatorBinder.addBinding(MediaType.APPLICATION_XML).to(XMLSchemaBasedTypeValidator.class);
@@ -149,6 +191,7 @@ public class SPIModule extends PrivateModule {
     MapBinder<Class, PersistentService> serviceBinder = MapBinder.newMapBinder(binder(), Class.class,
                                                                                PersistentService.class);
     serviceBinder.addBinding(WritableContentType.class).to(ContentTypePersistentService.class);
+    serviceBinder.addBinding(WriteableContent.class).to(ContentPersistentService.class);
     bind(PersistentServiceRegistrar.class).to(
         com.smartitengineering.cms.spi.impl.PersistentServiceRegistrar.class);
     binder().expose(PersistentServiceRegistrar.class);
