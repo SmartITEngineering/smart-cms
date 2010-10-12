@@ -19,10 +19,19 @@
 package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.content.MutableOtherFieldValue;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  *
  * @author kaisar
  */
 public class OtherFieldValueImpl extends FieldValueImpl<byte[]> implements MutableOtherFieldValue {
+  @Override
+  protected String getValueAsString() {
+    byte[] data = getValue();
+    if (data != null) {
+      return Base64.encodeBase64String(data);
+    }
+    return super.getValueAsString();
+  }
 }

@@ -23,6 +23,7 @@ import com.smartitengineering.cms.api.content.CollectionFieldValue;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentFieldValue;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.content.DateTimeFieldValue;
@@ -40,15 +41,23 @@ import com.smartitengineering.cms.api.content.NumberFieldValue;
 import com.smartitengineering.cms.api.content.OtherFieldValue;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
+import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.PersistableContent;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import org.apache.commons.lang.math.NumberUtils;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.ArrayNode;
 
 /**
  *
@@ -259,5 +268,95 @@ public class ContentLoaderImpl implements ContentLoader {
       mutableContent.setField(field);
     }
     return mutableContent;
+  }
+
+  @Override
+  public FieldValue getValueFor(String value, FieldDef fieldDef) {
+    final FieldValue result;
+    final FieldValueType type = fieldDef.getValueDef().getType();
+    switch (type) {
+      case COLLECTION:
+        MutableCollectionFieldValue collectionFieldValue = new CollectionFieldValueImpl();
+        try {
+          JsonNode node = CollectionFieldValueImpl.MAPPER.readTree(value);
+          if (node instanceof ArrayNode) {
+            ArrayNode arrayNode = (ArrayNode) node;
+            int size = arrayNode.size();
+            ArrayList<FieldValue> values = new ArrayList<FieldValue>(size);
+            for (int i = 0; i < size; ++i) {
+              String stringValue = arrayNode.get(i).getTextValue();
+              values.add(getSimpleValueFor(stringValue, ((CollectionDataType) fieldDef.getValueDef()).getItemDataType().
+                  getType()));
+            }
+            collectionFieldValue.setValue(values);
+          }
+          else {
+            throw new IllegalStateException("Collection must be of array of strings!");
+          }
+        }
+        catch (Exception ex) {
+          throw new RuntimeException(ex);
+        }
+        result = collectionFieldValue;
+        break;
+      default:
+        result = getSimpleValueFor(value, type);
+    }
+    return result;
+  }
+
+  public FieldValue getSimpleValueFor(String value, FieldValueType type) {
+    final FieldValue result;
+    switch (type) {
+      case BOOLEAN:
+        MutableBooleanFieldValue booleanFieldValue = createBooleanFieldValue();
+        result = booleanFieldValue;
+        booleanFieldValue.setValue(Boolean.parseBoolean(value));
+        break;
+      case CONTENT:
+        MutableContentFieldValue contentFieldValue = createContentFieldValue();
+        try {
+          DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(value.getBytes("UTF-8")));
+          ContentIdImpl idImpl = new ContentIdImpl();
+          idImpl.readExternal(inputStream);
+          contentFieldValue.setValue(idImpl);
+        }
+        catch (Exception ex) {
+          throw new RuntimeException(ex);
+        }
+        result = contentFieldValue;
+        break;
+      case INTEGER:
+        MutableNumberFieldValue integerFieldValue = createNumberFieldValue();
+        integerFieldValue.setValue(NumberUtils.toInt(value, Integer.MIN_VALUE));
+        result = integerFieldValue;
+        break;
+      case DOUBLE:
+        MutableNumberFieldValue doubleFieldValue = createNumberFieldValue();
+        doubleFieldValue.setValue(NumberUtils.toDouble(value, Double.MIN_VALUE));
+        result = doubleFieldValue;
+        break;
+      case LONG:
+        MutableNumberFieldValue longFieldValue = createNumberFieldValue();
+        longFieldValue.setValue(NumberUtils.toLong(value, Long.MIN_VALUE));
+        result = longFieldValue;
+        break;
+      case DATE_TIME:
+        MutableDateTimeFieldValue valueOf;
+        try {
+          valueOf = DateTimeFieldValueImpl.valueOf(value);
+        }
+        catch (Exception ex) {
+          throw new RuntimeException(ex);
+        }
+        result = valueOf;
+        break;
+      case STRING:
+      default:
+        MutableStringFieldValue fieldValue = createStringFieldValue();
+        fieldValue.setValue(value);
+        result = fieldValue;
+    }
+    return result;
   }
 }
