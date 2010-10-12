@@ -28,6 +28,7 @@ import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.PersistableContent;
 import java.io.IOException;
@@ -35,6 +36,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang.ObjectUtils;
 
 /**
  *
@@ -49,6 +51,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   private Date creationDate;
   private Date lastModifiedDate;
   private Map<String, Field> map = new HashMap<String, Field>();
+  private Map<String, Field> cachedFieldMap;
 
   @Override
   public void setParentId(ContentId contentId) {
@@ -69,6 +72,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   @Override
   public void setField(Field field) {
     map.put(field.getName(), field);
+    cachedFieldMap = null;
   }
 
   @Override
@@ -98,18 +102,29 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
 
   @Override
   public Map<String, Field> getFields() {
-    return Collections.unmodifiableMap(this.map);
+    final Content parent = getParent();
+    final ContentType def = getContentDefinition();
+    if (cachedFieldMap == null) {
+      Map<String, Field> fields = new HashMap<String, Field>(this.map);
+      if (parent != null && def != null) {
+        Map<String, Field> parentFields = parent.getFields();
+        for (String fieldName : parentFields.keySet()) {
+          FieldDef myDef = def.getFieldDefs().get(fieldName);
+          FieldDef thatDef = parent.getContentDefinition().getFieldDefs().get(fieldName);
+          if (myDef != null && thatDef != null && ObjectUtils.equals(myDef, thatDef) && myDef.getValueDef().getType().
+              equals(thatDef.getValueDef().getType()) && !fields.containsKey(fieldName)) {
+            fields.put(fieldName, parent.getField(fieldName));
+          }
+        }
+      }
+      cachedFieldMap = fields;
+    }
+    return Collections.unmodifiableMap(cachedFieldMap);
   }
 
   @Override
   public Field getField(String fieldName) {
-    if (map.containsKey(fieldName)) {
-      return map.get(fieldName);
-    }
-    if (getParent() == null) {
-      return null;
-    }
-    return getParent().getField(fieldName);
+    return getFields().get(fieldName);
   }
 
   @Override
