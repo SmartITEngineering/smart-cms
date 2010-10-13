@@ -56,6 +56,10 @@ public class FieldValueImpl<V> implements MutableFieldValue<V> {
     return getValue().toString();
   }
 
+  public void setFieldValueType(FieldValueType fieldValueType) {
+    this.fieldValueType = fieldValueType;
+  }
+
   @Override
   public final String toString() {
     return StringUtils.defaultIfEmpty(getValueAsString(), "NULL");

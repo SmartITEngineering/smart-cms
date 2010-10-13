@@ -51,7 +51,6 @@ import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.PersistableContent;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -213,37 +212,65 @@ public class ContentLoaderImpl implements ContentLoader {
 
   @Override
   public MutableDateTimeFieldValue createDateTimeFieldValue() {
-    return new DateTimeFieldValueImpl();
+    final DateTimeFieldValueImpl dateTimeFieldValueImpl = new DateTimeFieldValueImpl();
+    dateTimeFieldValueImpl.setFieldValueType(FieldValueType.DATE_TIME);
+    return dateTimeFieldValueImpl;
   }
 
   @Override
   public MutableBooleanFieldValue createBooleanFieldValue() {
-    return new BooleanFieldValueImpl();
+    final BooleanFieldValueImpl booleanFieldValueImpl = new BooleanFieldValueImpl();
+    booleanFieldValueImpl.setFieldValueType(FieldValueType.BOOLEAN);
+    return booleanFieldValueImpl;
   }
 
   @Override
   public MutableCollectionFieldValue createCollectionFieldValue() {
-    return new CollectionFieldValueImpl();
+    final CollectionFieldValueImpl collectionFieldValueImpl = new CollectionFieldValueImpl();
+    collectionFieldValueImpl.setFieldValueType(FieldValueType.COLLECTION);
+    return collectionFieldValueImpl;
   }
 
   @Override
   public MutableContentFieldValue createContentFieldValue() {
-    return new ContentFieldValueImpl();
+    final ContentFieldValueImpl contentFieldValueImpl = new ContentFieldValueImpl();
+    contentFieldValueImpl.setFieldValueType(FieldValueType.CONTENT);
+    return contentFieldValueImpl;
   }
 
   @Override
-  public MutableNumberFieldValue createNumberFieldValue() {
-    return new NumberFieldValueImpl();
+  public MutableNumberFieldValue createDoubleFieldValue() {
+    final NumberFieldValueImpl numberFieldValueImpl = new NumberFieldValueImpl();
+    numberFieldValueImpl.setFieldValueType(FieldValueType.DOUBLE);
+    return numberFieldValueImpl;
+  }
+
+  @Override
+  public MutableNumberFieldValue createIntegerFieldValue() {
+    final NumberFieldValueImpl numberFieldValueImpl = new NumberFieldValueImpl();
+    numberFieldValueImpl.setFieldValueType(FieldValueType.INTEGER);
+    return numberFieldValueImpl;
+  }
+
+  @Override
+  public MutableNumberFieldValue createLongFieldValue() {
+    final NumberFieldValueImpl numberFieldValueImpl = new NumberFieldValueImpl();
+    numberFieldValueImpl.setFieldValueType(FieldValueType.LONG);
+    return numberFieldValueImpl;
   }
 
   @Override
   public MutableOtherFieldValue createOtherFieldValue() {
-    return new OtherFieldValueImpl();
+    final OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
+    otherFieldValueImpl.setFieldValueType(FieldValueType.OTHER);
+    return otherFieldValueImpl;
   }
 
   @Override
   public MutableStringFieldValue createStringFieldValue() {
-    return new StringFieldValueImpl();
+    final StringFieldValueImpl stringFieldValueImpl = new StringFieldValueImpl();
+    stringFieldValueImpl.setFieldValueType(FieldValueType.STRING);
+    return stringFieldValueImpl;
   }
 
   @Override
@@ -280,7 +307,7 @@ public class ContentLoaderImpl implements ContentLoader {
     final FieldValueType type = dataType.getType();
     switch (type) {
       case COLLECTION:
-        MutableCollectionFieldValue collectionFieldValue = new CollectionFieldValueImpl();
+        MutableCollectionFieldValue collectionFieldValue = createCollectionFieldValue();
         try {
           JsonNode node = CollectionFieldValueImpl.MAPPER.readTree(value);
           if (node instanceof ArrayNode) {
@@ -331,17 +358,17 @@ public class ContentLoaderImpl implements ContentLoader {
         result = contentFieldValue;
         break;
       case INTEGER:
-        MutableNumberFieldValue integerFieldValue = createNumberFieldValue();
+        MutableNumberFieldValue integerFieldValue = createIntegerFieldValue();
         integerFieldValue.setValue(NumberUtils.toInt(value, Integer.MIN_VALUE));
         result = integerFieldValue;
         break;
       case DOUBLE:
-        MutableNumberFieldValue doubleFieldValue = createNumberFieldValue();
+        MutableNumberFieldValue doubleFieldValue = createDoubleFieldValue();
         doubleFieldValue.setValue(NumberUtils.toDouble(value, Double.MIN_VALUE));
         result = doubleFieldValue;
         break;
       case LONG:
-        MutableNumberFieldValue longFieldValue = createNumberFieldValue();
+        MutableNumberFieldValue longFieldValue = createLongFieldValue();
         longFieldValue.setValue(NumberUtils.toLong(value, Long.MIN_VALUE));
         result = longFieldValue;
         break;

@@ -71,7 +71,11 @@ public interface ContentLoader {
 
   MutableContentFieldValue createContentFieldValue(ContentFieldValue fieldValue);
 
-  MutableNumberFieldValue createNumberFieldValue();
+  MutableNumberFieldValue createIntegerFieldValue();
+
+  MutableNumberFieldValue createLongFieldValue();
+
+  MutableNumberFieldValue createDoubleFieldValue();
 
   MutableNumberFieldValue createNumberFieldValue(NumberFieldValue fieldValue);
 
