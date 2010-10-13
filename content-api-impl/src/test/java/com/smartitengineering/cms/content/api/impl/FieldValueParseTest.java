@@ -54,7 +54,7 @@ public class FieldValueParseTest extends TestCase {
     collectionDataTypeImpl.setItemDataType(new StringDataTypeImpl());
     fieldDef.setValueDef(collectionDataTypeImpl);
     CollectionFieldValue fieldValue = (CollectionFieldValue) new ContentLoaderImpl().getValueFor(impl.toString(),
-                                                                                                 fieldDef);
+                                                                                                 fieldDef.getValueDef());
     Collection<FieldValue> values = fieldValue.getValue();
     assertEquals(4, values.size());
     assertEquals(impl.toString(), fieldValue.toString());
