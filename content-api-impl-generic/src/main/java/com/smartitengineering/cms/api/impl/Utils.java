@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import org.apache.commons.codec.binary.StringUtils;
 
 /**
  *
@@ -52,7 +53,7 @@ public final class Utils {
         notEof = false;
       }
     }
-    String string = new String(Arrays.copyOf(buffer.array(), length), "UTF-8");
+    String string = StringUtils.newStringUtf8(Arrays.copyOf(buffer.array(), length));
     return string;
   }
 }

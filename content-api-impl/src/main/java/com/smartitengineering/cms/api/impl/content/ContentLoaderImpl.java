@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
@@ -318,7 +319,7 @@ public class ContentLoaderImpl implements ContentLoader {
       case CONTENT:
         MutableContentFieldValue contentFieldValue = createContentFieldValue();
         try {
-          DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(value.getBytes("UTF-8")));
+          DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(StringUtils.getBytesUtf8(value)));
           ContentIdImpl idImpl = new ContentIdImpl();
           idImpl.readExternal(inputStream);
           contentFieldValue.setValue(idImpl);
@@ -365,11 +366,6 @@ public class ContentLoaderImpl implements ContentLoader {
   @Override
   public ContentId generateContentId(WorkspaceId workspaceId) {
     UUID uid = UUID.randomUUID();
-    try {
-      return createContentId(workspaceId, uid.toString().getBytes("UTF-8"));
-    }
-    catch (UnsupportedEncodingException ex) {
-      throw new RuntimeException(ex);
-    }
+    return createContentId(workspaceId, StringUtils.getBytesUtf8(uid.toString()));
   }
 }
