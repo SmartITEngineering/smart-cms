@@ -18,7 +18,6 @@
  */
 package com.smartitengineering.cms.spi.content;
 
-import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import java.util.Date;
 
@@ -27,8 +26,6 @@ import java.util.Date;
  * @author imyousuf
  */
 public interface PersistableContent extends WriteableContent {
-
-  public void setContentId(ContentId contentId);
 
   public void setCreationDate(Date creationDate);
 
