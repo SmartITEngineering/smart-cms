@@ -123,6 +123,11 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   }
 
   @Override
+  public Map<String, Field> getOwnFields() {
+    return Collections.unmodifiableMap(map);
+  }
+
+  @Override
   public Field getField(String fieldName) {
     return getFields().get(fieldName);
   }
