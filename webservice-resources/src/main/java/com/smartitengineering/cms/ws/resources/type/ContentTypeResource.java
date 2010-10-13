@@ -21,9 +21,11 @@ package com.smartitengineering.cms.ws.resources.type;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
+import java.net.URI;
 import java.util.Date;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -34,6 +36,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,8 +78,8 @@ public class ContentTypeResource extends AbstractResource {
   @DELETE
   public Response delete() {
     if (logger.isDebugEnabled()) {
-      logger.debug("Delete content type with id " + type.getContentTypeID().toString() + " with last-modified "
-          + lastModified + " " + tag.getValue());
+      logger.debug("Delete content type with id " + type.getContentTypeID().toString() + " with last-modified " +
+          lastModified + " " + tag.getValue());
     }
     ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(lastModified, tag);
     if (builder != null) {
@@ -91,5 +94,12 @@ public class ContentTypeResource extends AbstractResource {
       logger.error(ex.getMessage(), ex);
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
+  }
+
+  public static URI getContentTypeRelativeURI(ContentTypeId typeId) {
+    UriBuilder builder = UriBuilder.fromResource(ContentTypesResource.class);
+    builder.path(ContentTypesResource.PATH_TO_CONTENT_TYPE);
+    return builder.build(typeId.getWorkspace().getGlobalNamespace(), typeId.getWorkspace().getName(), typeId.
+        getWorkspace(), typeId.getName());
   }
 }
