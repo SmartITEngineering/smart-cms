@@ -281,7 +281,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
     typeImpl.setLastModifiedDate(contentType.getLastModifiedDate());
     typeImpl.setParent(contentType.getParent());
     typeImpl.getMutableFieldDefs().clear();
-    typeImpl.getMutableFieldDefs().addAll(contentType.getFieldDefs().values());
+    typeImpl.getMutableFieldDefs().addAll(contentType.getOwnFieldDefs().values());
     typeImpl.getMutableRepresentationDefs().clear();
     typeImpl.getMutableRepresentationDefs().addAll(contentType.getRepresentationDefs().values());
     typeImpl.getMutableStatuses().clear();

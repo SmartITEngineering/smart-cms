@@ -109,8 +109,8 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
       if (parent != null && def != null) {
         Map<String, Field> parentFields = parent.getFields();
         for (String fieldName : parentFields.keySet()) {
-          FieldDef myDef = def.getFieldDefs().get(fieldName);
-          FieldDef thatDef = parent.getContentDefinition().getFieldDefs().get(fieldName);
+          FieldDef myDef = def.getOwnFieldDefs().get(fieldName);
+          FieldDef thatDef = parent.getContentDefinition().getOwnFieldDefs().get(fieldName);
           if (myDef != null && thatDef != null && ObjectUtils.equals(myDef, thatDef) && myDef.getValueDef().getType().
               equals(thatDef.getValueDef().getType()) && !fields.containsKey(fieldName)) {
             fields.put(fieldName, parent.getField(fieldName));

@@ -194,15 +194,15 @@ public class XMLContentTypeDefnitionParserTest {
     MutableContentType contentType = iterator.next();
 
     if (logger.isInfoEnabled()) {
-      logger.debug(new StringBuffer("first Fileds size is ").append(contentType.getFieldDefs().size()).toString());
+      logger.debug(new StringBuffer("first Fileds size is ").append(contentType.getOwnFieldDefs().size()).toString());
     }
-    Assert.assertEquals(4, contentType.getFieldDefs().size());
+    Assert.assertEquals(4, contentType.getOwnFieldDefs().size());
     contentType = iterator.next();
 
     if (logger.isInfoEnabled()) {
-      logger.debug(new StringBuffer("2nd Fileds size is ").append(contentType.getFieldDefs()).toString());
+      logger.debug(new StringBuffer("2nd Fileds size is ").append(contentType.getOwnFieldDefs()).toString());
     }
-    Assert.assertEquals(2, contentType.getFieldDefs().size());
+    Assert.assertEquals(2, contentType.getOwnFieldDefs().size());
 
   }
 

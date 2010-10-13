@@ -195,7 +195,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
       /*
        * Fields
        */
-      for (Entry<String, FieldDef> entry : instance.getMutableContentType().getFieldDefs().entrySet()) {
+      for (Entry<String, FieldDef> entry : instance.getMutableContentType().getOwnFieldDefs().entrySet()) {
         if (logger.isDebugEnabled()) {
           logger.debug(new StringBuilder("Putting field with name ").append(entry.getKey()).append(" and value ").append(entry.
               getValue().toString()).toString());

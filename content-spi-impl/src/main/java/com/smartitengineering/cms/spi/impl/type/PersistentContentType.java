@@ -46,7 +46,7 @@ public class PersistentContentType extends AbstractGenericPersistentDTO<Persiste
   public boolean isValid() {
     if (mutableContentType == null || mutableContentType.getContentTypeID() == null || StringUtils.isBlank(mutableContentType.
         getContentTypeID().getName()) || StringUtils.isBlank(mutableContentType.getContentTypeID().getNamespace()) || mutableContentType.
-        getFieldDefs().isEmpty() || mutableContentType.getStatuses().isEmpty() || mutableContentType.getContentTypeID().
+        getOwnFieldDefs().isEmpty() || mutableContentType.getStatuses().isEmpty() || mutableContentType.getContentTypeID().
         getWorkspace() == null || StringUtils.isBlank(mutableContentType.getContentTypeID().getWorkspace().
         getGlobalNamespace()) || StringUtils.isBlank(mutableContentType.getContentTypeID().getWorkspace().getName())) {
       return false;
