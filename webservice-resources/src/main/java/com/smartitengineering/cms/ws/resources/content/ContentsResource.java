@@ -18,16 +18,18 @@
  */
 package com.smartitengineering.cms.ws.resources.content;
 
-import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.cms.ws.common.domains.Content;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import java.io.UnsupportedEncodingException;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.commons.codec.binary.StringUtils;
 
@@ -54,8 +56,15 @@ public class ContentsResource extends AbstractResource {
   public ContentResource getContentResource(@PathParam(PARAM_CONTENT) String contentId) throws
       UnsupportedEncodingException {
     final ContentLoader contentLoader = SmartContentAPI.getInstance().getContentLoader();
-    Content content = contentLoader.loadContent(contentLoader.createContentId(workspace.getId(), StringUtils.
+    return new ContentResource(getInjectables(), contentLoader.createContentId(workspace.getId(), StringUtils.
         getBytesUtf8(contentId)));
-    return new ContentResource(getInjectables(), content);
+  }
+
+  @POST
+  public Response createContent(Content content) {
+    final ContentLoader contentLoader = SmartContentAPI.getInstance().getContentLoader();
+    ContentResource r = new ContentResource(getInjectables(), contentLoader.createContentId(workspace.getId(),
+                                                                                            new byte[0]));
+    return r.put(content);
   }
 }

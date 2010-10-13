@@ -102,4 +102,8 @@ public class ContentTypeResource extends AbstractResource {
     return builder.build(typeId.getWorkspace().getGlobalNamespace(), typeId.getWorkspace().getName(), typeId.
         getWorkspace(), typeId.getName());
   }
+
+  public ContentType getType() {
+    return type;
+  }
 }
