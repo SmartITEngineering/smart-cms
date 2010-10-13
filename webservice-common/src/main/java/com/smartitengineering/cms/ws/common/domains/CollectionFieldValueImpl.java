@@ -44,7 +44,7 @@ public class CollectionFieldValueImpl extends FieldValueImpl implements Collecti
 
   @Override
   public String getValue() {
-    throw new UnsupportedOperationException("Should not be called from here!");
+    return "";
   }
 
   @Override
