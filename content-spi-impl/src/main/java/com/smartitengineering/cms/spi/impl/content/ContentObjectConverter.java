@@ -24,6 +24,7 @@ import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
+import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldDef;
@@ -117,12 +118,19 @@ public class ContentObjectConverter extends AbstactObjectRowConverter<Persistent
         throw new RuntimeException("Could not find content type with id " + typeId);
       }
       byte[] status = startRow.getValue(FAMILY_SELF, CELL_STATUS);
-      MutableContentStatus contentStatus = SmartContentAPI.getInstance().getContentTypeLoader().
-          createMutableContentStatus();
-      contentStatus.setName(Bytes.toString(status));
-      contentStatus.setContentTypeID(typeId);
-      contentStatus.setId(0);
-      content.setStatus(contentStatus);
+      final String statusString = Bytes.toString(status);
+      final ContentStatus definedStatus = type.getStatuses().get(statusString);
+      if (definedStatus != null) {
+        content.setStatus(definedStatus);
+      }
+      else {
+        MutableContentStatus contentStatus = SmartContentAPI.getInstance().getContentTypeLoader().
+            createMutableContentStatus();
+        contentStatus.setName(statusString);
+        contentStatus.setContentTypeID(typeId);
+        contentStatus.setId(0);
+        content.setStatus(contentStatus);
+      }
     }
     catch (RuntimeException ex) {
       logger.error("Could not parse content type id", ex);
@@ -199,7 +207,7 @@ public class ContentObjectConverter extends AbstactObjectRowConverter<Persistent
   }
 
   private void putFields(WriteableContent content, Put put) {
-    for (Field field : content.getFields().values()) {
+    for (Field field : content.getOwnFields().values()) {
       switch (field.getValue().getDataType()) {
         case COLLECTION:
           putField(field, put, FAMILY_COLLECTION);
