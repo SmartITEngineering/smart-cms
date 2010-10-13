@@ -18,10 +18,28 @@
  */
 package com.smartitengineering.cms.ws.resources.domains;
 
+import com.smartitengineering.cms.api.content.CollectionFieldValue;
+import com.smartitengineering.cms.api.content.ContentFieldValue;
+import com.smartitengineering.cms.api.content.Field;
+import com.smartitengineering.cms.api.content.FieldValue;
+import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.ContentStatus;
+import com.smartitengineering.cms.api.type.DataType;
+import com.smartitengineering.cms.api.type.OtherDataType;
+import com.smartitengineering.cms.ws.common.domains.CollectionFieldValueImpl;
+import com.smartitengineering.cms.ws.common.domains.Content;
+import com.smartitengineering.cms.ws.common.domains.ContentImpl;
+import com.smartitengineering.cms.ws.common.domains.FieldImpl;
+import com.smartitengineering.cms.ws.common.domains.FieldValueImpl;
+import com.smartitengineering.cms.ws.common.domains.OtherFieldValueImpl;
 import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
 import com.smartitengineering.cms.ws.common.domains.ResourceTemplateImpl;
 import com.smartitengineering.cms.ws.common.domains.WorkspaceImpl;
 import com.smartitengineering.cms.ws.common.domains.Workspace;
+import com.smartitengineering.cms.ws.resources.content.ContentResource;
+import com.smartitengineering.cms.ws.resources.type.ContentTypeResource;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  *
@@ -47,5 +65,73 @@ public final class Factory {
     template.setWorkspaceId(new WorkspaceImpl.WorkspaceIdImpl(t.getWorkspaceId().getGlobalNamespace(), t.getWorkspaceId().
         getName()));
     return template;
+  }
+
+  public static Content getContent(com.smartitengineering.cms.api.content.Content content) {
+    ContentImpl contentImpl = new ContentImpl();
+    contentImpl.setContentTypeUri(ContentTypeResource.getContentTypeRelativeURI(content.getContentDefinition().
+        getContentTypeID()).toASCIIString());
+    if (content.getParentId() != null) {
+      contentImpl.setParentContentUri(ContentResource.getContentUri(content.getParentId()).toASCIIString());
+    }
+    contentImpl.setCreationDate(content.getCreationDate());
+    contentImpl.setLastModifiedDate(content.getLastModifiedDate());
+    final ContentStatus status = content.getStatus();
+    if (status != null) {
+      contentImpl.setStatus(status.getName());
+    }
+    Map<String, Field> fields = content.getFields();
+    String contentUri = ContentResource.getContentUri(content.getContentId()).toASCIIString();
+    for (Field field : fields.values()) {
+      FieldImpl fieldImpl = new FieldImpl();
+      fieldImpl.setName(field.getName());
+      fieldImpl.setFieldUri(new StringBuilder(contentUri).append('/').append(field.getName()).toString());
+      final FieldValueImpl value;
+      final FieldValue contentFieldValue = field.getValue();
+      final DataType valueDef = field.getFieldDef().getValueDef();
+      value = getFieldvalue(valueDef, contentFieldValue);
+      fieldImpl.setValue(value);
+    }
+    return contentImpl;
+  }
+
+  private static FieldValueImpl getFieldvalue(final DataType valueDef, final FieldValue contentFieldValue) {
+    final FieldValueImpl value;
+    switch (valueDef.getType()) {
+      case CONTENT: {
+        FieldValueImpl valueImpl = new FieldValueImpl();
+        valueImpl.setValue(ContentResource.getContentUri(((ContentFieldValue) contentFieldValue).getValue()).
+            toASCIIString());
+        value = valueImpl;
+        break;
+      }
+      case COLLECTION: {
+        CollectionFieldValueImpl valueImpl =
+                                 new CollectionFieldValueImpl();
+        Collection<FieldValue> contentValues =
+                               ((CollectionFieldValue) contentFieldValue).getValue();
+        final DataType itemDataType = ((CollectionDataType) valueDef).getItemDataType();
+        for (FieldValue contentValue : contentValues) {
+          valueImpl.getValues().add(getFieldvalue(itemDataType, contentValue));
+        }
+        value = valueImpl;
+        break;
+      }
+      case OTHER:
+      case STRING: {
+        OtherFieldValueImpl valueImpl = new OtherFieldValueImpl();
+        valueImpl.setValue(contentFieldValue.toString());
+        valueImpl.setMimeType(((OtherDataType) valueDef).getMIMEType());
+        value = valueImpl;
+        break;
+      }
+      default: {
+        FieldValueImpl valueImpl = new FieldValueImpl();
+        valueImpl.setValue(contentFieldValue.toString());
+        value = valueImpl;
+      }
+    }
+    value.setType(contentFieldValue.getDataType().name());
+    return value;
   }
 }
