@@ -21,11 +21,16 @@ package com.smartitengineering.cms.client.impl;
 import com.google.inject.AbstractModule;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.api.type.RepresentationDef;
+import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.binder.guice.Initializer;
 import com.smartitengineering.cms.client.api.ContentTypeResource;
@@ -61,6 +66,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -534,6 +540,9 @@ public class AppTest {
   @Test
   public void testCreateContentType() throws Exception {
     LOGGER.info(":::::::::::::: CREATE CONTENT_TYPE RESOURCE TEST ::::::::::::::");
+
+    WorkspaceId workspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId("atest2", "additional");
+
     String XML = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("content-type-def-shopping.xml"));
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
@@ -546,8 +555,220 @@ public class AppTest {
     contentTypesResource.createContentType(XML);
     contentTypesResource.get();
     Collection<ContentTypeResource> collection = contentTypesResource.getContentTypes();
-    Assert.assertEquals(6, collection.size());
+    Assert.assertEquals(3, collection.size());
 
+    InputStream inputStream = IOUtils.toInputStream(XML);
+
+    String NAME_SPACE = "com.smartitengineering.smart-shopping.content";
+
+    Collection<WritableContentType> contentTypes = SmartContentAPI.getInstance().getContentTypeLoader().
+        parseContentTypes(workspaceId, inputStream, com.smartitengineering.cms.api.common.MediaType.APPLICATION_XML);
+    String[] name = {"Book", "Publisher", "Author"};
+    Collection<ContentType> HBaseContentTypes = new ArrayList<ContentType>();
+    for (int i = 0; i < 3; i++) {
+
+      ContentTypeId contentTypeId = SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(
+          workspaceId,
+          NAME_SPACE,
+          name[i]);
+
+      ContentType contentTypeTest =
+                  SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(contentTypeId);
+      HBaseContentTypes.add(contentTypeTest);
+    }
+    Assert.assertEquals(contentTypes.size(), HBaseContentTypes.size());
+
+    Iterator<WritableContentType> iterator1 = contentTypes.iterator();
+    Iterator<ContentType> iterator2 = HBaseContentTypes.iterator();
+    for (int i = 0; i < 3; i++) {
+      ContentType servedContentType = iterator1.next();
+      ContentType getContentType = iterator2.next();
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Content Type Name : " + getContentType.getContentTypeID().getName());
+      }
+      Assert.assertEquals(servedContentType.getContentTypeID().getName(), getContentType.getContentTypeID().getName());
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Content Type Namespace : " + getContentType.getContentTypeID().getNamespace());
+      }
+      Assert.assertEquals(servedContentType.getContentTypeID().getNamespace(), getContentType.getContentTypeID().
+          getNamespace());
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Content Type Global Namespace : " + getContentType.getContentTypeID().getWorkspace().
+            getGlobalNamespace());
+      }
+      Assert.assertEquals(servedContentType.getContentTypeID().getWorkspace().getGlobalNamespace(), getContentType.
+          getContentTypeID().getWorkspace().getGlobalNamespace());
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Content Type ID Global Name : " + getContentType.getContentTypeID().getWorkspace().getName());
+      }
+      Assert.assertEquals(servedContentType.getContentTypeID().getWorkspace().getName(), getContentType.getContentTypeID().
+          getWorkspace().getName());
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Content Type Display Name : " + getContentType.getDisplayName());
+      }
+      Assert.assertEquals(servedContentType.getDisplayName(), getContentType.getDisplayName());
+      if (getContentType.getParent() != null) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Content Type Parent's Name : " + getContentType.getParent().getName());
+        }
+        Assert.assertEquals(servedContentType.getParent().getName(), getContentType.getParent().getName());
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Content Type Parent's Namespace : " + getContentType.getParent().getNamespace());
+        }
+        Assert.assertEquals(servedContentType.getParent().getNamespace(), getContentType.getParent().getNamespace());
+        Assert.assertEquals(servedContentType.getParent().getWorkspace().getGlobalNamespace(), getContentType.getParent().
+            getWorkspace().getGlobalNamespace());
+        Assert.assertEquals(servedContentType.getParent().getWorkspace().getName(), getContentType.getParent().
+            getWorkspace().getName());
+      }
+      Assert.assertEquals(servedContentType.getStatuses().size(), getContentType.getStatuses().size());
+      Set statusKeys = servedContentType.getStatuses().keySet();
+      for (Iterator ite = statusKeys.iterator(); ite.hasNext();) {
+        String key = (String) ite.next();
+        ContentStatus servedContentStatus = servedContentType.getStatuses().get(key);
+        ContentStatus getContentStatus = getContentType.getStatuses().get(key);
+        System.out.println("****** status name " + i + " " + getContentStatus.getName() + "******");
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Content Status : " + getContentStatus.getName());
+        }
+        Assert.assertEquals(servedContentStatus.getName(), getContentStatus.getName());
+      }
+
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Size of Representations Defs : " + getContentType.getRepresentationDefs());
+      }
+
+      Assert.assertEquals(servedContentType.getRepresentations().size(), getContentType.getRepresentations().size());
+
+      Assert.assertEquals(servedContentType.getRepresentationDefs().size(),
+                          getContentType.getRepresentationDefs().size());
+
+      Map<String, RepresentationDef> servedRepresentationDefs = servedContentType.getRepresentationDefs();
+      Set keys = servedRepresentationDefs.keySet();
+      for (Iterator ite = keys.iterator(); ite.hasNext();) {
+        String key = (String) ite.next();
+        RepresentationDef servedRepresentationDef = servedContentType.getRepresentationDefs().get(key);
+        RepresentationDef getRepresentationDef = getContentType.getRepresentationDefs().get(key);
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Representation MimeType : " + getRepresentationDef.getMIMEType());
+        }
+
+        Assert.assertEquals(servedRepresentationDef.getMIMEType(), getRepresentationDef.getMIMEType());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Representation Name : " + getRepresentationDef.getName());
+        }
+
+        Assert.assertEquals(servedRepresentationDef.getName(), getRepresentationDef.getName());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Representation URI : " + getRepresentationDef.getResourceUri().getValue());
+        }
+
+        Assert.assertEquals(servedRepresentationDef.getResourceUri().getValue(), getRepresentationDef.getResourceUri().
+            getValue());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Representation URI Type : " + getRepresentationDef.getResourceUri().getType().name());
+        }
+
+        Assert.assertEquals(servedRepresentationDef.getResourceUri().getType().name(), getRepresentationDef.
+            getResourceUri().getType().name());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Representation Type : " + getRepresentationDef.getTemplateType().name());
+        }
+
+        Assert.assertEquals(servedRepresentationDef.getTemplateType().name(), getRepresentationDef.getTemplateType().
+            name());
+      }
+
+      Assert.assertEquals(servedContentType.getFieldDefs().size(), getContentType.getFieldDefs().size());
+      Map<String, FieldDef> servedFieldDefs = servedContentType.getFieldDefs();
+      Set fieldKeys = servedFieldDefs.keySet();
+      for (Iterator ite = fieldKeys.iterator(); ite.hasNext();) {
+        String key = (String) ite.next();
+        FieldDef servedFieldDef = servedContentType.getFieldDefs().get(key);
+        FieldDef getFieldDef = getContentType.getFieldDefs().get(key);
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Field Name : " + getFieldDef.getName());
+        }
+
+        Assert.assertEquals(servedFieldDef.getName(), getFieldDef.getName());
+        Assert.assertEquals(servedFieldDef.getCustomValidator().geType().name(), getFieldDef.getCustomValidator().
+            geType().
+            name());
+        Assert.assertEquals(servedFieldDef.getCustomValidator().getUri().getType().name(), getFieldDef.
+            getCustomValidator().getUri().getType().name());
+        Assert.assertEquals(servedFieldDef.getCustomValidator().getUri().getValue(), getFieldDef.getCustomValidator().
+            getUri().getValue());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Field Search Def : " + getFieldDef.getSearchDefinition().toString());
+        }
+
+        Assert.assertEquals(getFieldDef.getSearchDefinition().toString(), getFieldDef.getSearchDefinition().toString());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Field value Name : " + getFieldDef.getValueDef().getType().name());
+        }
+
+        Assert.assertEquals(servedFieldDef.getValueDef().getType().name(), getFieldDef.getValueDef().getType().name());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Field isUpdateable : " + getFieldDef.isFieldStandaloneUpdateAble());
+        }
+
+        Assert.assertEquals(servedFieldDef.isFieldStandaloneUpdateAble(), getFieldDef.isFieldStandaloneUpdateAble());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Field isRequired : " + getFieldDef.isRequired());
+        }
+
+        Assert.assertEquals(servedFieldDef.isRequired(), getFieldDef.isRequired());
+        Collection<VariationDef> servedVariationDefs = servedFieldDef.getVariations();
+        Collection<VariationDef> getVariationDefs = getFieldDef.getVariations();
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Size of Variation Def : " + getFieldDef.getVariations().size());
+        }
+
+        Assert.assertEquals(servedVariationDefs.size(), getVariationDefs.size());
+        Iterator<VariationDef> iterator3 = getVariationDefs.iterator();
+        for (VariationDef servedVariationDef : servedVariationDefs) {
+          VariationDef getVariationDef = iterator3.next();
+          Assert.assertEquals(servedVariationDef.getMIMEType(), getVariationDef.getMIMEType());
+
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Variation Name : " + getVariationDef.getName());
+          }
+
+          Assert.assertEquals(servedVariationDef.getName(), getVariationDef.getName());
+
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Variation URI Type : " + getVariationDef.getResourceUri().getType().name());
+          }
+
+          Assert.assertEquals(servedVariationDef.getResourceUri().getType().name(), getVariationDef.getResourceUri().
+              getType().name());
+
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Variation URI : " + getVariationDef.getResourceUri().getValue());
+          }
+
+          Assert.assertEquals(servedVariationDef.getResourceUri().getValue(),
+                              getVariationDef.getResourceUri().getValue());
+
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Variation Template Type : " + getVariationDef.getTemplateType().name());
+          }
+
+          Assert.assertEquals(servedVariationDef.getTemplateType().name(), getVariationDef.getTemplateType().name());
+        }
+      }
+    }
   }
 
   @Test
@@ -572,56 +793,234 @@ public class AppTest {
   @Test
   public void testUpdateContentType() throws Exception {
     LOGGER.info(":::::::::::::: UPDATE CONTENT_TYPE RESOURCE TEST ::::::::::::::");
+
+    WorkspaceId workspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId("atest2", "additional");
+
     String XML = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Update-shopping.xml"));
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
     ContentTypesResource contentTypesResource = feedResource.getContentTypes();
-    Collection<ContentTypeResource> collection = contentTypesResource.getContentTypes();
-    Assert.assertEquals(6, collection.size());
-    contentTypesResource.createContentType(XML);
     contentTypesResource.get();
     Collection<ContentTypeResource> collection1 = contentTypesResource.getContentTypes();
-    Assert.assertEquals(6, collection1.size());
-  }
-
-  @Test
-  public void testIsUpdated() throws Exception {
-    LOGGER.info(":::::::::::::: TEST IS UPDATED OCCURED ::::::::::::::");
-
-    WorkspaceId workspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId("additional");
-
-    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
-    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
-    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
-    WorkspaceFeedResource feedResource = iterator.next();
-
-    ContentTypesResource contentTypesResource = feedResource.getContentTypes();
+    Assert.assertEquals(3, collection1.size());
+    contentTypesResource.createContentType(XML);
+    contentTypesResource.get();
     Collection<ContentTypeResource> collection = contentTypesResource.getContentTypes();
-    Iterator<ContentTypeResource> iterator1 = collection.iterator();
+    Assert.assertEquals(3, collection.size());
 
-    ContentTypeResource contentTypeResource = iterator1.next();
-    contentTypeResource = iterator1.next();
-    contentTypeResource = iterator1.next();
-    contentTypeResource = iterator1.next();
+    InputStream inputStream = IOUtils.toInputStream(XML);
 
-    String content = contentTypeResource.get();
-    InputStream inputStream = IOUtils.toInputStream(content);
+    String NAME_SPACE = "com.smartitengineering.smart-shopping.content";
 
-    Collection<WritableContentType> objContentType = SmartContentAPI.getInstance().getContentTypeLoader().
+    Collection<WritableContentType> contentTypes = SmartContentAPI.getInstance().getContentTypeLoader().
         parseContentTypes(workspaceId, inputStream, com.smartitengineering.cms.api.common.MediaType.APPLICATION_XML);
+    String[] name = {"Book", "Publisher", "Author"};
+    Collection<ContentType> HBaseContentTypes = new ArrayList<ContentType>();
+    for (int i = 0; i < 3; i++) {
 
-    Iterator<WritableContentType> iterator2 = objContentType.iterator();
-    MutableContentType contentType = iterator2.next();
-    Assert.assertEquals(4, contentType.getStatuses().size());
+      ContentTypeId contentTypeId = SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(
+          workspaceId,
+          NAME_SPACE,
+          name[i]);
 
-    String[] name = {"update-draft", "update-marketed", "update-obselete", "update-withdrawn"};
-    for (int i = 0; i < 4; i++) {
-      MutableContentStatus contentStatus = SmartContentAPI.getInstance().getContentTypeLoader().
-          createMutableContentStatus();
-      contentStatus.setName(name[i]);
-      Assert.assertEquals(contentStatus, contentType.getStatuses().get(name[i]));
+      ContentType contentTypeTest =
+                  SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(contentTypeId);
+      HBaseContentTypes.add(contentTypeTest);
+    }
+    Assert.assertEquals(contentTypes.size(), HBaseContentTypes.size());
+
+    Iterator<WritableContentType> iterator1 = contentTypes.iterator();
+    Iterator<ContentType> iterator2 = HBaseContentTypes.iterator();
+    for (int i = 0; i < 3; i++) {
+      ContentType servedContentType = iterator1.next();
+      ContentType getContentType = iterator2.next();
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Content Type Name : " + getContentType.getContentTypeID().getName());
+      }
+      Assert.assertEquals(servedContentType.getContentTypeID().getName(), getContentType.getContentTypeID().getName());
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Content Type Namespace : " + getContentType.getContentTypeID().getNamespace());
+      }
+      Assert.assertEquals(servedContentType.getContentTypeID().getNamespace(), getContentType.getContentTypeID().
+          getNamespace());
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Content Type Global Namespace : " + getContentType.getContentTypeID().getWorkspace().
+            getGlobalNamespace());
+      }
+      Assert.assertEquals(servedContentType.getContentTypeID().getWorkspace().getGlobalNamespace(), getContentType.
+          getContentTypeID().getWorkspace().getGlobalNamespace());
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Content Type ID Global Name : " + getContentType.getContentTypeID().getWorkspace().getName());
+      }
+      Assert.assertEquals(servedContentType.getContentTypeID().getWorkspace().getName(), getContentType.getContentTypeID().
+          getWorkspace().getName());
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Content Type Display Name : " + getContentType.getDisplayName());
+      }
+      Assert.assertEquals(servedContentType.getDisplayName(), getContentType.getDisplayName());
+      if (getContentType.getParent() != null) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Content Type Parent's Name : " + getContentType.getParent().getName());
+        }
+        Assert.assertEquals(servedContentType.getParent().getName(), getContentType.getParent().getName());
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Content Type Parent's Namespace : " + getContentType.getParent().getNamespace());
+        }
+        Assert.assertEquals(servedContentType.getParent().getNamespace(), getContentType.getParent().getNamespace());
+        Assert.assertEquals(servedContentType.getParent().getWorkspace().getGlobalNamespace(), getContentType.getParent().
+            getWorkspace().getGlobalNamespace());
+        Assert.assertEquals(servedContentType.getParent().getWorkspace().getName(), getContentType.getParent().
+            getWorkspace().getName());
+      }
+      Assert.assertEquals(servedContentType.getStatuses().size(), getContentType.getStatuses().size());
+      Set statusKeys = servedContentType.getStatuses().keySet();
+      for (Iterator ite = statusKeys.iterator(); ite.hasNext();) {
+        String key = (String) ite.next();
+        ContentStatus servedContentStatus = servedContentType.getStatuses().get(key);
+        ContentStatus getContentStatus = getContentType.getStatuses().get(key);
+        System.out.println("****** status name " + i + " " + getContentStatus.getName() + "******");
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Content Status : " + getContentStatus.getName());
+        }
+        Assert.assertEquals(servedContentStatus.getName(), getContentStatus.getName());
+      }
+
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Size of Representations Defs : " + getContentType.getRepresentationDefs());
+      }
+
+      Assert.assertEquals(servedContentType.getRepresentations().size(), getContentType.getRepresentations().size());
+
+      Assert.assertEquals(servedContentType.getRepresentationDefs().size(),
+                          getContentType.getRepresentationDefs().size());
+
+      Map<String, RepresentationDef> servedRepresentationDefs = servedContentType.getRepresentationDefs();
+      Set keys = servedRepresentationDefs.keySet();
+      for (Iterator ite = keys.iterator(); ite.hasNext();) {
+        String key = (String) ite.next();
+        RepresentationDef servedRepresentationDef = servedContentType.getRepresentationDefs().get(key);
+        RepresentationDef getRepresentationDef = getContentType.getRepresentationDefs().get(key);
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Representation MimeType : " + getRepresentationDef.getMIMEType());
+        }
+
+        Assert.assertEquals(servedRepresentationDef.getMIMEType(), getRepresentationDef.getMIMEType());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Representation Name : " + getRepresentationDef.getName());
+        }
+
+        Assert.assertEquals(servedRepresentationDef.getName(), getRepresentationDef.getName());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Representation URI : " + getRepresentationDef.getResourceUri().getValue());
+        }
+
+        Assert.assertEquals(servedRepresentationDef.getResourceUri().getValue(), getRepresentationDef.getResourceUri().
+            getValue());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Representation URI Type : " + getRepresentationDef.getResourceUri().getType().name());
+        }
+
+        Assert.assertEquals(servedRepresentationDef.getResourceUri().getType().name(), getRepresentationDef.
+            getResourceUri().getType().name());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Representation Type : " + getRepresentationDef.getTemplateType().name());
+        }
+
+        Assert.assertEquals(servedRepresentationDef.getTemplateType().name(), getRepresentationDef.getTemplateType().
+            name());
+      }
+
+      Assert.assertEquals(servedContentType.getFieldDefs().size(), getContentType.getFieldDefs().size());
+      Map<String, FieldDef> servedFieldDefs = servedContentType.getFieldDefs();
+      Set fieldKeys = servedFieldDefs.keySet();
+      for (Iterator ite = fieldKeys.iterator(); ite.hasNext();) {
+        String key = (String) ite.next();
+        FieldDef servedFieldDef = servedContentType.getFieldDefs().get(key);
+        FieldDef getFieldDef = getContentType.getFieldDefs().get(key);
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Field Name : " + getFieldDef.getName());
+        }
+
+        Assert.assertEquals(servedFieldDef.getName(), getFieldDef.getName());
+        Assert.assertEquals(servedFieldDef.getCustomValidator().geType().name(), getFieldDef.getCustomValidator().
+            geType().
+            name());
+        Assert.assertEquals(servedFieldDef.getCustomValidator().getUri().getType().name(), getFieldDef.
+            getCustomValidator().getUri().getType().name());
+        Assert.assertEquals(servedFieldDef.getCustomValidator().getUri().getValue(), getFieldDef.getCustomValidator().
+            getUri().getValue());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Field Search Def : " + getFieldDef.getSearchDefinition().toString());
+        }
+
+        Assert.assertEquals(getFieldDef.getSearchDefinition().toString(), getFieldDef.getSearchDefinition().toString());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Field value Name : " + getFieldDef.getValueDef().getType().name());
+        }
+
+        Assert.assertEquals(servedFieldDef.getValueDef().getType().name(), getFieldDef.getValueDef().getType().name());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Field isUpdateable : " + getFieldDef.isFieldStandaloneUpdateAble());
+        }
+
+        Assert.assertEquals(servedFieldDef.isFieldStandaloneUpdateAble(), getFieldDef.isFieldStandaloneUpdateAble());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Field isRequired : " + getFieldDef.isRequired());
+        }
+
+        Assert.assertEquals(servedFieldDef.isRequired(), getFieldDef.isRequired());
+        Collection<VariationDef> servedVariationDefs = servedFieldDef.getVariations();
+        Collection<VariationDef> getVariationDefs = getFieldDef.getVariations();
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Size of Variation Def : " + getFieldDef.getVariations().size());
+        }
+
+        Assert.assertEquals(servedVariationDefs.size(), getVariationDefs.size());
+        Iterator<VariationDef> iterator3 = getVariationDefs.iterator();
+        for (VariationDef servedVariationDef : servedVariationDefs) {
+          VariationDef getVariationDef = iterator3.next();
+          Assert.assertEquals(servedVariationDef.getMIMEType(), getVariationDef.getMIMEType());
+
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Variation Name : " + getVariationDef.getName());
+          }
+
+          Assert.assertEquals(servedVariationDef.getName(), getVariationDef.getName());
+
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Variation URI Type : " + getVariationDef.getResourceUri().getType().name());
+          }
+
+          Assert.assertEquals(servedVariationDef.getResourceUri().getType().name(), getVariationDef.getResourceUri().
+              getType().name());
+
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Variation URI : " + getVariationDef.getResourceUri().getValue());
+          }
+
+          Assert.assertEquals(servedVariationDef.getResourceUri().getValue(),
+                              getVariationDef.getResourceUri().getValue());
+
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Variation Template Type : " + getVariationDef.getTemplateType().name());
+          }
+
+          Assert.assertEquals(servedVariationDef.getTemplateType().name(), getVariationDef.getTemplateType().name());
+        }
+      }
     }
   }
 
@@ -634,7 +1033,7 @@ public class AppTest {
     WorkspaceFeedResource feedResource = iterator.next();
     ContentTypesResource contentTypesResource = feedResource.getContentTypes();
     Collection<ContentTypeResource> collection = contentTypesResource.getContentTypes();
-    Assert.assertEquals(6, collection.size());
+    Assert.assertEquals(3, collection.size());
     ContentTypeResource contentTypeResource = collection.iterator().next();
     Assert.assertNotNull(contentTypeResource.get());
     contentTypeResource.delete(ClientResponse.Status.OK);
@@ -657,7 +1056,7 @@ public class AppTest {
     }
     contentTypesResource.get();
     Collection<ContentTypeResource> collection1 = contentTypesResource.getContentTypes();
-    Assert.assertEquals(4, collection1.size());
+    Assert.assertEquals(1, collection1.size());
   }
 
   protected void testConditionalGetUsingLastModified(final String uri) throws IOException {

@@ -27,50 +27,10 @@
 <contentTypes xmlns="http://www.smartitengineering.com/smart-cms/content/content-type-schema"
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:schemaLocation="http://www.smartitengineering.com/smart-cms/content/content-type-schema http://github.com/smart-it/smart-cms/raw/master/content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd">
-  <contentType namespace="com.smartitengineering.smart-shopping.content">
-    <name>Product</name>
-    <fields>
-      <field>
-        <name>manufactureID</name>
-        <value>
-          <string>
-            <mimeType>text/plain</mimeType>
-          </string>
-        </value>
-        <required>true</required>
-      </field>
-      <field>
-        <name>name</name>
-        <value>
-          <string>
-            <mimeType>text/plain</mimeType>
-          </string>
-        </value>
-        <required>true</required>
-      </field>
-      <field>
-        <name>description</name>
-        <value>
-          <string>
-            <mimeType>application/xml</mimeType>
-          </string>
-        </value>
-      </field>
-    </fields>
-    <status>
-      <statusName>update-draft</statusName>
-      <statusName>update-marketed</statusName>
-      <statusName>update-obselete</statusName>
-      <statusName>update-withdrawn</statusName>
-    </status>
-  </contentType>
 
   <contentType namespace="com.smartitengineering.smart-shopping.content">
     <name>Book</name>
-    <parent>
-      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-      <typeName>Product</typeName>
-    </parent>
+
     <fields>
       <field>
         <name>isbn</name>
@@ -80,6 +40,37 @@
           </string>
         </value>
         <required>true</required>
+        <variations>
+          <variation>
+            <name>avar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>velocity</templateType>
+            <uri>
+              <external>http://some/uri</external>
+            </uri>
+          </variation>
+          <variation>
+            <name>anothervar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>javascript</templateType>
+            <uri>
+              <internal>
+                <name>internalvar</name>
+              </internal>
+            </uri>
+          </variation>
+        </variations>
+        <validator>
+          <validatorType>groovy</validatorType>
+          <uri>
+            <external>http://some/uri</external>
+          </uri>
+        </validator>
+        <search>
+          <index>true</index>
+          <store>false</store>
+          <boost>a</boost>
+        </search>
       </field>
       <field>
         <name>publishers</name>
@@ -97,6 +88,32 @@
           </collection>
         </value>
         <required>true</required>
+        <variations>
+          <variation>
+            <name>avar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>velocity</templateType>
+            <uri>
+              <external>http://some/uri</external>
+            </uri>
+          </variation>
+          <variation>
+            <name>anothervar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>javascript</templateType>
+            <uri>
+              <internal>
+                <name>internalvar</name>
+              </internal>
+            </uri>
+          </variation>
+        </variations>
+        <validator>
+          <validatorType>groovy</validatorType>
+          <uri>
+            <external>http://some/uri</external>
+          </uri>
+        </validator>
       </field>
       <field>
         <name>authors</name>
@@ -114,17 +131,67 @@
           </collection>
         </value>
         <required>true</required>
+        <variations>
+          <variation>
+            <name>avar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>velocity</templateType>
+            <uri>
+              <external>http://some/uri</external>
+            </uri>
+          </variation>
+          <variation>
+            <name>anothervar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>javascript</templateType>
+            <uri>
+              <internal>
+                <name>internalvar</name>
+              </internal>
+            </uri>
+          </variation>
+        </variations>
+        <validator>
+          <validatorType>groovy</validatorType>
+          <uri>
+            <external>http://some/uri</external>
+          </uri>
+        </validator>
       </field>
     </fields>
     <status>
-      <statusName>draft</statusName>
-      <statusName>marketed</statusName>
-      <statusName>obselete</statusName>
+      <statusName>updated-draft</statusName>
+      <statusName>updated-marketed</statusName>
+      <statusName>updated-obselete</statusName>
     </status>
+    <representations>
+      <representation>
+        <name>arep</name>
+        <mimeType>some/type</mimeType>
+        <templateType>velocity</templateType>
+        <uri>
+          <external>http://some/uri</external>
+        </uri>
+      </representation>
+      <representation>
+        <name>anotherrep</name>
+        <mimeType>some/type</mimeType>
+        <templateType>ruby</templateType>
+        <uri>
+          <internal>
+            <name>internalrep</name>
+          </internal>
+        </uri>
+      </representation>
+    </representations>
   </contentType>
 
   <contentType namespace="com.smartitengineering.smart-shopping.content">
     <name>Publisher</name>
+    <parent>
+      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+      <typeName>Book</typeName>
+    </parent>
     <fields>
       <field>
         <name>name</name>
@@ -134,6 +201,32 @@
           </string>
         </value>
         <required>true</required>
+        <variations>
+          <variation>
+            <name>avar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>velocity</templateType>
+            <uri>
+              <external>http://some/uri</external>
+            </uri>
+          </variation>
+          <variation>
+            <name>anothervar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>javascript</templateType>
+            <uri>
+              <internal>
+                <name>internalvar</name>
+              </internal>
+            </uri>
+          </variation>
+        </variations>
+        <validator>
+          <validatorType>groovy</validatorType>
+          <uri>
+            <external>http://some/uri</external>
+          </uri>
+        </validator>
       </field>
       <field>
         <name>publicationHouse</name>
@@ -146,6 +239,32 @@
           </content>
         </value>
         <required>true</required>
+        <variations>
+          <variation>
+            <name>avar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>velocity</templateType>
+            <uri>
+              <external>http://some/uri</external>
+            </uri>
+          </variation>
+          <variation>
+            <name>anothervar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>javascript</templateType>
+            <uri>
+              <internal>
+                <name>internalvar</name>
+              </internal>
+            </uri>
+          </variation>
+        </variations>
+        <validator>
+          <validatorType>groovy</validatorType>
+          <uri>
+            <external>http://some/uri</external>
+          </uri>
+        </validator>
       </field>
     </fields>
     <status>
@@ -153,91 +272,34 @@
       <statusName>marketed</statusName>
       <statusName>obselete</statusName>
     </status>
-  </contentType>
-
-  <contentType namespace="com.smartitengineering.smart-shopping.content">
-    <name>PublicationHouse</name>
-    <fields>
-      <field>
-        <name>name</name>
-        <value>
-          <string>
-            <mimeType>text/plain</mimeType>
-          </string>
-        </value>
-        <required>true</required>
-      </field>
-      <field>
-        <name>adress</name>
-        <value>
-          <content>
-            <definition>
-              <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-              <typeName>Address</typeName>
-            </definition>
-          </content>
-        </value>
-        <required>true</required>
-      </field>
-    </fields>
-    <status>
-      <statusName>draft</statusName>
-      <statusName>marketed</statusName>
-      <statusName>obselete</statusName>
-    </status>
-  </contentType>
-
-  <contentType namespace="com.smartitengineering.smart-shopping.content">
-    <name>Address</name>
-    <fields>
-      <field>
-        <name>streetAddress</name>
-        <value>
-          <string>
-            <mimeType>text/plain</mimeType>
-          </string>
-        </value>
-      </field>
-      <field>
-        <name>state</name>
-        <value>
-          <string>
-            <mimeType>text/plain</mimeType>
-          </string>
-        </value>
-      </field>
-      <field>
-        <name>city</name>
-        <value>
-          <string>
-            <mimeType>text/plain</mimeType>
-          </string>
-        </value>
-      </field>
-      <field>
-        <name>country</name>
-        <value>
-          <string>
-            <mimeType>text/plain</mimeType>
-          </string>
-        </value>
-      </field>
-      <field>
-        <name>zipCode</name>
-        <value>
-          <string>
-            <mimeType>text/plain</mimeType>
-          </string>
-        </value>
-      </field>
-    </fields>
-    <status>
-      <statusName>published</statusName>
-    </status>
+    <representations>
+      <representation>
+        <name>arep</name>
+        <mimeType>some/type</mimeType>
+        <templateType>velocity</templateType>
+        <uri>
+          <external>http://some/uri</external>
+        </uri>
+      </representation>
+      <representation>
+        <name>anotherrep</name>
+        <mimeType>some/type</mimeType>
+        <templateType>ruby</templateType>
+        <uri>
+          <internal>
+            <name>internalrep</name>
+          </internal>
+        </uri>
+      </representation>
+    </representations>
   </contentType>
 
   <contentType namespace="com.smartitengineering.smart-shopping.content">
     <name>Author</name>
+    <parent>
+      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
+      <typeName>Book</typeName>
+    </parent>
     <fields>
       <field>
         <name>name</name>
@@ -246,6 +308,32 @@
             <mimeType>text/plain</mimeType>
           </string>
         </value>
+        <variations>
+          <variation>
+            <name>avar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>velocity</templateType>
+            <uri>
+              <external>http://some/uri</external>
+            </uri>
+          </variation>
+          <variation>
+            <name>anothervar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>javascript</templateType>
+            <uri>
+              <internal>
+                <name>internalvar</name>
+              </internal>
+            </uri>
+          </variation>
+        </variations>
+        <validator>
+          <validatorType>groovy</validatorType>
+          <uri>
+            <external>http://some/uri</external>
+          </uri>
+        </validator>
       </field>
       <field>
         <name>books</name>
@@ -262,6 +350,32 @@
             </simple-value>
           </collection>
         </value>
+        <variations>
+          <variation>
+            <name>avar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>velocity</templateType>
+            <uri>
+              <external>http://some/uri</external>
+            </uri>
+          </variation>
+          <variation>
+            <name>anothervar</name>
+            <mimeType>some/type</mimeType>
+            <templateType>javascript</templateType>
+            <uri>
+              <internal>
+                <name>internalvar</name>
+              </internal>
+            </uri>
+          </variation>
+        </variations>
+        <validator>
+          <validatorType>groovy</validatorType>
+          <uri>
+            <external>http://some/uri</external>
+          </uri>
+        </validator>
       </field>
     </fields>
     <status>
