@@ -54,11 +54,13 @@ import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -86,7 +88,11 @@ public class ContentResource extends AbstractResource {
       throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
     this.contentId = contentId;
+    if (logger.isDebugEnabled()) {
+      logger.debug("Content ID " + contentId);
+    }
     if (contentId.getId() != null && contentId.getId().length > 0) {
+
       this.content = SmartContentAPI.getInstance().getContentLoader().loadContent(contentId);
     }
     else {
@@ -125,20 +131,40 @@ public class ContentResource extends AbstractResource {
 
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response put(com.smartitengineering.cms.ws.common.domains.Content content) {
+  public Response put(com.smartitengineering.cms.ws.common.domains.Content jsonContent,
+                      @HeaderParam(HttpHeaders.IF_MATCH) EntityTag etag) {
     Content newContent;
     try {
-      newContent = adapter.convertInversely(content);
+      newContent = adapter.convertInversely(jsonContent);
     }
     catch (Exception ex) {
       logger.warn("Could not convert to content!", ex);
       return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).type(MediaType.TEXT_PLAIN).build();
     }
-    WriteableContent writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(newContent);
-    if (content == null && contentId.getId() != null && contentId.getId().length > 0) {
+    final WriteableContent writeableContent;
+    if (this.content == null) {
+      writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(newContent);
+    }
+    else {
+      if (etag == null) {
+        return Response.status(Response.Status.PRECONDITION_FAILED).build();
+      }
+      ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(this.tag);
+      if(builder != null) {
+        return builder.build();
+      }
+      writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(this.content);
+      writeableContent.setContentDefinition(newContent.getContentDefinition());
+      writeableContent.setStatus(newContent.getStatus());
+      writeableContent.setParentId(newContent.getParentId());
+      for (Field field : newContent.getOwnFields().values()) {
+        writeableContent.setField(field);
+      }
+    }
+    if (this.content == null && contentId.getId() != null && contentId.getId().length > 0) {
       writeableContent.setContentId(contentId);
     }
-    else if (content == null) {
+    else if (this.content == null) {
       writeableContent.createContentId(contentId.getWorkspaceId());
     }
     try {
@@ -149,7 +175,7 @@ public class ContentResource extends AbstractResource {
       return Response.serverError().build();
     }
     final ResponseBuilder builder;
-    if (content == null) {
+    if (this.content == null) {
       builder = Response.created(getAbsoluteURIBuilder().uri(getContentUri(writeableContent.getContentId())).build());
     }
     else {
@@ -159,9 +185,12 @@ public class ContentResource extends AbstractResource {
   }
 
   @DELETE
-  public Response delete() {
+  public Response delete(@HeaderParam(HttpHeaders.IF_MATCH) EntityTag etag) {
     if (content == null) {
       throw new WebApplicationException(Response.Status.NOT_FOUND);
+    }
+    if (etag == null) {
+      return Response.status(Response.Status.PRECONDITION_FAILED).build();
     }
     ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(tag);
     if (builder == null) {
@@ -210,9 +239,15 @@ public class ContentResource extends AbstractResource {
         contentImpl.setStatus(status.getName());
       }
       Map<String, Field> fields = fromBean.getFields();
+      if (logger.isDebugEnabled()) {
+        logger.debug("FIELDS: " + fields);
+      }
       String contentUri = ContentResource.getContentUri(fromBean.getContentId()).toASCIIString();
       for (Field field : fields.values()) {
         FieldImpl fieldImpl = new FieldImpl();
+        if (logger.isDebugEnabled()) {
+          logger.debug("Converting field " + field.getName() + " with value " + field.getValue().toString());
+        }
         fieldImpl.setName(field.getName());
         fieldImpl.setFieldUri(new StringBuilder(contentUri).append('/').append(field.getName()).toString());
         final FieldValueImpl value;
@@ -220,6 +255,7 @@ public class ContentResource extends AbstractResource {
         final DataType valueDef = field.getFieldDef().getValueDef();
         value = getFieldvalue(valueDef, contentFieldValue);
         fieldImpl.setValue(value);
+        contentImpl.getFields().add(fieldImpl);
       }
     }
 
@@ -284,25 +320,29 @@ public class ContentResource extends AbstractResource {
       }
       writeableContent.setStatus(status);
       Content parentContent;
-      try {
-        final ContentResource resource = getResourceContext().matchResource(new URI(toBean.getParentContentUri()),
-                                                                            ContentResource.class);
-        if (resource == null) {
-          throw new NullPointerException("No such content type!");
+      final String parentContentUri = toBean.getParentContentUri();
+      if (org.apache.commons.lang.StringUtils.isNotBlank(parentContentUri)) {
+        try {
+          final ContentResource resource = getResourceContext().matchResource(new URI(parentContentUri),
+                                                                              ContentResource.class);
+          if (resource == null) {
+            throw new NullPointerException("No such content type!");
+          }
+          parentContent = resource.getContent();
         }
-        parentContent = resource.getContent();
+        catch (Exception ex) {
+          throw new RuntimeException(ex.getMessage(), ex);
+        }
+        writeableContent.setParentId(parentContent.getContentId());
       }
-      catch (Exception ex) {
-        throw new RuntimeException(ex.getMessage(), ex);
-      }
-      writeableContent.setParentId(parentContent.getContentId());
       for (com.smartitengineering.cms.ws.common.domains.Field field : toBean.getFields()) {
         FieldDef fieldDef = contentType.getFieldDefs().get(field.getName());
         if (fieldDef == null) {
           throw new IllegalArgumentException("No field in content type with name " + field.getName());
         }
         final DataType dataType = fieldDef.getValueDef();
-        if (!org.apache.commons.lang.StringUtils.equalsIgnoreCase(dataType.getType().name(), field.getValue().getType())) {
+        if (org.apache.commons.lang.StringUtils.isNotBlank(field.getValue().getType()) && !org.apache.commons.lang.StringUtils.
+            equalsIgnoreCase(dataType.getType().name(), field.getValue().getType())) {
           throw new IllegalArgumentException("Type mismatch! NOTE: type of valus in field is optional in this case. " +
               "Field is " + field.getName());
         }
@@ -333,8 +373,7 @@ public class ContentResource extends AbstractResource {
           fieldValue = collectionFieldValue;
           break;
         default:
-          fieldValue =
-          SmartContentAPI.getInstance().getContentLoader().getValueFor(value.getValue(), dataType);
+          fieldValue = SmartContentAPI.getInstance().getContentLoader().getValueFor(value.getValue(), dataType);
       }
       return fieldValue;
     }

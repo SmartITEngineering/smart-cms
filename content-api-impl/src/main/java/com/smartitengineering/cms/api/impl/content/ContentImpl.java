@@ -92,7 +92,12 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
 
   @Override
   public Content getParent() {
-    return SmartContentAPI.getInstance().getContentLoader().loadContent(parentId);
+    if (parentId != null) {
+      return SmartContentAPI.getInstance().getContentLoader().loadContent(parentId);
+    }
+    else {
+      return null;
+    }
   }
 
   @Override

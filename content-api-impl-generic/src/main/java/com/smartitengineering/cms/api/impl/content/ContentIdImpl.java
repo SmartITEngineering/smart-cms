@@ -27,6 +27,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -36,6 +38,7 @@ public class ContentIdImpl implements ContentId {
 
   private WorkspaceId workspaceId;
   private byte[] id;
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   public void setWorkspaceId(WorkspaceId workspaceId) {
     if (workspaceId == null) {
@@ -45,7 +48,7 @@ public class ContentIdImpl implements ContentId {
   }
 
   public void setId(byte[] id) {
-    if (id == null || id.length <= 0) {
+    if (id == null) {
       throw new IllegalArgumentException(String.format(ContentTypeIdImpl.STANDARD_ERROR_MSG, "Content Id"));
     }
     this.id = id;
@@ -63,7 +66,7 @@ public class ContentIdImpl implements ContentId {
 
   @Override
   public String toString() {
-    return new StringBuilder().append(workspaceId).append(new String(id)).toString();
+    return new StringBuilder().append(workspaceId).append(':').append(new String(id)).toString();
   }
 
   @Override
@@ -74,19 +77,22 @@ public class ContentIdImpl implements ContentId {
   @Override
   public void readExternal(DataInput input) throws IOException, ClassNotFoundException {
     String idString = Utils.readStringInUTF8(input);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Trying to parse content id: " + idString);
+    }
     if (StringUtils.isBlank(idString)) {
       throw new IOException("No content!");
     }
     String[] params = idString.split(":");
     if (params == null || params.length != 3) {
       throw new IOException(
-          "Object should have been in the format globalNamespace:workspace-name:type-namespace:type-name!");
+          "Object should have been in the format globalNamespace:workspace-name:type-name!");
     }
     WorkspaceIdImpl workspaceIdImpl = new WorkspaceIdImpl();
     workspaceIdImpl.setGlobalNamespace(params[0]);
     workspaceIdImpl.setName(params[1]);
     setWorkspaceId(workspaceIdImpl);
-    setId(params[2].getBytes());
+    setId(org.apache.commons.codec.binary.StringUtils.getBytesUtf8(params[2]));
   }
 
   @Override

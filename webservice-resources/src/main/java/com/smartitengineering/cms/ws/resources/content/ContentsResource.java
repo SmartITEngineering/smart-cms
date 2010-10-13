@@ -68,6 +68,6 @@ public class ContentsResource extends AbstractResource {
     final ContentLoader contentLoader = SmartContentAPI.getInstance().getContentLoader();
     ContentResource r = new ContentResource(getInjectables(), contentLoader.createContentId(workspace.getId(),
                                                                                             new byte[0]));
-    return r.put(content);
+    return r.put(content, null);
   }
 }
