@@ -50,11 +50,14 @@ import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.PersistableContent;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
@@ -316,7 +319,7 @@ public class ContentLoaderImpl implements ContentLoader {
       case CONTENT:
         MutableContentFieldValue contentFieldValue = createContentFieldValue();
         try {
-          DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(value.getBytes("UTF-8")));
+          DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(StringUtils.getBytesUtf8(value)));
           ContentIdImpl idImpl = new ContentIdImpl();
           idImpl.readExternal(inputStream);
           contentFieldValue.setValue(idImpl);
@@ -358,5 +361,11 @@ public class ContentLoaderImpl implements ContentLoader {
         result = fieldValue;
     }
     return result;
+  }
+
+  @Override
+  public ContentId generateContentId(WorkspaceId workspaceId) {
+    UUID uid = UUID.randomUUID();
+    return createContentId(workspaceId, StringUtils.getBytesUtf8(uid.toString()));
   }
 }

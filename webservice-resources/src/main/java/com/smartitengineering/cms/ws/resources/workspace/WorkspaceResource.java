@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author imyousuf
  */
-@Path("/ws/{" + WorkspaceResource.PARAM_NAMESPACE + "}/{" + WorkspaceResource.PARAM_NAME + "}")
+@Path("/w/{" + WorkspaceResource.PARAM_NAMESPACE + "}/{" + WorkspaceResource.PARAM_NAME + "}")
 public class WorkspaceResource extends AbstractResource {
 
   public static final int MAX_AGE = 1 * 60 * 60;

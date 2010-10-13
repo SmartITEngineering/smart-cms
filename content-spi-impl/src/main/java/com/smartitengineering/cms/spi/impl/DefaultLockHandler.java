@@ -20,7 +20,7 @@ package com.smartitengineering.cms.spi.impl;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.smartitengineering.cms.api.common.Lock;
+import com.smartitengineering.cms.api.factory.write.Lock;
 import com.smartitengineering.cms.spi.lock.Key;
 import com.smartitengineering.cms.spi.lock.LockHandler;
 import java.util.concurrent.TimeUnit;

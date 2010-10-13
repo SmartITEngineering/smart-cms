@@ -94,7 +94,7 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
       return false;
     }
     if (this.workspaceId != other.getWorkspace() && (this.workspaceId == null || !this.workspaceId.equals(other.
-        getWorkspace()))) {
+                                                     getWorkspace()))) {
       return false;
     }
     return true;
@@ -117,7 +117,7 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
 
   @Override
   public void writeExternal(DataOutput output) throws IOException {
-    output.write(toString().getBytes("UTF-8"));
+    output.write(org.apache.commons.codec.binary.StringUtils.getBytesUtf8(toString()));
   }
 
   @Override

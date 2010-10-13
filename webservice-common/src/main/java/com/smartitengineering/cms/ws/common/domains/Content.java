@@ -16,14 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.factory.type;
+package com.smartitengineering.cms.ws.common.domains;
 
-import com.smartitengineering.cms.api.factory.write.PersistentWriter;
-import com.smartitengineering.cms.api.type.MutableContentType;
+import java.util.Collection;
+import java.util.Date;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 /**
  *
  * @author imyousuf
  */
-public interface WritableContentType extends PersistentWriter, MutableContentType {
+@JsonDeserialize(as=ContentImpl.class)
+public interface Content {
+
+  Date getCreationDate();
+
+  Date getLastModifiedDate();
+
+  String getContentTypeUri();
+
+  String getParentContentUri();
+
+  String getStatus();
+
+  Collection<Field> getFields();
 }

@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;
 import com.smartitengineering.cms.api.type.ContentStatus;
@@ -87,6 +88,19 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
 
   @Override
   public Map<String, FieldDef> getFieldDefs() {
+    Map<String, FieldDef> fieldDefMap = new LinkedHashMap<String, FieldDef>();
+    if (parentTypeId != null) {
+      ContentType parantType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(parentTypeId);
+      if (parantType != null) {
+        fieldDefMap.putAll(parantType.getFieldDefs());
+      }
+    }
+    fieldDefMap.putAll(getOwnFieldDefs());
+    return Collections.unmodifiableMap(fieldDefMap);
+  }
+
+  @Override
+  public Map<String, FieldDef> getOwnFieldDefs() {
     Map<String, FieldDef> fieldDefMap = new LinkedHashMap<String, FieldDef>(fieldDefs.size());
     for (FieldDef fieldDef : fieldDefs) {
       fieldDefMap.put(fieldDef.getName(), fieldDef);

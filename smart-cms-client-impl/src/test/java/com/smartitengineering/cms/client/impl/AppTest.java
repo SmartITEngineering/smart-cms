@@ -254,14 +254,14 @@ public class AppTest {
     final Iterator<WorkspaceFeedResource> iterator = rootResource.getWorkspaceFeeds().iterator();
     WorkspaceFeedResource feedResource = iterator.next();
     WorkspaceFriendsResource friendsResource = feedResource.getFriends();
-    friendsResource.addFriend(new URI("http://localhost:10080/ws/com.smartitengineering/test"));
+    friendsResource.addFriend(new URI("http://localhost:10080/w/com.smartitengineering/test"));
     friendsResource.get();
     Collection<URI> frdUri = friendsResource.getLastReadStateOfEntity();
     Iterator<URI> frdUris = frdUri.iterator();
     Assert.assertEquals(1, frdUri.size());
-    Assert.assertEquals("http://localhost:10080/ws/com.smartitengineering/test", frdUris.next().toASCIIString());
-    friendsResource.addFriend(URI.create("/ws/a%20test%20namespace/this%20is%20a%20test"));
-    friendsResource.addFriend(new URI("ws/testNS/test"));
+    Assert.assertEquals("http://localhost:10080/w/com.smartitengineering/test", frdUris.next().toASCIIString());
+    friendsResource.addFriend(URI.create("/w/a%20test%20namespace/this%20is%20a%20test"));
+    friendsResource.addFriend(new URI("w/testNS/test"));
     WorkspaceFriendsResource newFriendsResource = feedResource.getFriends();
     Collection<URI> collection = newFriendsResource.get();
     if (LOGGER.isDebugEnabled()) {
@@ -272,13 +272,13 @@ public class AppTest {
     Assert.assertEquals(3, collection.size());
     frdUris = collection.iterator();
     String friendWorkspace = frdUris.next().toASCIIString();
-    Assert.assertEquals("http://localhost:10080/ws/a%20test%20namespace/this%20is%20a%20test", friendWorkspace);
+    Assert.assertEquals("http://localhost:10080/w/a%20test%20namespace/this%20is%20a%20test", friendWorkspace);
     LOGGER.debug(new StringBuilder("First friend workspace is : ").append(friendWorkspace).toString());
     friendWorkspace = frdUris.next().toASCIIString();
-    Assert.assertEquals("http://localhost:10080/ws/com.smartitengineering/test", friendWorkspace);
+    Assert.assertEquals("http://localhost:10080/w/com.smartitengineering/test", friendWorkspace);
     LOGGER.debug(new StringBuilder("Second friend workspace is : ").append(friendWorkspace).toString());
     friendWorkspace = frdUris.next().toASCIIString();
-    Assert.assertEquals("http://localhost:10080/ws/testNS/test", friendWorkspace);
+    Assert.assertEquals("http://localhost:10080/w/testNS/test", friendWorkspace);
     LOGGER.debug(new StringBuilder("Third friend workspace is : ").append(friendWorkspace).toString());
   }
 
@@ -289,7 +289,7 @@ public class AppTest {
     final Iterator<WorkspaceFeedResource> iterator = rootResource.getWorkspaceFeeds().iterator();
     WorkspaceFeedResource feedResource = iterator.next();
     WorkspaceFriendsResource friendsResource = feedResource.getFriends();
-    friendsResource.deleteFriend(new URI("http://localhost:10080/ws/com.smartitengineering/test"));
+    friendsResource.deleteFriend(new URI("http://localhost:10080/w/com.smartitengineering/test"));
     friendsResource.get();
     Collection<URI> frdUri = friendsResource.getLastReadStateOfEntity();
     Iterator<URI> frdUris = frdUri.iterator();
@@ -299,10 +299,10 @@ public class AppTest {
     }
     Assert.assertEquals(2, frdUri.size());
     String friendWorkspace = frdUris.next().toASCIIString();
-    Assert.assertEquals("http://localhost:10080/ws/a%20test%20namespace/this%20is%20a%20test", friendWorkspace);
+    Assert.assertEquals("http://localhost:10080/w/a%20test%20namespace/this%20is%20a%20test", friendWorkspace);
     LOGGER.debug(new StringBuilder("First friend workspace is : ").append(friendWorkspace).toString());
     friendWorkspace = frdUris.next().toASCIIString();
-    Assert.assertEquals("http://localhost:10080/ws/testNS/test", friendWorkspace);
+    Assert.assertEquals("http://localhost:10080/w/testNS/test", friendWorkspace);
     LOGGER.debug(new StringBuilder("Second friend workspace is : ").append(friendWorkspace).toString());
   }
 
@@ -319,8 +319,8 @@ public class AppTest {
     WorkspaceFeedResource feedResource = iterator.next();
     WorkspaceFriendsResource friendsResource = feedResource.getFriends();
 
-    uris.add(new URI("http://localhost:10080/ws/atest2/additional"));
-    uris.add(new URI("http://localhost:10080/ws/com.smartitengineering/test"));
+    uris.add(new URI("http://localhost:10080/w/atest2/additional"));
+    uris.add(new URI("http://localhost:10080/w/com.smartitengineering/test"));
 
     friendsResource.replaceAllFriends(uris);
     friendsResource.get();
@@ -332,10 +332,10 @@ public class AppTest {
     }
     Assert.assertEquals(2, frdUri.size());
     final String friendWS1 = frdUris.next().toASCIIString();
-    Assert.assertEquals("http://localhost:10080/ws/atest2/additional", friendWS1);
+    Assert.assertEquals("http://localhost:10080/w/atest2/additional", friendWS1);
     LOGGER.debug(new StringBuilder("First friend after replacing is : ").append(friendWS1).toString());
     final String friendWS2 = frdUris.next().toASCIIString();
-    Assert.assertEquals("http://localhost:10080/ws/com.smartitengineering/test", friendWS2);
+    Assert.assertEquals("http://localhost:10080/w/com.smartitengineering/test", friendWS2);
     LOGGER.debug(new StringBuilder("Second friend after replacing is : ").append(friendWS2).toString());
   }
 
@@ -548,6 +548,25 @@ public class AppTest {
     Collection<ContentTypeResource> collection = contentTypesResource.getContentTypes();
     Assert.assertEquals(6, collection.size());
 
+  }
+
+  @Test
+  public void testCreateContentTypeWithInvalidXML() throws Exception {
+    LOGGER.info(":::::::::::::: CREATE CONTENT_TYPE RESOURCE WITH INVALID XML TEST ::::::::::::::");
+    String XML = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("InvalidValueType.xml"));
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    ContentTypesResource contentTypesResource = feedResource.getContentTypes();
+    contentTypesResource.get();
+    try {
+      contentTypesResource.createContentType(XML);
+      Assert.fail("Should not be able to create!");
+    }
+    catch (UniformInterfaceException ex) {
+      Assert.assertEquals(400, ex.getResponse().getStatus());
+    }
   }
 
   @Test

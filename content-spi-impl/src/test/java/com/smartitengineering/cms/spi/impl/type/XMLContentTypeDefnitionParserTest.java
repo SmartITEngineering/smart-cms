@@ -192,15 +192,15 @@ public class XMLContentTypeDefnitionParserTest {
     MutableContentType contentType = iterator.next();
 
     if (logger.isInfoEnabled()) {
-      logger.debug(new StringBuffer("first Fileds size is ").append(contentType.getFieldDefs().size()).toString());
+      logger.debug(new StringBuffer("first Fileds size is ").append(contentType.getOwnFieldDefs().size()).toString());
     }
-    Assert.assertEquals(4, contentType.getFieldDefs().size());
+    Assert.assertEquals(4, contentType.getOwnFieldDefs().size());
     contentType = iterator.next();
 
     if (logger.isInfoEnabled()) {
-      logger.debug(new StringBuffer("2nd Fileds size is ").append(contentType.getFieldDefs()).toString());
+      logger.debug(new StringBuffer("2nd Fileds size is ").append(contentType.getOwnFieldDefs()).toString());
     }
-    Assert.assertEquals(2, contentType.getFieldDefs().size());
+    Assert.assertEquals(2, contentType.getOwnFieldDefs().size());
 
   }
 
@@ -432,8 +432,10 @@ public class XMLContentTypeDefnitionParserTest {
                                                                                           MediaType.APPLICATION_XML);
       Assert.fail("Parent is Invalid");
     }
-    catch (Exception e) {
-      e.printStackTrace();
+    catch (InvalidReferenceException e) {
+    }
+    catch(Exception ex) {
+      Assert.fail("Unexpected exception! " + ex.getMessage());
     }
   }
 
@@ -450,8 +452,10 @@ public class XMLContentTypeDefnitionParserTest {
                                                                                           MediaType.APPLICATION_XML);
       Assert.fail("minSize is Grater than maxSize");
     }
-    catch (Exception e) {
-      e.printStackTrace();
+    catch (InvalidReferenceException e) {
+    }
+    catch(Exception ex) {
+      Assert.fail("Unexpected exception! " + ex.getMessage());
     }
   }
 
@@ -468,8 +472,10 @@ public class XMLContentTypeDefnitionParserTest {
                                                                                           MediaType.APPLICATION_XML);
       Assert.fail("Invalid Value type inside the collection");
     }
-    catch (Exception e) {
-      e.printStackTrace();
+    catch (InvalidReferenceException e) {
+    }
+    catch(Exception ex) {
+      Assert.fail("Unexpected exception! " + ex.getMessage());
     }
   }
 

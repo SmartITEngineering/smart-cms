@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.spi.lock;
 
-import com.smartitengineering.cms.api.common.Lock;
+import com.smartitengineering.cms.api.factory.write.Lock;
 
 /**
  * The SPI used the implementation to achieve locks.

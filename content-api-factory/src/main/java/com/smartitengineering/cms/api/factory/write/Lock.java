@@ -16,14 +16,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.factory.type;
+package com.smartitengineering.cms.api.factory.write;
 
-import com.smartitengineering.cms.api.factory.write.PersistentWriter;
-import com.smartitengineering.cms.api.type.MutableContentType;
+import java.util.concurrent.TimeUnit;
 
 /**
- *
+ * Represents the lock of the CMS API. The lock basically extends the
+ * {@link java.util.concurrent.locks.Lock} by adding capabilities of detecting
+ * whether current thread is the owner or not.
  * @author imyousuf
+ * @since 0.1
  */
-public interface WritableContentType extends PersistentWriter, MutableContentType {
+public interface Lock {
+
+  public boolean isLockOwned();
+
+  public void lock();
+
+  public boolean tryLock();
+
+  public boolean tryLock(long time, TimeUnit unit) throws InterruptedException;
+
+  public void unlock();
 }

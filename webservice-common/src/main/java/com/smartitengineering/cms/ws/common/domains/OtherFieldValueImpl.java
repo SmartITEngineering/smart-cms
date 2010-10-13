@@ -16,14 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.factory.type;
-
-import com.smartitengineering.cms.api.factory.write.PersistentWriter;
-import com.smartitengineering.cms.api.type.MutableContentType;
+package com.smartitengineering.cms.ws.common.domains;
 
 /**
  *
  * @author imyousuf
  */
-public interface WritableContentType extends PersistentWriter, MutableContentType {
+public class OtherFieldValueImpl extends FieldValueImpl implements OtherFieldValue {
+
+  private String mimeType;
+
+  @Override
+  public String getMimeType() {
+    return mimeType;
+  }
+
+  public void setMimeType(String mimeType) {
+    this.mimeType = mimeType;
+  }
 }

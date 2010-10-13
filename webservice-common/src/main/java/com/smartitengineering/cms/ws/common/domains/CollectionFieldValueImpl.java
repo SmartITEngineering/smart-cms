@@ -16,26 +16,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.common;
+package com.smartitengineering.cms.ws.common.domains;
 
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
- * Represents the lock of the CMS API. The lock basically extends the
- * {@link java.util.concurrent.locks.Lock} by adding capabilities of detecting
- * whether current thread is the owner or not.
+ *
  * @author imyousuf
- * @since 0.1
  */
-public interface Lock {
+public class CollectionFieldValueImpl extends FieldValueImpl implements CollectionFieldValue {
 
-  public boolean isLockOwned();
+  private List<FieldValue> values = new ArrayList<FieldValue>();
 
-  public void lock();
+  @Override
+  public Collection<FieldValue> getValues() {
+    return values;
+  }
 
-  public boolean tryLock();
+  public void setValues(Collection<FieldValue> values) {
+    this.values.clear();
+    if (values != null) {
+      this.values.addAll(values);
+    }
+  }
 
-  public boolean tryLock(long time, TimeUnit unit) throws InterruptedException;
+  @Override
+  public String getValue() {
+    throw new UnsupportedOperationException("Should not be called from here!");
+  }
 
-  public void unlock();
+  @Override
+  public void setValue(String value) {
+    throw new UnsupportedOperationException("Should not be called from here!");
+  }
 }

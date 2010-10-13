@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -36,7 +37,6 @@ import org.slf4j.LoggerFactory;
 public final class Utils {
 
   private static final Logger logger = LoggerFactory.getLogger(Utils.class);
-  public static final String UTF_8_ENCODING = "UTF-8";
 
   private Utils() {
   }
@@ -46,7 +46,7 @@ public final class Utils {
       return new byte[0];
     }
     try {
-      return DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(date).getBytes(UTF_8_ENCODING);
+      return StringUtils.getBytesUtf8(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(date));
     }
     catch (Exception ex) {
       throw new RuntimeException(ex);
@@ -55,7 +55,7 @@ public final class Utils {
 
   public static Date toDate(final byte[] dateBytes) {
     try {
-      String dateString = new String(dateBytes, UTF_8_ENCODING);
+      String dateString = StringUtils.newStringUtf8(dateBytes);
       return DateUtils.parseDate(dateString, new String[]{DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()});
     }
     catch (Exception ex) {

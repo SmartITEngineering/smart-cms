@@ -39,6 +39,8 @@ public interface Content {
 
   public Map<String, Field> getFields();
 
+  public Map<String, Field> getOwnFields();
+
   public Field getField(String fieldName);
 
   public ContentStatus getStatus();

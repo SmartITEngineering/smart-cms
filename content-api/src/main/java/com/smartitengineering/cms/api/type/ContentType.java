@@ -45,12 +45,14 @@ public interface ContentType {
    */
   public Map<String, ContentStatus> getStatuses();
 
+  public Map<String, FieldDef> getFieldDefs();
+
   /**
    * Retrieve the defined fields for this content type. The collection
    * returned could be unmodifiable.
    * @return defined fields
    */
-  public Map<String, FieldDef> getFieldDefs();
+  public Map<String, FieldDef> getOwnFieldDefs();
 
   public ContentTypeId getParent();
 

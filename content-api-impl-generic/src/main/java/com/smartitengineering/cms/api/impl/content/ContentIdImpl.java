@@ -68,7 +68,7 @@ public class ContentIdImpl implements ContentId {
 
   @Override
   public void writeExternal(DataOutput output) throws IOException {
-    output.write(toString().getBytes("UTF-8"));
+    output.write(org.apache.commons.codec.binary.StringUtils.getBytesUtf8(toString()));
   }
 
   @Override

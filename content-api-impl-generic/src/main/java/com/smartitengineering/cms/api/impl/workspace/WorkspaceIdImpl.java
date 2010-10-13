@@ -61,7 +61,7 @@ public class WorkspaceIdImpl implements WorkspaceId {
 
   @Override
   public void writeExternal(DataOutput out) throws IOException {
-    out.write(toString().getBytes("UTF-8"));
+    out.write(org.apache.commons.codec.binary.StringUtils.getBytesUtf8(toString()));
   }
 
   @Override

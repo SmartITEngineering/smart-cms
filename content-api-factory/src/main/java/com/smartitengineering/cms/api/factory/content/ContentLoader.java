@@ -97,4 +97,6 @@ public interface ContentLoader {
   Set<Content> search(Filter filter);
 
   Variation getVariation(Field field, String name);
+
+  ContentId generateContentId(WorkspaceId workspaceId);
 }

@@ -16,26 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.common;
+package com.smartitengineering.cms.ws.common.domains;
 
-import org.w3c.dom.Document;
+import java.util.Collection;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 /**
- * Api for objects that has an xml representation.
+ *
  * @author imyousuf
- * @since 0.1
  */
-public interface XMLContent {
+@JsonDeserialize(as = CollectionFieldValueImpl.class)
+public interface CollectionFieldValue extends FieldValue {
 
-  /**
-   * Retrieve the xml document representing the instance
-   * @return xml document
-   */
-  public Document getXMLDocument();
+  @Override
+  @JsonIgnore
+  @Deprecated
+  String getValue();
 
-  /**
-   * Returns the current content's XML version
-   * @return XML {@link CharSequence} of the current content.
-   */
-  public CharSequence toXml();
+  Collection<FieldValue> getValues();
 }

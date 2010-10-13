@@ -16,14 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.factory.type;
+package com.smartitengineering.cms.ws.common.domains;
 
-import com.smartitengineering.cms.api.factory.write.PersistentWriter;
-import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.ws.common.jackson.FieldValueTypeIdResolver;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonTypeIdResolver;
 
 /**
  *
  * @author imyousuf
  */
-public interface WritableContentType extends PersistentWriter, MutableContentType {
+@JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, include = JsonTypeInfo.As.PROPERTY, property = "@valueType")
+@JsonTypeIdResolver(FieldValueTypeIdResolver.class)
+@JsonDeserialize(as = FieldValueImpl.class)
+public interface FieldValue {
+
+  String getType();
+
+  String getValue();
 }
