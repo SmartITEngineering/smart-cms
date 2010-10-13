@@ -23,6 +23,7 @@ import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
 import com.smartitengineering.cms.ws.common.utils.Utils;
+import com.smartitengineering.cms.ws.resources.content.ContentsResource;
 import com.smartitengineering.cms.ws.resources.domains.Factory;
 import com.smartitengineering.cms.ws.resources.type.ContentTypesResource;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
@@ -66,6 +67,7 @@ public class WorkspaceResource extends AbstractResource {
   public static final String REL_REPRESENTATIONS = "representations";
   public static final String REL_VARIATIONS = "variations";
   public static final String REL_CONTENT_TYPES = "content-types";
+  public static final String REL_CONTENTS = "contents";
   public static final String REL_WORKSPACE_CONTENT = "workspaceContent";
   private final String namespace;
   private final String workspaceName;
@@ -123,6 +125,8 @@ public class WorkspaceResource extends AbstractResource {
       feed.addLink(getLink(
           getAbsoluteURIBuilder().path(ContentTypesResource.class).build(namespace, workspaceName), REL_CONTENT_TYPES,
           MediaType.APPLICATION_ATOM_XML));
+      feed.addLink(getLink(getAbsoluteURIBuilder().path(ContentsResource.class).build(namespace, workspaceName),
+                           REL_CONTENTS, MediaType.APPLICATION_ATOM_XML));
       feed.addLink(getLink(getUriInfo().getRequestUri(), Link.REL_ALTERNATE, MediaType.APPLICATION_JSON));
       ResponseBuilder builder = Response.ok(feed);
       builder.lastModified(creationDate);
