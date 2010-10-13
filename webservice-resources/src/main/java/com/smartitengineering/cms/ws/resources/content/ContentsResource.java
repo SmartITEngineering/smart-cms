@@ -25,10 +25,12 @@ import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.ws.common.domains.Content;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import java.io.UnsupportedEncodingException;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.commons.codec.binary.StringUtils;
@@ -61,6 +63,7 @@ public class ContentsResource extends AbstractResource {
   }
 
   @POST
+  @Consumes(MediaType.APPLICATION_JSON)
   public Response createContent(Content content) {
     final ContentLoader contentLoader = SmartContentAPI.getInstance().getContentLoader();
     ContentResource r = new ContentResource(getInjectables(), contentLoader.createContentId(workspace.getId(),
