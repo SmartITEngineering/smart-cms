@@ -40,6 +40,7 @@ import com.smartitengineering.cms.api.content.OtherFieldValue;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.type.FieldDef;
 import java.util.Set;
@@ -82,7 +83,7 @@ public interface ContentLoader {
 
   MutableStringFieldValue createStringFieldValue(StringFieldValue fieldValue);
 
-  FieldValue getValueFor(String value, FieldDef fieldDef);
+  FieldValue getValueFor(String value, DataType fieldDef);
 
   ContentId createContentId(WorkspaceId workspaceId, byte[] id);
 

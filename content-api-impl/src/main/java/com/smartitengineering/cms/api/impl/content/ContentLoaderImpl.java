@@ -43,6 +43,7 @@ import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
@@ -274,9 +275,9 @@ public class ContentLoaderImpl implements ContentLoader {
   }
 
   @Override
-  public FieldValue getValueFor(String value, FieldDef fieldDef) {
+  public FieldValue getValueFor(String value, DataType dataType) {
     final FieldValue result;
-    final FieldValueType type = fieldDef.getValueDef().getType();
+    final FieldValueType type = dataType.getType();
     switch (type) {
       case COLLECTION:
         MutableCollectionFieldValue collectionFieldValue = new CollectionFieldValueImpl();
@@ -288,7 +289,7 @@ public class ContentLoaderImpl implements ContentLoader {
             ArrayList<FieldValue> values = new ArrayList<FieldValue>(size);
             for (int i = 0; i < size; ++i) {
               String stringValue = arrayNode.get(i).getTextValue();
-              values.add(getSimpleValueFor(stringValue, ((CollectionDataType) fieldDef.getValueDef()).getItemDataType().
+              values.add(getSimpleValueFor(stringValue, ((CollectionDataType) dataType).getItemDataType().
                   getType()));
             }
             collectionFieldValue.setValue(values);

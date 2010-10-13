@@ -173,7 +173,7 @@ public class ContentObjectConverter extends AbstactObjectRowConverter<Persistent
           break;
       }
       MutableField field = SmartContentAPI.getInstance().getContentLoader().createMutableField(fieldDef);
-      field.setValue(SmartContentAPI.getInstance().getContentLoader().getValueFor(value, fieldDef));
+      field.setValue(SmartContentAPI.getInstance().getContentLoader().getValueFor(value, fieldDef.getValueDef()));
       content.setField(field);
     }
     PersistentContent persistentContent = new PersistentContent();
