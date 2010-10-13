@@ -19,7 +19,7 @@
 package com.smartitengineering.cms.api.factory.content;
 
 import com.smartitengineering.cms.api.content.MutableContent;
-import com.smartitengineering.cms.api.common.PersistentWriter;
+import com.smartitengineering.cms.api.factory.write.PersistentWriter;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 
 /**

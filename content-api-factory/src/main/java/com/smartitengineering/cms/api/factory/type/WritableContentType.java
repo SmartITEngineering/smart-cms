@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.api.factory.type;
 
-import com.smartitengineering.cms.api.common.PersistentWriter;
+import com.smartitengineering.cms.api.factory.write.PersistentWriter;
 import com.smartitengineering.cms.api.type.MutableContentType;
 
 /**

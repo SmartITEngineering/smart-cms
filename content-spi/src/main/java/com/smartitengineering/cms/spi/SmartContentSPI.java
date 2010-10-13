@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.spi;
 
-import com.smartitengineering.cms.api.common.PersistentWriter;
+import com.smartitengineering.cms.api.factory.write.PersistentWriter;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.spi.content.ContentIdProcessor;
