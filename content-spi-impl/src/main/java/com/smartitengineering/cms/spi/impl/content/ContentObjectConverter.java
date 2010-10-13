@@ -52,7 +52,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 public class ContentObjectConverter extends AbstactObjectRowConverter<PersistentContent, ContentId> {
 
   public final static byte[] FAMILY_SELF = Bytes.toBytes("self");
-  public final static byte[] FAMILY_SIMPLE_FIELDS = Bytes.toBytes("simple-fields");
+  public final static byte[] FAMILY_SIMPLE_FIELDS = Bytes.toBytes("simpleFields");
   public final static byte[] FAMILY_COLLECTION = Bytes.toBytes("collections");
   public final static byte[] FAMILY_STRING = Bytes.toBytes("strings");
   public final static byte[] FAMILY_OTHER = Bytes.toBytes("others");

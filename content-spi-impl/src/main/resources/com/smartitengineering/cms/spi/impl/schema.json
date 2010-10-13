@@ -23,6 +23,29 @@
     ]
   },
   {
+    "tableName": "content",
+    "columnFamilyConfigurations": [
+      {
+        "familyName": "self"
+      },
+      {
+        "familyName": "simpleFields"
+      },
+      {
+        "familyName": "collections"
+      },
+      {
+        "familyName": "strings"
+      },
+      {
+        "familyName": "others"
+      },
+      {
+        "familyName": "fieldType"
+      }
+    ]
+  },
+  {
     "tableName": "content-type",
     "columnFamilyConfigurations": [
       {
