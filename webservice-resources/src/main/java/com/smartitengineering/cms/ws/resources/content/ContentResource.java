@@ -299,7 +299,7 @@ public class ContentResource extends AbstractResource {
         writeableContent.setParentId(parentContent.getContentId());
       }
       for (com.smartitengineering.cms.ws.common.domains.Field field : toBean.getFields()) {
-        MutableField mutableField = getField(contentType, field);
+        MutableField mutableField = getField(contentType.getFieldDefs().get(field.getName()), field);
         writeableContent.setField(mutableField);
       }
       return writeableContent;
@@ -329,10 +329,9 @@ public class ContentResource extends AbstractResource {
     return fieldValue;
   }
 
-  protected static MutableField getField(final ContentType contentType,
+  protected static MutableField getField(final FieldDef fieldDef,
                                          com.smartitengineering.cms.ws.common.domains.Field field) throws
       IllegalArgumentException {
-    FieldDef fieldDef = contentType.getFieldDefs().get(field.getName());
     if (fieldDef == null) {
       throw new IllegalArgumentException("No field in content type with name " + field.getName());
     }
