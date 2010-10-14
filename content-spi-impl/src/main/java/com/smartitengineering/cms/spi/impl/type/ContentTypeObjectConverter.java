@@ -91,6 +91,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
   public final static byte[] CELL_CREATION_DATE = Bytes.toBytes("creationDate");
   public final static byte[] CELL_LAST_MODIFIED_DATE = Bytes.toBytes("lastModifiedDate");
   public final static byte[] CELL_PARENT_ID = Bytes.toBytes("parent");
+  public final static byte[] CELL_ENTITY_TAG = Bytes.toBytes("entityTag");
   public final static byte[] CELL_RSRC_NAME = Bytes.toBytes("name");
   public final static byte[] CELL_RSRC_MIME_TYPE = Bytes.toBytes("mimeType");
   public final static byte[] CELL_RSRC_URI_TYPE = Bytes.toBytes("resourceUri.type");
@@ -143,6 +144,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         }
         put.add(FAMILY_SIMPLE, CELL_DISPLAY_NAME, Bytes.toBytes(displayName));
       }
+      put.add(FAMILY_SIMPLE, CELL_ENTITY_TAG, Bytes.toBytes(instance.getMutableContentType().getEntityTagValue()));
       final Date lastModifiedDate = date;
       logger.debug("Set creation date if necessary and set last modification date");
       put.add(FAMILY_SIMPLE, CELL_LAST_MODIFIED_DATE, Utils.toBytes(lastModifiedDate));
@@ -361,6 +363,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         logger.debug("Set display name of the content type!");
         contentType.setDisplayName(Bytes.toString(displayName));
       }
+      contentType.setEntityTagValue(Bytes.toString(startRow.getValue(FAMILY_SIMPLE, CELL_ENTITY_TAG)));
       logger.debug("Setting creation and last modified date");
       contentType.setCreationDate(Utils.toDate(startRow.getValue(FAMILY_SIMPLE, CELL_CREATION_DATE)));
       contentType.setLastModifiedDate(Utils.toDate(startRow.getValue(FAMILY_SIMPLE, CELL_LAST_MODIFIED_DATE)));

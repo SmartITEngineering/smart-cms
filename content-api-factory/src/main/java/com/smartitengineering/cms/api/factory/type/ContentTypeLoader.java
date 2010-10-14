@@ -165,4 +165,6 @@ public interface ContentTypeLoader {
   public MutableStringDataType createMutableStringDataType();
 
   public String getSearchFieldName(FieldDef fieldDef);
+
+  public String getEntityTagValueForContentType(ContentType contentType);
 }

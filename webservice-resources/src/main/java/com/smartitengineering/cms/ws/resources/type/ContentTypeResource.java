@@ -61,7 +61,7 @@ public class ContentTypeResource extends AbstractResource {
     }
     this.type = type;
     lastModified = type.getLastModifiedDate();
-    tag = new EntityTag(DigestUtils.md5Hex(Utils.getFormattedDate(lastModified)));
+    tag = new EntityTag(type.getEntityTagValue());
   }
 
   @GET

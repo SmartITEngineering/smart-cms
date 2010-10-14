@@ -50,6 +50,7 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
   private final Set<RepresentationDef> representationDefs = new LinkedHashSet<RepresentationDef>();
   private ContentTypeId parentTypeId;
   private String displayName;
+  private String entityTagValue;
   private Date creationDate;
   private Date lastModifiedDate;
   private boolean fromPersistentStorage;
@@ -230,5 +231,15 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
   @Override
   public Map<MediaType, String> getRepresentations() {
     return Collections.unmodifiableMap(representations);
+  }
+
+  @Override
+  public void setEntityTagValue(String entityTagValue) {
+    this.entityTagValue = entityTagValue;
+  }
+
+  @Override
+  public String getEntityTagValue() {
+    return entityTagValue;
   }
 }

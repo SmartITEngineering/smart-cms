@@ -65,4 +65,6 @@ public interface ContentType {
   public Date getLastModifiedDate();
 
   public Map<MediaType, String> getRepresentations();
+
+  public String getEntityTagValue();
 }

@@ -20,11 +20,14 @@ package com.smartitengineering.cms.spi.impl.type;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
+import com.smartitengineering.cms.spi.type.PersistableContentType;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
@@ -35,6 +38,7 @@ import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -66,12 +70,22 @@ public class ContentTypePersistentService implements PersistentService<WritableC
 
   @Override
   public void create(WritableContentType bean) throws Exception {
-    commonWriteDao.save(getAdapter().convert(bean));
+    PersistableContentType contentType = getPersistableContentType(bean);
+    final Date date = new Date();
+    contentType.setCreationDate(date);
+    contentType.setLastModifiedDate(date);
+    contentType.setEntityTagValue(SmartContentAPI.getInstance().getContentTypeLoader().getEntityTagValueForContentType(
+        contentType));
+    commonWriteDao.save(getAdapter().convert(contentType));
   }
 
   @Override
   public void update(WritableContentType bean) throws Exception {
-    commonWriteDao.update(getAdapter().convert(bean));
+    PersistableContentType contentType = getPersistableContentType(bean);
+    contentType.setLastModifiedDate(new Date());
+    contentType.setEntityTagValue(SmartContentAPI.getInstance().getContentTypeLoader().getEntityTagValueForContentType(
+        contentType));
+    commonWriteDao.update(getAdapter().convert(contentType));
   }
 
   @Override
@@ -94,5 +108,21 @@ public class ContentTypePersistentService implements PersistentService<WritableC
       return Collections.emptyList();
     }
     return getAdapter().convertInversely(list.toArray(new PersistentContentType[list.size()]));
+  }
+
+  private PersistableContentType getPersistableContentType(WritableContentType bean) {
+    PersistableContentType contentType = SmartContentSPI.getInstance().getPersistableDomainFactory().
+        createPersistableContentType();
+    contentType.setContentTypeID(bean.getContentTypeID());
+    contentType.setCreationDate(bean.getCreationDate());
+    contentType.setDisplayName(bean.getDisplayName());
+    contentType.setEntityTagValue(bean.getEntityTagValue());
+    contentType.setLastModifiedDate(bean.getLastModifiedDate());
+    contentType.setParent(bean.getParent());
+    contentType.setRepresentations(bean.getRepresentations());
+    contentType.getMutableFieldDefs().addAll(bean.getMutableFieldDefs());
+    contentType.getMutableRepresentationDefs().addAll(bean.getMutableRepresentationDefs());
+    contentType.getMutableStatuses().addAll(bean.getMutableStatuses());
+    return contentType;
   }
 }

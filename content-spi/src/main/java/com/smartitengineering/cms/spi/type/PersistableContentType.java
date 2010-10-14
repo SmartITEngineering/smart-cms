@@ -38,4 +38,6 @@ public interface PersistableContentType extends WritableContentType {
   public void setLastModifiedDate(Date lastModifiedDate);
 
   public void setRepresentations(Map<MediaType, String> reps);
+
+  public void setEntityTagValue(String entityTagValue);
 }
