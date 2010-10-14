@@ -87,6 +87,7 @@ public class FieldResource extends AbstractResource {
   public FieldResource(ServerResourceInjectables injectables, Content content, FieldDef fieldDef, EntityTag eTag) {
     super(injectables);
     if (content == null || fieldDef == null) {
+      logger.warn("No content or field def", new NullPointerException());
       throw new WebApplicationException(Status.NOT_FOUND);
     }
     this.content = content;
