@@ -92,10 +92,11 @@ public class ContentResource extends AbstractResource {
       logger.debug("Content ID " + contentId);
     }
     if (contentId.getId() != null && contentId.getId().length > 0) {
-
+      //An existing content
       this.content = SmartContentAPI.getInstance().getContentLoader().loadContent(contentId);
     }
     else {
+      //New content is being created
       this.content = null;
     }
     if (content != null) {
@@ -143,9 +144,11 @@ public class ContentResource extends AbstractResource {
     }
     final WriteableContent writeableContent;
     if (this.content == null) {
+      //Create new content
       writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(newContent);
     }
     else {
+      //Update new content with etag checking
       if (etag == null) {
         return Response.status(Response.Status.PRECONDITION_FAILED).build();
       }
@@ -153,6 +156,7 @@ public class ContentResource extends AbstractResource {
       if(builder != null) {
         return builder.build();
       }
+      //Merge new contents into the old one in case of update
       writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(this.content);
       writeableContent.setContentDefinition(newContent.getContentDefinition());
       writeableContent.setStatus(newContent.getStatus());
@@ -161,13 +165,16 @@ public class ContentResource extends AbstractResource {
         writeableContent.setField(field);
       }
     }
+    //Set content id for new content with valid id
     if (this.content == null && contentId.getId() != null && contentId.getId().length > 0) {
       writeableContent.setContentId(contentId);
     }
+    //Create new content id for new content with no specified id
     else if (this.content == null) {
       writeableContent.createContentId(contentId.getWorkspaceId());
     }
     try {
+      //Save or update the content, will be decided by writeable content implementation
       writeableContent.put();
     }
     catch (IOException ex) {
@@ -176,9 +183,11 @@ public class ContentResource extends AbstractResource {
     }
     final ResponseBuilder builder;
     if (this.content == null) {
+      //Send 201
       builder = Response.created(getAbsoluteURIBuilder().uri(getContentUri(writeableContent.getContentId())).build());
     }
     else {
+      //Send 202
       builder = Response.status(Response.Status.ACCEPTED);
     }
     return builder.build();
