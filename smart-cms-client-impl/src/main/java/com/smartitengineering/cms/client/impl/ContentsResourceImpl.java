@@ -69,7 +69,8 @@ public class ContentsResourceImpl extends AbstractFeedClientResource<ContentsRes
   }
 
   @Override
-  public void createContentResource(Content content) {
-    post(MediaType.APPLICATION_JSON, content, ClientResponse.Status.CREATED);
+  public ContentResource createContentResource(Content content) {
+    ClientResponse response = post(MediaType.APPLICATION_JSON, content, ClientResponse.Status.CREATED);
+    return new ContentResourceImpl(this, response.getLocation());
   }
 }

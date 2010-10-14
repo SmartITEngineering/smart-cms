@@ -32,5 +32,5 @@ public interface ContentsResource extends WritableResource<Feed>, PaginatedResou
 
   public Collection<ContentResource> getContentResources();
 
-  public void createContentResource(Content content);
+  public ContentResource createContentResource(Content content);
 }
