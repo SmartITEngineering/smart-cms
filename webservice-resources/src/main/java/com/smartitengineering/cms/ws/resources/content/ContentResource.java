@@ -153,7 +153,7 @@ public class ContentResource extends AbstractResource {
         return Response.status(Response.Status.PRECONDITION_FAILED).build();
       }
       ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(this.tag);
-      if(builder != null) {
+      if (builder != null) {
         return builder.build();
       }
       //Merge new contents into the old one in case of update
@@ -254,58 +254,12 @@ public class ContentResource extends AbstractResource {
       String contentUri = ContentResource.getContentUri(fromBean.getContentId()).toASCIIString();
       for (Field field : fields.values()) {
         FieldImpl fieldImpl = new FieldImpl();
+        getDomainField(field, contentUri, fieldImpl);
         if (logger.isDebugEnabled()) {
           logger.debug("Converting field " + field.getName() + " with value " + field.getValue().toString());
         }
-        fieldImpl.setName(field.getName());
-        fieldImpl.setFieldUri(new StringBuilder(contentUri).append('/').append(field.getName()).toString());
-        final FieldValueImpl value;
-        final FieldValue contentFieldValue = field.getValue();
-        final DataType valueDef = field.getFieldDef().getValueDef();
-        value = getFieldvalue(valueDef, contentFieldValue);
-        fieldImpl.setValue(value);
         contentImpl.getFields().add(fieldImpl);
       }
-    }
-
-    private FieldValueImpl getFieldvalue(final DataType valueDef, final FieldValue contentFieldValue) {
-      final FieldValueImpl value;
-      switch (valueDef.getType()) {
-        case CONTENT: {
-          FieldValueImpl valueImpl = new FieldValueImpl();
-          valueImpl.setValue(ContentResource.getContentUri(((ContentFieldValue) contentFieldValue).getValue()).
-              toASCIIString());
-          value = valueImpl;
-          break;
-        }
-        case COLLECTION: {
-          CollectionFieldValueImpl valueImpl =
-                                   new CollectionFieldValueImpl();
-          Collection<FieldValue> contentValues =
-                                 ((CollectionFieldValue) contentFieldValue).getValue();
-          final DataType itemDataType = ((CollectionDataType) valueDef).getItemDataType();
-          for (FieldValue contentValue : contentValues) {
-            valueImpl.getValues().add(getFieldvalue(itemDataType, contentValue));
-          }
-          value = valueImpl;
-          break;
-        }
-        case OTHER:
-        case STRING: {
-          OtherFieldValueImpl valueImpl = new OtherFieldValueImpl();
-          valueImpl.setValue(contentFieldValue.toString());
-          valueImpl.setMimeType(((OtherDataType) valueDef).getMIMEType());
-          value = valueImpl;
-          break;
-        }
-        default: {
-          FieldValueImpl valueImpl = new FieldValueImpl();
-          valueImpl.setValue(contentFieldValue.toString());
-          value = valueImpl;
-        }
-      }
-      value.setType(contentFieldValue.getDataType().name());
-      return value;
     }
 
     @Override
@@ -345,46 +299,104 @@ public class ContentResource extends AbstractResource {
         writeableContent.setParentId(parentContent.getContentId());
       }
       for (com.smartitengineering.cms.ws.common.domains.Field field : toBean.getFields()) {
-        FieldDef fieldDef = contentType.getFieldDefs().get(field.getName());
-        if (fieldDef == null) {
-          throw new IllegalArgumentException("No field in content type with name " + field.getName());
-        }
-        final DataType dataType = fieldDef.getValueDef();
-        if (org.apache.commons.lang.StringUtils.isNotBlank(field.getValue().getType()) && !org.apache.commons.lang.StringUtils.
-            equalsIgnoreCase(dataType.getType().name(), field.getValue().getType())) {
-          throw new IllegalArgumentException("Type mismatch! NOTE: type of valus in field is optional in this case. " +
-              "Field is " + field.getName());
-        }
-        final MutableField mutableField = SmartContentAPI.getInstance().getContentLoader().createMutableField(fieldDef);
-        final FieldValue fieldValue;
-        fieldValue = getFieldValue(dataType, field.getValue());
-        mutableField.setValue(fieldValue);
+        MutableField mutableField = getField(contentType, field);
         writeableContent.setField(mutableField);
       }
       return writeableContent;
     }
+  }
 
-    protected FieldValue getFieldValue(final DataType dataType,
-                                       com.smartitengineering.cms.ws.common.domains.FieldValue value) {
-      FieldValue fieldValue;
-      switch (dataType.getType()) {
-        case COLLECTION:
-          MutableCollectionFieldValue collectionFieldValue = SmartContentAPI.getInstance().getContentLoader().
-              createCollectionFieldValue();
-          CollectionDataType collectionDataType = (CollectionDataType) dataType;
-          com.smartitengineering.cms.ws.common.domains.CollectionFieldValue cFieldValue =
-                                                                            (com.smartitengineering.cms.ws.common.domains.CollectionFieldValue) value;
-          ArrayList<FieldValue> list = new ArrayList<FieldValue>(cFieldValue.getValues().size());
-          for (com.smartitengineering.cms.ws.common.domains.FieldValue v : cFieldValue.getValues()) {
-            list.add(getFieldValue(collectionDataType.getItemDataType(), v));
-          }
-          collectionFieldValue.setValue(list);
-          fieldValue = collectionFieldValue;
-          break;
-        default:
-          fieldValue = SmartContentAPI.getInstance().getContentLoader().getValueFor(value.getValue(), dataType);
-      }
-      return fieldValue;
+  protected static FieldValue getFieldValue(final DataType dataType,
+                                            com.smartitengineering.cms.ws.common.domains.FieldValue value) {
+    FieldValue fieldValue;
+    switch (dataType.getType()) {
+      case COLLECTION:
+        MutableCollectionFieldValue collectionFieldValue = SmartContentAPI.getInstance().getContentLoader().
+            createCollectionFieldValue();
+        CollectionDataType collectionDataType = (CollectionDataType) dataType;
+        com.smartitengineering.cms.ws.common.domains.CollectionFieldValue cFieldValue =
+                                                                          (com.smartitengineering.cms.ws.common.domains.CollectionFieldValue) value;
+        ArrayList<FieldValue> list = new ArrayList<FieldValue>(cFieldValue.getValues().size());
+        for (com.smartitengineering.cms.ws.common.domains.FieldValue v : cFieldValue.getValues()) {
+          list.add(getFieldValue(collectionDataType.getItemDataType(), v));
+        }
+        collectionFieldValue.setValue(list);
+        fieldValue = collectionFieldValue;
+        break;
+      default:
+        fieldValue = SmartContentAPI.getInstance().getContentLoader().getValueFor(value.getValue(), dataType);
     }
+    return fieldValue;
+  }
+
+  protected static MutableField getField(final ContentType contentType,
+                                         com.smartitengineering.cms.ws.common.domains.Field field) throws
+      IllegalArgumentException {
+    FieldDef fieldDef = contentType.getFieldDefs().get(field.getName());
+    if (fieldDef == null) {
+      throw new IllegalArgumentException("No field in content type with name " + field.getName());
+    }
+    final DataType dataType = fieldDef.getValueDef();
+    if (org.apache.commons.lang.StringUtils.isNotBlank(field.getValue().getType()) &&
+        !org.apache.commons.lang.StringUtils.equalsIgnoreCase(dataType.getType().name(), field.getValue().getType())) {
+      throw new IllegalArgumentException("Type mismatch! NOTE: type of valus in field is optional in this case. " +
+          "Field is " + field.getName());
+    }
+    final MutableField mutableField =
+                       SmartContentAPI.getInstance().getContentLoader().createMutableField(fieldDef);
+    final FieldValue fieldValue;
+    fieldValue = getFieldValue(dataType, field.getValue());
+    mutableField.setValue(fieldValue);
+    return mutableField;
+  }
+
+  protected static void getDomainField(Field field, String contentUri, FieldImpl fieldImpl) {
+    fieldImpl.setName(field.getName());
+    fieldImpl.setFieldUri(new StringBuilder(contentUri).append('/').append(field.getName()).toString());
+    final FieldValueImpl value;
+    final FieldValue contentFieldValue = field.getValue();
+    final DataType valueDef = field.getFieldDef().getValueDef();
+    value = getFieldvalue(valueDef, contentFieldValue);
+    fieldImpl.setValue(value);
+  }
+
+  private static FieldValueImpl getFieldvalue(final DataType valueDef, final FieldValue contentFieldValue) {
+    final FieldValueImpl value;
+    switch (valueDef.getType()) {
+      case CONTENT: {
+        FieldValueImpl valueImpl = new FieldValueImpl();
+        valueImpl.setValue(ContentResource.getContentUri(((ContentFieldValue) contentFieldValue).getValue()).
+            toASCIIString());
+        value = valueImpl;
+        break;
+      }
+      case COLLECTION: {
+        CollectionFieldValueImpl valueImpl =
+                                 new CollectionFieldValueImpl();
+        Collection<FieldValue> contentValues =
+                               ((CollectionFieldValue) contentFieldValue).getValue();
+        final DataType itemDataType = ((CollectionDataType) valueDef).getItemDataType();
+        for (FieldValue contentValue : contentValues) {
+          valueImpl.getValues().add(getFieldvalue(itemDataType, contentValue));
+        }
+        value = valueImpl;
+        break;
+      }
+      case OTHER:
+      case STRING: {
+        OtherFieldValueImpl valueImpl = new OtherFieldValueImpl();
+        valueImpl.setValue(contentFieldValue.toString());
+        valueImpl.setMimeType(((OtherDataType) valueDef).getMIMEType());
+        value = valueImpl;
+        break;
+      }
+      default: {
+        FieldValueImpl valueImpl = new FieldValueImpl();
+        valueImpl.setValue(contentFieldValue.toString());
+        value = valueImpl;
+      }
+    }
+    value.setType(contentFieldValue.getDataType().name());
+    return value;
   }
 }
