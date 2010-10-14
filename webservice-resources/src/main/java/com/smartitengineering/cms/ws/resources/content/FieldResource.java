@@ -121,12 +121,10 @@ public class FieldResource extends AbstractResource {
           final MediaType fieldValueDefaultMimeType = getFieldValueDefaultMimeType(fieldDef.getValueDef());
           MediaType type = getUserPreferredType(fieldValueDefaultMimeType);
           if (type == null) {
-            return Response.notAcceptable(Variant.mediaTypes(MediaType.APPLICATION_ATOM_XML_TYPE,
-                                                             fieldValueDefaultMimeType,
-                                                             MediaType.APPLICATION_JSON_TYPE,
-                                                             MediaType.APPLICATION_XML_TYPE,
-                                                             MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE).
-                build()).build();
+            final List<Variant> variants = getVariants(MediaType.APPLICATION_ATOM_XML_TYPE, fieldValueDefaultMimeType,
+                                                       MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_XML_TYPE,
+                                                       MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE);
+            return Response.notAcceptable(variants).build();
           }
           else if (type.equals(MediaType.APPLICATION_ATOM_XML_TYPE) || type.equals(MediaType.TEXT_XML_TYPE) || type.
               equals(
@@ -391,6 +389,14 @@ public class FieldResource extends AbstractResource {
                                                                           MediaType.APPLICATION_XML_TYPE,
                                                                           MediaType.TEXT_XML_TYPE,
                                                                           MediaType.WILDCARD_TYPE));
+  }
+
+  private List<Variant> getVariants(MediaType... mediaTypes) {
+    List<Variant> variants = new ArrayList<Variant>(mediaTypes.length);
+    for (MediaType type : mediaTypes) {
+      variants.add(new Variant(type, null, null));
+    }
+    return variants;
   }
 
   class FieldAdapterHelper extends AbstractAdapterHelper<Field, com.smartitengineering.cms.ws.common.domains.Field> {
