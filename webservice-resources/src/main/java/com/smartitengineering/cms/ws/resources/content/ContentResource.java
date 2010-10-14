@@ -360,7 +360,9 @@ public class ContentResource extends AbstractResource {
 
   protected static void getDomainField(Field field, String contentUri, FieldImpl fieldImpl) {
     fieldImpl.setName(field.getName());
-    fieldImpl.setFieldUri(new StringBuilder(contentUri).append('/').append(field.getName()).toString());
+    final String fieldUri = new StringBuilder(contentUri).append('/').append(field.getName()).toString();
+    fieldImpl.setFieldUri(fieldUri);
+    fieldImpl.setFieldRawContentUri(new StringBuilder(fieldUri).append("/raw").toString());
     final FieldValueImpl value;
     final FieldValue contentFieldValue = field.getValue();
     final DataType valueDef = field.getFieldDef().getValueDef();

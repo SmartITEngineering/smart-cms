@@ -35,14 +35,14 @@ import org.codehaus.jackson.map.ObjectMapper;
 public class ContentDeSerializationTest extends TestCase {
 
   private static final String CONTENT = "{\"fields\":[{\"name\":\"field1\",\"value\":{\"@valueType\":\"integer\"," +
-      "\"value\":\"1\",\"type\":\"integer\"},\"fieldUri\":\"field1Uri\"},{\"name\":\"field2\",\"value\":{" +
+      "\"value\":\"1\",\"type\":\"integer\"},\"fieldUri\":\"field1Uri\",\"fieldRawContentUri\":null},{\"name\":\"field2\",\"value\":{" +
       "\"@valueType\":\"other\",\"mimeType\":\"text/plain\",\"value\":\"1\",\"type\":\"other\"}," +
-      "\"fieldUri\":\"field1Uri\"},{\"name\":\"field3\",\"value\":{\"@valueType\":\"string\",\"mimeType\":\"text/xml\"," +
-      "\"value\":\"1\",\"type\":\"string\"},\"fieldUri\":\"field1Uri\"},{\"name\":\"field4\",\"value\":{" +
+      "\"fieldUri\":\"field1Uri\",\"fieldRawContentUri\":null},{\"name\":\"field3\",\"value\":{\"@valueType\":\"string\",\"mimeType\":\"text/xml\"," +
+      "\"value\":\"1\",\"type\":\"string\"},\"fieldUri\":\"field1Uri\",\"fieldRawContentUri\":null},{\"name\":\"field4\",\"value\":{" +
       "\"@valueType\":\"collection\",\"values\":[{\"@valueType\":\"string\",\"mimeType\":\"text/xml\",\"value\":\"1\"," +
       "\"type\":\"string\"},{\"@valueType\":\"string\",\"mimeType\":\"text/xml\",\"value\":\"2\",\"type\":\"string\"}," +
       "{\"@valueType\":\"string\",\"mimeType\":\"text/xml\",\"value\":\"3\",\"type\":\"string\"}]," +
-      "\"type\":\"collection\"},\"fieldUri\":\"field1Uri\"}],\"creationDate\":1286889793183," +
+      "\"type\":\"collection\"},\"fieldUri\":\"field1Uri\",\"fieldRawContentUri\":null}],\"creationDate\":1286889793183," +
       "\"lastModifiedDate\":1286889793183,\"contentTypeUri\":\"someUri\",\"parentContentUri\":\"parentUri\"," +
       "\"status\":\"someStatus\"}";
   private Content content;
