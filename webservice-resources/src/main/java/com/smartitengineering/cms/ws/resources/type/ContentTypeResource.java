@@ -29,9 +29,11 @@ import java.net.URI;
 import java.util.Date;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -76,10 +78,13 @@ public class ContentTypeResource extends AbstractResource {
   }
 
   @DELETE
-  public Response delete() {
+  public Response delete(@HeaderParam(HttpHeaders.IF_MATCH) EntityTag etag) {
     if (logger.isDebugEnabled()) {
       logger.debug("Delete content type with id " + type.getContentTypeID().toString() + " with last-modified " +
           lastModified + " " + tag.getValue());
+    }
+    if (etag == null) {
+      return Response.status(Response.Status.PRECONDITION_FAILED).build();
     }
     ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(lastModified, tag);
     if (builder != null) {
