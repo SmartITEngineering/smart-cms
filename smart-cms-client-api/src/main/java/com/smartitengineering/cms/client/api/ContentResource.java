@@ -18,22 +18,14 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.util.rest.client.Resource;
-import org.apache.abdera.model.Feed;
+import com.smartitengineering.cms.ws.common.domains.Content;
+import com.smartitengineering.util.rest.client.WritableResource;
 
 /**
  *
- * @author imyousuf
+ * @author kaisar
  */
-public interface WorkspaceFeedResource extends Resource<Feed> {
+public interface ContentResource extends WritableResource<Content> {
 
-  WorkspaceFriendsResource getFriends();
-
-  WorkspaceRepresentationsResource getRepresentations();
-
-  WorkspaceVariationsResource getVariations();
-
-  ContentTypesResource getContentTypes();
-
-  ContentsResource getContents();
+  public void update(Content content);
 }

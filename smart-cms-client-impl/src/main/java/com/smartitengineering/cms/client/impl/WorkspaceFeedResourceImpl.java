@@ -78,7 +78,7 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
   }
 
   @Override
-  public ContentsResource getContent() {
+  public ContentsResource getContents() {
     return new ContentsResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
         getLink("contents")));
   }

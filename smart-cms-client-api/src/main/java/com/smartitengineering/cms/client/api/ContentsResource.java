@@ -18,22 +18,19 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.util.rest.client.Resource;
+import com.smartitengineering.cms.ws.common.domains.Content;
+import com.smartitengineering.util.rest.client.PaginatedResource;
+import com.smartitengineering.util.rest.client.WritableResource;
+import java.util.Collection;
 import org.apache.abdera.model.Feed;
 
 /**
  *
- * @author imyousuf
+ * @author kaisar
  */
-public interface WorkspaceFeedResource extends Resource<Feed> {
+public interface ContentsResource extends WritableResource<Feed>, PaginatedResource<ContentsResource> {
 
-  WorkspaceFriendsResource getFriends();
+  public Collection<ContentResource> getContentResources();
 
-  WorkspaceRepresentationsResource getRepresentations();
-
-  WorkspaceVariationsResource getVariations();
-
-  ContentTypesResource getContentTypes();
-
-  ContentsResource getContents();
+  public void createContentResource(Content content);
 }
