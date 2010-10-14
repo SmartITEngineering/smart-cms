@@ -50,4 +50,6 @@ public interface Content {
   public Date getCreationDate();
 
   public Date getLastModifiedDate();
+
+  public String getEntityTagValue();
 }

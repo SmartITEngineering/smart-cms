@@ -58,7 +58,9 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 
@@ -395,5 +397,12 @@ public class ContentLoaderImpl implements ContentLoader {
   public ContentId generateContentId(WorkspaceId workspaceId) {
     UUID uid = UUID.randomUUID();
     return createContentId(workspaceId, StringUtils.getBytesUtf8(uid.toString()));
+  }
+
+  @Override
+  public String getEntityTagValueForContent(Content content) {
+    return DigestUtils.md5Hex(new StringBuilder(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(content.
+        getLastModifiedDate())).append('~').append(content.getOwnFields().toString()).append('~').append(content.
+        getStatus()).toString());
   }
 }

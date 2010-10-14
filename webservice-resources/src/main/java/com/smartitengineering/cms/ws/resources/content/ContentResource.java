@@ -39,7 +39,6 @@ import com.smartitengineering.cms.ws.common.domains.ContentImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldValueImpl;
 import com.smartitengineering.cms.ws.common.domains.OtherFieldValueImpl;
-import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.cms.ws.resources.type.ContentTypeResource;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
@@ -56,6 +55,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
@@ -66,7 +66,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.codec.binary.StringUtils;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,8 +99,7 @@ public class ContentResource extends AbstractResource {
       this.content = null;
     }
     if (content != null) {
-      tag = new EntityTag(DigestUtils.md5Hex(new StringBuilder(Utils.getFormattedDate(content.getLastModifiedDate())).
-          append('~').append(content.getOwnFields().toString()).append('~').append(content.getStatus()).toString()));
+      tag = new EntityTag(content.getEntityTagValue());
     }
     else {
       tag = null;
@@ -110,6 +108,13 @@ public class ContentResource extends AbstractResource {
                        new GenericAdapterImpl<Content, com.smartitengineering.cms.ws.common.domains.Content>();
     adapterImpl.setHelper(new ContentAdapterHelper());
     adapter = adapterImpl;
+  }
+
+  @PathParam("{fieldName}")
+  public FieldResource getFieldResource(@PathParam("fieldName") String fieldName) {
+    FieldDef fieldDef = content.getContentDefinition().getFieldDefs().get(fieldName);
+    FieldResource resource = new FieldResource(getInjectables(), content, fieldDef, tag);
+    return resource;
   }
 
   @GET
@@ -299,7 +304,7 @@ public class ContentResource extends AbstractResource {
         writeableContent.setParentId(parentContent.getContentId());
       }
       for (com.smartitengineering.cms.ws.common.domains.Field field : toBean.getFields()) {
-        MutableField mutableField = getField(contentType, field);
+        MutableField mutableField = getField(contentType.getFieldDefs().get(field.getName()), field);
         writeableContent.setField(mutableField);
       }
       return writeableContent;
@@ -329,10 +334,9 @@ public class ContentResource extends AbstractResource {
     return fieldValue;
   }
 
-  protected static MutableField getField(final ContentType contentType,
+  protected static MutableField getField(final FieldDef fieldDef,
                                          com.smartitengineering.cms.ws.common.domains.Field field) throws
       IllegalArgumentException {
-    FieldDef fieldDef = contentType.getFieldDefs().get(field.getName());
     if (fieldDef == null) {
       throw new IllegalArgumentException("No field in content type with name " + field.getName());
     }

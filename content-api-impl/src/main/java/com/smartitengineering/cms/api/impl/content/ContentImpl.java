@@ -52,6 +52,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   private Date lastModifiedDate;
   private Map<String, Field> map = new HashMap<String, Field>();
   private Map<String, Field> cachedFieldMap;
+  private String entityTagValue;
 
   @Override
   public void setParentId(ContentId contentId) {
@@ -234,5 +235,15 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
       throw new IllegalArgumentException("Workspace ID can not be null!");
     }
     setContentId(SmartContentAPI.getInstance().getContentLoader().generateContentId(workspace));
+  }
+
+  @Override
+  public void setEntityTagValue(String eTagValue) {
+    this.entityTagValue = eTagValue;
+  }
+
+  @Override
+  public String getEntityTagValue() {
+    return this.entityTagValue;
   }
 }

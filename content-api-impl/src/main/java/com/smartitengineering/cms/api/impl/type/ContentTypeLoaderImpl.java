@@ -53,7 +53,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,8 +179,8 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       return collectionDataTypeImpl;
     }
     else {
-      throw new IllegalArgumentException("Argument can not be null or min size has to be non-negative or max size can"
-          + " not be smaller than min zie.");
+      throw new IllegalArgumentException("Argument can not be null or min size has to be non-negative or max size can" +
+          " not be smaller than min zie.");
     }
   }
 
@@ -279,6 +281,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
     typeImpl.setFromPersistentStorage(contentType instanceof PersistableContentType ? ((PersistableContentType) contentType).
         isFromPersistentStorage() : false);
     typeImpl.setLastModifiedDate(contentType.getLastModifiedDate());
+    typeImpl.setEntityTagValue(contentType.getEntityTagValue());
     typeImpl.setParent(contentType.getParent());
     typeImpl.getMutableFieldDefs().clear();
     typeImpl.getMutableFieldDefs().addAll(contentType.getOwnFieldDefs().values());
@@ -332,5 +335,12 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   @Override
   public WritableContentType getWritableContentType(ContentType contentType) {
     return getContentTypeImpl(contentType);
+  }
+
+  @Override
+  public String getEntityTagValueForContentType(ContentType contentType) {
+    return DigestUtils.md5Hex(new StringBuilder(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(contentType.
+        getLastModifiedDate())).append('~').append(contentType.getRepresentations().get(MediaType.APPLICATION_XML)).
+        toString());
   }
 }
