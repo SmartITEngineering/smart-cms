@@ -62,6 +62,7 @@ public class ContentObjectConverter extends AbstactObjectRowConverter<Persistent
   public final static byte[] CELL_STATUS = Bytes.toBytes("status");
   public final static byte[] CELL_CREATED = Bytes.toBytes("created");
   public final static byte[] CELL_LAST_MODIFIED = Bytes.toBytes("lastModified");
+  public final static byte[] CELL_ENTITY_TAG = Bytes.toBytes("entityTag");
   @Inject
   private SchemaInfoProvider<PersistentContentType, ContentTypeId> contentTypeSchemaProvider;
 
@@ -104,6 +105,7 @@ public class ContentObjectConverter extends AbstactObjectRowConverter<Persistent
     }
     content.setCreationDate(Utils.toDate(startRow.getValue(FAMILY_SELF, CELL_CREATED)));
     content.setLastModifiedDate(Utils.toDate(startRow.getValue(FAMILY_SELF, CELL_LAST_MODIFIED)));
+    content.setEntityTagValue(Bytes.toString(startRow.getValue(FAMILY_SELF, CELL_ENTITY_TAG)));
     ContentType type = null;
     try {
       ContentTypeId typeId =
@@ -192,6 +194,7 @@ public class ContentObjectConverter extends AbstactObjectRowConverter<Persistent
     }
     put.add(FAMILY_SELF, CELL_CREATED, Utils.toBytes(content.getCreationDate()));
     put.add(FAMILY_SELF, CELL_LAST_MODIFIED, Utils.toBytes(content.getLastModifiedDate()));
+    put.add(FAMILY_SELF, CELL_ENTITY_TAG, Bytes.toBytes(content.getEntityTagValue()));
     if (content.getStatus() != null) {
       put.add(FAMILY_SELF, CELL_STATUS, Bytes.toBytes(content.getStatus().getName()));
     }

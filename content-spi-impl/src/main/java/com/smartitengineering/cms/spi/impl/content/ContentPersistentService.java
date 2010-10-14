@@ -23,6 +23,7 @@ import com.google.inject.Singleton;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.PersistableContent;
@@ -76,6 +77,7 @@ public class ContentPersistentService implements PersistentService<WriteableCont
     Date date = new Date();
     content.setCreationDate(date);
     content.setLastModifiedDate(date);
+    content.setEntityTagValue(SmartContentAPI.getInstance().getContentLoader().getEntityTagValueForContent(content));
     commonWriteDao.save(adapter.convert(content));
   }
 
@@ -90,6 +92,7 @@ public class ContentPersistentService implements PersistentService<WriteableCont
       copy(bean, content);
     }
     content.setLastModifiedDate(new Date());
+    content.setEntityTagValue(SmartContentAPI.getInstance().getContentLoader().getEntityTagValueForContent(content));
     commonWriteDao.update(adapter.convert(content));
   }
 

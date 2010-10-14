@@ -39,7 +39,6 @@ import com.smartitengineering.cms.ws.common.domains.ContentImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldValueImpl;
 import com.smartitengineering.cms.ws.common.domains.OtherFieldValueImpl;
-import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.cms.ws.resources.type.ContentTypeResource;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
@@ -67,7 +66,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.codec.binary.StringUtils;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,8 +99,7 @@ public class ContentResource extends AbstractResource {
       this.content = null;
     }
     if (content != null) {
-      tag = new EntityTag(DigestUtils.md5Hex(new StringBuilder(Utils.getFormattedDate(content.getLastModifiedDate())).
-          append('~').append(content.getOwnFields().toString()).append('~').append(content.getStatus()).toString()));
+      tag = new EntityTag(content.getEntityTagValue());
     }
     else {
       tag = null;

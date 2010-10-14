@@ -30,4 +30,6 @@ public interface PersistableContent extends WriteableContent {
   public void setCreationDate(Date creationDate);
 
   public void setLastModifiedDate(Date lastModifiedDate);
+
+  public void setEntityTagValue(String eTagValue);
 }
