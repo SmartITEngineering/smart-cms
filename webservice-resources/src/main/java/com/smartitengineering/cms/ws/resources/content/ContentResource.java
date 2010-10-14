@@ -56,6 +56,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
@@ -110,6 +111,13 @@ public class ContentResource extends AbstractResource {
                        new GenericAdapterImpl<Content, com.smartitengineering.cms.ws.common.domains.Content>();
     adapterImpl.setHelper(new ContentAdapterHelper());
     adapter = adapterImpl;
+  }
+
+  @PathParam("{fieldName}")
+  public FieldResource getFieldResource(@PathParam("fieldName") String fieldName) {
+    FieldDef fieldDef = content.getContentDefinition().getFieldDefs().get(fieldName);
+    FieldResource resource = new FieldResource(getInjectables(), content, fieldDef, tag);
+    return resource;
   }
 
   @GET
