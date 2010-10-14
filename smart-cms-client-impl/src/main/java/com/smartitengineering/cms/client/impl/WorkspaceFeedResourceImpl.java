@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.ContentTypesResource;
+import com.smartitengineering.cms.client.api.ContentsResource;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
 import com.smartitengineering.cms.client.api.WorkspaceRepresentationsResource;
@@ -72,6 +73,13 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
 
   @Override
   public ContentTypesResource getContentTypes() {
-    return new ContentTypesResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().getLink("content-types")));
+    return new ContentTypesResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+        getLink("content-types")));
+  }
+
+  @Override
+  public ContentsResource getContent() {
+    return new ContentsResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+        getLink("contents")));
   }
 }
