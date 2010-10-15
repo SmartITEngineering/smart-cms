@@ -18,19 +18,23 @@
  */
 package com.smartitengineering.cms.spi.impl.workspace;
 
+import com.google.inject.Inject;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.impl.Utils;
+import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableResourceTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
+import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import com.smartitengineering.dao.impl.hbase.spi.impl.AbstactObjectRowConverter;
 import java.io.IOException;
 import java.util.Date;
@@ -49,6 +53,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 public class WorkspaceObjectConverter extends AbstactObjectRowConverter<PersistentWorkspace, WorkspaceId> {
 
   public static final String FRIENDLIES = "friendlies";
+  public static final String ROOT_CONTENTS = "rootContents";
   public static final String LASTMODIFIED = "lastModified";
   public static final String NAME = "name";
   public static final String REP_DATA = "repData";
@@ -64,12 +69,15 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
   public static final byte[] FAMILY_VARIATIONS_INFO = Bytes.toBytes(VAR_INFO);
   public static final byte[] FAMILY_VARIATIONS_DATA = Bytes.toBytes(VAR_DATA);
   public static final byte[] FAMILY_FRIENDLIES = Bytes.toBytes(FRIENDLIES);
+  public static final byte[] FAMILY_ROOT_CONTENTS = Bytes.toBytes(ROOT_CONTENTS);
   public static final byte[] CELL_NAMESPACE = Bytes.toBytes("namespace");
   public static final byte[] CELL_NAME = Bytes.toBytes(NAME);
   public static final byte[] CELL_CREATED = Bytes.toBytes(CREATED);
   public static final byte[] CELL_LAST_MODIFIED = Bytes.toBytes(LASTMODIFIED);
   public static final byte[] CELL_TEMPLATE_TYPE = Bytes.toBytes(TEMPLATETYPE);
   public static final byte[] CELL_ENTITY_TAG = Bytes.toBytes(ENTITY_TAG);
+  @Inject
+  private SchemaInfoProvider<PersistentContent, ContentId> contentSchemaProvider;
 
   @Override
   protected String[] getTablesToAttainLock() {
@@ -100,6 +108,16 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
       for (WorkspaceId friendly : instance.getFriendlies()) {
         try {
           put.add(FAMILY_FRIENDLIES, getInfoProvider().getRowIdFromId(friendly), Utils.toBytes(new Date()));
+        }
+        catch (IOException ex) {
+          logger.warn("Error putting friendly", ex);
+        }
+      }
+    }
+    if (instance.isRootContentsPopulated()) {
+      for (ContentId contentId : instance.getRootContents()) {
+        try {
+          put.add(FAMILY_ROOT_CONTENTS, contentSchemaProvider.getRowIdFromId(contentId), Utils.toBytes(new Date()));
         }
         catch (IOException ex) {
           logger.warn("Error putting friendly", ex);
@@ -140,7 +158,8 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     /*
      * Delete whole workspace
      */
-    if (!(instance.isFriendliesPopulated() || instance.isRepresentationPopulated() || instance.isVariationPopulated())) {
+    if (!(instance.isFriendliesPopulated() || instance.isRepresentationPopulated() || instance.isVariationPopulated() || instance.
+          isRootContentsPopulated())) {
       if (logger.isInfoEnabled()) {
         logger.info(new StringBuilder("Deleting whole workspace with ID: ").append(instance.getId()).toString());
       }
@@ -213,6 +232,32 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
             }
             catch (IOException ex) {
               logger.warn("Error deleting friendly", ex);
+            }
+          }
+        }
+      }
+      if (instance.isRootContentsPopulated()) {
+        /*
+         * Delete all root content relations
+         */
+        if (instance.getRootContents().isEmpty()) {
+          logger.info("Delete all root content  relations");
+          delete.deleteFamily(FAMILY_ROOT_CONTENTS);
+        }
+        /*
+         * Delete selected root content relations
+         */
+        else {
+          logger.info("Delete selected root content relations");
+          for (ContentId contentId : instance.getRootContents()) {
+            try {
+              if (logger.isDebugEnabled()) {
+                logger.debug(new StringBuilder("Deleting content relation ").append(contentId.toString()).toString());
+              }
+              delete.deleteColumns(FAMILY_ROOT_CONTENTS, contentSchemaProvider.getRowIdFromId(contentId));
+            }
+            catch (IOException ex) {
+              logger.warn("Error deleting root content relation", ex);
             }
           }
         }
@@ -296,6 +341,20 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
             }
             catch (Exception ex) {
               logger.warn("Error putting friendly", ex);
+            }
+          }
+        }
+      }
+      {
+        final Map<byte[], byte[]> rootContents = allFamilies.get(FAMILY_ROOT_CONTENTS);
+        if (rootContents != null && !rootContents.isEmpty()) {
+          persistentWorkspace.setRootContentsPopulated(true);
+          for (byte[] conentId : rootContents.keySet()) {
+            try {
+              persistentWorkspace.addRootContent(contentSchemaProvider.getIdFromRowId(conentId));
+            }
+            catch (Exception ex) {
+              logger.warn("Error putting root content", ex);
             }
           }
         }

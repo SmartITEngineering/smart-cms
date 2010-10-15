@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.spi.impl.workspace;
 
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
@@ -340,5 +341,38 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     template.setLastModifiedDate(date);
     template.setEntityTagValue(SmartContentAPI.getInstance().getWorkspaceApi().getEntityTagValueForResourceTemplate(
         template));
+  }
+
+  @Override
+  public Collection<ContentId> getRootContents(WorkspaceId workspaceId) {
+    final QueryParameter rootContentsProp = QueryParameterFactory.getPropProjectionParam("rootContents");
+    final QueryParameter idParam = getIdParam(workspaceId);
+    PersistentWorkspace workspace = commonReadDao.getSingle(idParam, SELF_PARAM, rootContentsProp);
+    return workspace.getRootContents();
+  }
+
+  @Override
+  public void addRootContent(WorkspaceId to, ContentId... contentIds) {
+    PersistentWorkspace workspace = getWorkspace(to);
+    for (ContentId id : contentIds) {
+      workspace.addRootContent(id);
+    }
+    workspace.setRootContentsPopulated(true);
+    commonWriteDao.update(workspace);
+  }
+
+  @Override
+  public void removeRootContent(WorkspaceId from, ContentId contentId) {
+    PersistentWorkspace workspace = getWorkspace(from);
+    workspace.addRootContent(contentId);
+    workspace.setRootContentsPopulated(true);
+    commonWriteDao.delete(workspace);
+  }
+
+  @Override
+  public void removeAllRootContents(WorkspaceId workspaceId) {
+    PersistentWorkspace workspace = getWorkspace(workspaceId);
+    workspace.setRootContentsPopulated(true);
+    commonWriteDao.delete(workspace);
   }
 }

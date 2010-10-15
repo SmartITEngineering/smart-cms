@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.impl.workspace;
 
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
@@ -74,5 +75,10 @@ public class WorkspaceImpl implements PersistableWorkspace {
   @Override
   public VariationTemplate getVariations(String name) {
     return SmartContentSPI.getInstance().getWorkspaceService().getVariationTemplate(id, name);
+  }
+
+  @Override
+  public Collection<ContentId> getRootContents() {
+    return SmartContentSPI.getInstance().getWorkspaceService().getRootContents(id);
   }
 }

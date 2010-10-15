@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.spi.workspace;
 
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.type.ContentType;
@@ -72,4 +73,12 @@ public interface WorkspaceService {
   public Collection<RepresentationTemplate> getRepresentationsWithoutData(WorkspaceId id, ResourceSortCriteria criteria);
 
   public Collection<VariationTemplate> getVariationsWithoutData(WorkspaceId id, ResourceSortCriteria criteria);
+
+  public Collection<ContentId> getRootContents(WorkspaceId workspaceId);
+
+  public void addRootContent(WorkspaceId to, ContentId... contentIds);
+
+  public void removeRootContent(WorkspaceId from, ContentId contentId);
+
+  public void removeAllRootContents(WorkspaceId workspaceId);
 }

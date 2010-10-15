@@ -166,9 +166,12 @@ public class SPIModule extends PrivateModule {
     }).in(Singleton.class);
     bind(new TypeLiteral<Class<ContentId>>() {
     }).toInstance(ContentId.class);
-    bind(new TypeLiteral<SchemaInfoProvider<PersistentContent, ContentId>>() {
-    }).to(new TypeLiteral<SchemaInfoProviderImpl<PersistentContent, ContentId>>() {
+    final TypeLiteral<SchemaInfoProvider<PersistentContent, ContentId>> contentSchema =
+                                                                        new TypeLiteral<SchemaInfoProvider<PersistentContent, ContentId>>() {
+    };
+    bind(contentSchema).to(new TypeLiteral<SchemaInfoProviderImpl<PersistentContent, ContentId>>() {
     }).in(Singleton.class);
+    binder().expose(contentSchema);
     bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistentContent>>() {
     }).toProvider(ContentSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);
     bind(new TypeLiteral<FilterConfigs<PersistentContent>>() {

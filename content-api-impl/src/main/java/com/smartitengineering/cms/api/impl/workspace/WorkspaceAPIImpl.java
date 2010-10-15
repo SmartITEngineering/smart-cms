@@ -21,6 +21,7 @@ package com.smartitengineering.cms.api.impl.workspace;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
@@ -319,5 +320,25 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
           template.getName());
     }
     return etag;
+  }
+
+  @Override
+  public Collection<ContentId> getRootContents(WorkspaceId workspaceId) {
+    return SmartContentSPI.getInstance().getWorkspaceService().getRootContents(workspaceId);
+  }
+
+  @Override
+  public void addRootContent(WorkspaceId to, ContentId... contentIds) {
+    SmartContentSPI.getInstance().getWorkspaceService().addRootContent(to, contentIds);
+  }
+
+  @Override
+  public void removeRootContent(WorkspaceId from, ContentId contentId) {
+    SmartContentSPI.getInstance().getWorkspaceService().removeRootContent(from, contentId);
+  }
+
+  @Override
+  public void removeAllRootContents(WorkspaceId workspaceId) {
+    SmartContentSPI.getInstance().getWorkspaceService().removeAllRootContents(workspaceId);
   }
 }

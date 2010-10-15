@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.workspace;
 
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.type.ContentType;
 import java.util.Collection;
 import java.util.Date;
@@ -37,6 +38,8 @@ public interface Workspace {
   public RepresentationTemplate getRepresentation(String name);
 
   public VariationTemplate getVariations(String name);
+
+  public Collection<ContentId> getRootContents();
 
   public Date getCreationDate();
 }
