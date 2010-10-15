@@ -40,4 +40,6 @@ public interface PersistableResourceTemplate extends ResourceTemplate {
   void setCreatedDate(Date creationDate);
 
   void setLastModifiedDate(Date lastModifiedDate);
+
+  void setEntityTagValue(String entityTagValue);
 }

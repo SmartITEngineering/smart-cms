@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.spi.impl.workspace;
 
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
@@ -154,7 +155,7 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     template.setWorkspaceId(workspaceId);
     template.setTemplate(data);
     RepresentationTemplate oldTemplate = getRepresentationTemplate(workspaceId, name);
-    updateDates(template, oldTemplate);
+    updateFields(template, oldTemplate);
     workspace.setRepresentationPopulated(true);
     commonWriteDao.update(workspace);
     return template;
@@ -170,6 +171,8 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
         append(WorkspaceObjectConverter.CREATED).toString()));
     params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
         append(WorkspaceObjectConverter.LASTMODIFIED).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.ENTITY_TAG).toString()));
     params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(WorkspaceObjectConverter.REP_DATA).append(
         ':').append(name).toString()));
     params.add(SELF_PARAM);
@@ -193,7 +196,7 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     template.setWorkspaceId(workspaceId);
     template.setTemplate(data);
     VariationTemplate oldTemplate = getVariationTemplate(workspaceId, name);
-    updateDates(template, oldTemplate);
+    updateFields(template, oldTemplate);
     workspace.setVariationPopulated(true);
     commonWriteDao.update(workspace);
     return template;
@@ -209,6 +212,8 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
         append(WorkspaceObjectConverter.CREATED).toString()));
     params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
         append(WorkspaceObjectConverter.LASTMODIFIED).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.ENTITY_TAG).toString()));
     params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(WorkspaceObjectConverter.VAR_DATA).append(
         ':').append(name).toString()));
     params.add(SELF_PARAM);
@@ -324,7 +329,7 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     return Collections.unmodifiableCollection(templates);
   }
 
-  private void updateDates(PersistableResourceTemplate template, ResourceTemplate oldTemplate) {
+  private void updateFields(PersistableResourceTemplate template, ResourceTemplate oldTemplate) {
     final Date date = new Date();
     if (oldTemplate != null) {
       template.setCreatedDate(oldTemplate.getCreatedDate());
@@ -333,5 +338,7 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
       template.setCreatedDate(date);
     }
     template.setLastModifiedDate(date);
+    template.setEntityTagValue(SmartContentAPI.getInstance().getWorkspaceApi().getEntityTagValueForResourceTemplate(
+        template));
   }
 }

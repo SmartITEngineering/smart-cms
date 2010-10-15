@@ -31,11 +31,14 @@ import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -303,5 +306,18 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   @Override
   public VariationTemplate getVariationTemplate(WorkspaceId id, String name) {
     return SmartContentSPI.getInstance().getWorkspaceService().getVariationTemplate(id, name);
+  }
+
+  @Override
+  public String getEntityTagValueForResourceTemplate(ResourceTemplate template) {
+    final String toString = new StringBuilder(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(template.
+        getLastModifiedDate())).append(':').append(Arrays.toString(template.getTemplate())).append(':').append(template.
+        getTemplateType().name()).toString();
+    final String etag = DigestUtils.md5Hex(toString);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Generated etag " + etag + " for " + template.getClass().getName() + " with name " +
+          template.getName());
+    }
+    return etag;
   }
 }

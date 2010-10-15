@@ -33,6 +33,7 @@ public class ResourceTemplateImpl implements PersistableResourceTemplate {
 
   public static final byte[] EMPTY_ARRAY = new byte[0];
   private String name;
+  private String entityTagValue;
   private TemplateType templateType;
   private ByteBuffer buffer;
   private Date createdDate;
@@ -127,5 +128,15 @@ public class ResourceTemplateImpl implements PersistableResourceTemplate {
     hash = 29 * hash + (this.name != null ? this.name.hashCode() : 0);
     hash = 29 * hash + (this.workspaceId != null ? this.workspaceId.hashCode() : 0);
     return hash;
+  }
+
+  @Override
+  public void setEntityTagValue(String entityTagValue) {
+    this.entityTagValue = entityTagValue;
+  }
+
+  @Override
+  public String getEntityTagValue() {
+    return entityTagValue;
   }
 }

@@ -57,6 +57,7 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
   public static final String VAR_DATA = "varData";
   public static final String VAR_INFO = "varInfo";
   public static final String CREATED = "created";
+  public static final String ENTITY_TAG = "entityTag";
   public static final byte[] FAMILY_SELF = Bytes.toBytes("self");
   public static final byte[] FAMILY_REPRESENTATIONS_INFO = Bytes.toBytes(REP_INFO);
   public static final byte[] FAMILY_REPRESENTATIONS_DATA = Bytes.toBytes(REP_DATA);
@@ -68,6 +69,7 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
   public static final byte[] CELL_CREATED = Bytes.toBytes(CREATED);
   public static final byte[] CELL_LAST_MODIFIED = Bytes.toBytes(LASTMODIFIED);
   public static final byte[] CELL_TEMPLATE_TYPE = Bytes.toBytes(TEMPLATETYPE);
+  public static final byte[] CELL_ENTITY_TAG = Bytes.toBytes(ENTITY_TAG);
 
   @Override
   protected String[] getTablesToAttainLock() {
@@ -81,14 +83,17 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     put.add(FAMILY_SELF, CELL_CREATED, Utils.toBytes(instance.getWorkspace().getCreationDate()));
     if (instance.isRepresentationPopulated() && !instance.getRepresentationTemplates().isEmpty()) {
       for (PersistableRepresentationTemplate template : instance.getRepresentationTemplates()) {
-        popolatePutWithResource(FAMILY_REPRESENTATIONS_INFO, template, put);
-        popolatePutWithResourceData(FAMILY_REPRESENTATIONS_DATA, template, put);
+        if (logger.isDebugEnabled()) {
+          logger.debug("PUTTING representation " + template.getName());
+        }
+        populatePutWithResource(FAMILY_REPRESENTATIONS_INFO, template, put);
+        populatePutWithResourceData(FAMILY_REPRESENTATIONS_DATA, template, put);
       }
     }
     if (instance.isVariationPopulated() && !instance.getVariationTemplates().isEmpty()) {
       for (PersistableVariationTemplate template : instance.getVariationTemplates()) {
-        popolatePutWithResource(FAMILY_VARIATIONS_INFO, template, put);
-        popolatePutWithResourceData(FAMILY_VARIATIONS_DATA, template, put);
+        populatePutWithResource(FAMILY_VARIATIONS_INFO, template, put);
+        populatePutWithResourceData(FAMILY_VARIATIONS_DATA, template, put);
       }
     }
     if (instance.isFriendliesPopulated()) {
@@ -107,7 +112,7 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     return Bytes.toBytes(new StringBuilder(template.getName()).append(':').toString());
   }
 
-  protected void popolatePutWithResource(byte[] family, PersistableResourceTemplate template, Put put) {
+  protected void populatePutWithResource(byte[] family, PersistableResourceTemplate template, Put put) {
     byte[] prefix = getPrefixForResource(template);
     put.add(family, Bytes.add(prefix, CELL_TEMPLATE_TYPE), Bytes.toBytes(template.getTemplateType().name()));
     final Date created = template.getCreatedDate() == null ? new Date() : template.getCreatedDate();
@@ -116,9 +121,13 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     final Date lastModified = template.getLastModifiedDate() == null ? created : template.getLastModifiedDate();
     put.add(family, Bytes.add(prefix, CELL_LAST_MODIFIED), Utils.toBytes(lastModified));
     template.setLastModifiedDate(lastModified);
+    if (logger.isDebugEnabled()) {
+      logger.debug("PUTTING Entity Tag: " + template.getEntityTagValue());
+    }
+    put.add(family, Bytes.add(prefix, CELL_ENTITY_TAG), Bytes.toBytes(template.getEntityTagValue()));
   }
 
-  protected void popolatePutWithResourceData(byte[] family, ResourceTemplate template, Put put) {
+  protected void populatePutWithResourceData(byte[] family, ResourceTemplate template, Put put) {
     byte[] key = Bytes.toBytes(template.getName());
     put.add(family, key, template.getTemplate());
   }
@@ -216,6 +225,7 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     delete.deleteColumns(family, Bytes.add(prefix, CELL_CREATED));
     delete.deleteColumns(family, Bytes.add(prefix, CELL_LAST_MODIFIED));
     delete.deleteColumns(family, Bytes.add(prefix, CELL_TEMPLATE_TYPE));
+    delete.deleteColumns(family, Bytes.add(prefix, CELL_ENTITY_TAG));
   }
 
   protected void addResourceDataColumnsToDelete(byte[] family, Delete delete, ResourceTemplate resourceTemplate) {
@@ -308,6 +318,7 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     template.setTemplateType(TemplateType.valueOf(type));
     template.setCreatedDate(Utils.toDate(cells.get(new StringBuilder(prefix).append(CREATED).toString())));
     template.setLastModifiedDate(Utils.toDate(cells.get(new StringBuilder(prefix).append(LASTMODIFIED).toString())));
+    template.setEntityTagValue(Bytes.toString(cells.get(new StringBuilder(prefix).append(ENTITY_TAG).toString())));
   }
 
   protected void populateResourceTemplateData(String repName, PersistableResourceTemplate template,
