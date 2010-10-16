@@ -75,6 +75,10 @@ The module is responsible for Implementing the SPI for the CMS.
       <artifactId>js</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.python</groupId>
+      <artifactId>jython</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
       <artifactId>content-api-impl</artifactId>
       <version>${project.version}</version>
