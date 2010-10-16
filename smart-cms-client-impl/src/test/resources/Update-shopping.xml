@@ -30,7 +30,6 @@
 
   <contentType namespace="com.smartitengineering.smart-shopping.content">
     <name>Book</name>
-
     <fields>
       <field>
         <name>isbn</name>
@@ -180,10 +179,6 @@
 
   <contentType namespace="com.smartitengineering.smart-shopping.content">
     <name>Publisher</name>
-    <parent>
-      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-      <typeName>Book</typeName>
-    </parent>
     <fields>
       <field>
         <name>name</name>
@@ -218,47 +213,12 @@
           </uri>
         </validator>
       </field>
-      <field>
-        <name>publicationHouse</name>
-        <value>
-          <content>
-            <definition>
-              <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-              <typeName>PublicationHouse</typeName>
-            </definition>
-          </content>
-        </value>
-        <required>true</required>
-        <variations>
-          <variation>
-            <name>avar</name>
-            <mimeType>some/type</mimeType>
-            <uri>
-              <external>http://some/uri</external>
-            </uri>
-          </variation>
-          <variation>
-            <name>anothervar</name>
-            <mimeType>some/type</mimeType>
-            <uri>
-              <internal>
-                <name>internalvar</name>
-              </internal>
-            </uri>
-          </variation>
-        </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
-      </field>
     </fields>
     <status>
       <statusName>draft</statusName>
       <statusName>marketed</statusName>
       <statusName>obselete</statusName>
+      <statusName>published</statusName>
     </status>
     <representations>
       <representation>

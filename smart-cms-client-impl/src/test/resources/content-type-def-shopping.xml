@@ -30,7 +30,6 @@
 
   <contentType namespace="com.smartitengineering.smart-shopping.content">
     <name>Book</name>
-    
     <fields>
       <field>
         <name>isbn</name>
@@ -192,43 +191,6 @@
             <mimeType>text/plain</mimeType>
           </string>
         </value>
-        <required>true</required>
-        <variations>
-          <variation>
-            <name>avar</name>
-            <mimeType>some/type</mimeType>
-            <uri>
-              <external>http://some/uri</external>
-            </uri>
-          </variation>
-          <variation>
-            <name>anothervar</name>
-            <mimeType>some/type</mimeType>
-            <uri>
-              <internal>
-                <name>internalvar</name>
-              </internal>
-            </uri>
-          </variation>
-        </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
-      </field>
-      <field>
-        <name>publicationHouse</name>
-        <value>
-          <content>
-            <definition>
-              <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-              <typeName>PublicationHouse</typeName>
-            </definition>
-          </content>
-        </value>
-        <required>true</required>
         <variations>
           <variation>
             <name>avar</name>

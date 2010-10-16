@@ -282,17 +282,15 @@ public class XmlParser implements XmlConstants {
         final Element simpleElement = (Element) element.getChild(1);
         type.setItemDataType(parseSimpleValue(simpleElement));
       }
-      else if (StringUtils.equalsIgnoreCase(element.getLocalName(), MIN_SIZE)) {
-        type.setMinSize(NumberUtils.toInt(parseOptionalStringElement(rootElement, MIN_SIZE), Integer.MIN_VALUE));
-        if (logger.isDebugEnabled()) {
-          logger.debug("minSize of collection " + type.getMinSize());
-        }
+      type.setMinSize(NumberUtils.toInt(parseOptionalStringElement(rootElement, MIN_SIZE), Integer.MIN_VALUE));
+      if (logger.isDebugEnabled()) {
+        logger.debug("minSize of collection " + type.getMinSize() + " parsed minSize is " + parseOptionalStringElement(
+            rootElement, MIN_SIZE));
       }
-      else if (StringUtils.equalsIgnoreCase(element.getLocalName(), MAX_SIZE)) {
-        type.setMaxSize(NumberUtils.toInt(parseOptionalStringElement(rootElement, MAX_SIZE), Integer.MAX_VALUE));
-        if (logger.isDebugEnabled()) {
-          logger.debug("maxSize of collection " + type.getMaxSize());
-        }
+      type.setMaxSize(NumberUtils.toInt(parseOptionalStringElement(rootElement, MAX_SIZE), Integer.MAX_VALUE));
+      if (logger.isDebugEnabled()) {
+        logger.debug("maxSize of collection " + type.getMaxSize() + " parsed MaxSize is " + parseOptionalStringElement(
+            rootElement, MAX_SIZE));
       }
     }
     return type;

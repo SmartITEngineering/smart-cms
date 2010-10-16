@@ -30,6 +30,7 @@ import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.binder.guice.Initializer;
+import com.smartitengineering.cms.client.api.ContentResource;
 import com.smartitengineering.cms.client.api.ContentTypeResource;
 import com.smartitengineering.cms.client.api.ContentTypesResource;
 import com.smartitengineering.cms.client.api.RootResource;
@@ -40,6 +41,8 @@ import com.smartitengineering.cms.client.api.WorkspaceRepresentationResource;
 import com.smartitengineering.cms.client.api.WorkspaceRepresentationsResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationsResource;
+import com.smartitengineering.cms.ws.common.domains.Content;
+import com.smartitengineering.cms.ws.common.domains.Field;
 import com.smartitengineering.cms.ws.common.domains.ResourceTemplateImpl;
 import com.smartitengineering.cms.ws.common.domains.Workspace;
 import com.smartitengineering.cms.ws.common.domains.WorkspaceImpl.WorkspaceIdImpl;
@@ -74,6 +77,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
@@ -624,7 +628,6 @@ public class AppTest {
         String key = (String) ite.next();
         ContentStatus servedContentStatus = servedContentType.getStatuses().get(key);
         ContentStatus getContentStatus = getContentType.getStatuses().get(key);
-        System.out.println("****** status name " + i + " " + getContentStatus.getName() + "******");
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Content Status : " + getContentStatus.getName());
         }
@@ -750,7 +753,6 @@ public class AppTest {
 
           Assert.assertEquals(servedVariationDef.getResourceUri().getValue(),
                               getVariationDef.getResourceUri().getValue());
-
         }
       }
     }
@@ -865,7 +867,6 @@ public class AppTest {
         String key = (String) ite.next();
         ContentStatus servedContentStatus = servedContentType.getStatuses().get(key);
         ContentStatus getContentStatus = getContentType.getStatuses().get(key);
-        System.out.println("****** status name " + i + " " + getContentStatus.getName() + "******");
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Content Status : " + getContentStatus.getName());
         }
@@ -994,6 +995,91 @@ public class AppTest {
         }
       }
     }
+  }
+
+  @Test
+  public void testCreateContent() throws Exception {
+    LOGGER.info(":::::::::::::: CREATE CONTENT RESOURCE TEST ::::::::::::::");
+    ObjectMapper mapper = new ObjectMapper();
+    String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
+    InputStream stream = IOUtils.toInputStream(JSON);
+    Content content = mapper.readValue(stream, Content.class);
+    Assert.assertNotNull(content);
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    ContentResource contentResource = feedResource.getContents().createContentResource(content);
+    Content content1 = contentResource.get();
+    Assert.assertNotNull(content1);
+    Assert.assertEquals(content.getParentContentUri(), content1.getParentContentUri());
+    Assert.assertEquals(content.getStatus(), content1.getStatus());
+    Assert.assertEquals(content.getFields().size(), content1.getFields().size());
+    final Field field = content.getFields().iterator().next();
+    final Field field1 = content1.getFields().iterator().next();
+    Assert.assertEquals(field.getName(), field1.getName());
+    Assert.assertEquals(field.getValue().getType(), field.getValue().getType());
+    Assert.assertEquals(field.getValue().getValue(), field.getValue().getValue());
+  }
+
+  @Test
+  public void testCreateAnotherContent() throws Exception {
+    LOGGER.info(":::::::::::::: CREATE CONTENT RESOURCE TEST ::::::::::::::");
+    ObjectMapper mapper = new ObjectMapper();
+    String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Update-Content.json"));
+    InputStream stream = IOUtils.toInputStream(JSON);
+    Content content = mapper.readValue(stream, Content.class);
+    Assert.assertNotNull(content);
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    ContentResource contentResource = feedResource.getContents().createContentResource(content);
+    Content content1 = contentResource.get();
+    Assert.assertNotNull(content1);
+    Assert.assertEquals(content.getParentContentUri(), content1.getParentContentUri());
+    Assert.assertEquals(content.getStatus(), content1.getStatus());
+    Assert.assertEquals(content.getFields().size(), content1.getFields().size());
+    final Field field = content.getFields().iterator().next();
+    final Field field1 = content1.getFields().iterator().next();
+    Assert.assertEquals(field.getName(), field1.getName());
+    Assert.assertEquals(field.getValue().getType(), field.getValue().getType());
+    Assert.assertEquals(field.getValue().getValue(), field.getValue().getValue());
+  }
+
+  @Test
+  public void testUpdateContent() throws Exception {
+    LOGGER.info(":::::::::::::: UPDATE CONTENT RESOURCE TEST ::::::::::::::");
+    ObjectMapper mapper = new ObjectMapper();
+    String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
+    InputStream stream = IOUtils.toInputStream(JSON);
+    Content content = mapper.readValue(stream, Content.class);
+    Assert.assertNotNull(content);
+    ObjectMapper mapper1 = new ObjectMapper();
+    String JSON1 = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Update-Content.json"));
+    InputStream stream1 = IOUtils.toInputStream(JSON1);
+    Content content1 = mapper1.readValue(stream1, Content.class);
+    Assert.assertNotNull(content1);
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    feedResource.getContents().createContentResource(content).update(content1);
+  }
+
+  @Test
+  public void testDeleteContent() throws Exception {
+    LOGGER.info(":::::::::::::: DELETE CONTENT RESOURCE TEST ::::::::::::::");
+    ObjectMapper mapper = new ObjectMapper();
+    String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
+    InputStream stream = IOUtils.toInputStream(JSON);
+    Content content = mapper.readValue(stream, Content.class);
+    Assert.assertNotNull(content);
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    feedResource.getContents().createContentResource(content).delete(ClientResponse.Status.OK);
   }
 
   @Test
