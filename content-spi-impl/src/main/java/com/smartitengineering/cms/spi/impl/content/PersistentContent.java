@@ -23,6 +23,8 @@ import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.domain.AbstractGenericPersistentDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -31,21 +33,37 @@ import com.smartitengineering.domain.AbstractGenericPersistentDTO;
 public class PersistentContent extends AbstractGenericPersistentDTO<PersistentContent, ContentId, Long> {
 
   private WriteableContent mutableContent;
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public boolean isValid() {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Mutable content: " + mutableContent);
+      if (mutableContent != null) {
+        logger.debug("Mutable content ID: " + mutableContent.getContentId());
+        logger.debug("Mutable content Definition: " + mutableContent.getContentDefinition());
+        if (mutableContent.getContentDefinition() != null) {
+          logger.debug("Mutable required fields present: " + isMandatoryFieldsPresent());
+        }
+      }
+    }
     return mutableContent != null && mutableContent.getContentId() != null && mutableContent.getContentDefinition()
         != null && isMandatoryFieldsPresent();
   }
 
   protected boolean isMandatoryFieldsPresent() {
     ContentType type = getMutableContent().getContentDefinition();
+    boolean valid = true;
     for (FieldDef def : type.getFieldDefs().values()) {
+      if (logger.isDebugEnabled()) {
+        logger.debug(def.getName() + " is required: " + def.isRequired());
+        logger.debug(def.getName() + ": " + getMutableContent().getField(def.getName()));
+      }
       if (def.isRequired() && getMutableContent().getField(def.getName()) == null) {
-        return false;
+        valid = valid && false;
       }
     }
-    return true;
+    return valid;
   }
 
   public WriteableContent getMutableContent() {
