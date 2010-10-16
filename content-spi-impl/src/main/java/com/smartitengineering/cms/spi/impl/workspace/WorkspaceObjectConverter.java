@@ -18,19 +18,23 @@
  */
 package com.smartitengineering.cms.spi.impl.workspace;
 
+import com.google.inject.Inject;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.impl.Utils;
+import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableResourceTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
+import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import com.smartitengineering.dao.impl.hbase.spi.impl.AbstactObjectRowConverter;
 import java.io.IOException;
 import java.util.Date;
@@ -49,6 +53,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 public class WorkspaceObjectConverter extends AbstactObjectRowConverter<PersistentWorkspace, WorkspaceId> {
 
   public static final String FRIENDLIES = "friendlies";
+  public static final String ROOT_CONTENTS = "rootContents";
   public static final String LASTMODIFIED = "lastModified";
   public static final String NAME = "name";
   public static final String REP_DATA = "repData";
@@ -57,17 +62,22 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
   public static final String VAR_DATA = "varData";
   public static final String VAR_INFO = "varInfo";
   public static final String CREATED = "created";
+  public static final String ENTITY_TAG = "entityTag";
   public static final byte[] FAMILY_SELF = Bytes.toBytes("self");
   public static final byte[] FAMILY_REPRESENTATIONS_INFO = Bytes.toBytes(REP_INFO);
   public static final byte[] FAMILY_REPRESENTATIONS_DATA = Bytes.toBytes(REP_DATA);
   public static final byte[] FAMILY_VARIATIONS_INFO = Bytes.toBytes(VAR_INFO);
   public static final byte[] FAMILY_VARIATIONS_DATA = Bytes.toBytes(VAR_DATA);
   public static final byte[] FAMILY_FRIENDLIES = Bytes.toBytes(FRIENDLIES);
+  public static final byte[] FAMILY_ROOT_CONTENTS = Bytes.toBytes(ROOT_CONTENTS);
   public static final byte[] CELL_NAMESPACE = Bytes.toBytes("namespace");
   public static final byte[] CELL_NAME = Bytes.toBytes(NAME);
   public static final byte[] CELL_CREATED = Bytes.toBytes(CREATED);
   public static final byte[] CELL_LAST_MODIFIED = Bytes.toBytes(LASTMODIFIED);
   public static final byte[] CELL_TEMPLATE_TYPE = Bytes.toBytes(TEMPLATETYPE);
+  public static final byte[] CELL_ENTITY_TAG = Bytes.toBytes(ENTITY_TAG);
+  @Inject
+  private SchemaInfoProvider<PersistentContent, ContentId> contentSchemaProvider;
 
   @Override
   protected String[] getTablesToAttainLock() {
@@ -81,14 +91,17 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     put.add(FAMILY_SELF, CELL_CREATED, Utils.toBytes(instance.getWorkspace().getCreationDate()));
     if (instance.isRepresentationPopulated() && !instance.getRepresentationTemplates().isEmpty()) {
       for (PersistableRepresentationTemplate template : instance.getRepresentationTemplates()) {
-        popolatePutWithResource(FAMILY_REPRESENTATIONS_INFO, template, put);
-        popolatePutWithResourceData(FAMILY_REPRESENTATIONS_DATA, template, put);
+        if (logger.isDebugEnabled()) {
+          logger.debug("PUTTING representation " + template.getName());
+        }
+        populatePutWithResource(FAMILY_REPRESENTATIONS_INFO, template, put);
+        populatePutWithResourceData(FAMILY_REPRESENTATIONS_DATA, template, put);
       }
     }
     if (instance.isVariationPopulated() && !instance.getVariationTemplates().isEmpty()) {
       for (PersistableVariationTemplate template : instance.getVariationTemplates()) {
-        popolatePutWithResource(FAMILY_VARIATIONS_INFO, template, put);
-        popolatePutWithResourceData(FAMILY_VARIATIONS_DATA, template, put);
+        populatePutWithResource(FAMILY_VARIATIONS_INFO, template, put);
+        populatePutWithResourceData(FAMILY_VARIATIONS_DATA, template, put);
       }
     }
     if (instance.isFriendliesPopulated()) {
@@ -101,13 +114,23 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
         }
       }
     }
+    if (instance.isRootContentsPopulated()) {
+      for (ContentId contentId : instance.getRootContents()) {
+        try {
+          put.add(FAMILY_ROOT_CONTENTS, contentSchemaProvider.getRowIdFromId(contentId), Utils.toBytes(new Date()));
+        }
+        catch (IOException ex) {
+          logger.warn("Error putting friendly", ex);
+        }
+      }
+    }
   }
 
   protected byte[] getPrefixForResource(ResourceTemplate template) {
     return Bytes.toBytes(new StringBuilder(template.getName()).append(':').toString());
   }
 
-  protected void popolatePutWithResource(byte[] family, PersistableResourceTemplate template, Put put) {
+  protected void populatePutWithResource(byte[] family, PersistableResourceTemplate template, Put put) {
     byte[] prefix = getPrefixForResource(template);
     put.add(family, Bytes.add(prefix, CELL_TEMPLATE_TYPE), Bytes.toBytes(template.getTemplateType().name()));
     final Date created = template.getCreatedDate() == null ? new Date() : template.getCreatedDate();
@@ -116,9 +139,13 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     final Date lastModified = template.getLastModifiedDate() == null ? created : template.getLastModifiedDate();
     put.add(family, Bytes.add(prefix, CELL_LAST_MODIFIED), Utils.toBytes(lastModified));
     template.setLastModifiedDate(lastModified);
+    if (logger.isDebugEnabled()) {
+      logger.debug("PUTTING Entity Tag: " + template.getEntityTagValue());
+    }
+    put.add(family, Bytes.add(prefix, CELL_ENTITY_TAG), Bytes.toBytes(template.getEntityTagValue()));
   }
 
-  protected void popolatePutWithResourceData(byte[] family, ResourceTemplate template, Put put) {
+  protected void populatePutWithResourceData(byte[] family, ResourceTemplate template, Put put) {
     byte[] key = Bytes.toBytes(template.getName());
     put.add(family, key, template.getTemplate());
   }
@@ -131,7 +158,8 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     /*
      * Delete whole workspace
      */
-    if (!(instance.isFriendliesPopulated() || instance.isRepresentationPopulated() || instance.isVariationPopulated())) {
+    if (!(instance.isFriendliesPopulated() || instance.isRepresentationPopulated() || instance.isVariationPopulated() || instance.
+          isRootContentsPopulated())) {
       if (logger.isInfoEnabled()) {
         logger.info(new StringBuilder("Deleting whole workspace with ID: ").append(instance.getId()).toString());
       }
@@ -208,6 +236,32 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
           }
         }
       }
+      if (instance.isRootContentsPopulated()) {
+        /*
+         * Delete all root content relations
+         */
+        if (instance.getRootContents().isEmpty()) {
+          logger.info("Delete all root content  relations");
+          delete.deleteFamily(FAMILY_ROOT_CONTENTS);
+        }
+        /*
+         * Delete selected root content relations
+         */
+        else {
+          logger.info("Delete selected root content relations");
+          for (ContentId contentId : instance.getRootContents()) {
+            try {
+              if (logger.isDebugEnabled()) {
+                logger.debug(new StringBuilder("Deleting content relation ").append(contentId.toString()).toString());
+              }
+              delete.deleteColumns(FAMILY_ROOT_CONTENTS, contentSchemaProvider.getRowIdFromId(contentId));
+            }
+            catch (IOException ex) {
+              logger.warn("Error deleting root content relation", ex);
+            }
+          }
+        }
+      }
     }
   }
 
@@ -216,6 +270,7 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     delete.deleteColumns(family, Bytes.add(prefix, CELL_CREATED));
     delete.deleteColumns(family, Bytes.add(prefix, CELL_LAST_MODIFIED));
     delete.deleteColumns(family, Bytes.add(prefix, CELL_TEMPLATE_TYPE));
+    delete.deleteColumns(family, Bytes.add(prefix, CELL_ENTITY_TAG));
   }
 
   protected void addResourceDataColumnsToDelete(byte[] family, Delete delete, ResourceTemplate resourceTemplate) {
@@ -290,6 +345,20 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
           }
         }
       }
+      {
+        final Map<byte[], byte[]> rootContents = allFamilies.get(FAMILY_ROOT_CONTENTS);
+        if (rootContents != null && !rootContents.isEmpty()) {
+          persistentWorkspace.setRootContentsPopulated(true);
+          for (byte[] conentId : rootContents.keySet()) {
+            try {
+              persistentWorkspace.addRootContent(contentSchemaProvider.getIdFromRowId(conentId));
+            }
+            catch (Exception ex) {
+              logger.warn("Error putting root content", ex);
+            }
+          }
+        }
+      }
     }
     return persistentWorkspace;
   }
@@ -308,6 +377,7 @@ public class WorkspaceObjectConverter extends AbstactObjectRowConverter<Persiste
     template.setTemplateType(TemplateType.valueOf(type));
     template.setCreatedDate(Utils.toDate(cells.get(new StringBuilder(prefix).append(CREATED).toString())));
     template.setLastModifiedDate(Utils.toDate(cells.get(new StringBuilder(prefix).append(LASTMODIFIED).toString())));
+    template.setEntityTagValue(Bytes.toString(cells.get(new StringBuilder(prefix).append(ENTITY_TAG).toString())));
   }
 
   protected void populateResourceTemplateData(String repName, PersistableResourceTemplate template,

@@ -31,5 +31,7 @@ public interface Field {
 
   String getFieldUri();
 
+  String getFieldRawContentUri();
+
   FieldValue getValue();
 }

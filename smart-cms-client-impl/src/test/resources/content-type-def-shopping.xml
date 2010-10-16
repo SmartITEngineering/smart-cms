@@ -43,7 +43,6 @@
           <variation>
             <name>avar</name>
             <mimeType>some/type</mimeType>
-            <templateType>velocity</templateType>
             <uri>
               <external>http://some/uri</external>
             </uri>
@@ -51,7 +50,6 @@
           <variation>
             <name>anothervar</name>
             <mimeType>some/type</mimeType>
-            <templateType>javascript</templateType>
             <uri>
               <internal>
                 <name>internalvar</name>
@@ -91,7 +89,6 @@
           <variation>
             <name>avar</name>
             <mimeType>some/type</mimeType>
-            <templateType>velocity</templateType>
             <uri>
               <external>http://some/uri</external>
             </uri>
@@ -99,7 +96,6 @@
           <variation>
             <name>anothervar</name>
             <mimeType>some/type</mimeType>
-            <templateType>javascript</templateType>
             <uri>
               <internal>
                 <name>internalvar</name>
@@ -134,7 +130,6 @@
           <variation>
             <name>avar</name>
             <mimeType>some/type</mimeType>
-            <templateType>velocity</templateType>
             <uri>
               <external>http://some/uri</external>
             </uri>
@@ -142,7 +137,6 @@
           <variation>
             <name>anothervar</name>
             <mimeType>some/type</mimeType>
-            <templateType>javascript</templateType>
             <uri>
               <internal>
                 <name>internalvar</name>
@@ -167,7 +161,6 @@
       <representation>
         <name>arep</name>
         <mimeType>some/type</mimeType>
-        <templateType>velocity</templateType>
         <uri>
           <external>http://some/uri</external>
         </uri>
@@ -175,7 +168,6 @@
       <representation>
         <name>anotherrep</name>
         <mimeType>some/type</mimeType>
-        <templateType>ruby</templateType>
         <uri>
           <internal>
             <name>internalrep</name>
@@ -203,7 +195,6 @@
           <variation>
             <name>avar</name>
             <mimeType>some/type</mimeType>
-            <templateType>velocity</templateType>
             <uri>
               <external>http://some/uri</external>
             </uri>
@@ -211,7 +202,6 @@
           <variation>
             <name>anothervar</name>
             <mimeType>some/type</mimeType>
-            <templateType>javascript</templateType>
             <uri>
               <internal>
                 <name>internalvar</name>
@@ -236,7 +226,6 @@
       <representation>
         <name>arep</name>
         <mimeType>some/type</mimeType>
-        <templateType>velocity</templateType>
         <uri>
           <external>http://some/uri</external>
         </uri>
@@ -244,7 +233,6 @@
       <representation>
         <name>anotherrep</name>
         <mimeType>some/type</mimeType>
-        <templateType>ruby</templateType>
         <uri>
           <internal>
             <name>internalrep</name>
@@ -272,7 +260,6 @@
           <variation>
             <name>avar</name>
             <mimeType>some/type</mimeType>
-            <templateType>velocity</templateType>
             <uri>
               <external>http://some/uri</external>
             </uri>
@@ -280,7 +267,6 @@
           <variation>
             <name>anothervar</name>
             <mimeType>some/type</mimeType>
-            <templateType>javascript</templateType>
             <uri>
               <internal>
                 <name>internalvar</name>
@@ -314,7 +300,6 @@
           <variation>
             <name>avar</name>
             <mimeType>some/type</mimeType>
-            <templateType>velocity</templateType>
             <uri>
               <external>http://some/uri</external>
             </uri>
@@ -322,7 +307,6 @@
           <variation>
             <name>anothervar</name>
             <mimeType>some/type</mimeType>
-            <templateType>javascript</templateType>
             <uri>
               <internal>
                 <name>internalvar</name>

@@ -25,11 +25,9 @@ import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
-import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.cms.ws.resources.domains.Factory;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
-import java.util.Arrays;
 import java.util.Date;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -45,7 +43,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,11 +87,9 @@ public class WorkspaceRepresentationResource extends AbstractResource {
   }
 
   protected static String getETag(ResourceTemplate template) {
-    final String toString = new StringBuilder(Utils.getFormattedDate(template.getLastModifiedDate())).append(':').append(Arrays.
-        toString(template.getTemplate())).append(':').append(template.getTemplateType().name()).toString();
-    final String etag = DigestUtils.md5Hex(toString);
+    final String etag = template.getEntityTagValue();
         if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("String to use for digest " + toString + " and ETag calculated is " + etag);
+      LOGGER.debug("ETag from persistence " + etag);
     }
 
     return etag;

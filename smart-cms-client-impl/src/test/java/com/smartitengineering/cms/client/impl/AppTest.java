@@ -21,14 +21,11 @@ package com.smartitengineering.cms.client.impl;
 import com.google.inject.AbstractModule;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
-import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldDef;
-import com.smartitengineering.cms.api.type.MutableContentStatus;
-import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
@@ -675,13 +672,6 @@ public class AppTest {
 
         Assert.assertEquals(servedRepresentationDef.getResourceUri().getType().name(), getRepresentationDef.
             getResourceUri().getType().name());
-
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Representation Type : " + getRepresentationDef.getTemplateType().name());
-        }
-
-        Assert.assertEquals(servedRepresentationDef.getTemplateType().name(), getRepresentationDef.getTemplateType().
-            name());
       }
 
       Assert.assertEquals(servedContentType.getFieldDefs().size(), getContentType.getFieldDefs().size());
@@ -761,11 +751,6 @@ public class AppTest {
           Assert.assertEquals(servedVariationDef.getResourceUri().getValue(),
                               getVariationDef.getResourceUri().getValue());
 
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Variation Template Type : " + getVariationDef.getTemplateType().name());
-          }
-
-          Assert.assertEquals(servedVariationDef.getTemplateType().name(), getVariationDef.getTemplateType().name());
         }
       }
     }
@@ -928,13 +913,6 @@ public class AppTest {
 
         Assert.assertEquals(servedRepresentationDef.getResourceUri().getType().name(), getRepresentationDef.
             getResourceUri().getType().name());
-
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Representation Type : " + getRepresentationDef.getTemplateType().name());
-        }
-
-        Assert.assertEquals(servedRepresentationDef.getTemplateType().name(), getRepresentationDef.getTemplateType().
-            name());
       }
 
       Assert.assertEquals(servedContentType.getFieldDefs().size(), getContentType.getFieldDefs().size());
@@ -1013,12 +991,6 @@ public class AppTest {
 
           Assert.assertEquals(servedVariationDef.getResourceUri().getValue(),
                               getVariationDef.getResourceUri().getValue());
-
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Variation Template Type : " + getVariationDef.getTemplateType().name());
-          }
-
-          Assert.assertEquals(servedVariationDef.getTemplateType().name(), getVariationDef.getTemplateType().name());
         }
       }
     }

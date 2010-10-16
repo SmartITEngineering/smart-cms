@@ -24,6 +24,14 @@
       "qualifierARangePrefix":false,
       "filterOnRowId":false
     },
+    "rootContents": {
+      "columnFamilyAsString":"rootContents",
+      "columnQualifierAsString":"",
+      "filterOnIfMissing":false,
+      "filterOnLatestVersionOnly":true,
+      "qualifierARangePrefix":false,
+      "filterOnRowId":false
+    },
     "repInfo": {
       "columnFamilyAsString":"repInfo",
       "columnQualifierAsString":"",

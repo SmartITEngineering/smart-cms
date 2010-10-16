@@ -19,7 +19,9 @@
 package com.smartitengineering.cms.api.factory.workspace;
 
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
@@ -102,7 +104,19 @@ public interface WorkspaceAPI {
 
   public Collection<String> getVariationNames(WorkspaceId id, ResourceSortCriteria criteria);
 
-  public Collection<String> getRepresentationNames(WorkspaceId id, ResourceSortCriteria criteria, String startPoint, int count);
+  public Collection<String> getRepresentationNames(WorkspaceId id, ResourceSortCriteria criteria, String startPoint,
+                                                   int count);
 
-  public Collection<String> getVariationNames(WorkspaceId id, ResourceSortCriteria criteria, String startPoint, int count);
+  public Collection<String> getVariationNames(WorkspaceId id, ResourceSortCriteria criteria, String startPoint,
+                                              int count);
+
+  public String getEntityTagValueForResourceTemplate(ResourceTemplate resourceTemplate);
+
+  public Collection<ContentId> getRootContents(WorkspaceId workspaceId);
+
+  public void addRootContent(WorkspaceId to, ContentId... contentIds);
+
+  public void removeRootContent(WorkspaceId from, ContentId contentId);
+
+  public void removeAllRootContents(WorkspaceId workspaceId);
 }

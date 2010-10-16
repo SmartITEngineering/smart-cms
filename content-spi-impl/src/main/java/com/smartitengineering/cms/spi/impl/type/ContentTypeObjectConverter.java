@@ -45,7 +45,6 @@ import com.smartitengineering.cms.api.type.ResourceDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.type.SearchDef;
 import com.smartitengineering.cms.api.type.StringDataType;
-import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.type.VariationDef;
@@ -96,7 +95,6 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
   public final static byte[] CELL_RSRC_MIME_TYPE = Bytes.toBytes("mimeType");
   public final static byte[] CELL_RSRC_URI_TYPE = Bytes.toBytes("resourceUri.type");
   public final static byte[] CELL_RSRC_URI_VAL = Bytes.toBytes("resourceUri.value");
-  public final static byte[] CELL_RSRC_TEMPLATE = Bytes.toBytes("templateType");
   public final static byte[] CELL_FIELD_VAL_TYPE = Bytes.toBytes("fieldValType");
   public final static byte[] CELL_FIELD_STANDALONE = Bytes.toBytes("fieldStandalone");
   public final static byte[] CELL_FIELD_REQUIRED = Bytes.toBytes("fieldRequired");
@@ -331,7 +329,6 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
     put.add(family, Bytes.add(prefix, CELL_RSRC_MIME_TYPE), Bytes.toBytes(value.getMIMEType()));
     final ResourceUri resourceUri = value.getResourceUri();
     putResourceUri(put, family, prefix, resourceUri);
-    put.add(family, Bytes.add(prefix, CELL_RSRC_TEMPLATE), Bytes.toBytes(value.getTemplateType().name()));
   }
 
   protected void putResourceUri(Put put, final byte[] family, final byte[] prefix, final ResourceUri resourceUri) {
@@ -747,10 +744,6 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
     else if (Arrays.equals(qualifier, CELL_RSRC_MIME_TYPE)) {
       logger.debug("Filling resource mime type");
       resourceDef.setMIMEType(Bytes.toString(value));
-    }
-    else if (Arrays.equals(qualifier, CELL_RSRC_TEMPLATE)) {
-      logger.debug("Filling resource template");
-      resourceDef.setTemplateType(TemplateType.valueOf(Bytes.toString(value)));
     }
     else if (Arrays.equals(qualifier, CELL_RSRC_URI_TYPE)) {
       logger.debug("Filling resource uri type");

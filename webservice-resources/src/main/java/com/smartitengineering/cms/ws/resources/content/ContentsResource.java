@@ -45,7 +45,8 @@ public class ContentsResource extends AbstractResource {
 
   private final Workspace workspace;
   static final String PARAM_CONTENT = "contentId";
-  public static final String PATH_TO_CONTENT = "{" + PARAM_CONTENT + "}";
+  public static final String PATH_TO_CONTENT = "i/{" + PARAM_CONTENT + "}";
+  public static final String PATH_TO_CONTAINER = "container";
 
   public ContentsResource(@PathParam("wsNS") String namespace, @PathParam("wsName") String name) {
     final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
@@ -63,6 +64,11 @@ public class ContentsResource extends AbstractResource {
         getBytesUtf8(contentId)));
   }
 
+  @Path(ContentsResource.PATH_TO_CONTAINER)
+  public WorkspaceContentContainerResource getContainer() {
+    return new WorkspaceContentContainerResource(getInjectables(), workspace);
+  }
+
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   public Response createContent(Content content) {
@@ -74,6 +80,7 @@ public class ContentsResource extends AbstractResource {
 
   @GET
   public Response get() {
-    return Response.noContent().build();
+    return Response.seeOther(getAbsoluteURIBuilder().path(ContentsResource.class).path(PATH_TO_CONTAINER).build(workspace.
+        getId().getGlobalNamespace(), workspace.getId().getName())).build();
   }
 }

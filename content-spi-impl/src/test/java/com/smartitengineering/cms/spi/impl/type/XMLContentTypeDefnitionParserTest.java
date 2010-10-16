@@ -26,7 +26,6 @@ import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
-import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceAPIImpl;
@@ -236,8 +235,6 @@ public class XMLContentTypeDefnitionParserTest {
     if (logger.isInfoEnabled()) {
       logger.debug(new StringBuffer("First ContentType's first field's 1st variation name is ").append(
           variationDef.getName()).toString());
-      logger.debug(new StringBuffer("First ContentType's first field's 1st variation TemplateType is ").append(
-          variationDef.getTemplateType()).toString());
       logger.debug(new StringBuffer("First ContentType's first field's 1st variation ResourceUri's type is ").append(
           variationDef.getResourceUri().getType()).toString());
       logger.debug(new StringBuffer("First ContentType's first field's 1st variation ResourceUri's value is ").append(
@@ -245,7 +242,6 @@ public class XMLContentTypeDefnitionParserTest {
     }
 
     Assert.assertEquals("avar", variationDef.getName());
-    Assert.assertEquals(TemplateType.VELOCITY, variationDef.getTemplateType());
     Assert.assertEquals("some/type", variationDef.getMIMEType());
     Assert.assertEquals(Type.EXTERNAL, variationDef.getResourceUri().getType());
     Assert.assertEquals("http://some/uri", variationDef.getResourceUri().getValue());
@@ -256,8 +252,6 @@ public class XMLContentTypeDefnitionParserTest {
     if (logger.isInfoEnabled()) {
       logger.debug(new StringBuffer("First ContentType's first field's 2nd variation name is ").append(
           variationDef.getName()).toString());
-      logger.debug(new StringBuffer("First ContentType's first field's 2nd variation TemplateType is ").append(
-          variationDef.getTemplateType()).toString());
       logger.debug(new StringBuffer("First ContentType's first field's 2nd variation ResourceUri's type is ").append(
           variationDef.getResourceUri().getType()).toString());
       logger.debug(new StringBuffer("First ContentType's first field's 2nd variation ResourceUri's value is ").append(
@@ -265,7 +259,6 @@ public class XMLContentTypeDefnitionParserTest {
     }
 
     Assert.assertEquals("anothervar", variationDef.getName());
-    Assert.assertEquals(TemplateType.JAVASCRIPT, variationDef.getTemplateType());
     Assert.assertEquals("some/type", variationDef.getMIMEType());
     Assert.assertEquals(Type.INTERNAL, variationDef.getResourceUri().getType());
     Assert.assertEquals("internalvar", variationDef.getResourceUri().getValue());
@@ -373,7 +366,6 @@ public class XMLContentTypeDefnitionParserTest {
     def.setName("arep");
     def.setMIMEType("some/type");
     def.setResourceUri(resourceUri);
-    def.setTemplateType(TemplateType.VELOCITY);
 
 
     final RepresentationDef defFromXml = contentType.getRepresentationDefs().get("arep");
@@ -381,7 +373,6 @@ public class XMLContentTypeDefnitionParserTest {
     logger.debug(def.getMIMEType() + " mime type " + defFromXml.getMIMEType());
     logger.debug(def.getResourceUri().getType().name() + " Uri Type " + defFromXml.getResourceUri().getType().name());
     logger.debug(def.getResourceUri().getValue() + " RESOURCE URI " + defFromXml.getResourceUri().getValue());
-    logger.debug(def.getTemplateType().name() + " TEMPLATE TYPE " + defFromXml.getTemplateType().name());
     logger.debug(def.hashCode() + " Hash COde " + defFromXml.hashCode());
 
 
@@ -389,7 +380,6 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals(def.getMIMEType(), defFromXml.getMIMEType());
     Assert.assertEquals(def.getResourceUri().getType(), defFromXml.getResourceUri().getType());
     Assert.assertEquals(def.getResourceUri().getValue(), defFromXml.getResourceUri().getValue());
-    Assert.assertEquals(def.getTemplateType(), defFromXml.getTemplateType());
 
     MutableResourceUri resourceUri1 = SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
     resourceUri1.setType(Type.INTERNAL);
@@ -400,7 +390,6 @@ public class XMLContentTypeDefnitionParserTest {
                              SmartContentAPI.getInstance().getContentTypeLoader().createMutableRepresentationDef();
     def1.setName("anotherrep");
     def1.setMIMEType("some/type");
-    def1.setTemplateType(TemplateType.RUBY);
     def1.setResourceUri(resourceUri1);
 
 
@@ -409,7 +398,6 @@ public class XMLContentTypeDefnitionParserTest {
     logger.debug(def1.getMIMEType() + " mime type " + defFromXml1.getMIMEType());
     logger.debug(def1.getResourceUri().getType().name() + " Uri Type " + defFromXml1.getResourceUri().getType().name());
     logger.debug(def1.getResourceUri().getValue() + " RESOURCE URI " + defFromXml1.getResourceUri().getValue());
-    logger.debug(def1.getTemplateType().name() + " TEMPLATE TYPE " + defFromXml1.getTemplateType().name());
     logger.debug(def1.hashCode() + " Hash COde " + defFromXml1.hashCode());
 
 
@@ -417,7 +405,6 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals(def1.getMIMEType(), defFromXml1.getMIMEType());
     Assert.assertEquals(def1.getResourceUri().getType(), defFromXml1.getResourceUri().getType());
     Assert.assertEquals(def1.getResourceUri().getValue(), defFromXml1.getResourceUri().getValue());
-    Assert.assertEquals(def1.getTemplateType(), defFromXml1.getTemplateType());
   }
 
   @Test

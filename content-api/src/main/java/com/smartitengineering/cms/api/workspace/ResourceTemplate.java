@@ -38,4 +38,6 @@ public interface ResourceTemplate {
   Date getCreatedDate();
 
   Date getLastModifiedDate();
+
+  String getEntityTagValue();
 }

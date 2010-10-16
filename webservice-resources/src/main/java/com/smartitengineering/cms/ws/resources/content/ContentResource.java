@@ -55,6 +55,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
@@ -110,8 +111,11 @@ public class ContentResource extends AbstractResource {
     adapter = adapterImpl;
   }
 
-  @PathParam("{fieldName}")
+  @Path("/{fieldName}")
   public FieldResource getFieldResource(@PathParam("fieldName") String fieldName) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Trying to get field resource with name " + fieldName);
+    }
     FieldDef fieldDef = content.getContentDefinition().getFieldDefs().get(fieldName);
     FieldResource resource = new FieldResource(getInjectables(), content, fieldDef, tag);
     return resource;
@@ -356,7 +360,9 @@ public class ContentResource extends AbstractResource {
 
   protected static void getDomainField(Field field, String contentUri, FieldImpl fieldImpl) {
     fieldImpl.setName(field.getName());
-    fieldImpl.setFieldUri(new StringBuilder(contentUri).append('/').append(field.getName()).toString());
+    final String fieldUri = new StringBuilder(contentUri).append('/').append(field.getName()).toString();
+    fieldImpl.setFieldUri(fieldUri);
+    fieldImpl.setFieldRawContentUri(new StringBuilder(fieldUri).append("/raw").toString());
     final FieldValueImpl value;
     final FieldValue contentFieldValue = field.getValue();
     final DataType valueDef = field.getFieldDef().getValueDef();

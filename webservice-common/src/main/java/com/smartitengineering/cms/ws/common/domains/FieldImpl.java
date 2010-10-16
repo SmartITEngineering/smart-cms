@@ -24,7 +24,7 @@ package com.smartitengineering.cms.ws.common.domains;
  */
 public class FieldImpl implements Field {
 
-  private String name, fieldUri;
+  private String name, fieldUri, fieldRawContentUri;
   private FieldValue value;
 
   @Override
@@ -42,6 +42,11 @@ public class FieldImpl implements Field {
     return value;
   }
 
+  @Override
+  public String getFieldRawContentUri() {
+    return fieldRawContentUri;
+  }
+
   public void setFieldUri(String fieldUri) {
     this.fieldUri = fieldUri;
   }
@@ -52,5 +57,9 @@ public class FieldImpl implements Field {
 
   public void setValue(FieldValue value) {
     this.value = value;
+  }
+
+  public void setFieldRawContentUri(String fieldRawContentUri) {
+    this.fieldRawContentUri = fieldRawContentUri;
   }
 }

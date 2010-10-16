@@ -26,8 +26,6 @@ import com.smartitengineering.cms.api.common.TemplateType;
  */
 public interface MutableResourceDef extends ResourceDef {
 
-  public void setTemplateType(TemplateType templateType);
-
   public void setMIMEType(String mimeType);
 
   public void setName(String name);

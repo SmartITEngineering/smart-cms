@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.workspace;
 
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
@@ -38,10 +39,40 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
   private boolean representationPopulated;
   private boolean variationPopulated;
   private boolean friendliesPopulated;
+  private boolean rootContentsPopulated;
   private final List<PersistableRepresentationTemplate> representationTemplates =
                                                         new ArrayList<PersistableRepresentationTemplate>();
   private final List<PersistableVariationTemplate> variationTemplates = new ArrayList<PersistableVariationTemplate>();
   private final List<WorkspaceId> friendlies = new ArrayList<WorkspaceId>();
+  private final List<ContentId> rootContents = new ArrayList<ContentId>();
+
+  public List<ContentId> getRootContents() {
+    return Collections.unmodifiableList(rootContents);
+  }
+
+  public void setRootContents(Collection<? extends ContentId> collection) {
+    rootContents.clear();
+    if (collection == null || collection.isEmpty()) {
+      return;
+    }
+    rootContents.addAll(collection);
+  }
+
+  public void addRootContent(ContentId friendly) {
+    rootContents.add(friendly);
+  }
+
+  public void removeRootContent(ContentId friendly) {
+    rootContents.remove(friendly);
+  }
+
+  public boolean isRootContentsPopulated() {
+    return rootContentsPopulated;
+  }
+
+  public void setRootContentsPopulated(boolean rootContentsPopulated) {
+    this.rootContentsPopulated = rootContentsPopulated;
+  }
 
   public List<WorkspaceId> getFriendlies() {
     return Collections.unmodifiableList(friendlies);

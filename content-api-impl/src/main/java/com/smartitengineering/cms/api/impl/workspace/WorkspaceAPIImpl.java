@@ -21,6 +21,7 @@ package com.smartitengineering.cms.api.impl.workspace;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
@@ -31,11 +32,14 @@ import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -303,5 +307,38 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   @Override
   public VariationTemplate getVariationTemplate(WorkspaceId id, String name) {
     return SmartContentSPI.getInstance().getWorkspaceService().getVariationTemplate(id, name);
+  }
+
+  @Override
+  public String getEntityTagValueForResourceTemplate(ResourceTemplate template) {
+    final String toString = new StringBuilder(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(template.
+        getLastModifiedDate())).append(':').append(Arrays.toString(template.getTemplate())).append(':').append(template.
+        getTemplateType().name()).toString();
+    final String etag = DigestUtils.md5Hex(toString);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Generated etag " + etag + " for " + template.getClass().getName() + " with name " +
+          template.getName());
+    }
+    return etag;
+  }
+
+  @Override
+  public Collection<ContentId> getRootContents(WorkspaceId workspaceId) {
+    return SmartContentSPI.getInstance().getWorkspaceService().getRootContents(workspaceId);
+  }
+
+  @Override
+  public void addRootContent(WorkspaceId to, ContentId... contentIds) {
+    SmartContentSPI.getInstance().getWorkspaceService().addRootContent(to, contentIds);
+  }
+
+  @Override
+  public void removeRootContent(WorkspaceId from, ContentId contentId) {
+    SmartContentSPI.getInstance().getWorkspaceService().removeRootContent(from, contentId);
+  }
+
+  @Override
+  public void removeAllRootContents(WorkspaceId workspaceId) {
+    SmartContentSPI.getInstance().getWorkspaceService().removeAllRootContents(workspaceId);
   }
 }
