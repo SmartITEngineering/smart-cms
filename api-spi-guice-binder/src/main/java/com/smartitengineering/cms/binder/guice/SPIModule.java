@@ -47,6 +47,7 @@ import com.smartitengineering.cms.spi.impl.content.guice.ContentSchemaBaseConfig
 import com.smartitengineering.cms.spi.impl.content.template.GroovyRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.JavascriptRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.RubyRepresentationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.VelocityRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
 import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
@@ -229,5 +230,6 @@ public class SPIModule extends PrivateModule {
     typeGenBinder.addBinding(TemplateType.RUBY).to(RubyRepresentationGenerator.class);
     typeGenBinder.addBinding(TemplateType.GROOVY).to(GroovyRepresentationGenerator.class);
     typeGenBinder.addBinding(TemplateType.JAVASCRIPT).to(JavascriptRepresentationGenerator.class);
+    typeGenBinder.addBinding(TemplateType.VELOCITY).to(VelocityRepresentationGenerator.class);
   }
 }
