@@ -27,12 +27,12 @@ import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.impl.content.RepresentationImpl;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.GroovyRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.JavascriptRepresentationGenerator;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.SimpleBeanFactory;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Map;
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.io.IOUtils;
 import org.jmock.Expectations;
@@ -76,6 +76,7 @@ public class JavascriptRespresentationGeneratorTest {
     final Content content = mockery.mock(Content.class);
     final Field field = mockery.mock(Field.class);
     final FieldValue value = mockery.mock(FieldValue.class);
+    final Map<String, Field> fieldMap = mockery.mock(Map.class);
     mockery.checking(new Expectations() {
 
       {
@@ -88,8 +89,10 @@ public class JavascriptRespresentationGeneratorTest {
         will(returnValue(CONTENT));
         exactly(1).of(field).getValue();
         will(returnValue(value));
-        exactly(1).of(content).getField(this.<String>with(Expectations.<String>anything()));
+        exactly(1).of(fieldMap).get(with(Expectations.<String>anything()));
         will(returnValue(field));
+        exactly(1).of(content).getFields();
+        will(returnValue(fieldMap));
       }
     });
     Representation representation = generator.getRepresentation(template, content);
