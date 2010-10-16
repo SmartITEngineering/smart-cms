@@ -23,6 +23,7 @@ import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Representation;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 
 /**
  *
@@ -35,4 +36,6 @@ public interface RepresentationProvider {
   Representation getRepresentation(String repName, ContentTypeId contentTypeId, Content content);
 
   Representation getRepresentation(String repName, ContentType contentType, Content content);
+
+  boolean isValidTemplate(RepresentationTemplate template);
 }

@@ -26,6 +26,7 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
@@ -33,13 +34,17 @@ import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.spi.content.PersistentContentReader;
+import com.smartitengineering.cms.spi.content.RepresentationProvider;
+import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
 import com.smartitengineering.cms.spi.impl.content.ContentAdapterHelper;
 import com.smartitengineering.cms.spi.impl.content.ContentObjectConverter;
 import com.smartitengineering.cms.spi.impl.content.ContentPersistentService;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
+import com.smartitengineering.cms.spi.impl.content.RepresentationProviderImpl;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentFilterConfigsProvider;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentSchemaBaseConfigProvider;
+import com.smartitengineering.cms.spi.impl.content.template.RubyRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
 import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
@@ -211,5 +216,14 @@ public class SPIModule extends PrivateModule {
     binder().expose(LockHandler.class);
     binder().expose(PersistableDomainFactory.class);
     binder().expose(DomainIdInstanceProvider.class);
+    /*
+     * DI related to template engine
+     */
+    bind(RepresentationProvider.class).to(RepresentationProviderImpl.class);
+    binder().expose(RepresentationProvider.class);
+    MapBinder<TemplateType, TypeRepresentationGenerator> typeGenBinder =
+                                                         MapBinder.newMapBinder(binder(), TemplateType.class,
+                                                                                TypeRepresentationGenerator.class);
+    typeGenBinder.addBinding(TemplateType.RUBY).to(RubyRepresentationGenerator.class);
   }
 }

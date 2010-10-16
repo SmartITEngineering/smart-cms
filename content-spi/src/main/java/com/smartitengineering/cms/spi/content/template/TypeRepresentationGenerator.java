@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,20 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.content;
+package com.smartitengineering.cms.spi.content.template;
 
-import com.smartitengineering.cms.api.content.Field;
-import com.smartitengineering.cms.api.content.Variation;
-import com.smartitengineering.cms.api.type.FieldDef;
-import com.smartitengineering.cms.api.workspace.VariationTemplate;
+import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.content.Representation;
+import com.smartitengineering.cms.api.exception.InvalidTemplateException;
+import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 
 /**
  *
  * @author imyousuf
  */
-public interface VariationProvider {
+public interface TypeRepresentationGenerator {
 
-  Variation getVariation(String varName, FieldDef fieldDef, Field field);
+  Representation getRepresentation(RepresentationTemplate template, Content content);
 
-  boolean isValidTemplate(VariationTemplate template);
+  RepresentationGenerator getGenerator(RepresentationTemplate template) throws InvalidTemplateException;
 }
