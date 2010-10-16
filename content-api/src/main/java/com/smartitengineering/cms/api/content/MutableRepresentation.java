@@ -16,37 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.impl.content;
-
-import com.smartitengineering.cms.api.content.MutableVariation;
-import com.smartitengineering.cms.api.content.Variation;
+package com.smartitengineering.cms.api.content;
 
 /**
  *
- * @author kaisar
+ * @author imyousuf
  */
-public class VariationImpl implements MutableVariation {
+public interface MutableRepresentation extends Representation {
 
-  private String name;
-  private byte[] variation;
+  public void setName(String name);
 
-  @Override
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  @Override
-  public void setVariation(byte[] variation) {
-    this.variation = variation;
-  }
-
-  @Override
-  public String getName() {
-    return this.name;
-  }
-
-  @Override
-  public byte[] getVariation() {
-    return this.variation;
-  }
+  public void setRepresentation(byte[] representation);
 }

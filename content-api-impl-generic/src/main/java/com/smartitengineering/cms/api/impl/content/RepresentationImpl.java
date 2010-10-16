@@ -18,21 +18,23 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
-import com.smartitengineering.cms.api.content.Representation;
+import com.smartitengineering.cms.api.content.MutableRepresentation;
 
 /**
  *
  * @author kaisar
  */
-public class RepresentationImpl implements Representation {
+public class RepresentationImpl implements MutableRepresentation {
 
   private String name;
   private byte[] representation;
 
+  @Override
   public void setName(String name) {
     this.name = name;
   }
 
+  @Override
   public void setRepresentation(byte[] representation) {
     this.representation = representation;
   }

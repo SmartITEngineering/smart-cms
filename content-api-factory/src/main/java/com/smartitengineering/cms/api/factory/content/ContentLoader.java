@@ -34,7 +34,9 @@ import com.smartitengineering.cms.api.content.MutableDateTimeFieldValue;
 import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.content.MutableNumberFieldValue;
 import com.smartitengineering.cms.api.content.MutableOtherFieldValue;
+import com.smartitengineering.cms.api.content.MutableRepresentation;
 import com.smartitengineering.cms.api.content.MutableStringFieldValue;
+import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.content.NumberFieldValue;
 import com.smartitengineering.cms.api.content.OtherFieldValue;
 import com.smartitengineering.cms.api.content.StringFieldValue;
@@ -86,6 +88,10 @@ public interface ContentLoader {
   MutableStringFieldValue createStringFieldValue();
 
   MutableStringFieldValue createStringFieldValue(StringFieldValue fieldValue);
+
+  MutableRepresentation createMutableRepresentation();
+
+  MutableVariation createMutableVariation();
 
   FieldValue getValueFor(String value, DataType fieldDef);
 

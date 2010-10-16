@@ -24,6 +24,8 @@ import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentFieldValue;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.FieldValue;
+import com.smartitengineering.cms.api.content.MutableRepresentation;
+import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.content.DateTimeFieldValue;
@@ -404,5 +406,15 @@ public class ContentLoaderImpl implements ContentLoader {
     return DigestUtils.md5Hex(new StringBuilder(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(content.
         getLastModifiedDate())).append('~').append(content.getOwnFields().toString()).append('~').append(content.
         getStatus()).toString());
+  }
+
+  @Override
+  public MutableRepresentation createMutableRepresentation() {
+    return new RepresentationImpl();
+  }
+
+  @Override
+  public MutableVariation createMutableVariation() {
+    return new VariationImpl();
   }
 }
