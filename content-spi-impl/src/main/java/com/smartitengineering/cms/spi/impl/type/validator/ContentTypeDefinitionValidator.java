@@ -84,63 +84,61 @@ public class ContentTypeDefinitionValidator {
           final ContentTypeId parent = contentType.getParent();
           isValid = isValid && validateContentTypeIdExistence(parent);
         }
-        else {
-          Collection<FieldDef> fieldDefs = new ArrayList<FieldDef>();
-          fieldDefs = contentType.getMutableFieldDefs();
-          if (fieldDefs == null) {
+        Collection<FieldDef> fieldDefs = new ArrayList<FieldDef>();
+        fieldDefs = contentType.getMutableFieldDefs();
+        if (fieldDefs == null) {
+          if (logger.isDebugEnabled()) {
+            logger.error("No Field Definitions in " + contentType.getDisplayName());
+          }
+          isValid = false;
+        }
+        Iterator<FieldDef> fieldIterator = fieldDefs.iterator();
+        while (fieldIterator.hasNext()) {
+          FieldDef fieldDef = fieldIterator.next();
+          if (fieldDef == null) {
             if (logger.isDebugEnabled()) {
-              logger.error("No Field Definitions in " + contentType.getDisplayName());
+              logger.error("Field Def is empty");
             }
             isValid = false;
           }
-          Iterator<FieldDef> fieldIterator = fieldDefs.iterator();
-          while (fieldIterator.hasNext()) {
-            FieldDef fieldDef = fieldIterator.next();
-            if (fieldDef == null) {
+          else {
+            final FieldValueType type = fieldDef.getValueDef().getType();
+            if (type == null) {
               if (logger.isDebugEnabled()) {
-                logger.error("Field Def is empty");
+                logger.error("Not a valid Value Def. ");
               }
               isValid = false;
             }
             else {
-              final FieldValueType type = fieldDef.getValueDef().getType();
-              if (type == null) {
-                if (logger.isDebugEnabled()) {
-                  logger.error("Not a valid Value Def. ");
+              if (type.equals(FieldValueType.COLLECTION)) {
+                CollectionDataType dataType = (CollectionDataType) fieldDef.getValueDef();
+                if (dataType == null) {
+                  if (logger.isDebugEnabled()) {
+                    logger.error("Collection value is empty");
+                  }
+                  isValid = false;
                 }
-                isValid = false;
+                else if (dataType.getMinSize() > dataType.getMaxSize()) {
+                  if (logger.isDebugEnabled()) {
+                    logger.error("MinSize = ( " + dataType.getMinSize() + " ) can not be grater than MaxSize = ( " + dataType.
+                        getMaxSize() + " )");
+                  }
+                  isValid = false;
+                }
+                else if (dataType.getItemDataType() == null || dataType.getItemDataType().getType() == null) {
+                  if (logger.isDebugEnabled()) {
+                    logger.error("Collection's Item type is empty");
+                  }
+                  isValid = false;
+                }
+                else if (dataType.getItemDataType().getType().equals(FieldValueType.CONTENT)) {
+                  ContentDataType contentDataType = (ContentDataType) dataType.getItemDataType();
+                  isValid = isValid && validateContent(contentDataType);
+                }
               }
-              else {
-                if (type.equals(FieldValueType.COLLECTION)) {
-                  CollectionDataType dataType = (CollectionDataType) fieldDef.getValueDef();
-                  if (dataType == null) {
-                    if (logger.isDebugEnabled()) {
-                      logger.error("Collection value is empty");
-                    }
-                    isValid = false;
-                  }
-                  else if (dataType.getMinSize() > dataType.getMaxSize()) {
-                    if (logger.isDebugEnabled()) {
-                      logger.error("MinSize = ( " + dataType.getMinSize() + " ) can not be grater than MaxSize = ( " + dataType.
-                          getMaxSize() + " )");
-                    }
-                    isValid = false;
-                  }
-                  else if (dataType.getItemDataType() == null || dataType.getItemDataType().getType() == null) {
-                    if (logger.isDebugEnabled()) {
-                      logger.error("Collection's Item type is empty");
-                    }
-                    isValid = false;
-                  }
-                  else if (dataType.getItemDataType().getType().equals(FieldValueType.CONTENT)) {
-                    ContentDataType contentDataType = (ContentDataType) dataType.getItemDataType();
-                    isValid = isValid && validateContent(contentDataType);
-                  }
-                }
-                else if (type.equals(FieldValueType.CONTENT)) {
-                  ContentDataType dataType = (ContentDataType) fieldDef.getValueDef();
-                  isValid = isValid && validateContent(dataType);
-                }
+              else if (type.equals(FieldValueType.CONTENT)) {
+                ContentDataType dataType = (ContentDataType) fieldDef.getValueDef();
+                isValid = isValid && validateContent(dataType);
               }
             }
           }
