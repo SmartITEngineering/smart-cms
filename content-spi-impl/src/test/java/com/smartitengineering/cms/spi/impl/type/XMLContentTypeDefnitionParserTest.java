@@ -283,7 +283,7 @@ public class XMLContentTypeDefnitionParserTest {
 
     CollectionDataType collectionDataType = (CollectionDataType) fieldDef.getValueDef();
     Assert.assertEquals(10, collectionDataType.getMaxSize());
-    Assert.assertEquals(0, collectionDataType.getMinSize());
+    Assert.assertEquals(Integer.MIN_VALUE, collectionDataType.getMinSize());
     Assert.assertEquals(FieldValueType.INTEGER.name(), collectionDataType.getItemDataType().getType().name());
 
     Assert.assertEquals("fieldB", fieldDef.getName());
@@ -307,7 +307,7 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals(FieldValueType.COLLECTION.name(), fieldDef.getValueDef().getType().name());
 
     CollectionDataType collectionDataType1 = (CollectionDataType) fieldDef.getValueDef();
-    Assert.assertEquals(0, collectionDataType1.getMaxSize());
+    Assert.assertEquals(Integer.MAX_VALUE, collectionDataType1.getMaxSize());
     Assert.assertEquals(2, collectionDataType1.getMinSize());
 
     Assert.assertEquals(FieldValueType.CONTENT.name(), collectionDataType1.getItemDataType().getType().name());
@@ -422,7 +422,7 @@ public class XMLContentTypeDefnitionParserTest {
     }
     catch (InvalidReferenceException e) {
     }
-    catch(Exception ex) {
+    catch (Exception ex) {
       Assert.fail("Unexpected exception! " + ex.getMessage());
     }
   }
@@ -442,7 +442,7 @@ public class XMLContentTypeDefnitionParserTest {
     }
     catch (InvalidReferenceException e) {
     }
-    catch(Exception ex) {
+    catch (Exception ex) {
       Assert.fail("Unexpected exception! " + ex.getMessage());
     }
   }
@@ -462,7 +462,7 @@ public class XMLContentTypeDefnitionParserTest {
     }
     catch (InvalidReferenceException e) {
     }
-    catch(Exception ex) {
+    catch (Exception ex) {
       Assert.fail("Unexpected exception! " + ex.getMessage());
     }
   }
