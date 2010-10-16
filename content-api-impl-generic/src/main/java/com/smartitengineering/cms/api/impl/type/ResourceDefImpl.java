@@ -29,15 +29,9 @@ import com.smartitengineering.cms.api.type.ResourceUri;
  */
 public class ResourceDefImpl implements MutableResourceDef {
 
-  private TemplateType templateType;
   private String mimeType;
   private String name;
   private ResourceUri resourceUri;
-
-  @Override
-  public void setTemplateType(TemplateType templateType) {
-    this.templateType = templateType;
-  }
 
   @Override
   public void setMIMEType(String mimeType) {
@@ -52,11 +46,6 @@ public class ResourceDefImpl implements MutableResourceDef {
   @Override
   public void setResourceUri(ResourceUri resourceUri) {
     this.resourceUri = resourceUri;
-  }
-
-  @Override
-  public TemplateType getTemplateType() {
-    return this.templateType;
   }
 
   @Override
@@ -98,7 +87,7 @@ public class ResourceDefImpl implements MutableResourceDef {
 
   @Override
   public String toString() {
-    return "ResourceDefImpl{" + "; templateType=" + templateType + "; mimeType=" + mimeType + "; name=" + name
+    return "ResourceDefImpl{" + "; mimeType=" + mimeType + "; name=" + name
         + "; resourceUri=" + resourceUri + '}';
   }
 }

@@ -18,7 +18,6 @@
  */
 package com.smartitengineering.cms.type.xml;
 
-import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.impl.type.CollectionDataTypeImpl;
 import com.smartitengineering.cms.api.impl.type.ContentDataTypeImpl;
 import com.smartitengineering.cms.api.impl.type.ContentStatusImpl;
@@ -220,20 +219,6 @@ public class XmlParser implements XmlConstants {
       if (StringUtils.equals(childElements.get(i).getLocalName(), MIME_TYPE)) {
         representationDef.setMIMEType(childElements.get(i).getValue());
       }
-      if (StringUtils.equals(childElements.get(i).getLocalName(), TEMPLATE_TYPE)) {
-        if (StringUtils.equalsIgnoreCase(childElements.get(i).getValue(), "groovy")) {
-          representationDef.setTemplateType(TemplateType.GROOVY);
-        }
-        if (StringUtils.equalsIgnoreCase(childElements.get(i).getValue(), "velocity")) {
-          representationDef.setTemplateType(TemplateType.VELOCITY);
-        }
-        if (StringUtils.equalsIgnoreCase(childElements.get(i).getValue(), "ruby")) {
-          representationDef.setTemplateType(TemplateType.RUBY);
-        }
-        if (StringUtils.equalsIgnoreCase(childElements.get(i).getValue(), "javascript")) {
-          representationDef.setTemplateType(TemplateType.JAVASCRIPT);
-        }
-      }
       representationDef.setResourceUri(parseUri(rootElement, URI));
     }
     return representationDef;
@@ -397,18 +382,6 @@ public class XmlParser implements XmlConstants {
       variationDef.setName(parseMandatoryStringElement(rootElement, NAME));
       variationDef.setMIMEType(parseMandatoryStringElement(rootElement, MIME_TYPE));
       variationDef.setResourceUri(parseUri(rootElement, URI));
-      if (StringUtils.equalsIgnoreCase(parseMandatoryStringElement(rootElement, TEMPLATE_TYPE), "javascript")) {
-        variationDef.setTemplateType(TemplateType.JAVASCRIPT);
-      }
-      if (StringUtils.equalsIgnoreCase(parseMandatoryStringElement(rootElement, TEMPLATE_TYPE), "groovy")) {
-        variationDef.setTemplateType(TemplateType.GROOVY);
-      }
-      if (StringUtils.equalsIgnoreCase(parseMandatoryStringElement(rootElement, TEMPLATE_TYPE), "ruby")) {
-        variationDef.setTemplateType(TemplateType.RUBY);
-      }
-      if (StringUtils.equalsIgnoreCase(parseMandatoryStringElement(rootElement, TEMPLATE_TYPE), "velocity")) {
-        variationDef.setTemplateType(TemplateType.VELOCITY);
-      }
       return variationDef;
     }
   }

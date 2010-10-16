@@ -18,15 +18,11 @@
  */
 package com.smartitengineering.cms.api.type;
 
-import com.smartitengineering.cms.api.common.TemplateType;
-
 /**
  *
  * @author imyousuf
  */
 public interface ResourceDef {
-
-  public TemplateType getTemplateType();
 
   public String getMIMEType();
 

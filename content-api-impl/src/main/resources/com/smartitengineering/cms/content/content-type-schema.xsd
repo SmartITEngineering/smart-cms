@@ -165,7 +165,6 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
     <xs:sequence>
       <xs:element ref="name" minOccurs="1" maxOccurs="1" />
       <xs:element ref="mimeType" minOccurs="1" maxOccurs="1" />
-      <xs:element ref="templateType" minOccurs="1" maxOccurs="1" />
       <xs:element ref="uri" minOccurs="1" maxOccurs="1" />
     </xs:sequence>
   </xs:complexType>

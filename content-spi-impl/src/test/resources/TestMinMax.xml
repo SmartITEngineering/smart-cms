@@ -69,7 +69,6 @@
       <representation>
         <name>arep</name>
         <mimeType>some/type</mimeType>
-        <templateType>velocity</templateType>
         <uri>
           <external>http://some/uri</external>
         </uri>
@@ -77,7 +76,6 @@
       <representation>
         <name>anotherrep</name>
         <mimeType>some/type</mimeType>
-        <templateType>ruby</templateType>
         <uri>
           <internal>
             <name>internalrep</name>
