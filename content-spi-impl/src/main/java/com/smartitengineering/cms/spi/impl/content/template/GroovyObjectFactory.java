@@ -19,18 +19,35 @@
 package com.smartitengineering.cms.spi.impl.content.template;
 
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
-import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
-import com.smartitengineering.cms.spi.content.template.RepresentationGenerator;
+import groovy.lang.GroovyClassLoader;
+import org.apache.commons.codec.binary.StringUtils;
 
 /**
  *
  * @author imyousuf
  */
-public class JavascriptRepresentationGenerator extends AbstractTypeRepresentationGenerator {
+public class GroovyObjectFactory {
 
-  @Override
-  public RepresentationGenerator getGenerator(RepresentationTemplate template) throws InvalidTemplateException {
-    return JavascriptObjectFactory.getInstance().getObjectFromScript(template.getTemplate(),
-                                                                     RepresentationGenerator.class);
+  private final GroovyClassLoader groovyClassLoader = new GroovyClassLoader(getClass().getClassLoader());
+  private final static GroovyObjectFactory OBJECT_FACTORY = new GroovyObjectFactory();
+
+  public static GroovyObjectFactory getInstance() {
+    return OBJECT_FACTORY;
+  }
+
+  public synchronized <T> T getObjectFromScript(byte[] script, Class<? extends T> clazz) throws InvalidTemplateException {
+    try {
+      clazz = groovyClassLoader.parseClass(StringUtils.newStringUtf8(script));
+    }
+    catch (Exception ex) {
+      throw new InvalidTemplateException(ex);
+    }
+    try {
+      return clazz.newInstance();
+    }
+    catch (Exception ex) {
+      throw new InvalidTemplateException(ex);
+    }
+
   }
 }

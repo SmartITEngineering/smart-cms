@@ -22,8 +22,6 @@ import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.spi.content.template.RepresentationGenerator;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
-import groovy.lang.GroovyClassLoader;
-import org.apache.commons.codec.binary.StringUtils;
 
 /**
  *
@@ -32,22 +30,8 @@ import org.apache.commons.codec.binary.StringUtils;
 public class GroovyRepresentationGenerator extends AbstractTypeRepresentationGenerator implements
     TypeRepresentationGenerator {
 
-  private final GroovyClassLoader groovyClassLoader = new GroovyClassLoader(getClass().getClassLoader());
-
   @Override
   public RepresentationGenerator getGenerator(RepresentationTemplate template) throws InvalidTemplateException {
-    final Class<? extends RepresentationGenerator> clazz;
-    try {
-      clazz = groovyClassLoader.parseClass(StringUtils.newStringUtf8(template.getTemplate()));
-    }
-    catch (Exception ex) {
-      throw new InvalidTemplateException(ex);
-    }
-    try {
-      return clazz.newInstance();
-    }
-    catch (Exception ex) {
-      throw new InvalidTemplateException(ex);
-    }
+    return GroovyObjectFactory.getInstance().getObjectFromScript(template.getTemplate(), RepresentationGenerator.class);
   }
 }

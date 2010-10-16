@@ -22,10 +22,6 @@ import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.spi.content.template.RepresentationGenerator;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import org.apache.commons.io.IOUtils;
-import org.jruby.embed.ScriptingContainer;
 
 /**
  *
@@ -34,19 +30,8 @@ import org.jruby.embed.ScriptingContainer;
 public class RubyRepresentationGenerator extends AbstractTypeRepresentationGenerator implements
     TypeRepresentationGenerator {
 
-  private final ScriptingContainer scriptingContainer = new ScriptingContainer();
-
   @Override
   public RepresentationGenerator getGenerator(RepresentationTemplate template) throws InvalidTemplateException {
-    ByteArrayInputStream inputStream = new ByteArrayInputStream(template.getTemplate());
-    final Object receiver;
-    try {
-      receiver = scriptingContainer.runScriptlet(IOUtils.toString(inputStream));
-    }
-    catch (IOException ex) {
-      throw new InvalidTemplateException(ex);
-    }
-    final RepresentationGenerator generator = scriptingContainer.getInstance(receiver, RepresentationGenerator.class);
-    return generator;
+    return JRubyObjectFactory.getInstance().getObjectFromScript(template.getTemplate(), RepresentationGenerator.class);
   }
 }
