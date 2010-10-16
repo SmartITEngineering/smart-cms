@@ -20,12 +20,15 @@ package com.smartitengineering.cms.client.api;
 
 import com.smartitengineering.cms.ws.common.domains.Content;
 import com.smartitengineering.util.rest.client.WritableResource;
+import java.util.Collection;
 
 /**
  *
  * @author kaisar
  */
 public interface ContentResource extends WritableResource<Content> {
+
+  public Collection<FieldResource> getFields();
 
   public void update(Content content);
 }

@@ -31,6 +31,7 @@ import com.smartitengineering.util.rest.client.ResourceLink;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.config.ClientConfig;
 import org.apache.abdera.model.Feed;
+import org.apache.abdera.model.Link;
 
 /**
  *
