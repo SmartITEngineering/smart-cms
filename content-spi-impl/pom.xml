@@ -67,6 +67,10 @@ The module is responsible for Implementing the SPI for the CMS.
       <artifactId>jruby-embed</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-all</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
       <artifactId>content-api-impl</artifactId>
       <version>${project.version}</version>

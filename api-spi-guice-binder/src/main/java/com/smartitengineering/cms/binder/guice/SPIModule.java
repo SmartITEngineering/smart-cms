@@ -44,6 +44,7 @@ import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.cms.spi.impl.content.RepresentationProviderImpl;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentFilterConfigsProvider;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentSchemaBaseConfigProvider;
+import com.smartitengineering.cms.spi.impl.content.template.GroovyRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.RubyRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
@@ -225,5 +226,6 @@ public class SPIModule extends PrivateModule {
                                                          MapBinder.newMapBinder(binder(), TemplateType.class,
                                                                                 TypeRepresentationGenerator.class);
     typeGenBinder.addBinding(TemplateType.RUBY).to(RubyRepresentationGenerator.class);
+    typeGenBinder.addBinding(TemplateType.GROOVY).to(GroovyRepresentationGenerator.class);
   }
 }
