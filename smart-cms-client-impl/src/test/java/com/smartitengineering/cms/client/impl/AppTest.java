@@ -753,7 +753,6 @@ public class AppTest {
 
           Assert.assertEquals(servedVariationDef.getResourceUri().getValue(),
                               getVariationDef.getResourceUri().getValue());
-
         }
       }
     }
@@ -1013,8 +1012,6 @@ public class AppTest {
     ContentResource contentResource = feedResource.getContents().createContentResource(content);
     Content content1 = contentResource.get();
     Assert.assertNotNull(content1);
-//    URI uri = new URI(content.getContentTypeUri());
-//    Assert.assertEquals(uri.getPath(), content1.getContentTypeUri());
     Assert.assertEquals(content.getParentContentUri(), content1.getParentContentUri());
     Assert.assertEquals(content.getStatus(), content1.getStatus());
     Assert.assertEquals(content.getFields().size(), content1.getFields().size());
@@ -1023,6 +1020,66 @@ public class AppTest {
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType(), field.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field.getValue().getValue());
+  }
+
+  @Test
+  public void testCreateAnotherContent() throws Exception {
+    LOGGER.info(":::::::::::::: CREATE CONTENT RESOURCE TEST ::::::::::::::");
+    ObjectMapper mapper = new ObjectMapper();
+    String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Update-Content.json"));
+    InputStream stream = IOUtils.toInputStream(JSON);
+    Content content = mapper.readValue(stream, Content.class);
+    Assert.assertNotNull(content);
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    ContentResource contentResource = feedResource.getContents().createContentResource(content);
+    Content content1 = contentResource.get();
+    Assert.assertNotNull(content1);
+    Assert.assertEquals(content.getParentContentUri(), content1.getParentContentUri());
+    Assert.assertEquals(content.getStatus(), content1.getStatus());
+    Assert.assertEquals(content.getFields().size(), content1.getFields().size());
+    final Field field = content.getFields().iterator().next();
+    final Field field1 = content1.getFields().iterator().next();
+    Assert.assertEquals(field.getName(), field1.getName());
+    Assert.assertEquals(field.getValue().getType(), field.getValue().getType());
+    Assert.assertEquals(field.getValue().getValue(), field.getValue().getValue());
+  }
+
+  @Test
+  public void testUpdateContent() throws Exception {
+    LOGGER.info(":::::::::::::: UPDATE CONTENT RESOURCE TEST ::::::::::::::");
+    ObjectMapper mapper = new ObjectMapper();
+    String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
+    InputStream stream = IOUtils.toInputStream(JSON);
+    Content content = mapper.readValue(stream, Content.class);
+    Assert.assertNotNull(content);
+    ObjectMapper mapper1 = new ObjectMapper();
+    String JSON1 = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Update-Content.json"));
+    InputStream stream1 = IOUtils.toInputStream(JSON1);
+    Content content1 = mapper1.readValue(stream1, Content.class);
+    Assert.assertNotNull(content1);
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    feedResource.getContents().createContentResource(content).update(content1);
+  }
+
+  @Test
+  public void testDeleteContent() throws Exception {
+    LOGGER.info(":::::::::::::: DELETE CONTENT RESOURCE TEST ::::::::::::::");
+    ObjectMapper mapper = new ObjectMapper();
+    String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
+    InputStream stream = IOUtils.toInputStream(JSON);
+    Content content = mapper.readValue(stream, Content.class);
+    Assert.assertNotNull(content);
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    feedResource.getContents().createContentResource(content).delete(ClientResponse.Status.OK);
   }
 
   @Test
