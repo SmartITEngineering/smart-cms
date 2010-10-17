@@ -18,6 +18,9 @@
  */
 package com.smartitengineering.cms.ws.common.domains;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  *
  * @author imyousuf
@@ -26,6 +29,7 @@ public class FieldImpl implements Field {
 
   private String name, fieldUri, fieldRawContentUri;
   private FieldValue value;
+  private Map<String, String> variations = new LinkedHashMap<String, String>();
 
   @Override
   public String getName() {
@@ -45,6 +49,11 @@ public class FieldImpl implements Field {
   @Override
   public String getFieldRawContentUri() {
     return fieldRawContentUri;
+  }
+
+  @Override
+  public Map<String, String> getVariations() {
+    return variations;
   }
 
   public void setFieldUri(String fieldUri) {

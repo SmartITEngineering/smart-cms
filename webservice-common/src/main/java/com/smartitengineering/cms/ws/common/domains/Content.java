@@ -20,13 +20,16 @@ package com.smartitengineering.cms.ws.common.domains;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  *
  * @author imyousuf
  */
-@JsonDeserialize(as=ContentImpl.class)
+@JsonDeserialize(as = ContentImpl.class)
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_DEFAULT)
 public interface Content {
 
   Date getCreationDate();
@@ -40,4 +43,6 @@ public interface Content {
   String getStatus();
 
   Collection<Field> getFields();
+
+  Map<String, String> getRepresentations();
 }

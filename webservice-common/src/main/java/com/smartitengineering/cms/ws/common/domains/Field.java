@@ -18,13 +18,16 @@
  */
 package com.smartitengineering.cms.ws.common.domains;
 
+import java.util.Map;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  *
  * @author imyousuf
  */
-@JsonDeserialize(as=FieldImpl.class)
+@JsonDeserialize(as = FieldImpl.class)
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_DEFAULT)
 public interface Field {
 
   String getName();
@@ -34,4 +37,6 @@ public interface Field {
   String getFieldRawContentUri();
 
   FieldValue getValue();
+
+  Map<String, String> getVariations();
 }
