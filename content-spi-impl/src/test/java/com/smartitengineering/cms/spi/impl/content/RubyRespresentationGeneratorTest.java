@@ -80,6 +80,7 @@ public class RubyRespresentationGeneratorTest {
     final ContentType type = mockery.mock(ContentType.class);
     final Map<String, RepresentationDef> reps = mockery.mock(Map.class, "repMap");
     final RepresentationDef def = mockery.mock(RepresentationDef.class);
+    final Map<String, Field> fieldMap = mockery.mock(Map.class);
     mockery.checking(new Expectations() {
 
       {
@@ -92,8 +93,10 @@ public class RubyRespresentationGeneratorTest {
         will(returnValue(CONTENT));
         exactly(1).of(field).getValue();
         will(returnValue(value));
-        exactly(1).of(content).getField(this.<String>with(Expectations.<String>anything()));
+        exactly(1).of(fieldMap).get(with(Expectations.<String>anything()));
         will(returnValue(field));
+        exactly(1).of(content).getFields();
+        will(returnValue(fieldMap));
         exactly(1).of(content).getContentDefinition();
         will(returnValue(type));
         exactly(1).of(type).getRepresentationDefs();
