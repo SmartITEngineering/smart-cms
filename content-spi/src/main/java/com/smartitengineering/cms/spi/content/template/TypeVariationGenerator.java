@@ -19,7 +19,7 @@
 package com.smartitengineering.cms.spi.content.template;
 
 import com.smartitengineering.cms.api.content.Field;
-import com.smartitengineering.cms.api.content.Variation;
+import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 
@@ -29,7 +29,7 @@ import com.smartitengineering.cms.api.workspace.VariationTemplate;
  */
 public interface TypeVariationGenerator {
 
-  Variation getVariation(VariationTemplate template, Field field);
+  MutableVariation getVariation(VariationTemplate template, Field field);
 
   VariationGenerator getGenerator(VariationTemplate template) throws InvalidTemplateException;
 }

@@ -18,6 +18,8 @@
  */
 package com.smartitengineering.cms.api.content;
 
+import java.util.Date;
+
 /**
  *
  * @author imyousuf
@@ -29,4 +31,6 @@ public interface MutableRepresentation extends Representation {
   public void setMimeType(String mimeType);
 
   public void setRepresentation(byte[] representation);
+
+  public void setLastModifiedDate(Date lastModifiedDate);
 }

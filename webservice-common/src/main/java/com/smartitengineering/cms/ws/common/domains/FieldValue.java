@@ -21,6 +21,7 @@ package com.smartitengineering.cms.ws.common.domains;
 import com.smartitengineering.cms.ws.common.jackson.FieldValueTypeIdResolver;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonTypeIdResolver;
 
 /**
@@ -30,6 +31,7 @@ import org.codehaus.jackson.map.annotate.JsonTypeIdResolver;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, include = JsonTypeInfo.As.PROPERTY, property = "@valueType")
 @JsonTypeIdResolver(FieldValueTypeIdResolver.class)
 @JsonDeserialize(as = FieldValueImpl.class)
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public interface FieldValue {
 
   String getType();

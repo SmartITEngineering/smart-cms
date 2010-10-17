@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.Field;
+import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
@@ -30,6 +31,7 @@ import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.spi.content.VariationProvider;
 import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
+import java.util.Date;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -72,7 +74,16 @@ public class VariationProviderImpl implements VariationProvider {
       logger.info("Representation generator is null!");
       return null;
     }
-    return generator.getVariation(variationTemplate, field);
+    final MutableVariation variation = generator.getVariation(variationTemplate, field);
+    Date cLastModifiedDate = content.getLastModifiedDate();
+    Date tLastModifiedDate = variationTemplate.getLastModifiedDate();
+    if (cLastModifiedDate.before(tLastModifiedDate)) {
+      variation.setLastModifiedDate(tLastModifiedDate);
+    }
+    else {
+      variation.setLastModifiedDate(cLastModifiedDate);
+    }
+    return variation;
   }
 
   @Override

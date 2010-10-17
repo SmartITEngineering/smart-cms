@@ -20,7 +20,6 @@ package com.smartitengineering.cms.spi.impl.content.template;
 
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.MutableRepresentation;
-import com.smartitengineering.cms.api.content.Representation;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
@@ -39,7 +38,7 @@ public abstract class AbstractTypeRepresentationGenerator implements TypeReprese
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
-  public Representation getRepresentation(RepresentationTemplate template, Content content) {
+  public MutableRepresentation getRepresentation(RepresentationTemplate template, Content content) {
     RepresentationGenerator generator;
     try {
       generator = getGenerator(template);

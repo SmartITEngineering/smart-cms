@@ -21,7 +21,9 @@ package com.smartitengineering.cms.ws.common.domains;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -32,6 +34,7 @@ public class ContentImpl implements Content {
   private Date creationDate, lastModifiedDate;
   private String contentTypeUri, parentContentUri, status;
   private List<Field> fields = new ArrayList<Field>();
+  private Map<String, String> templateUris = new LinkedHashMap<String, String>();
 
   @Override
   public Date getCreationDate() {
@@ -88,5 +91,10 @@ public class ContentImpl implements Content {
 
   public void setStatus(String status) {
     this.status = status;
+  }
+
+  @Override
+  public Map<String, String> getRepresentations() {
+    return templateUris;
   }
 }

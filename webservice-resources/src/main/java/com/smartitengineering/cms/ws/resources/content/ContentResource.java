@@ -34,6 +34,8 @@ import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.OtherDataType;
+import com.smartitengineering.cms.api.type.RepresentationDef;
+import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldValueImpl;
 import com.smartitengineering.cms.ws.common.domains.ContentImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldImpl;
@@ -111,7 +113,7 @@ public class ContentResource extends AbstractResource {
     adapter = adapterImpl;
   }
 
-  @Path("/{fieldName}")
+  @Path("f/{fieldName}")
   public FieldResource getFieldResource(@PathParam("fieldName") String fieldName) {
     if (logger.isDebugEnabled()) {
       logger.debug("Trying to get field resource with name " + fieldName);
@@ -119,6 +121,11 @@ public class ContentResource extends AbstractResource {
     FieldDef fieldDef = content.getContentDefinition().getFieldDefs().get(fieldName);
     FieldResource resource = new FieldResource(getInjectables(), content, fieldDef, tag);
     return resource;
+  }
+
+  @Path("r/{repName}")
+  public RepresentationResource getRepresentationResource(@PathParam("repName") String repName) {
+    return new RepresentationResource(getInjectables(), repName, content);
   }
 
   @GET
@@ -245,8 +252,9 @@ public class ContentResource extends AbstractResource {
     @Override
     protected void mergeFromF2T(Content fromBean, com.smartitengineering.cms.ws.common.domains.Content toBean) {
       ContentImpl contentImpl = (ContentImpl) toBean;
-      contentImpl.setContentTypeUri(ContentTypeResource.getContentTypeRelativeURI(fromBean.getContentDefinition().
-          getContentTypeID()).toASCIIString());
+      ContentType type = fromBean.getContentDefinition();
+      contentImpl.setContentTypeUri(
+          ContentTypeResource.getContentTypeRelativeURI(type.getContentTypeID()).toASCIIString());
       if (fromBean.getParentId() != null) {
         contentImpl.setParentContentUri(ContentResource.getContentUri(fromBean.getParentId()).toASCIIString());
       }
@@ -268,6 +276,13 @@ public class ContentResource extends AbstractResource {
           logger.debug("Converting field " + field.getName() + " with value " + field.getValue().toString());
         }
         contentImpl.getFields().add(fieldImpl);
+      }
+      Collection<RepresentationDef> defs = type.getRepresentationDefs().values();
+      String currentContext = new StringBuilder(contentUri).append("/r/").toString();
+      Map<String, String> repUris = contentImpl.getRepresentations();
+      for (RepresentationDef def : defs) {
+        String uri = new StringBuilder(currentContext).append(def.getName()).toString();
+        repUris.put(uri, def.getMIMEType());
       }
     }
 
@@ -360,13 +375,18 @@ public class ContentResource extends AbstractResource {
 
   protected static void getDomainField(Field field, String contentUri, FieldImpl fieldImpl) {
     fieldImpl.setName(field.getName());
-    final String fieldUri = new StringBuilder(contentUri).append('/').append(field.getName()).toString();
+    final String fieldUri = new StringBuilder(contentUri).append("/f/").append(field.getName()).toString();
     fieldImpl.setFieldUri(fieldUri);
     fieldImpl.setFieldRawContentUri(new StringBuilder(fieldUri).append("/raw").toString());
     final FieldValueImpl value;
     final FieldValue contentFieldValue = field.getValue();
     final DataType valueDef = field.getFieldDef().getValueDef();
     value = getFieldvalue(valueDef, contentFieldValue);
+    Map<String, String> variations = fieldImpl.getVariations();
+    Collection<VariationDef> defs = field.getFieldDef().getVariations().values();
+    for (VariationDef def : defs) {
+      variations.put(new StringBuilder(fieldUri).append("/v/").append(def.getName()).toString(), def.getMIMEType());
+    }
     fieldImpl.setValue(value);
   }
 

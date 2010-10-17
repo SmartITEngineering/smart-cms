@@ -18,6 +18,8 @@
  */
 package com.smartitengineering.cms.api.content;
 
+import java.util.Date;
+
 /**
  *
  * @author imyousuf
@@ -29,4 +31,6 @@ public interface MutableVariation extends Variation {
   public void setMimeType(String mimeType);
 
   public void setVariation(byte[] variation);
+
+  public void setLastModifiedDate(Date lastModifiedDate);
 }

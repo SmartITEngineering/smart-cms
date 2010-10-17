@@ -19,7 +19,7 @@
 package com.smartitengineering.cms.spi.content.template;
 
 import com.smartitengineering.cms.api.content.Content;
-import com.smartitengineering.cms.api.content.Representation;
+import com.smartitengineering.cms.api.content.MutableRepresentation;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 
@@ -29,7 +29,7 @@ import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
  */
 public interface TypeRepresentationGenerator {
 
-  Representation getRepresentation(RepresentationTemplate template, Content content);
+  MutableRepresentation getRepresentation(RepresentationTemplate template, Content content);
 
   RepresentationGenerator getGenerator(RepresentationTemplate template) throws InvalidTemplateException;
 }

@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.content.MutableRepresentation;
 import com.smartitengineering.cms.api.content.Representation;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
@@ -32,8 +33,10 @@ import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.spi.content.RepresentationProvider;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
+import java.util.Date;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +90,16 @@ public class RepresentationProviderImpl implements RepresentationProvider {
       logger.info("Representation generator is null!");
       return null;
     }
-    return generator.getRepresentation(representationTemplate, content);
+    final MutableRepresentation representation = generator.getRepresentation(representationTemplate, content);
+    final Date cLastModifiedDate = content.getLastModifiedDate();
+    final Date tLastModifiedDate = representationTemplate.getLastModifiedDate();
+    if (cLastModifiedDate.before(tLastModifiedDate)) {
+      representation.setLastModifiedDate(tLastModifiedDate);
+    }
+    else {
+      representation.setLastModifiedDate(cLastModifiedDate);
+    }
+    return representation;
   }
 
   @Override

@@ -113,7 +113,7 @@ public class WorkspaceContentContainerResource extends AbstractResource {
   @PUT
   @Consumes(TextURIListProvider.TEXT_URI_LIST)
   public Response replaceContainerContents(final Collection<URI> contentUris) {
-    SmartContentAPI.getInstance().getWorkspaceApi().removeAllFriendlies(workspace.getId());
+    SmartContentAPI.getInstance().getWorkspaceApi().removeAllRootContents(workspace.getId());
     if (contentUris != null && contentUris.size() > 0) {
       List<ContentId> ids = new ArrayList<ContentId>(contentUris.size());
       for (URI uri : contentUris) {
