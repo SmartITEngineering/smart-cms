@@ -20,7 +20,6 @@ package com.smartitengineering.cms.spi.impl.content.template;
 
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.MutableVariation;
-import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
@@ -39,7 +38,7 @@ public abstract class AbstractTypeVariationGenerator implements TypeVariationGen
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
-  public Variation getVariation(VariationTemplate template, Field field) {
+  public MutableVariation getVariation(VariationTemplate template, Field field) {
     VariationGenerator generator;
     try {
       generator = getGenerator(template);

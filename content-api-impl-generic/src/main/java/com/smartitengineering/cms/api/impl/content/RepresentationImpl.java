@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.content.MutableRepresentation;
+import java.util.Date;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -31,6 +32,7 @@ public class RepresentationImpl implements MutableRepresentation {
   private String name;
   private byte[] representation;
   private String mimeType;
+  private Date lastModifiedDate;
 
   @Override
   public void setName(String name) {
@@ -60,5 +62,15 @@ public class RepresentationImpl implements MutableRepresentation {
   @Override
   public String getMimeType() {
     return StringUtils.isNotBlank(mimeType) ? mimeType : MediaType.APPLICATION_OCTET_STREAM.toString();
+  }
+
+  @Override
+  public void setLastModifiedDate(Date lastModifiedDate) {
+    this.lastModifiedDate = lastModifiedDate;
+  }
+
+  @Override
+  public Date getLastModifiedDate() {
+    return lastModifiedDate;
   }
 }

@@ -18,6 +18,8 @@
  */
 package com.smartitengineering.cms.api.content;
 
+import java.util.Date;
+
 /**
  *
  * @author imyousuf
@@ -27,6 +29,8 @@ public interface Variation {
   public String getName();
 
   public String getMimeType();
+
+  public Date getLastModifiedDate();
 
   public byte[] getVariation();
 }

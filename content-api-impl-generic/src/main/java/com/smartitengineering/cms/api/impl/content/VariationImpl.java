@@ -20,7 +20,7 @@ package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.content.MutableVariation;
-import com.smartitengineering.cms.api.content.Variation;
+import java.util.Date;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -32,6 +32,7 @@ public class VariationImpl implements MutableVariation {
   private String name;
   private byte[] variation;
   private String mimeType;
+  private Date lastModifiedDate;
 
   @Override
   public void setName(String name) {
@@ -61,5 +62,15 @@ public class VariationImpl implements MutableVariation {
   @Override
   public String getMimeType() {
     return StringUtils.isNotBlank(mimeType) ? mimeType : MediaType.APPLICATION_OCTET_STREAM.toString();
+  }
+
+  @Override
+  public void setLastModifiedDate(Date lastModifiedDate) {
+    this.lastModifiedDate = lastModifiedDate;
+  }
+
+  @Override
+  public Date getLastModifiedDate() {
+    return lastModifiedDate;
   }
 }
