@@ -45,7 +45,7 @@ public abstract class AbstractTypeRepresentationGenerator implements TypeReprese
       generator = getGenerator(template);
     }
     catch (InvalidTemplateException ex) {
-      logger.warn("Could get generator!", ex);
+      logger.warn("Could not get generator!", ex);
       generator = null;
     }
     if (generator == null) {

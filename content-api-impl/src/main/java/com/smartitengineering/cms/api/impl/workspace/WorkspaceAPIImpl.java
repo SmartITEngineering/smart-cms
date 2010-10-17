@@ -24,6 +24,7 @@ import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
+import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
@@ -340,5 +341,10 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   @Override
   public void removeAllRootContents(WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getWorkspaceService().removeAllRootContents(workspaceId);
+  }
+
+  @Override
+  public ValidatorTemplate getValidatorTemplate(WorkspaceId workspaceId, String name) {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 }

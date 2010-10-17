@@ -31,9 +31,12 @@ import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
+import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
 import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.RubyRepresentationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.RubyValidatorGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.RubyVariationGenerator;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.SimpleBeanFactory;
@@ -155,5 +158,26 @@ public class RubyGeneratorTest {
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());
     Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getVariation()));
+  }
+
+  @Test
+  public void testRubyValGeneration() throws IOException {
+    TypeFieldValidator generator = new RubyValidatorGenerator();
+    final ValidatorTemplate template = mockery.mock(ValidatorTemplate.class);
+    final Field field = mockery.mock(Field.class, "valField");
+    final FieldValue value = mockery.mock(FieldValue.class, "valFieldVal");
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(1).of(template).getTemplate();
+        will(returnValue(
+            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("scripts/ruby/val-script.rb"))));
+        exactly(1).of(value).getValue();
+        will(returnValue(CONTENT));
+        exactly(1).of(field).getValue();
+        will(returnValue(value));
+      }
+    });
+    Assert.assertFalse(generator.isValid(template, field));
   }
 }

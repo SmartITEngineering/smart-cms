@@ -16,19 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.content.template;
-
-import com.smartitengineering.cms.api.content.Field;
-import com.smartitengineering.cms.api.exception.InvalidTemplateException;
-import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 
 /**
  *
  * @author imyousuf
  */
-public interface TypeFieldValidator {
-
-  boolean isValid(ValidatorTemplate template, Field field);
-
-  FieldValidator getValidator(ValidatorTemplate template) throws InvalidTemplateException;
+class GroovyTestVariationGenerator implements com.smartitengineering.cms.spi.content.template.FieldValidator {
+	public boolean isValidFieldValue(com.smartitengineering.cms.api.content.Field field) {
+    return field.value.value.toString() != "content";
+  }
 }
+

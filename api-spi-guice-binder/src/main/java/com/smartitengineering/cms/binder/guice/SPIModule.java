@@ -33,9 +33,12 @@ import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.spi.content.PersistentContentReader;
 import com.smartitengineering.cms.spi.content.RepresentationProvider;
+import com.smartitengineering.cms.spi.content.ValidatorProvider;
 import com.smartitengineering.cms.spi.content.VariationProvider;
+import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
 import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
 import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
@@ -44,14 +47,18 @@ import com.smartitengineering.cms.spi.impl.content.ContentObjectConverter;
 import com.smartitengineering.cms.spi.impl.content.ContentPersistentService;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.cms.spi.impl.content.RepresentationProviderImpl;
+import com.smartitengineering.cms.spi.impl.content.ValidatorProviderImpl;
 import com.smartitengineering.cms.spi.impl.content.VariationProviderImpl;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentFilterConfigsProvider;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentSchemaBaseConfigProvider;
 import com.smartitengineering.cms.spi.impl.content.template.GroovyRepresentationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.GroovyValidatorGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.GroovyVariationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.JavascriptRepresentationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.JavascriptValidatorGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.JavascriptVariationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.RubyRepresentationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.RubyValidatorGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.RubyVariationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.VelocityRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.VelocityVariationGenerator;
@@ -253,5 +260,16 @@ public class SPIModule extends PrivateModule {
     typeVarGenBinder.addBinding(TemplateType.GROOVY).to(GroovyVariationGenerator.class);
     typeVarGenBinder.addBinding(TemplateType.JAVASCRIPT).to(JavascriptVariationGenerator.class);
     typeVarGenBinder.addBinding(TemplateType.VELOCITY).to(VelocityVariationGenerator.class);
+    /*
+     * Field validator
+     */
+    bind(ValidatorProvider.class).to(ValidatorProviderImpl.class);
+    binder().expose(ValidatorProvider.class);
+    MapBinder<ValidatorType, TypeFieldValidator> typeFieldValBinder =
+                                                         MapBinder.newMapBinder(binder(), ValidatorType.class,
+                                                                                TypeFieldValidator.class);
+    typeFieldValBinder.addBinding(ValidatorType.RUBY).to(RubyValidatorGenerator.class);
+    typeFieldValBinder.addBinding(ValidatorType.GROOVY).to(GroovyValidatorGenerator.class);
+    typeFieldValBinder.addBinding(ValidatorType.JAVASCRIPT).to(JavascriptValidatorGenerator.class);
   }
 }

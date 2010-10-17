@@ -45,7 +45,7 @@ public abstract class AbstractTypeVariationGenerator implements TypeVariationGen
       generator = getGenerator(template);
     }
     catch (InvalidTemplateException ex) {
-      logger.warn("Could get generator!", ex);
+      logger.warn("Could not get generator!", ex);
       generator = null;
     }
     if (generator == null) {

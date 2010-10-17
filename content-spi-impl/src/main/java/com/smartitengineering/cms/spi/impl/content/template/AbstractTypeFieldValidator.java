@@ -16,19 +16,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.content.template;
+package com.smartitengineering.cms.spi.impl.content.template;
 
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
+import com.smartitengineering.cms.spi.content.template.FieldValidator;
+import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author imyousuf
  */
-public interface TypeFieldValidator {
+public abstract class AbstractTypeFieldValidator implements TypeFieldValidator {
 
-  boolean isValid(ValidatorTemplate template, Field field);
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-  FieldValidator getValidator(ValidatorTemplate template) throws InvalidTemplateException;
+  @Override
+  public boolean isValid(ValidatorTemplate template, Field field) {
+    FieldValidator validator;
+    try {
+      validator = getValidator(template);
+    }
+    catch (InvalidTemplateException ex) {
+      logger.warn("Could not get validator!", ex);
+      validator = null;
+    }
+    if (validator == null) {
+      if (logger.isInfoEnabled()) {
+        logger.info("Validator not available!");
+      }
+      return true;
+    }
+    return validator.isValidFieldValue(field);
+  }
 }
