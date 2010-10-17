@@ -29,12 +29,13 @@ import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.JavascriptRepresentationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.GroovyRepresentationGenerator;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.SimpleBeanFactory;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import javax.ws.rs.core.MediaType;
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.io.IOUtils;
 import org.jmock.Expectations;
@@ -48,11 +49,12 @@ import org.junit.Test;
  *
  * @author imyousuf
  */
-public class JavascriptRespresentationGeneratorTest {
+public class GroovyGeneratorTest {
 
   public static final String CONTENT = "content";
   private static final Mockery mockery = new JUnit3Mockery();
   public static final String REP_NAME = "test";
+  public static final String MIME_TYPE = MediaType.APPLICATION_JSON;
 
   @BeforeClass
   public static void setupAPIAndSPI() throws ClassNotFoundException {
@@ -72,13 +74,12 @@ public class JavascriptRespresentationGeneratorTest {
   }
 
   @Test
-  public void testJavascriptRepGeneration() throws IOException {
-    TypeRepresentationGenerator generator = new JavascriptRepresentationGenerator();
+  public void testGroovyRepGeneration() throws IOException {
+    TypeRepresentationGenerator generator = new GroovyRepresentationGenerator();
     final RepresentationTemplate template = mockery.mock(RepresentationTemplate.class);
     final Content content = mockery.mock(Content.class);
     final Field field = mockery.mock(Field.class);
     final FieldValue value = mockery.mock(FieldValue.class);
-    final Map<String, Field> fieldMap = mockery.mock(Map.class);
     final ContentType type = mockery.mock(ContentType.class);
     final Map<String, RepresentationDef> reps = mockery.mock(Map.class, "repMap");
     final RepresentationDef def = mockery.mock(RepresentationDef.class);
@@ -87,17 +88,16 @@ public class JavascriptRespresentationGeneratorTest {
       {
         exactly(1).of(template).getTemplate();
         will(returnValue(
-            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("scripts/js/test-script.js"))));
+            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
+            "scripts/groovy/GroovyTestRepresentationGenerator.groovy"))));
         exactly(1).of(template).getName();
         will(returnValue(REP_NAME));
         exactly(1).of(value).getValue();
         will(returnValue(CONTENT));
         exactly(1).of(field).getValue();
         will(returnValue(value));
-        exactly(1).of(fieldMap).get(with(Expectations.<String>anything()));
+        exactly(1).of(content).getField(this.<String>with(Expectations.<String>anything()));
         will(returnValue(field));
-        exactly(1).of(content).getFields();
-        will(returnValue(fieldMap));
         exactly(1).of(content).getContentDefinition();
         will(returnValue(type));
         exactly(1).of(type).getRepresentationDefs();
@@ -105,13 +105,13 @@ public class JavascriptRespresentationGeneratorTest {
         exactly(1).of(reps).get(with(REP_NAME));
         will(returnValue(def));
         exactly(1).of(def).getMIMEType();
-        will(returnValue(GroovyRespresentationGeneratorTest.MIME_TYPE));
+        will(returnValue(GroovyGeneratorTest.MIME_TYPE));
       }
     });
     Representation representation = generator.getRepresentation(template, content);
     Assert.assertNotNull(representation);
     Assert.assertEquals(REP_NAME, representation.getName());
+    Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());
     Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getRepresentation()));
-    Assert.assertEquals(GroovyRespresentationGeneratorTest.MIME_TYPE, representation.getMimeType());
   }
 }

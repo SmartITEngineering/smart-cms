@@ -48,7 +48,7 @@ import org.junit.Test;
  *
  * @author imyousuf
  */
-public class PythonRespresentationGeneratorTest {
+public class PythonGeneratorTest {
 
   public static final String CONTENT = "content";
   private static final Mockery mockery = new JUnit3Mockery();
@@ -102,13 +102,13 @@ public class PythonRespresentationGeneratorTest {
         exactly(1).of(reps).get(with(REP_NAME));
         will(returnValue(def));
         exactly(1).of(def).getMIMEType();
-        will(returnValue(GroovyRespresentationGeneratorTest.MIME_TYPE));
+        will(returnValue(GroovyGeneratorTest.MIME_TYPE));
       }
     });
     Representation representation = generator.getRepresentation(template, content);
     Assert.assertNotNull(representation);
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getRepresentation()));
-    Assert.assertEquals(GroovyRespresentationGeneratorTest.MIME_TYPE, representation.getMimeType());
+    Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());
   }
 }
