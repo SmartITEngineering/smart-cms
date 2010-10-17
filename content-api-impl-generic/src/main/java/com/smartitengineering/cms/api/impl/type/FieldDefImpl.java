@@ -26,7 +26,9 @@ import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 
 /**
  *
@@ -99,8 +101,12 @@ public class FieldDefImpl implements MutableFieldDef {
   }
 
   @Override
-  public Collection<VariationDef> getVariations() {
-    return Collections.unmodifiableCollection(variationDefs);
+  public Map<String, VariationDef> getVariations() {
+    Map<String, VariationDef> defs = new LinkedHashMap<String, VariationDef>(variationDefs.size());
+    for (VariationDef def : variationDefs) {
+      defs.put(def.getName(), def);
+    }
+    return Collections.unmodifiableMap(defs);
   }
 
   @Override
@@ -142,8 +148,8 @@ public class FieldDefImpl implements MutableFieldDef {
 
   @Override
   public String toString() {
-    return "FieldDefImpl{" + "newFieldName=" + newFieldName + "; required=" + required + "; dataType=" + dataType
-        + "; variationDefs=" + variationDefs + "; validatorDef=" + validatorDef + "; searchDef=" + searchDef
-        + "; standaloneUpdateAble=" + standaloneUpdateAble + '}';
+    return "FieldDefImpl{" + "newFieldName=" + newFieldName + "; required=" + required + "; dataType=" + dataType +
+        "; variationDefs=" + variationDefs + "; validatorDef=" + validatorDef + "; searchDef=" + searchDef +
+        "; standaloneUpdateAble=" + standaloneUpdateAble + '}';
   }
 }

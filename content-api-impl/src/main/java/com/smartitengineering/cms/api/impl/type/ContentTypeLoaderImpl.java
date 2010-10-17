@@ -209,7 +209,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       fieldDefImpl.setName(fieldDef.getName());
       fieldDefImpl.setSearchDefinition(fieldDef.getSearchDefinition());
       fieldDefImpl.setValueDef(fieldDef.getValueDef());
-      fieldDefImpl.setVariations(fieldDef.getVariations());
+      fieldDefImpl.setVariations(fieldDef.getVariations().values());
       fieldDefImpl.setFieldStandaloneUpdateAble(true);
       fieldDefImpl.setRequired(true);
       return fieldDefImpl;

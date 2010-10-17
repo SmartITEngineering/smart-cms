@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.api.type;
 
-import java.util.Collection;
+import java.util.Map;
 
 /**
  * Represents the definition of the fields of the {@link ContentType}
@@ -45,7 +45,7 @@ public interface FieldDef {
    */
   public boolean isRequired();
 
-  public Collection<VariationDef> getVariations();
+  public Map<String, VariationDef> getVariations();
 
   public ValidatorDef getCustomValidator();
 

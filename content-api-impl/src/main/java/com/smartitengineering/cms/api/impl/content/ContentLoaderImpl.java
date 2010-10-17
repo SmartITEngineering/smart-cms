@@ -278,8 +278,8 @@ public class ContentLoaderImpl implements ContentLoader {
   }
 
   @Override
-  public Variation getVariation(Field field, String name) {
-    return SmartContentSPI.getInstance().getVariationProvider().getVariation(name, field.getFieldDef(), field);
+  public Variation getVariation(Content content, Field field, String name) {
+    return SmartContentSPI.getInstance().getVariationProvider().getVariation(name, content, field);
   }
 
   @Override

@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.spi.content;
 
+import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 
@@ -27,7 +28,7 @@ import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
  */
 public interface ValidatorProvider {
 
-  boolean isValidField(Field field);
+  boolean isValidField(Content content, Field field);
 
   boolean isValidTemplate(ValidatorTemplate template);
 }

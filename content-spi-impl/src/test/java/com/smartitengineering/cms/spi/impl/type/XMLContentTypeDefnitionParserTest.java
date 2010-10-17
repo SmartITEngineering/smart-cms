@@ -230,7 +230,7 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals("fieldA", fieldDef.getName());
     Assert.assertEquals(2, fieldDef.getVariations().size());
 
-    Collection<VariationDef> variationDefs = fieldDef.getVariations();
+    Collection<VariationDef> variationDefs = fieldDef.getVariations().values();
     Iterator<VariationDef> variationIterator = variationDefs.iterator();
     VariationDef variationDef = variationIterator.next();
 
