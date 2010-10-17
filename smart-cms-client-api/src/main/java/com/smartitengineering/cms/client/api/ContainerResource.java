@@ -18,7 +18,6 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.cms.ws.common.domains.Content;
 import com.smartitengineering.util.rest.client.WritableResource;
 import java.net.URI;
 import java.util.Collection;
@@ -32,7 +31,7 @@ public interface ContainerResource extends WritableResource<Feed> {
 
   public void createContainer(URI contentUri);
 
-  public void updateContainer(URI contentUri);
+  public void updateContainer(Collection<URI> contentUri);
 
   public Collection<ContentResource> getContainerContents();
 }

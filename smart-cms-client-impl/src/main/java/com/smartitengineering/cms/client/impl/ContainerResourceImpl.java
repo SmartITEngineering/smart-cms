@@ -67,7 +67,7 @@ public class ContainerResourceImpl extends AbstractClientResource<Feed, Resource
   }
 
   @Override
-  public void updateContainer(URI contentUri) {
+  public void updateContainer(Collection<URI> contentUri) {
     put(TextURIListProvider.TEXT_URI_LIST, contentUri, ClientResponse.Status.OK);
   }
 
