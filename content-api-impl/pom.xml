@@ -26,7 +26,7 @@
 		<modelVersion>4.0.0</modelVersion>
 		<groupId>com.smartitengineering.smart-cms</groupId>
 		<artifactId>content-api-impl</artifactId>
-		<name>content-api-impl</name>
+		<name>Content API Impl</name>
 		<description><![CDATA[
 The module is responsible for Implementing the API for the CMS.
 ]]>

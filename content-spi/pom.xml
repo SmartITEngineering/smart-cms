@@ -26,7 +26,7 @@
 		<modelVersion>4.0.0</modelVersion>
 		<groupId>com.smartitengineering.smart-cms</groupId>
 		<artifactId>content-spi</artifactId>
-		<name>content-spi</name>
+		<name>Content SPI</name>
 		<description><![CDATA[
 The module is responsible for providing an SPI for the API implementation of the
 CMS.

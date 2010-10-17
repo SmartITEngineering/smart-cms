@@ -26,7 +26,7 @@
 		<modelVersion>4.0.0</modelVersion>
 		<groupId>com.smartitengineering.smart-cms</groupId>
 		<artifactId>content-api</artifactId>
-		<name>content-api</name>
+		<name>Content API</name>
 		<description><![CDATA[
 The module is responsible for defining a API for the CMS. It will not contain
 any implementation except for content type definition parsing.
