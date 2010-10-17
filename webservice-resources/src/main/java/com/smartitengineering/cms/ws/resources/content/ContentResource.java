@@ -123,6 +123,11 @@ public class ContentResource extends AbstractResource {
     return resource;
   }
 
+  @Path("r/{repName}")
+  public RepresentationResource getRepresentationResource(@PathParam("repName") String repName) {
+    return new RepresentationResource(getInjectables(), repName, content);
+  }
+
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
