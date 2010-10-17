@@ -385,7 +385,7 @@ public class ContentResource extends AbstractResource {
     Map<String, String> variations = fieldImpl.getVariations();
     Collection<VariationDef> defs = field.getFieldDef().getVariations().values();
     for (VariationDef def : defs) {
-      variations.put(new StringBuilder(fieldUri).append("/t/").append(def.getName()).toString(), def.getMIMEType());
+      variations.put(new StringBuilder(fieldUri).append("/v/").append(def.getName()).toString(), def.getMIMEType());
     }
     fieldImpl.setValue(value);
   }
