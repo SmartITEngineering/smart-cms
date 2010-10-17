@@ -19,8 +19,8 @@
 package com.smartitengineering.cms.client.api;
 
 import com.smartitengineering.cms.ws.common.domains.Content;
-import com.smartitengineering.util.rest.client.PaginatedResource;
 import com.smartitengineering.util.rest.client.WritableResource;
+import java.net.URI;
 import java.util.Collection;
 import org.apache.abdera.model.Feed;
 
@@ -28,11 +28,11 @@ import org.apache.abdera.model.Feed;
  *
  * @author kaisar
  */
-public interface ContentsResource extends WritableResource<Feed>, PaginatedResource<ContentsResource> {
+public interface ContainerResource extends WritableResource<Feed> {
 
-  public Collection<ContainerResource> getContainer();
+  public void createContainer(URI contentUri);
 
-  public Collection<ContentResource> getContentResources();
+  public void updateContainer(URI contentUri);
 
-  public ContentResource createContentResource(Content content);
+  public Collection<ContentResource> getContainerContents();
 }

@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.client.impl;
 
+import com.smartitengineering.cms.client.api.ContainerResource;
 import com.smartitengineering.cms.client.api.ContentResource;
 import com.smartitengineering.cms.client.api.ContentsResource;
 import com.smartitengineering.cms.ws.common.domains.Content;
@@ -33,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
 import org.apache.abdera.model.Entry;
+import org.apache.abdera.model.Link;
 
 /**
  *
@@ -55,6 +57,19 @@ public class ContentsResourceImpl extends AbstractFeedClientResource<ContentsRes
   }
 
   @Override
+  public Collection<ContainerResource> getContainer() {
+    final List<ResourceLink> container = getRelatedResourceUris().get(Link.REL_SELF);
+    if (container == null || container.isEmpty()) {
+      return Collections.emptyList();
+    }
+    List<ContainerResource> resource = new ArrayList<ContainerResource>(container.size());
+    for (ResourceLink link : container) {
+      resource.add(new ContainerResourceImpl(this, link));
+    }
+    return Collections.unmodifiableCollection(resource);
+  }
+
+  @Override
   public Collection<ContentResource> getContentResources() {
     final List<Entry> entries = getLastReadStateOfEntity().getEntries();
     if (entries == null || entries.isEmpty()) {
@@ -62,8 +77,8 @@ public class ContentsResourceImpl extends AbstractFeedClientResource<ContentsRes
     }
     List<ContentResource> resources = new ArrayList<ContentResource>(entries.size());
     for (Entry entry : entries) {
-      resources.add(new ContentResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(entry.
-          getAlternateLink())));
+      resources.add(new ContentResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(entry.getLink(
+          Link.REL_ALTERNATE))));
     }
     return Collections.unmodifiableCollection(resources);
   }
