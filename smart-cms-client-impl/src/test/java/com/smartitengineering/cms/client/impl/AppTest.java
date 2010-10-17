@@ -30,6 +30,7 @@ import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.binder.guice.Initializer;
+import com.smartitengineering.cms.client.api.ContainerResource;
 import com.smartitengineering.cms.client.api.ContentResource;
 import com.smartitengineering.cms.client.api.ContentTypeResource;
 import com.smartitengineering.cms.client.api.ContentTypesResource;
@@ -1023,8 +1024,8 @@ public class AppTest {
   }
 
   @Test
-  public void testCreateAnotherContent() throws Exception {
-    LOGGER.info(":::::::::::::: CREATE CONTENT RESOURCE TEST ::::::::::::::");
+  public void testAddContainerContent() throws Exception {
+    LOGGER.info(":::::::::::::: CREATE CONTENT IN CONTAINER RESOURCE TEST ::::::::::::::");
     ObjectMapper mapper = new ObjectMapper();
     String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Update-Content.json"));
     InputStream stream = IOUtils.toInputStream(JSON);
@@ -1045,6 +1046,13 @@ public class AppTest {
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType(), field.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field.getValue().getValue());
+
+    feedResource.get();
+    ContainerResource containerResource = feedResource.getContents().getContainer().iterator().next();
+    containerResource.createContainer(contentResource.getUri());
+    Assert.assertEquals(1, containerResource.getContainerContents().size());
+    Assert.assertEquals(contentResource.getUri().toASCIIString(), containerResource.getContainerContents().iterator().
+        next().getUri().toASCIIString());
   }
 
   @Test
