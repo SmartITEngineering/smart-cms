@@ -67,5 +67,27 @@
         "familyName": "variants"
       }
     ]
+  },
+  {
+    "tableName": "representations",
+    "columnFamilyConfigurations": [
+      {
+        "familyName": "self"
+      },
+      {
+        "familyName": "blob"
+      }
+    ]
+  },
+  {
+    "tableName": "variations",
+    "columnFamilyConfigurations": [
+      {
+        "familyName": "self"
+      },
+      {
+        "familyName": "blob"
+      }
+    ]
   }
 ]

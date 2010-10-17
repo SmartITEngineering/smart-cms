@@ -1,0 +1,5 @@
+{
+  "schemaNamespace": "com.smartitengineering.cms.spi.impl.content",
+  "mainTableName": "variations",
+  "transactionalDomain": "false"
+}

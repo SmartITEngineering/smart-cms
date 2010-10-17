@@ -18,31 +18,37 @@
  */
 package com.smartitengineering.cms.spi.impl.content;
 
+import com.smartitengineering.cms.spi.impl.content.template.persistent.PersistentRepresentation;
 import com.google.inject.Inject;
-import com.smartitengineering.cms.api.common.TemplateType;
+import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
-import com.smartitengineering.cms.api.content.MutableRepresentation;
 import com.smartitengineering.cms.api.content.Representation;
-import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.spi.content.RepresentationProvider;
-import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.persistent.TemplateId;
+import com.smartitengineering.dao.common.CommonReadDao;
+import com.smartitengineering.dao.common.CommonWriteDao;
 import java.util.Date;
-import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
 /**
  *
  * @author imyousuf
  */
-public class RepresentationProviderImpl extends AbstractRepresentationProvider implements RepresentationProvider {
+public class PersistentRepresentationProviderImpl extends AbstractRepresentationProvider implements
+    RepresentationProvider {
 
   @Inject
-  private Map<TemplateType, TypeRepresentationGenerator> generators;
+  @Named("mainProvider")
+  private RepresentationProvider mainProvider;
+  @Inject
+  private CommonReadDao<PersistentRepresentation, TemplateId> readDao;
+  @Inject
+  private CommonWriteDao<PersistentRepresentation> writeDao;
 
   @Override
   public Representation getRepresentation(String repName, ContentTypeId contentTypeId, ContentId contentId) {
@@ -63,45 +69,42 @@ public class RepresentationProviderImpl extends AbstractRepresentationProvider i
       logger.info("Representation name or content type or content is null or blank!");
       return null;
     }
-    RepresentationTemplate representationTemplate = getTemplate(repName, contentType, content);
-    if (representationTemplate == null) {
-      logger.info("Representation template is null!");
-      return null;
+    final TemplateId id = new TemplateId();
+    id.setId(new StringBuilder(content.getContentId().toString()).append(':').append(repName).toString());
+    PersistentRepresentation cachedRep = readDao.getById(id);
+    boolean update = false;
+    if (cachedRep != null) {
+      update = true;
+      Date cachedDate = cachedRep.getRepresentation().getLastModifiedDate();
+      RepresentationTemplate template = getTemplate(repName, contentType, content);
+      Date lastModified = content.getLastModifiedDate();
+      if (template != null) {
+        final Date lastModifiedDate = template.getLastModifiedDate();
+        if (lastModified.before(lastModifiedDate)) {
+          lastModified = lastModifiedDate;
+        }
+      }
+      if (cachedDate.before(lastModified)) {
+        cachedRep = null;
+      }
     }
-    TypeRepresentationGenerator generator = generators.get(representationTemplate.getTemplateType());
-    if (generator == null) {
-      logger.info("Representation generator is null!");
-      return null;
+    if (cachedRep == null) {
+      Representation rep = mainProvider.getRepresentation(repName, contentType, content);
+      cachedRep = new PersistentRepresentation();
+      cachedRep.setId(id);
+      cachedRep.setRepresentation(rep);
+      if (update) {
+        writeDao.update(cachedRep);
+      }
+      else {
+        writeDao.save(cachedRep);
+      }
     }
-    final MutableRepresentation representation = generator.getRepresentation(representationTemplate, content);
-    final Date cLastModifiedDate = content.getLastModifiedDate();
-    final Date tLastModifiedDate = representationTemplate.getLastModifiedDate();
-    if (cLastModifiedDate.before(tLastModifiedDate)) {
-      representation.setLastModifiedDate(tLastModifiedDate);
-    }
-    else {
-      representation.setLastModifiedDate(cLastModifiedDate);
-    }
-    return representation;
+    return cachedRep.getRepresentation();
   }
 
   @Override
-  public boolean isValidTemplate(RepresentationTemplate representationTemplate) {
-    if (representationTemplate == null) {
-      logger.info("Representation template is null!");
-      return false;
-    }
-    TypeRepresentationGenerator generator = generators.get(representationTemplate.getTemplateType());
-    if (generator == null) {
-      logger.info("Representation generator is null!");
-      return false;
-    }
-    try {
-      return generator.getGenerator(representationTemplate) != null;
-    }
-    catch (InvalidTemplateException ex) {
-      logger.debug(ex.getMessage(), ex);
-      return false;
-    }
+  public boolean isValidTemplate(RepresentationTemplate template) {
+    return mainProvider.isValidTemplate(template);
   }
 }

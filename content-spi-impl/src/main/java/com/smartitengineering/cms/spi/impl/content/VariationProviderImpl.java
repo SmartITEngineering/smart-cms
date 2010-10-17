@@ -25,25 +25,19 @@ import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
-import com.smartitengineering.cms.api.factory.SmartContentAPI;
-import com.smartitengineering.cms.api.type.ResourceUri;
-import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.spi.content.VariationProvider;
 import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
 import java.util.Date;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author imyousuf
  */
-public class VariationProviderImpl implements VariationProvider {
+public class VariationProviderImpl extends AbstractVariationProvider implements VariationProvider {
 
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
   @Inject
   private Map<TemplateType, TypeVariationGenerator> generators;
 
@@ -53,18 +47,7 @@ public class VariationProviderImpl implements VariationProvider {
       logger.info("Variation name or content or field is null or blank!");
       return null;
     }
-    VariationDef variationDef = field.getFieldDef().getVariations().get(varName);
-    if (variationDef == null) {
-      logger.info("Representation def is null!");
-      return null;
-    }
-    if (variationDef.getResourceUri().getType().equals(ResourceUri.Type.EXTERNAL)) {
-      logger.warn("External resource URI is not yet handled!");
-      return null;
-    }
-    VariationTemplate variationTemplate =
-                      SmartContentAPI.getInstance().getWorkspaceApi().getVariationTemplate(content.getContentId().
-        getWorkspaceId(), variationDef.getResourceUri().getValue());
+    VariationTemplate variationTemplate = getTemplate(varName, content, field);
     if (variationTemplate == null) {
       logger.info("Representation template is null!");
       return null;
