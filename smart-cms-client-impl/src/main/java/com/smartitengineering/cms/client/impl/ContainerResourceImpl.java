@@ -6,8 +6,6 @@ package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.ContainerResource;
 import com.smartitengineering.cms.client.api.ContentResource;
-import com.smartitengineering.cms.ws.common.domains.Content;
-import com.smartitengineering.cms.ws.common.domains.ContentImpl;
 import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
 import com.smartitengineering.util.rest.atom.AtomClientUtil;
 import com.smartitengineering.util.rest.client.AbstractClientResource;

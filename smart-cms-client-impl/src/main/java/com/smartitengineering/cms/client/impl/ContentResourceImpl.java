@@ -20,6 +20,7 @@ package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.ContentResource;
 import com.smartitengineering.cms.client.api.FieldResource;
+import com.smartitengineering.cms.client.api.RepresentationResource;
 import com.smartitengineering.cms.ws.common.domains.Content;
 import com.smartitengineering.cms.ws.common.domains.Field;
 import com.smartitengineering.util.rest.client.AbstractClientResource;
@@ -88,5 +89,10 @@ public class ContentResourceImpl extends AbstractClientResource<Content, Resourc
       }
     }
     return Collections.unmodifiableCollection(resources);
+  }
+
+  @Override
+  public Collection<RepresentationResource> getRepresentation() {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 }
