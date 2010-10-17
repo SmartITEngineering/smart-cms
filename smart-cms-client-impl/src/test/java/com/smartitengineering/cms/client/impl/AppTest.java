@@ -1056,6 +1056,43 @@ public class AppTest {
   }
 
   @Test
+  public void testUpdateCointainerContent() throws Exception {
+    LOGGER.info(":::::::::::::: UPDATE CONTAINER CONTENT RESOURCE TEST ::::::::::::::");
+
+    Collection<URI> contentUri = new ArrayList<URI>();
+    ObjectMapper mapper = new ObjectMapper();
+    String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
+    InputStream stream = IOUtils.toInputStream(JSON);
+    Content content = mapper.readValue(stream, Content.class);
+    Assert.assertNotNull(content);
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    ContentResource contentResource = feedResource.getContents().createContentResource(content);
+    feedResource.get();
+    ContainerResource containerResource = feedResource.getContents().getContainer().iterator().next();
+    contentUri.add(contentResource.getUri());
+    containerResource.updateContainer(contentUri);
+    Assert.assertEquals(1, containerResource.getContainerContents().size());
+    Assert.assertEquals(contentResource.getUri().toASCIIString(), containerResource.getContainerContents().iterator().
+        next().getUri().toASCIIString());
+  }
+
+  @Test
+  public void testDeleteContainerContent() throws Exception {
+    LOGGER.info(":::::::::::::: UPDATE CONTAINER CONTENT RESOURCE TEST ::::::::::::::");
+    RootResource rootResource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = rootResource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    feedResource.get();
+    ContainerResource containerResource = feedResource.getContents().getContainer().iterator().next();
+    containerResource.delete(ClientResponse.Status.ACCEPTED);
+    Assert.assertEquals(0, containerResource.getContainerContents().size());
+  }
+
+  @Test
   public void testUpdateContent() throws Exception {
     LOGGER.info(":::::::::::::: UPDATE CONTENT RESOURCE TEST ::::::::::::::");
     ObjectMapper mapper = new ObjectMapper();
