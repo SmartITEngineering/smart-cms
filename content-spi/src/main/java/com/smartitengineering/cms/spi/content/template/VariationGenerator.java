@@ -26,5 +26,5 @@ import com.smartitengineering.cms.api.content.Field;
  */
 public interface VariationGenerator {
 
-  String getRepresentationForContent(Field field);
+  String getVariationForField(Field field);
 }
