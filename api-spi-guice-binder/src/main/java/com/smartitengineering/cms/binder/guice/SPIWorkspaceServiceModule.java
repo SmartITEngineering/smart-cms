@@ -23,6 +23,7 @@ import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.impl.workspace.PersistentWorkspace;
@@ -35,6 +36,7 @@ import com.smartitengineering.cms.spi.workspace.WorkspaceService;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.dao.impl.hbase.CommonDao;
+import com.smartitengineering.dao.impl.hbase.spi.DomainIdInstanceProvider;
 import com.smartitengineering.dao.impl.hbase.spi.FilterConfigs;
 import com.smartitengineering.dao.impl.hbase.spi.ObjectRowConverter;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
@@ -54,6 +56,7 @@ public class SPIWorkspaceServiceModule extends PrivateModule {
   protected void configure() {
     bind(Boolean.class).annotatedWith(Names.named("mergeEnabled")).toInstance(Boolean.FALSE);
     bind(Integer.class).annotatedWith(Names.named("maxRows")).toInstance(new Integer(200));
+    bind(DomainIdInstanceProvider.class).to(DomainIdInstanceProviderImpl.class).in(Scopes.SINGLETON);
     /*
      * Start injection specific to common dao of workspace
      */

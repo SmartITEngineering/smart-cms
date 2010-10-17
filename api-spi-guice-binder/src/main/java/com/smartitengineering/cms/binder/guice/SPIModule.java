@@ -26,42 +26,20 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.common.MediaType;
-import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
-import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.spi.content.PersistentContentReader;
-import com.smartitengineering.cms.spi.content.RepresentationProvider;
-import com.smartitengineering.cms.spi.content.ValidatorProvider;
-import com.smartitengineering.cms.spi.content.VariationProvider;
-import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
-import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
-import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
 import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
 import com.smartitengineering.cms.spi.impl.content.ContentAdapterHelper;
 import com.smartitengineering.cms.spi.impl.content.ContentObjectConverter;
 import com.smartitengineering.cms.spi.impl.content.ContentPersistentService;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
-import com.smartitengineering.cms.spi.impl.content.RepresentationProviderImpl;
-import com.smartitengineering.cms.spi.impl.content.ValidatorProviderImpl;
-import com.smartitengineering.cms.spi.impl.content.VariationProviderImpl;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentFilterConfigsProvider;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentSchemaBaseConfigProvider;
-import com.smartitengineering.cms.spi.impl.content.template.GroovyRepresentationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.GroovyValidatorGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.GroovyVariationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.JavascriptRepresentationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.JavascriptValidatorGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.JavascriptVariationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.RubyRepresentationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.RubyValidatorGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.RubyVariationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.VelocityRepresentationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.VelocityVariationGenerator;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
 import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
@@ -138,6 +116,7 @@ public class SPIModule extends PrivateModule {
     final Named named = Names.named("schemaLocationForContentTypeXml");
     bind(String.class).annotatedWith(named).toInstance(schemaLocationForContentType);
     binder().expose(String.class).annotatedWith(named);
+    bind(DomainIdInstanceProvider.class).to(DomainIdInstanceProviderImpl.class).in(Scopes.SINGLETON);
     /*
      * Start injection specific to common dao of content type
      */
@@ -228,48 +207,8 @@ public class SPIModule extends PrivateModule {
         com.smartitengineering.cms.spi.impl.type.validator.ContentTypeDefinitionParsers.class);
     bind(LockHandler.class).to(DefaultLockHandler.class).in(Scopes.SINGLETON);
     bind(PersistableDomainFactory.class).to(PersistableDomainFactoryImpl.class).in(Scopes.SINGLETON);
-    bind(DomainIdInstanceProvider.class).to(DomainIdInstanceProviderImpl.class).in(Scopes.SINGLETON);
     binder().expose(ContentTypeDefinitionParsers.class);
     binder().expose(LockHandler.class);
     binder().expose(PersistableDomainFactory.class);
-    binder().expose(DomainIdInstanceProvider.class);
-    /*
-     * DI related to template engine
-     */
-    /*
-     * Representation
-     */
-    bind(RepresentationProvider.class).to(RepresentationProviderImpl.class);
-    binder().expose(RepresentationProvider.class);
-    MapBinder<TemplateType, TypeRepresentationGenerator> typeGenBinder =
-                                                         MapBinder.newMapBinder(binder(), TemplateType.class,
-                                                                                TypeRepresentationGenerator.class);
-    typeGenBinder.addBinding(TemplateType.RUBY).to(RubyRepresentationGenerator.class);
-    typeGenBinder.addBinding(TemplateType.GROOVY).to(GroovyRepresentationGenerator.class);
-    typeGenBinder.addBinding(TemplateType.JAVASCRIPT).to(JavascriptRepresentationGenerator.class);
-    typeGenBinder.addBinding(TemplateType.VELOCITY).to(VelocityRepresentationGenerator.class);
-    /*
-     * Variation
-     */
-    bind(VariationProvider.class).to(VariationProviderImpl.class);
-    binder().expose(VariationProvider.class);
-    MapBinder<TemplateType, TypeVariationGenerator> typeVarGenBinder =
-                                                         MapBinder.newMapBinder(binder(), TemplateType.class,
-                                                                                TypeVariationGenerator.class);
-    typeVarGenBinder.addBinding(TemplateType.RUBY).to(RubyVariationGenerator.class);
-    typeVarGenBinder.addBinding(TemplateType.GROOVY).to(GroovyVariationGenerator.class);
-    typeVarGenBinder.addBinding(TemplateType.JAVASCRIPT).to(JavascriptVariationGenerator.class);
-    typeVarGenBinder.addBinding(TemplateType.VELOCITY).to(VelocityVariationGenerator.class);
-    /*
-     * Field validator
-     */
-    bind(ValidatorProvider.class).to(ValidatorProviderImpl.class);
-    binder().expose(ValidatorProvider.class);
-    MapBinder<ValidatorType, TypeFieldValidator> typeFieldValBinder =
-                                                         MapBinder.newMapBinder(binder(), ValidatorType.class,
-                                                                                TypeFieldValidator.class);
-    typeFieldValBinder.addBinding(ValidatorType.RUBY).to(RubyValidatorGenerator.class);
-    typeFieldValBinder.addBinding(ValidatorType.GROOVY).to(GroovyValidatorGenerator.class);
-    typeFieldValBinder.addBinding(ValidatorType.JAVASCRIPT).to(JavascriptValidatorGenerator.class);
   }
 }

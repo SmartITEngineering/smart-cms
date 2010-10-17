@@ -1,4 +1,4 @@
 contextName=com.smartitnengineering.smart-cms.spi
-modules=com.smartitengineering.cms.binder.guice.SPIModule,com.smartitengineering.cms.binder.guice.SPIWorkspaceServiceModule
+modules=com.smartitengineering.cms.binder.guice.SPIModule,com.smartitengineering.cms.binder.guice.SPIWorkspaceServiceModule,com.smartitengineering.cms.binder.guice.SPITemplateEngineModule
 ignoreMissingDependency=true
 com.smartitengineering.cms.schemaLocationForContentType=http://github.com/smart-it/smart-cms/raw/master/content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd
