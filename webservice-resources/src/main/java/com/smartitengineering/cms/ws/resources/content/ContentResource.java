@@ -269,8 +269,11 @@ public class ContentResource extends AbstractResource {
         logger.debug("FIELDS: " + fields);
       }
       String contentUri = ContentResource.getContentUri(fromBean.getContentId()).toASCIIString();
-      for (Field field : fields.values()) {
+      for (FieldDef fieldDef : type.getFieldDefs().values()) {
+        final String fieldName = fieldDef.getName();
+        Field field = fields.get(fieldName);
         FieldImpl fieldImpl = new FieldImpl();
+        fieldImpl.setName(fieldName);
         getDomainField(field, contentUri, fieldImpl);
         if (logger.isDebugEnabled()) {
           logger.debug("Converting field " + field.getName() + " with value " + field.getValue().toString());
@@ -374,20 +377,23 @@ public class ContentResource extends AbstractResource {
   }
 
   protected static void getDomainField(Field field, String contentUri, FieldImpl fieldImpl) {
-    fieldImpl.setName(field.getName());
+
     final String fieldUri = new StringBuilder(contentUri).append("/f/").append(field.getName()).toString();
     fieldImpl.setFieldUri(fieldUri);
     fieldImpl.setFieldRawContentUri(new StringBuilder(fieldUri).append("/raw").toString());
-    final FieldValueImpl value;
-    final FieldValue contentFieldValue = field.getValue();
-    final DataType valueDef = field.getFieldDef().getValueDef();
-    value = getFieldvalue(valueDef, contentFieldValue);
-    Map<String, String> variations = fieldImpl.getVariations();
-    Collection<VariationDef> defs = field.getFieldDef().getVariations().values();
-    for (VariationDef def : defs) {
-      variations.put(new StringBuilder(fieldUri).append("/v/").append(def.getName()).toString(), def.getMIMEType());
+    if (field != null) {
+      fieldImpl.setName(field.getName());
+      final FieldValueImpl value;
+      final FieldValue contentFieldValue = field.getValue();
+      final DataType valueDef = field.getFieldDef().getValueDef();
+      value = getFieldvalue(valueDef, contentFieldValue);
+      Map<String, String> variations = fieldImpl.getVariations();
+      Collection<VariationDef> defs = field.getFieldDef().getVariations().values();
+      for (VariationDef def : defs) {
+        variations.put(new StringBuilder(fieldUri).append("/v/").append(def.getName()).toString(), def.getMIMEType());
+      }
+      fieldImpl.setValue(value);
     }
-    fieldImpl.setValue(value);
   }
 
   private static FieldValueImpl getFieldvalue(final DataType valueDef, final FieldValue contentFieldValue) {
