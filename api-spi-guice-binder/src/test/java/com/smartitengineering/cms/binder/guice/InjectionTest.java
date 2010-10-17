@@ -55,6 +55,9 @@ public class InjectionTest extends TestCase {
     assertNotNull(SmartContentSPI.getInstance().getPersistentServiceRegistrar().getPersistentService(
         WriteableContent.class));
     assertNotNull(SmartContentSPI.getInstance().getWorkspaceService());
+    assertNotNull(SmartContentSPI.getInstance().getRepresentationProvider());
+    assertNotNull(SmartContentSPI.getInstance().getVariationProvider());
+    assertNotNull(SmartContentSPI.getInstance().getValidatorProvider());
     final PersistentService<WritableContentType> persistentService =
                                                  SmartContentSPI.getInstance().getPersistentService(
         WritableContentType.class);

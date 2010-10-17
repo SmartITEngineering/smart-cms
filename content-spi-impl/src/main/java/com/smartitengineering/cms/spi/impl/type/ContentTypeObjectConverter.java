@@ -212,7 +212,7 @@ public class ContentTypeObjectConverter extends AbstactObjectRowConverter<Persis
         /*
          * Variations
          */
-        Collection<VariationDef> varDefs = value.getVariations();
+        Collection<VariationDef> varDefs = value.getVariations().values();
         if (varDefs != null && !varDefs.isEmpty()) {
           int index = 0;
           for (VariationDef def : varDefs) {

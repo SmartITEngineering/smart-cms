@@ -721,8 +721,8 @@ public class AppTest {
         }
 
         Assert.assertEquals(servedFieldDef.isRequired(), getFieldDef.isRequired());
-        Collection<VariationDef> servedVariationDefs = servedFieldDef.getVariations();
-        Collection<VariationDef> getVariationDefs = getFieldDef.getVariations();
+        Collection<VariationDef> servedVariationDefs = servedFieldDef.getVariations().values();
+        Collection<VariationDef> getVariationDefs = getFieldDef.getVariations().values();
 
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Size of Variation Def : " + getFieldDef.getVariations().size());
@@ -960,8 +960,8 @@ public class AppTest {
         }
 
         Assert.assertEquals(servedFieldDef.isRequired(), getFieldDef.isRequired());
-        Collection<VariationDef> servedVariationDefs = servedFieldDef.getVariations();
-        Collection<VariationDef> getVariationDefs = getFieldDef.getVariations();
+        Collection<VariationDef> servedVariationDefs = servedFieldDef.getVariations().values();
+        Collection<VariationDef> getVariationDefs = getFieldDef.getVariations().values();
 
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Size of Variation Def : " + getFieldDef.getVariations().size());

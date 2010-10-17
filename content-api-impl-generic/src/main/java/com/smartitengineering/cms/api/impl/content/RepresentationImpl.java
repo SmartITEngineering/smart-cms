@@ -18,21 +18,26 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
-import com.smartitengineering.cms.api.content.Representation;
+import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.content.MutableRepresentation;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
  * @author kaisar
  */
-public class RepresentationImpl implements Representation {
+public class RepresentationImpl implements MutableRepresentation {
 
   private String name;
   private byte[] representation;
+  private String mimeType;
 
+  @Override
   public void setName(String name) {
     this.name = name;
   }
 
+  @Override
   public void setRepresentation(byte[] representation) {
     this.representation = representation;
   }
@@ -45,5 +50,15 @@ public class RepresentationImpl implements Representation {
   @Override
   public byte[] getRepresentation() {
     return this.representation;
+  }
+
+  @Override
+  public void setMimeType(String mimeType) {
+    this.mimeType = mimeType;
+  }
+
+  @Override
+  public String getMimeType() {
+    return StringUtils.isNotBlank(mimeType) ? mimeType : MediaType.APPLICATION_OCTET_STREAM.toString();
   }
 }

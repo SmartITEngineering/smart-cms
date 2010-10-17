@@ -22,6 +22,7 @@ import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
+import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
@@ -119,4 +120,6 @@ public interface WorkspaceAPI {
   public void removeRootContent(WorkspaceId from, ContentId contentId);
 
   public void removeAllRootContents(WorkspaceId workspaceId);
+
+  public ValidatorTemplate getValidatorTemplate(WorkspaceId workspaceId, String name);
 }

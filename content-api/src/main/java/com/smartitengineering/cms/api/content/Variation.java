@@ -26,5 +26,7 @@ public interface Variation {
 
   public String getName();
 
+  public String getMimeType();
+
   public byte[] getVariation();
 }

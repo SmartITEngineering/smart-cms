@@ -58,6 +58,7 @@ public final class MediaType {
   public static final MediaType APPLICATION_XML = new MediaType("application", "xml");
   public static final MediaType APPLICATION_JSON = new MediaType("application", "json");
   public static final MediaType APPLICATION_ATOM_XML = new MediaType("application", "atom+xml");
+  public static final MediaType APPLICATION_OCTET_STREAM = new MediaType("application", "octet-stream");
   public static final MediaType APPLICATION_ATOM_XML_ENTRY = new MediaType("application", "atom+xml", Collections.
       singletonMap("type", "entry"));
   private static final Map<String, MediaType> parseResult = new WeakHashMap<String, MediaType>();

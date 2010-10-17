@@ -24,6 +24,7 @@ import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.spi.content.ContentSearcher;
 import com.smartitengineering.cms.spi.content.PersistentContentReader;
 import com.smartitengineering.cms.spi.content.RepresentationProvider;
+import com.smartitengineering.cms.spi.content.ValidatorProvider;
 import com.smartitengineering.cms.spi.content.VariationProvider;
 import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
@@ -65,6 +66,8 @@ public final class SmartContentSPI {
   @InjectableField
   protected VariationProvider variationProvider;
   @InjectableField
+  protected ValidatorProvider validatorProvider;
+  @InjectableField
   private SearchFieldNameGenerator searchFieldNameGenerator;
   /**
    * The registrar for aggregating different implementations of
@@ -87,6 +90,10 @@ public final class SmartContentSPI {
   private String schemaLocationForContentTypeXml;
   @InjectableField
   private ContentSearcher contentSearcher;
+
+  public ValidatorProvider getValidatorProvider() {
+    return validatorProvider;
+  }
 
   public ContentSearcher getContentSearcher() {
     return contentSearcher;

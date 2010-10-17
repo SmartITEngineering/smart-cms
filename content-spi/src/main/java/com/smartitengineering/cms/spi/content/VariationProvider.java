@@ -18,9 +18,10 @@
  */
 package com.smartitengineering.cms.spi.content;
 
+import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.Variation;
-import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.workspace.VariationTemplate;
 
 /**
  *
@@ -28,5 +29,7 @@ import com.smartitengineering.cms.api.type.FieldDef;
  */
 public interface VariationProvider {
 
-  Variation getVariation(String varName, FieldDef fieldDef, Field field);
+  Variation getVariation(String varName, Content content, Field field);
+
+  boolean isValidTemplate(VariationTemplate template);
 }
