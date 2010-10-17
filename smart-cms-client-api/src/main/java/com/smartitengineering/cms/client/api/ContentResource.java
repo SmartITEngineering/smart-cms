@@ -31,4 +31,6 @@ public interface ContentResource extends WritableResource<Content> {
   public Collection<FieldResource> getFields();
 
   public void update(Content content);
+
+  public Collection<RepresentationResource> getRepresentation();
 }

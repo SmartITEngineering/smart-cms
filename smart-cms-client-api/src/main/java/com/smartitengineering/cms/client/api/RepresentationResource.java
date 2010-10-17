@@ -18,20 +18,11 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.util.rest.client.WritableResource;
-import java.net.URI;
-import java.util.Collection;
-import org.apache.abdera.model.Feed;
-
 /**
  *
  * @author kaisar
  */
-public interface ContainerResource extends WritableResource<Feed> {
+public interface RepresentationResource {
 
-  public void createContainer(URI contentUri);
-
-  public void updateContainer(Collection<URI> contentUri);
-
-  public Collection<ContentResource> getContainerContents();
+  public String getRepresentation(String representationName);
 }

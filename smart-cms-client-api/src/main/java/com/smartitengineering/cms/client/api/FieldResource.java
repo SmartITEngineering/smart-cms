@@ -20,6 +20,7 @@ package com.smartitengineering.cms.client.api;
 
 import com.smartitengineering.cms.ws.common.domains.Field;
 import com.smartitengineering.util.rest.client.WritableResource;
+import java.util.Collection;
 
 /**
  *
@@ -28,4 +29,6 @@ import com.smartitengineering.util.rest.client.WritableResource;
 public interface FieldResource extends WritableResource<Field> {
 
   public void update(Field field);
+
+  public Collection<VariationResource> getVariations();
 }

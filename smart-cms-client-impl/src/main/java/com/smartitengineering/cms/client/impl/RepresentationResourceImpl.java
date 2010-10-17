@@ -18,29 +18,20 @@
  */
 package com.smartitengineering.cms.client.impl;
 
-import com.smartitengineering.cms.client.api.FieldResource;
-import com.smartitengineering.cms.client.api.VariationResource;
-import com.smartitengineering.cms.ws.common.domains.Field;
+import com.smartitengineering.cms.client.api.RepresentationResource;
 import com.smartitengineering.util.rest.client.AbstractClientResource;
 import com.smartitengineering.util.rest.client.Resource;
 import com.smartitengineering.util.rest.client.ResourceLink;
-import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
-import java.net.URI;
-import java.util.Collection;
-import javax.ws.rs.core.MediaType;
 
 /**
  *
  * @author kaisar
  */
-public class FieldResourceImpl extends AbstractClientResource<Field, Resource> implements FieldResource {
+public class RepresentationResourceImpl extends AbstractClientResource<String, Resource> implements
+    RepresentationResource {
 
-  public FieldResourceImpl(Resource referrer, URI uri) {
-    super(referrer, uri, MediaType.APPLICATION_JSON, Field.class);
-  }
-
-  public FieldResourceImpl(Resource referrer, ResourceLink link) {
+  public RepresentationResourceImpl(Resource referrer, ResourceLink link) {
     super(referrer, link);
   }
 
@@ -64,12 +55,7 @@ public class FieldResourceImpl extends AbstractClientResource<Field, Resource> i
   }
 
   @Override
-  public void update(Field field) {
-    put(MediaType.APPLICATION_JSON, field, ClientResponse.Status.ACCEPTED);
-  }
-
-  @Override
-  public Collection<VariationResource> getVariations() {
+  public String getRepresentation(String representationName) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 }

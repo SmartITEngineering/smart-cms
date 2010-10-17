@@ -6,8 +6,6 @@ package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.ContainerResource;
 import com.smartitengineering.cms.client.api.ContentResource;
-import com.smartitengineering.cms.ws.common.domains.Content;
-import com.smartitengineering.cms.ws.common.domains.ContentImpl;
 import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
 import com.smartitengineering.util.rest.atom.AtomClientUtil;
 import com.smartitengineering.util.rest.client.AbstractClientResource;
@@ -67,7 +65,7 @@ public class ContainerResourceImpl extends AbstractClientResource<Feed, Resource
   }
 
   @Override
-  public void updateContainer(URI contentUri) {
+  public void updateContainer(Collection<URI> contentUri) {
     put(TextURIListProvider.TEXT_URI_LIST, contentUri, ClientResponse.Status.OK);
   }
 
