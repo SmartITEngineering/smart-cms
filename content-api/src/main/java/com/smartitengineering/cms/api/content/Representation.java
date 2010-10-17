@@ -26,5 +26,7 @@ public interface Representation {
 
   public String getName();
 
+  public String getMimeType();
+
   public byte[] getRepresentation();
 }

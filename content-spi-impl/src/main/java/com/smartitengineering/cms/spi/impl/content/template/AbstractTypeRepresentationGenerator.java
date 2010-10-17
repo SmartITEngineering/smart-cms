@@ -57,7 +57,9 @@ public abstract class AbstractTypeRepresentationGenerator implements TypeReprese
     final String representationForContent = generator.getRepresentationForContent(content);
     MutableRepresentation representation =
                           SmartContentAPI.getInstance().getContentLoader().createMutableRepresentation();
-    representation.setName(template.getName());
+    final String name = template.getName();
+    representation.setName(name);
+    representation.setMimeType(content.getContentDefinition().getRepresentationDefs().get(name).getMIMEType());
     representation.setRepresentation(StringUtils.getBytesUtf8(representationForContent));
     return representation;
   }

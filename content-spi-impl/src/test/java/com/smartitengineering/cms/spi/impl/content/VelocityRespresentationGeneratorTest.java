@@ -25,9 +25,10 @@ import com.smartitengineering.cms.api.content.Representation;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.impl.content.RepresentationImpl;
+import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.GroovyRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.VelocityRepresentationGenerator;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.SimpleBeanFactory;
@@ -78,6 +79,9 @@ public class VelocityRespresentationGeneratorTest {
     final Field field = mockery.mock(Field.class);
     final FieldValue value = mockery.mock(FieldValue.class);
     final Map<String, Field> fieldMap = mockery.mock(Map.class);
+    final ContentType type = mockery.mock(ContentType.class);
+    final Map<String, RepresentationDef> reps = mockery.mock(Map.class, "repMap");
+    final RepresentationDef def = mockery.mock(RepresentationDef.class);
     mockery.checking(new Expectations() {
 
       {
@@ -94,11 +98,20 @@ public class VelocityRespresentationGeneratorTest {
         will(returnValue(field));
         exactly(1).of(content).getFields();
         will(returnValue(fieldMap));
+        exactly(1).of(content).getContentDefinition();
+        will(returnValue(type));
+        exactly(1).of(type).getRepresentationDefs();
+        will(returnValue(reps));
+        exactly(1).of(reps).get(with(REP_NAME));
+        will(returnValue(def));
+        exactly(1).of(def).getMIMEType();
+        will(returnValue(GroovyRespresentationGeneratorTest.MIME_TYPE));
       }
     });
     Representation representation = generator.getRepresentation(template, content);
     Assert.assertNotNull(representation);
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getRepresentation()));
+    Assert.assertEquals(GroovyRespresentationGeneratorTest.MIME_TYPE, representation.getMimeType());
   }
 }

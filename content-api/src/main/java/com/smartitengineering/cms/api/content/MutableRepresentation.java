@@ -26,5 +26,7 @@ public interface MutableRepresentation extends Representation {
 
   public void setName(String name);
 
+  public void setMimeType(String mimeType);
+
   public void setRepresentation(byte[] representation);
 }

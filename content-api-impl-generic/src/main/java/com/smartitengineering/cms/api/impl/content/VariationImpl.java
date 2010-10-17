@@ -18,8 +18,10 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
+import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.content.Variation;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -29,6 +31,7 @@ public class VariationImpl implements MutableVariation {
 
   private String name;
   private byte[] variation;
+  private String mimeType;
 
   @Override
   public void setName(String name) {
@@ -48,5 +51,15 @@ public class VariationImpl implements MutableVariation {
   @Override
   public byte[] getVariation() {
     return this.variation;
+  }
+
+  @Override
+  public void setMimeType(String mimeType) {
+    this.mimeType = mimeType;
+  }
+
+  @Override
+  public String getMimeType() {
+    return StringUtils.isNotBlank(mimeType) ? mimeType : MediaType.APPLICATION_OCTET_STREAM.toString();
   }
 }

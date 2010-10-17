@@ -26,5 +26,7 @@ public interface MutableVariation extends Variation {
 
   public void setName(String name);
 
+  public void setMimeType(String mimeType);
+
   public void setVariation(byte[] variation);
 }
