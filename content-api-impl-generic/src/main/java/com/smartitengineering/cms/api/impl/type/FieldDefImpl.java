@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  *
@@ -151,5 +152,21 @@ public class FieldDefImpl implements MutableFieldDef {
     return "FieldDefImpl{" + "newFieldName=" + newFieldName + "; required=" + required + "; dataType=" + dataType +
         "; variationDefs=" + variationDefs + "; validatorDef=" + validatorDef + "; searchDef=" + searchDef +
         "; standaloneUpdateAble=" + standaloneUpdateAble + '}';
+  }
+
+  @Override
+  public VariationDef getVariationDefForMimeType(String mimeType) {
+    TreeMap<String, VariationDef> map = new TreeMap<String, VariationDef>();
+    for (VariationDef def : variationDefs) {
+      if (def.getMIMEType().equals(mimeType)) {
+        map.put(def.getName(), def);
+      }
+    }
+    if (map.isEmpty()) {
+      return null;
+    }
+    else {
+      return map.firstEntry().getValue();
+    }
   }
 }

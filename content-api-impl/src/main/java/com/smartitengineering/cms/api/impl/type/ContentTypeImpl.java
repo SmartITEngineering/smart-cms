@@ -37,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  *
@@ -241,5 +242,21 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
   @Override
   public String getEntityTagValue() {
     return entityTagValue;
+  }
+
+  @Override
+  public RepresentationDef getRepresentationDefForMimeType(String mimeType) {
+    TreeMap<String, RepresentationDef> map = new TreeMap<String, RepresentationDef>();
+    for (RepresentationDef def : representationDefs) {
+      if (def.getMIMEType().equals(mimeType)) {
+        map.put(def.getName(), def);
+      }
+    }
+    if (map.isEmpty()) {
+      return null;
+    }
+    else {
+      return map.firstEntry().getValue();
+    }
   }
 }

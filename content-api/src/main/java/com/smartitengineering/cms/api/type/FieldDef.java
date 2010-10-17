@@ -47,6 +47,8 @@ public interface FieldDef {
 
   public Map<String, VariationDef> getVariations();
 
+  public VariationDef getVariationDefForMimeType(String mimeType);
+
   public ValidatorDef getCustomValidator();
 
   public SearchDef getSearchDefinition();

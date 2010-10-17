@@ -60,6 +60,8 @@ public interface ContentType {
 
   public Map<String, RepresentationDef> getRepresentationDefs();
 
+  public RepresentationDef getRepresentationDefForMimeType(String mimeType);
+
   public Date getCreationDate();
 
   public Date getLastModifiedDate();
