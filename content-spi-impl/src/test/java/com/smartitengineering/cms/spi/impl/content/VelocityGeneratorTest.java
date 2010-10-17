@@ -22,14 +22,20 @@ import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.Representation;
+import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.impl.content.RepresentationImpl;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.RepresentationDef;
+import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
+import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.VelocityRepresentationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.VelocityVariationGenerator;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.SimpleBeanFactory;
 import java.io.IOException;
@@ -113,5 +119,43 @@ public class VelocityGeneratorTest {
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getRepresentation()));
     Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());
+  }
+
+  @Test
+  public void testVelocityVarGeneration() throws IOException {
+    TypeVariationGenerator generator = new VelocityVariationGenerator();
+    final VariationTemplate template = mockery.mock(VariationTemplate.class);
+    final Field field = mockery.mock(Field.class, "varField");
+    final FieldValue value = mockery.mock(FieldValue.class, "varFieldVal");
+    final FieldDef fieldDef = mockery.mock(FieldDef.class);
+    final Map<String, VariationDef> vars = mockery.mock(Map.class, "varMap");
+    final VariationDef def = mockery.mock(VariationDef.class);
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(1).of(template).getTemplate();
+        will(returnValue(
+            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("scripts/velocity/var-template.vm"))));
+        exactly(1).of(template).getName();
+        will(returnValue(REP_NAME));
+        exactly(1).of(value).getValue();
+        will(returnValue(CONTENT));
+        exactly(1).of(field).getValue();
+        will(returnValue(value));
+        exactly(1).of(field).getFieldDef();
+        will(returnValue(fieldDef));
+        exactly(1).of(fieldDef).getVariations();
+        will(returnValue(vars));
+        exactly(1).of(vars).get(with(REP_NAME));
+        will(returnValue(def));
+        exactly(1).of(def).getMIMEType();
+        will(returnValue(GroovyGeneratorTest.MIME_TYPE));
+      }
+    });
+    Variation representation = generator.getVariation(template, field);
+    Assert.assertNotNull(representation);
+    Assert.assertEquals(REP_NAME, representation.getName());
+    Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());
+    Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getVariation()));
   }
 }
