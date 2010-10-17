@@ -30,6 +30,8 @@ import org.apache.abdera.model.Feed;
  */
 public interface ContentsResource extends WritableResource<Feed>, PaginatedResource<ContentsResource> {
 
+  public Collection<ContainerResource> getContainer();
+
   public Collection<ContentResource> getContentResources();
 
   public ContentResource createContentResource(Content content);
