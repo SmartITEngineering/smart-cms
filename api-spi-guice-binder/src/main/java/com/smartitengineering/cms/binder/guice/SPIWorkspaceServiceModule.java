@@ -38,8 +38,10 @@ import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.dao.impl.hbase.CommonDao;
 import com.smartitengineering.dao.impl.hbase.spi.DomainIdInstanceProvider;
 import com.smartitengineering.dao.impl.hbase.spi.FilterConfigs;
+import com.smartitengineering.dao.impl.hbase.spi.LockAttainer;
 import com.smartitengineering.dao.impl.hbase.spi.ObjectRowConverter;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
+import com.smartitengineering.dao.impl.hbase.spi.impl.LockAttainerImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
@@ -78,6 +80,9 @@ public class SPIWorkspaceServiceModule extends PrivateModule {
     }).toInstance(WorkspaceId.class);
     bind(new TypeLiteral<SchemaInfoProvider<PersistentWorkspace, WorkspaceId>>() {
     }).to(wTypeLiteral).in(Singleton.class);
+    bind(new TypeLiteral<LockAttainer<PersistentWorkspace, WorkspaceId>>() {
+    }).to(new TypeLiteral<LockAttainerImpl<PersistentWorkspace, WorkspaceId>>() {
+    });
     bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistentWorkspace>>() {
     }).toProvider(WorkspaceSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);
     bind(new TypeLiteral<FilterConfigs<PersistentWorkspace>>() {

@@ -63,8 +63,10 @@ import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.dao.impl.hbase.CommonDao;
 import com.smartitengineering.dao.impl.hbase.spi.DomainIdInstanceProvider;
 import com.smartitengineering.dao.impl.hbase.spi.FilterConfigs;
+import com.smartitengineering.dao.impl.hbase.spi.LockAttainer;
 import com.smartitengineering.dao.impl.hbase.spi.ObjectRowConverter;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
+import com.smartitengineering.dao.impl.hbase.spi.impl.LockAttainerImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
 
@@ -108,6 +110,9 @@ public class SPITemplateEngineModule extends PrivateModule {
     }).in(Singleton.class);
     final TypeLiteral<SchemaInfoProviderImpl<PersistentRepresentation, TemplateId>> rTypeLiteral = new TypeLiteral<SchemaInfoProviderImpl<PersistentRepresentation, TemplateId>>() {
     };
+    bind(new TypeLiteral<LockAttainer<PersistentRepresentation, TemplateId>>() {
+    }).to(new TypeLiteral<LockAttainerImpl<PersistentRepresentation, TemplateId>>() {
+    });
     bind(new TypeLiteral<Class<TemplateId>>() {
     }).toInstance(TemplateId.class);
     bind(new TypeLiteral<SchemaInfoProvider<PersistentRepresentation, TemplateId>>() {
@@ -144,6 +149,9 @@ public class SPITemplateEngineModule extends PrivateModule {
     };
     bind(new TypeLiteral<SchemaInfoProvider<PersistentVariation, TemplateId>>() {
     }).to(vTypeLiteral).in(Singleton.class);
+    bind(new TypeLiteral<LockAttainer<PersistentVariation, TemplateId>>() {
+    }).to(new TypeLiteral<LockAttainerImpl<PersistentVariation, TemplateId>>() {
+    });
     bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistentVariation>>() {
     }).toProvider(VariationSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);
     bind(new TypeLiteral<FilterConfigs<PersistentVariation>>() {

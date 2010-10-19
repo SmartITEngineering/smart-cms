@@ -63,10 +63,12 @@ import com.smartitengineering.dao.impl.hbase.CommonDao;
 import com.smartitengineering.dao.impl.hbase.spi.AsyncExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.DomainIdInstanceProvider;
 import com.smartitengineering.dao.impl.hbase.spi.FilterConfigs;
+import com.smartitengineering.dao.impl.hbase.spi.LockAttainer;
 import com.smartitengineering.dao.impl.hbase.spi.MergeService;
 import com.smartitengineering.dao.impl.hbase.spi.ObjectRowConverter;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import com.smartitengineering.dao.impl.hbase.spi.impl.DiffBasedMergeService;
+import com.smartitengineering.dao.impl.hbase.spi.impl.LockAttainerImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.MixedExecutorServiceImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
@@ -133,6 +135,9 @@ public class SPIModule extends PrivateModule {
     }).in(Singleton.class);
     final TypeLiteral<SchemaInfoProviderImpl<PersistentContentType, ContentTypeId>> typeLiteral = new TypeLiteral<SchemaInfoProviderImpl<PersistentContentType, ContentTypeId>>() {
     };
+    bind(new TypeLiteral<LockAttainer<PersistentContentType, ContentTypeId>>() {
+    }).to(new TypeLiteral<LockAttainerImpl<PersistentContentType, ContentTypeId>>() {
+    });
     bind(new TypeLiteral<Class<ContentTypeId>>() {
     }).toInstance(ContentTypeId.class);
     bind(new TypeLiteral<SchemaInfoProvider<PersistentContentType, ContentTypeId>>() {
@@ -172,6 +177,9 @@ public class SPIModule extends PrivateModule {
     };
     bind(contentSchema).to(new TypeLiteral<SchemaInfoProviderImpl<PersistentContent, ContentId>>() {
     }).in(Singleton.class);
+    bind(new TypeLiteral<LockAttainer<PersistentContent, ContentId>>() {
+    }).to(new TypeLiteral<LockAttainerImpl<PersistentContent, ContentId>>() {
+    });
     binder().expose(contentSchema);
     bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistentContent>>() {
     }).toProvider(ContentSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);
