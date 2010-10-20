@@ -39,8 +39,10 @@ import com.smartitengineering.dao.impl.hbase.CommonDao;
 import com.smartitengineering.dao.impl.hbase.spi.DomainIdInstanceProvider;
 import com.smartitengineering.dao.impl.hbase.spi.FilterConfigs;
 import com.smartitengineering.dao.impl.hbase.spi.LockAttainer;
+import com.smartitengineering.dao.impl.hbase.spi.MergeService;
 import com.smartitengineering.dao.impl.hbase.spi.ObjectRowConverter;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
+import com.smartitengineering.dao.impl.hbase.spi.impl.DiffBasedMergeService;
 import com.smartitengineering.dao.impl.hbase.spi.impl.LockAttainerImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
@@ -80,6 +82,9 @@ public class SPIWorkspaceServiceModule extends PrivateModule {
     }).toInstance(WorkspaceId.class);
     bind(new TypeLiteral<SchemaInfoProvider<PersistentWorkspace, WorkspaceId>>() {
     }).to(wTypeLiteral).in(Singleton.class);
+    bind(new TypeLiteral<MergeService<PersistentWorkspace, WorkspaceId>>() {
+    }).to(new TypeLiteral<DiffBasedMergeService<PersistentWorkspace, WorkspaceId>>() {
+    });
     bind(new TypeLiteral<LockAttainer<PersistentWorkspace, WorkspaceId>>() {
     }).to(new TypeLiteral<LockAttainerImpl<PersistentWorkspace, WorkspaceId>>() {
     });

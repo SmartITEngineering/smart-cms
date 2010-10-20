@@ -64,8 +64,10 @@ import com.smartitengineering.dao.impl.hbase.CommonDao;
 import com.smartitengineering.dao.impl.hbase.spi.DomainIdInstanceProvider;
 import com.smartitengineering.dao.impl.hbase.spi.FilterConfigs;
 import com.smartitengineering.dao.impl.hbase.spi.LockAttainer;
+import com.smartitengineering.dao.impl.hbase.spi.MergeService;
 import com.smartitengineering.dao.impl.hbase.spi.ObjectRowConverter;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
+import com.smartitengineering.dao.impl.hbase.spi.impl.DiffBasedMergeService;
 import com.smartitengineering.dao.impl.hbase.spi.impl.LockAttainerImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
@@ -110,6 +112,9 @@ public class SPITemplateEngineModule extends PrivateModule {
     }).in(Singleton.class);
     final TypeLiteral<SchemaInfoProviderImpl<PersistentRepresentation, TemplateId>> rTypeLiteral = new TypeLiteral<SchemaInfoProviderImpl<PersistentRepresentation, TemplateId>>() {
     };
+    bind(new TypeLiteral<MergeService<PersistentRepresentation, TemplateId>>() {
+    }).to(new TypeLiteral<DiffBasedMergeService<PersistentRepresentation, TemplateId>>() {
+    });
     bind(new TypeLiteral<LockAttainer<PersistentRepresentation, TemplateId>>() {
     }).to(new TypeLiteral<LockAttainerImpl<PersistentRepresentation, TemplateId>>() {
     });
@@ -149,6 +154,9 @@ public class SPITemplateEngineModule extends PrivateModule {
     };
     bind(new TypeLiteral<SchemaInfoProvider<PersistentVariation, TemplateId>>() {
     }).to(vTypeLiteral).in(Singleton.class);
+    bind(new TypeLiteral<MergeService<PersistentVariation, TemplateId>>() {
+    }).to(new TypeLiteral<DiffBasedMergeService<PersistentVariation, TemplateId>>() {
+    });
     bind(new TypeLiteral<LockAttainer<PersistentVariation, TemplateId>>() {
     }).to(new TypeLiteral<LockAttainerImpl<PersistentVariation, TemplateId>>() {
     });

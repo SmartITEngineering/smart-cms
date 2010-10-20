@@ -113,8 +113,6 @@ public class SPIModule extends PrivateModule {
     bind(TimeUnit.class).annotatedWith(Names.named("unit")).toInstance(TimeUnit.SECONDS);
     binder().expose(TimeUnit.class).annotatedWith(Names.named("unit"));
     bind(Boolean.class).annotatedWith(Names.named("mergeEnabled")).toInstance(Boolean.TRUE);
-    bind(MergeService.class).to(DiffBasedMergeService.class).in(Singleton.class);
-    binder().expose(MergeService.class);
     final Named named = Names.named("schemaLocationForContentTypeXml");
     bind(String.class).annotatedWith(named).toInstance(schemaLocationForContentType);
     binder().expose(String.class).annotatedWith(named);
@@ -135,6 +133,9 @@ public class SPIModule extends PrivateModule {
     }).in(Singleton.class);
     final TypeLiteral<SchemaInfoProviderImpl<PersistentContentType, ContentTypeId>> typeLiteral = new TypeLiteral<SchemaInfoProviderImpl<PersistentContentType, ContentTypeId>>() {
     };
+    bind(new TypeLiteral<MergeService<PersistentContentType, ContentTypeId>>() {
+    }).to(new TypeLiteral<DiffBasedMergeService<PersistentContentType, ContentTypeId>>() {
+    });
     bind(new TypeLiteral<LockAttainer<PersistentContentType, ContentTypeId>>() {
     }).to(new TypeLiteral<LockAttainerImpl<PersistentContentType, ContentTypeId>>() {
     });
@@ -177,6 +178,9 @@ public class SPIModule extends PrivateModule {
     };
     bind(contentSchema).to(new TypeLiteral<SchemaInfoProviderImpl<PersistentContent, ContentId>>() {
     }).in(Singleton.class);
+    bind(new TypeLiteral<MergeService<PersistentContent, ContentId>>() {
+    }).to(new TypeLiteral<DiffBasedMergeService<PersistentContent, ContentId>>() {
+    });
     bind(new TypeLiteral<LockAttainer<PersistentContent, ContentId>>() {
     }).to(new TypeLiteral<LockAttainerImpl<PersistentContent, ContentId>>() {
     });
