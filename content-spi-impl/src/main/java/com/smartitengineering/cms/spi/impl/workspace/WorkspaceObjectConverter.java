@@ -35,7 +35,7 @@ import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
-import com.smartitengineering.dao.impl.hbase.spi.impl.AbstactObjectRowConverter;
+import com.smartitengineering.dao.impl.hbase.spi.impl.AbstractObjectRowConverter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -50,7 +50,7 @@ import org.apache.hadoop.hbase.util.Bytes;
  *
  * @author imyousuf
  */
-public class WorkspaceObjectConverter extends AbstactObjectRowConverter<PersistentWorkspace, WorkspaceId> {
+public class WorkspaceObjectConverter extends AbstractObjectRowConverter<PersistentWorkspace, WorkspaceId> {
 
   public static final String FRIENDLIES = "friendlies";
   public static final String ROOT_CONTENTS = "rootContents";

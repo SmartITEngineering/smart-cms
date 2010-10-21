@@ -52,7 +52,7 @@ import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.impl.Utils;
 import com.smartitengineering.cms.spi.type.PersistableContentType;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
-import com.smartitengineering.dao.impl.hbase.spi.impl.AbstactObjectRowConverter;
+import com.smartitengineering.dao.impl.hbase.spi.impl.AbstractObjectRowConverter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -79,7 +79,7 @@ import org.apache.hadoop.hbase.util.Bytes;
  *
  * @author imyousuf
  */
-public class ContentTypeObjectConverter extends AbstactObjectRowConverter<PersistentContentType, ContentTypeId> {
+public class ContentTypeObjectConverter extends AbstractObjectRowConverter<PersistentContentType, ContentTypeId> {
 
   public final static byte[] FAMILY_SIMPLE = Bytes.toBytes("simple");
   public final static byte[] FAMILY_FIELDS = Bytes.toBytes("fields");

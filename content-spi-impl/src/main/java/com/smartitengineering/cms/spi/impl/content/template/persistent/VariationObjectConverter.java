@@ -22,7 +22,7 @@ import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.spi.impl.Utils;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
-import com.smartitengineering.dao.impl.hbase.spi.impl.AbstactObjectRowConverter;
+import com.smartitengineering.dao.impl.hbase.spi.impl.AbstractObjectRowConverter;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -32,7 +32,7 @@ import org.apache.hadoop.hbase.util.Bytes;
  *
  * @author imyousuf
  */
-public class VariationObjectConverter extends AbstactObjectRowConverter<PersistentVariation, TemplateId> {
+public class VariationObjectConverter extends AbstractObjectRowConverter<PersistentVariation, TemplateId> {
 
   public static final byte[] FAMILY_SELF = Bytes.toBytes("self");
   public static final byte[] FAMILY_BLOB = Bytes.toBytes("blob");
