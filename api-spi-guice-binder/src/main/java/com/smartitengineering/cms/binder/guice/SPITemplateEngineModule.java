@@ -117,7 +117,7 @@ public class SPITemplateEngineModule extends PrivateModule {
     });
     bind(new TypeLiteral<LockAttainer<PersistentRepresentation, TemplateId>>() {
     }).to(new TypeLiteral<LockAttainerImpl<PersistentRepresentation, TemplateId>>() {
-    });
+    }).in(Scopes.SINGLETON);
     bind(new TypeLiteral<Class<TemplateId>>() {
     }).toInstance(TemplateId.class);
     bind(new TypeLiteral<SchemaInfoProvider<PersistentRepresentation, TemplateId>>() {
@@ -159,7 +159,7 @@ public class SPITemplateEngineModule extends PrivateModule {
     });
     bind(new TypeLiteral<LockAttainer<PersistentVariation, TemplateId>>() {
     }).to(new TypeLiteral<LockAttainerImpl<PersistentVariation, TemplateId>>() {
-    });
+    }).in(Scopes.SINGLETON);
     bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistentVariation>>() {
     }).toProvider(VariationSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);
     bind(new TypeLiteral<FilterConfigs<PersistentVariation>>() {

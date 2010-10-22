@@ -138,7 +138,7 @@ public class SPIModule extends PrivateModule {
     });
     bind(new TypeLiteral<LockAttainer<PersistentContentType, ContentTypeId>>() {
     }).to(new TypeLiteral<LockAttainerImpl<PersistentContentType, ContentTypeId>>() {
-    });
+    }).in(Scopes.SINGLETON);
     bind(new TypeLiteral<Class<ContentTypeId>>() {
     }).toInstance(ContentTypeId.class);
     bind(new TypeLiteral<SchemaInfoProvider<PersistentContentType, ContentTypeId>>() {
@@ -183,7 +183,7 @@ public class SPIModule extends PrivateModule {
     });
     bind(new TypeLiteral<LockAttainer<PersistentContent, ContentId>>() {
     }).to(new TypeLiteral<LockAttainerImpl<PersistentContent, ContentId>>() {
-    });
+    }).in(Scopes.SINGLETON);
     binder().expose(contentSchema);
     bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistentContent>>() {
     }).toProvider(ContentSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);

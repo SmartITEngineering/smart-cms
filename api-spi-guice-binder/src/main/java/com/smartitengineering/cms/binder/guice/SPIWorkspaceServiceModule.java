@@ -87,7 +87,7 @@ public class SPIWorkspaceServiceModule extends PrivateModule {
     });
     bind(new TypeLiteral<LockAttainer<PersistentWorkspace, WorkspaceId>>() {
     }).to(new TypeLiteral<LockAttainerImpl<PersistentWorkspace, WorkspaceId>>() {
-    });
+    }).in(Scopes.SINGLETON);
     bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistentWorkspace>>() {
     }).toProvider(WorkspaceSchemaBaseConfigProvider.class).in(Scopes.SINGLETON);
     bind(new TypeLiteral<FilterConfigs<PersistentWorkspace>>() {
