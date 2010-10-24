@@ -80,7 +80,7 @@ public class WorkspaceContentContainerResource extends AbstractResource {
       Content content = SmartContentAPI.getInstance().getContentLoader().loadContent(contentId);
       if (content != null) {
         feed.addEntry(getEntry(contentId.toString(), contentId.toString(), content.getLastModifiedDate(),
-                               getLink(ContentResource.getContentUri(contentId), Link.REL_ALTERNATE,
+                               getLink(ContentResource.getContentUri(getRelativeURIBuilder(), contentId), Link.REL_ALTERNATE,
                                        MediaType.APPLICATION_JSON)));
       }
     }
@@ -98,7 +98,7 @@ public class WorkspaceContentContainerResource extends AbstractResource {
     Collection<ContentId> contents = workspace.getRootContents();
     List<URI> uris = new ArrayList<URI>(contents.size());
     for (ContentId contentId : contents) {
-      uris.add(ContentResource.getContentUri(contentId));
+      uris.add(ContentResource.getContentUri(getRelativeURIBuilder(), contentId));
     }
     builder.entity(uris);
     return builder.build();

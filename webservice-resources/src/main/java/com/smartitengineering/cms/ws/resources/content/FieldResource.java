@@ -246,8 +246,8 @@ public class FieldResource extends AbstractResource {
           builder = Response.status(Status.ACCEPTED);
         }
         else {
-          builder = Response.created(getAbsoluteURIBuilder().uri(ContentResource.getContentUri(content.getContentId())).
-              path(field.getName()).build());
+          builder = Response.created(UriBuilder.fromUri(ContentResource.getContentUri(getRelativeURIBuilder(), content.
+              getContentId())).path(field.getName()).build());
         }
       }
     }
@@ -276,7 +276,7 @@ public class FieldResource extends AbstractResource {
       case CONTENT:
         ContentFieldValue contentFieldValue = (ContentFieldValue) value;
         entry = getEntry(StringUtils.defaultIfEmpty(id[0], "value"), "Value", lastModifiedDate, getLink(ContentResource.
-            getContentUri(contentFieldValue.getValue()), Link.REL_ALTERNATE, mimeType));
+            getContentUri(getRelativeURIBuilder(), contentFieldValue.getValue()), Link.REL_ALTERNATE, mimeType));
         entries.add(entry);
         break;
       case DATE_TIME:
@@ -338,7 +338,8 @@ public class FieldResource extends AbstractResource {
         break;
       case CONTENT:
         ContentFieldValue contentFieldValue = (ContentFieldValue) value;
-        builder.entity(Collections.singleton(ContentResource.getContentUri(contentFieldValue.getValue()))).type(mimeType);
+        builder.entity(Collections.singleton(ContentResource.getContentUri(getRelativeURIBuilder(), contentFieldValue.
+            getValue()))).type(mimeType);
         break;
       case DATE_TIME:
         DateTimeFieldValue dateTimeFieldValue = (DateTimeFieldValue) value;
@@ -383,11 +384,12 @@ public class FieldResource extends AbstractResource {
   }
 
   private URI getFieldUri() {
-    return getFieldURI(content, fieldDef);
+    return getFieldURI(getRelativeURIBuilder(), content, fieldDef);
   }
 
-  public static URI getFieldURI(Content content, FieldDef fieldDef) {
-    return UriBuilder.fromUri(ContentResource.getContentUri(content.getContentId())).path(fieldDef.getName()).build();
+  public static URI getFieldURI(UriBuilder builder, Content content, FieldDef fieldDef) {
+    return UriBuilder.fromUri(ContentResource.getContentUri(builder, content.getContentId())).path(fieldDef.getName()).
+        build();
   }
 
   @Override
@@ -420,8 +422,8 @@ public class FieldResource extends AbstractResource {
 
     @Override
     protected void mergeFromF2T(Field fromBean, com.smartitengineering.cms.ws.common.domains.Field toBean) {
-      ContentResource.getDomainField(fromBean, ContentResource.getContentUri(content.getContentId()).toASCIIString(),
-                                     (FieldImpl) toBean);
+      ContentResource.getDomainField(getRelativeURIBuilder(), fromBean, ContentResource.getContentUri(
+          getRelativeURIBuilder(), content.getContentId()).toASCIIString(), (FieldImpl) toBean);
     }
 
     @Override

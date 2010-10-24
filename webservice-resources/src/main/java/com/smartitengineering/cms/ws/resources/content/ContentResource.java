@@ -200,7 +200,7 @@ public class ContentResource extends AbstractResource {
     final ResponseBuilder builder;
     if (this.content == null) {
       //Send 201
-      builder = Response.created(getAbsoluteURIBuilder().uri(getContentUri(writeableContent.getContentId())).build());
+      builder = Response.created(getContentUri(getRelativeURIBuilder(), writeableContent.getContentId()));
     }
     else {
       //Send 202
@@ -236,8 +236,8 @@ public class ContentResource extends AbstractResource {
     return content;
   }
 
-  public static URI getContentUri(ContentId contentId) {
-    UriBuilder builder = UriBuilder.fromResource(ContentsResource.class).path(ContentsResource.PATH_TO_CONTENT);
+  public static URI getContentUri(UriBuilder builder, ContentId contentId) {
+    builder.path(ContentsResource.class).path(ContentsResource.PATH_TO_CONTENT);
     return builder.build(contentId.getWorkspaceId().getGlobalNamespace(), contentId.getWorkspaceId().getName(),
                          StringUtils.newStringUtf8(contentId.getId()));
   }
@@ -256,7 +256,8 @@ public class ContentResource extends AbstractResource {
       contentImpl.setContentTypeUri(
           ContentTypeResource.getContentTypeRelativeURI(type.getContentTypeID()).toASCIIString());
       if (fromBean.getParentId() != null) {
-        contentImpl.setParentContentUri(ContentResource.getContentUri(fromBean.getParentId()).toASCIIString());
+        contentImpl.setParentContentUri(ContentResource.getContentUri(getRelativeURIBuilder(), fromBean.getParentId()).
+            toASCIIString());
       }
       contentImpl.setCreationDate(fromBean.getCreationDate());
       contentImpl.setLastModifiedDate(fromBean.getLastModifiedDate());
@@ -268,13 +269,13 @@ public class ContentResource extends AbstractResource {
       if (logger.isDebugEnabled()) {
         logger.debug("FIELDS: " + fields);
       }
-      String contentUri = ContentResource.getContentUri(fromBean.getContentId()).toASCIIString();
+      String contentUri = ContentResource.getContentUri(getRelativeURIBuilder(), fromBean.getContentId()).toASCIIString();
       for (FieldDef fieldDef : type.getFieldDefs().values()) {
         final String fieldName = fieldDef.getName();
         Field field = fields.get(fieldName);
         FieldImpl fieldImpl = new FieldImpl();
         fieldImpl.setName(fieldName);
-        getDomainField(field, contentUri, fieldImpl);
+        getDomainField(getRelativeURIBuilder(), field, contentUri, fieldImpl);
         if (logger.isDebugEnabled()) {
           logger.debug("Converting field " + field.getName() + " with value " + field.getValue().toString());
         }
@@ -376,7 +377,7 @@ public class ContentResource extends AbstractResource {
     return mutableField;
   }
 
-  protected static void getDomainField(Field field, String contentUri, FieldImpl fieldImpl) {
+  protected static void getDomainField(UriBuilder builder, Field field, String contentUri, FieldImpl fieldImpl) {
 
     final String fieldUri = new StringBuilder(contentUri).append("/f/").append(field.getName()).toString();
     fieldImpl.setFieldUri(fieldUri);
@@ -386,7 +387,7 @@ public class ContentResource extends AbstractResource {
       final FieldValueImpl value;
       final FieldValue contentFieldValue = field.getValue();
       final DataType valueDef = field.getFieldDef().getValueDef();
-      value = getFieldvalue(valueDef, contentFieldValue);
+      value = getFieldvalue(builder, valueDef, contentFieldValue);
       Map<String, String> variations = fieldImpl.getVariations();
       Collection<VariationDef> defs = field.getFieldDef().getVariations().values();
       for (VariationDef def : defs) {
@@ -396,13 +397,12 @@ public class ContentResource extends AbstractResource {
     }
   }
 
-  private static FieldValueImpl getFieldvalue(final DataType valueDef, final FieldValue contentFieldValue) {
+  private static FieldValueImpl getFieldvalue(final UriBuilder builder, final DataType valueDef, final FieldValue contentFieldValue) {
     final FieldValueImpl value;
     switch (valueDef.getType()) {
       case CONTENT: {
         FieldValueImpl valueImpl = new FieldValueImpl();
-        valueImpl.setValue(ContentResource.getContentUri(((ContentFieldValue) contentFieldValue).getValue()).
-            toASCIIString());
+        valueImpl.setValue(ContentResource.getContentUri(builder, ((ContentFieldValue) contentFieldValue).getValue()).toASCIIString());
         value = valueImpl;
         break;
       }
@@ -413,7 +413,7 @@ public class ContentResource extends AbstractResource {
                                ((CollectionFieldValue) contentFieldValue).getValue();
         final DataType itemDataType = ((CollectionDataType) valueDef).getItemDataType();
         for (FieldValue contentValue : contentValues) {
-          valueImpl.getValues().add(getFieldvalue(itemDataType, contentValue));
+          valueImpl.getValues().add(getFieldvalue(builder, itemDataType, contentValue));
         }
         value = valueImpl;
         break;
