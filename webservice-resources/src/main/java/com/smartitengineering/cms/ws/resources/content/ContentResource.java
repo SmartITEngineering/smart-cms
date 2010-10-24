@@ -200,7 +200,7 @@ public class ContentResource extends AbstractResource {
     final ResponseBuilder builder;
     if (this.content == null) {
       //Send 201
-      builder = Response.created(getContentUri(getRelativeURIBuilder(), writeableContent.getContentId()));
+      builder = Response.created(getContentUri(getAbsoluteURIBuilder(), writeableContent.getContentId()));
     }
     else {
       //Send 202

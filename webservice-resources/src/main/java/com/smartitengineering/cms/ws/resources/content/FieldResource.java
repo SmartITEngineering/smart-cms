@@ -246,7 +246,7 @@ public class FieldResource extends AbstractResource {
           builder = Response.status(Status.ACCEPTED);
         }
         else {
-          builder = Response.created(UriBuilder.fromUri(ContentResource.getContentUri(getRelativeURIBuilder(), content.
+          builder = Response.created(UriBuilder.fromUri(ContentResource.getContentUri(getAbsoluteURIBuilder(), content.
               getContentId())).path(field.getName()).build());
         }
       }
