@@ -40,6 +40,7 @@ import com.smartitengineering.cms.spi.impl.content.ContentPersistentService;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentFilterConfigsProvider;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentSchemaBaseConfigProvider;
+import com.smartitengineering.cms.spi.impl.content.search.SearchFieldNameGeneratorImpl;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
 import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
@@ -55,6 +56,7 @@ import com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParsers;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
+import com.smartitengineering.cms.spi.type.SearchFieldNameGenerator;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
 import com.smartitengineering.dao.common.CommonReadDao;
@@ -87,16 +89,20 @@ public class SPIModule extends PrivateModule {
   public static final String DEFAULT_LOCATION =
                              "http://github.com/smart-it/smart-cms/raw/master/" +
       "content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd";
+  public static final String DEFAULT_SOLR_URI = "http://localhost:8080/solr/";
   private final String schemaLocationForContentType;
+  private final String solrUri;
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   public SPIModule(Properties properties) {
     if (properties != null) {
       schemaLocationForContentType = properties.getProperty("com.smartitengineering.cms.schemaLocationForContentType",
                                                             DEFAULT_LOCATION);
+      solrUri = properties.getProperty("com.smartitengineering.cms.solrUri", DEFAULT_SOLR_URI);
     }
     else {
       schemaLocationForContentType = DEFAULT_LOCATION;
+      solrUri = DEFAULT_SOLR_URI;
     }
     logger.debug("SCHEMA Location " + schemaLocationForContentType);
   }
@@ -117,6 +123,8 @@ public class SPIModule extends PrivateModule {
     bind(String.class).annotatedWith(named).toInstance(schemaLocationForContentType);
     binder().expose(String.class).annotatedWith(named);
     bind(DomainIdInstanceProvider.class).to(DomainIdInstanceProviderImpl.class).in(Scopes.SINGLETON);
+    bind(SearchFieldNameGenerator.class).to(SearchFieldNameGeneratorImpl.class);
+    binder().expose(SearchFieldNameGenerator.class);
     /*
      * Start injection specific to common dao of content type
      */

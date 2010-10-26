@@ -42,6 +42,14 @@ The module is responsible for Implementing the SPI for the CMS.
       <artifactId>smart-hbase-dao</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.smartitengineering.smart-dao</groupId>
+      <artifactId>solr-dao</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.smartitengineering.smart-dao</groupId>
+      <artifactId>solr-search-dao</artifactId>
+    </dependency>
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
