@@ -41,9 +41,6 @@ public class InitializerContextListener implements ServletContextListener {
   public void contextInitialized(ServletContextEvent sce) {
     Initializer.init();
     Configuration config = HBaseConfigurationFactory.getConfigurationInstance();
-    if (config == null) {
-      config = HBaseConfigurationFactory.initConfiguration();
-    }
     try {
       new HBaseTableGenerator(ConfigurationJsonParser.getConfigurations(getClass().getClassLoader().
           getResourceAsStream("com/smartitengineering/cms/spi/impl/schema.json")), config, false).generateTables();
