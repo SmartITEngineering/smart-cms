@@ -43,7 +43,6 @@ import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -398,11 +397,11 @@ public class FieldResource extends AbstractResource {
   }
 
   private MediaType getUserPreferredType(MediaType defaultType) {
-    return getContext().getRequest().getAcceptableMediaType(Arrays.asList(MediaType.APPLICATION_ATOM_XML_TYPE,
-                                                                          defaultType, MediaType.APPLICATION_JSON_TYPE,
-                                                                          MediaType.APPLICATION_XML_TYPE,
-                                                                          MediaType.TEXT_XML_TYPE,
-                                                                          MediaType.WILDCARD_TYPE));
+    return getContext().getRequest().selectVariant(getVariants(MediaType.APPLICATION_ATOM_XML_TYPE,
+                                                               defaultType, MediaType.APPLICATION_JSON_TYPE,
+                                                               MediaType.APPLICATION_XML_TYPE,
+                                                               MediaType.TEXT_XML_TYPE,
+                                                               MediaType.WILDCARD_TYPE)).getMediaType();
   }
 
   private List<Variant> getVariants(MediaType... mediaTypes) {
