@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.MutableCollectionFieldValue;
+import com.smartitengineering.cms.api.content.MutableContentFieldValue;
 import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
@@ -47,6 +48,7 @@ import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
+import com.sun.jersey.api.core.ResourceContext;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -269,7 +271,8 @@ public class ContentResource extends AbstractResource {
       if (logger.isDebugEnabled()) {
         logger.debug("FIELDS: " + fields);
       }
-      String contentUri = ContentResource.getContentUri(getRelativeURIBuilder(), fromBean.getContentId()).toASCIIString();
+      String contentUri =
+             ContentResource.getContentUri(getRelativeURIBuilder(), fromBean.getContentId()).toASCIIString();
       for (FieldDef fieldDef : type.getFieldDefs().values()) {
         final String fieldName = fieldDef.getName();
         Field field = fields.get(fieldName);
@@ -327,7 +330,8 @@ public class ContentResource extends AbstractResource {
         writeableContent.setParentId(parentContent.getContentId());
       }
       for (com.smartitengineering.cms.ws.common.domains.Field field : toBean.getFields()) {
-        MutableField mutableField = getField(contentType.getFieldDefs().get(field.getName()), field);
+        MutableField mutableField = getField(contentType.getFieldDefs().get(field.getName()), field,
+                                             getResourceContext());
         writeableContent.setField(mutableField);
       }
       return writeableContent;
@@ -335,7 +339,8 @@ public class ContentResource extends AbstractResource {
   }
 
   protected static FieldValue getFieldValue(final DataType dataType,
-                                            com.smartitengineering.cms.ws.common.domains.FieldValue value) {
+                                            com.smartitengineering.cms.ws.common.domains.FieldValue value,
+                                            ResourceContext context) {
     FieldValue fieldValue;
     switch (dataType.getType()) {
       case COLLECTION:
@@ -346,11 +351,26 @@ public class ContentResource extends AbstractResource {
                                                                           (com.smartitengineering.cms.ws.common.domains.CollectionFieldValue) value;
         ArrayList<FieldValue> list = new ArrayList<FieldValue>(cFieldValue.getValues().size());
         for (com.smartitengineering.cms.ws.common.domains.FieldValue v : cFieldValue.getValues()) {
-          list.add(getFieldValue(collectionDataType.getItemDataType(), v));
+          list.add(getFieldValue(collectionDataType.getItemDataType(), v, context));
         }
         collectionFieldValue.setValue(list);
         fieldValue = collectionFieldValue;
         break;
+      case CONTENT:
+        MutableContentFieldValue contentFieldValue = SmartContentAPI.getInstance().getContentLoader().
+            createContentFieldValue();
+        String contentUrl = value.getValue();
+        try {
+          ContentResource resource = context.matchResource(URI.create(contentUrl), ContentResource.class);
+          if (resource == null) {
+            throw new NullPointerException();
+          }
+          contentFieldValue.setValue(resource.getContent().getContentId());
+        }
+        catch (Exception ex) {
+          throw new IllegalArgumentException("Invalid Content URI!");
+        }
+        contentFieldValue.setValue(null);
       default:
         fieldValue = SmartContentAPI.getInstance().getContentLoader().getValueFor(value.getValue(), dataType);
     }
@@ -358,7 +378,8 @@ public class ContentResource extends AbstractResource {
   }
 
   protected static MutableField getField(final FieldDef fieldDef,
-                                         com.smartitengineering.cms.ws.common.domains.Field field) throws
+                                         com.smartitengineering.cms.ws.common.domains.Field field,
+                                         ResourceContext context) throws
       IllegalArgumentException {
     if (fieldDef == null) {
       throw new IllegalArgumentException("No field in content type with name " + field.getName());
@@ -372,7 +393,7 @@ public class ContentResource extends AbstractResource {
     final MutableField mutableField =
                        SmartContentAPI.getInstance().getContentLoader().createMutableField(fieldDef);
     final FieldValue fieldValue;
-    fieldValue = getFieldValue(dataType, field.getValue());
+    fieldValue = getFieldValue(dataType, field.getValue(), context);
     mutableField.setValue(fieldValue);
     return mutableField;
   }
@@ -397,12 +418,14 @@ public class ContentResource extends AbstractResource {
     }
   }
 
-  private static FieldValueImpl getFieldvalue(final UriBuilder builder, final DataType valueDef, final FieldValue contentFieldValue) {
+  private static FieldValueImpl getFieldvalue(final UriBuilder builder, final DataType valueDef,
+                                              final FieldValue contentFieldValue) {
     final FieldValueImpl value;
     switch (valueDef.getType()) {
       case CONTENT: {
         FieldValueImpl valueImpl = new FieldValueImpl();
-        valueImpl.setValue(ContentResource.getContentUri(builder, ((ContentFieldValue) contentFieldValue).getValue()).toASCIIString());
+        valueImpl.setValue(ContentResource.getContentUri(builder, ((ContentFieldValue) contentFieldValue).getValue()).
+            toASCIIString());
         value = valueImpl;
         break;
       }

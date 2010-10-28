@@ -405,11 +405,7 @@ public class FieldResource extends AbstractResource {
   }
 
   private List<Variant> getVariants(MediaType... mediaTypes) {
-    List<Variant> variants = new ArrayList<Variant>(mediaTypes.length);
-    for (MediaType type : mediaTypes) {
-      variants.add(new Variant(type, null, null));
-    }
-    return variants;
+    return Variant.mediaTypes(mediaTypes).add().build();
   }
 
   class FieldAdapterHelper extends AbstractAdapterHelper<Field, com.smartitengineering.cms.ws.common.domains.Field> {
@@ -427,7 +423,7 @@ public class FieldResource extends AbstractResource {
 
     @Override
     protected Field convertFromT2F(com.smartitengineering.cms.ws.common.domains.Field toBean) {
-      return ContentResource.getField(fieldDef, toBean);
+      return ContentResource.getField(fieldDef, toBean, getResourceContext());
     }
   }
 }
