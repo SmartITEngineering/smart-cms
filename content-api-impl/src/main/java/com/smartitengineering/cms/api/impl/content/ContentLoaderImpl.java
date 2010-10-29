@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -385,6 +386,11 @@ public class ContentLoaderImpl implements ContentLoader {
           throw new RuntimeException(ex);
         }
         result = valueOf;
+        break;
+      case OTHER:
+        MutableOtherFieldValue otherFieldValue = createOtherFieldValue();
+        otherFieldValue.setValue(Base64.decodeBase64(value));
+        result = otherFieldValue;
         break;
       case STRING:
       default:
