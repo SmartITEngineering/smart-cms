@@ -79,7 +79,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -134,12 +136,20 @@ public class AppTest {
      * Start web application container
      */
     jettyServer = new Server(PORT);
+    HandlerList handlerList = new HandlerList();
     final String webapp = "./src/test/webapp/";
     if (!new File(webapp).exists()) {
       throw new IllegalStateException("WebApp file/dir does not exist!");
     }
     WebAppContext webAppHandler = new WebAppContext(webapp, "/");
-    jettyServer.setHandler(webAppHandler);
+    handlerList.addHandler(webAppHandler);
+    /*
+     * The following is for solr for later, when this is to be used it
+     */
+    System.setProperty("solr.solr.home", "./target/sample-conf/");
+    Handler solr = new WebAppContext("./target/solr/", "/solr");
+    handlerList.addHandler(solr);
+    jettyServer.setHandler(handlerList);
     jettyServer.setSendDateHeader(true);
     jettyServer.start();
 
