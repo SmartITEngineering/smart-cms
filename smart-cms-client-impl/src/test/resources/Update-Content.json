@@ -1,11 +1,64 @@
 {
   "fields":[
     {
+      "name":"publisher-no",
+      "value":{
+        "@valueType":"integer",
+        "value":"123",
+        "type":"integer"
+      }
+    },
+    {
       "name":"name",
       "value": {
         "@valueType":"string",
-        "value":"Something",
+        "value":"SomeThing",
         "type":"string"
+      }
+    },
+    {
+      "name":"contentField3",
+      "value":{
+        "@valueType":"boolean",
+        "value":"false",
+        "type":"boolean"
+      }
+    },
+    {
+      "name":"contentField2",
+      "value":{
+        "@valueType":"double",
+        "value":"456.34",
+        "type":"double"
+      }
+    },
+    {
+      "name":"contentField1",
+      "value":{
+        "@valueType":"long",
+        "value":"555456789",
+        "type":"long"
+      }
+    },
+    {
+      "name":"books",
+      "value":{
+        "@valueType":"collection",
+        "values":[
+          {
+            "@valueType":"string",
+            "mimeType":"text/plain",
+            "value":"3",
+            "type":"string"
+          },
+          {
+            "@valueType":"string",
+            "mimeType":"text/plain",
+            "value":"4",
+            "type":"string"
+          }
+        ],
+        "type":"collection"
       }
     }
   ],
