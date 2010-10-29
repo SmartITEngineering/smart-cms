@@ -3,3 +3,7 @@ modules=com.smartitengineering.cms.binder.guice.SPIModule,com.smartitengineering
 ignoreMissingDependency=true
 com.smartitengineering.cms.schemaLocationForContentType=http://github.com/smart-it/smart-cms/raw/master/content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd
 com.smartitengineering.cms.solrUri=http://localhost:10080/solr/
+com.smartitengineering.cms.waitTimeInSec=10
+com.smartitengineering.cms.saveIntervalInSec=60
+com.smartitengineering.cms.updateIntervalInSec=60
+com.smartitengineering.cms.deleteIntervalInSec=60

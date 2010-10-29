@@ -40,6 +40,8 @@ import com.smartitengineering.cms.spi.impl.content.ContentPersistentService;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentFilterConfigsProvider;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentSchemaBaseConfigProvider;
+import com.smartitengineering.cms.spi.impl.content.search.ContentHelper;
+import com.smartitengineering.cms.spi.impl.content.search.ContentIdentifierQueryImpl;
 import com.smartitengineering.cms.spi.impl.content.search.SearchFieldNameGeneratorImpl;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
@@ -59,6 +61,12 @@ import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.SearchFieldNameGenerator;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
+import com.smartitengineering.common.dao.search.CommonFreeTextPersistentDao;
+import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
+import com.smartitengineering.common.dao.search.impl.CommonAsyncFreeTextPersistentDaoImpl;
+import com.smartitengineering.common.dao.search.solr.SolrFreeTextPersistentDao;
+import com.smartitengineering.common.dao.search.solr.SolrFreeTextSearchDao;
+import com.smartitengineering.common.dao.search.solr.spi.ObjectIdentifierQuery;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.dao.impl.hbase.CommonDao;
@@ -74,6 +82,15 @@ import com.smartitengineering.dao.impl.hbase.spi.impl.LockAttainerImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.MixedExecutorServiceImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
+import com.smartitengineering.dao.impl.search.CommonWriteDaoDecorator;
+import com.smartitengineering.dao.solr.MultivalueMap;
+import com.smartitengineering.dao.solr.ServerConfiguration;
+import com.smartitengineering.dao.solr.ServerFactory;
+import com.smartitengineering.dao.solr.SolrQueryDao;
+import com.smartitengineering.dao.solr.SolrWriteDao;
+import com.smartitengineering.dao.solr.impl.ServerConfigurationImpl;
+import com.smartitengineering.dao.solr.impl.SingletonRemoteServerFactory;
+import com.smartitengineering.dao.solr.impl.SolrDao;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
@@ -81,6 +98,7 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,17 +110,31 @@ public class SPIModule extends PrivateModule {
   public static final String DEFAULT_SOLR_URI = "http://localhost:8080/solr/";
   private final String schemaLocationForContentType;
   private final String solrUri;
+  private final long waitTime, saveInterval, updateInterval, deleteInterval;
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   public SPIModule(Properties properties) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Properties received: " + properties);
+    }
     if (properties != null) {
       schemaLocationForContentType = properties.getProperty("com.smartitengineering.cms.schemaLocationForContentType",
                                                             DEFAULT_LOCATION);
       solrUri = properties.getProperty("com.smartitengineering.cms.solrUri", DEFAULT_SOLR_URI);
+      long toLong = NumberUtils.toLong(properties.getProperty("com.smartitengineering.cms.waitTimeInSec"), 10L);
+      waitTime = toLong > 0 ? toLong : 10l;
+      toLong = NumberUtils.toLong(properties.getProperty("com.smartitengineering.cms.saveIntervalInSec"), 60L);
+      saveInterval = toLong > 0 ? toLong : 60l;
+      toLong = NumberUtils.toLong(properties.getProperty("com.smartitengineering.cms.updateIntervalInSec"), 60L);
+      updateInterval = toLong > 0 ? toLong : 60l;
+      toLong = NumberUtils.toLong(properties.getProperty("com.smartitengineering.cms.deleteIntervalInSec"), 60L);
+      deleteInterval = toLong > 0 ? toLong : 60l;
     }
     else {
       schemaLocationForContentType = DEFAULT_LOCATION;
       solrUri = DEFAULT_SOLR_URI;
+      waitTime = 10l;
+      saveInterval = updateInterval = deleteInterval = 60l;
     }
     logger.debug("SCHEMA Location " + schemaLocationForContentType);
   }
@@ -114,7 +146,7 @@ public class SPIModule extends PrivateModule {
     bind(ExecutorService.class).toInstance(Executors.newCachedThreadPool());
     binder().expose(ExecutorService.class);
     bind(Integer.class).annotatedWith(Names.named("maxRows")).toInstance(new Integer(100));
-    bind(Long.class).annotatedWith(Names.named("waitTime")).toInstance(new Long(10));
+    bind(Long.class).annotatedWith(Names.named("waitTime")).toInstance(waitTime);
     binder().expose(Long.class).annotatedWith(Names.named("waitTime"));
     bind(TimeUnit.class).annotatedWith(Names.named("unit")).toInstance(TimeUnit.SECONDS);
     binder().expose(TimeUnit.class).annotatedWith(Names.named("unit"));
@@ -125,6 +157,22 @@ public class SPIModule extends PrivateModule {
     bind(DomainIdInstanceProvider.class).to(DomainIdInstanceProviderImpl.class).in(Scopes.SINGLETON);
     bind(SearchFieldNameGenerator.class).to(SearchFieldNameGeneratorImpl.class);
     binder().expose(SearchFieldNameGenerator.class);
+
+    /*
+     * Solr client
+     * waitTime:long and ExecutorService.class from earlier config
+     */
+    bind(TimeUnit.class).annotatedWith(Names.named("waitTimeUnit")).toInstance(TimeUnit.SECONDS);
+    bind(SolrQueryDao.class).to(SolrDao.class).in(Scopes.SINGLETON);
+    bind(SolrWriteDao.class).to(SolrDao.class).in(Scopes.SINGLETON);
+    bind(ServerFactory.class).to(SingletonRemoteServerFactory.class).in(Scopes.SINGLETON);
+    bind(ServerConfiguration.class).to(ServerConfigurationImpl.class).in(Scopes.SINGLETON);
+    bind(String.class).annotatedWith(Names.named("uri")).toInstance(solrUri);
+    bind(Long.class).annotatedWith(Names.named("saveInterval")).toInstance(saveInterval);
+    bind(Long.class).annotatedWith(Names.named("updateInterval")).toInstance(updateInterval);
+    bind(Long.class).annotatedWith(Names.named("deleteInterval")).toInstance(deleteInterval);
+    bind(TimeUnit.class).annotatedWith(Names.named("intervalTimeUnit")).toInstance(TimeUnit.SECONDS);
+
     /*
      * Start injection specific to common dao of content type
      */
@@ -168,12 +216,37 @@ public class SPIModule extends PrivateModule {
     /*
      * Start injection specific to common dao of content
      */
+
+    /*
+     * Write Dao
+     */
+    bind(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
+    }).annotatedWith(Names.named("searchWriteDaoDecoratee")).to(new TypeLiteral<CommonDao<PersistentContent, ContentId>>() {
+    }).in(Singleton.class);
+    bind(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
+    }).to(new TypeLiteral<CommonWriteDaoDecorator<PersistentContent>>() {
+    }).in(Singleton.class);
+    TypeLiteral<CommonFreeTextPersistentDao<PersistentContent>> prodLit =
+                                                                new TypeLiteral<CommonFreeTextPersistentDao<PersistentContent>>() {
+    };
+    bind(prodLit).to(new TypeLiteral<CommonAsyncFreeTextPersistentDaoImpl<PersistentContent>>() {
+    }).in(Scopes.SINGLETON);
+    bind(prodLit).annotatedWith(Names.named("primaryFreeTextPersistentDao")).to(new TypeLiteral<SolrFreeTextPersistentDao<PersistentContent>>() {
+    }).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<ObjectIdentifierQuery<PersistentContent>>() {
+    }).to(ContentIdentifierQueryImpl.class).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<GenericAdapter<PersistentContent, MultivalueMap<String, Object>>>() {
+    }).to(new TypeLiteral<GenericAdapterImpl<PersistentContent, MultivalueMap<String, Object>>>() {
+    }).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<AbstractAdapterHelper<PersistentContent, MultivalueMap<String, Object>>>() {
+    }).to(ContentHelper.class).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<CommonFreeTextSearchDao<PersistentContent>>() {
+    }).to(new TypeLiteral<SolrFreeTextSearchDao<PersistentContent>>() {
+    }).in(Scopes.SINGLETON);
+
     bind(new TypeLiteral<ObjectRowConverter<PersistentContent>>() {
     }).to(ContentObjectConverter.class).in(Singleton.class);
     bind(new TypeLiteral<CommonReadDao<PersistentContent, ContentId>>() {
-    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContent, ContentId>>() {
-    }).in(Singleton.class);
-    bind(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
     }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContent, ContentId>>() {
     }).in(Singleton.class);
     bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContent, ContentId>>() {

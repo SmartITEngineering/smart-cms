@@ -52,6 +52,14 @@
       <artifactId>smart-bean-guice-util</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.smartitengineering.smart-dao</groupId>
+      <artifactId>smart-abstract-dao-decorator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.smartitengineering.smart-dao</groupId>
+      <artifactId>solr-search-dao</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jdk14</artifactId>
       <scope>provided</scope>
