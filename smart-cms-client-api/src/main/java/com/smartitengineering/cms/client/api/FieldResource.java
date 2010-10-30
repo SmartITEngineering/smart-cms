@@ -30,5 +30,7 @@ public interface FieldResource extends WritableResource<Field> {
 
   public void update(Field field);
 
-  public Collection<VariationResource> getVariations();
+  public Collection<String> getVariationUrls();
+
+  public String getVariation(String variationUrl);
 }
