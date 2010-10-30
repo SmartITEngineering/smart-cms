@@ -83,7 +83,7 @@ public class ContentResource extends AbstractResource {
   private final Content content;
   private final ContentId contentId;
   private final EntityTag tag;
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  private final static Logger LOGGER = LoggerFactory.getLogger(ContentResource.class);
   protected final GenericAdapter<Content, com.smartitengineering.cms.ws.common.domains.Content> adapter;
 
   public ContentResource(ServerResourceInjectables injectables, ContentId contentId) {
@@ -92,8 +92,8 @@ public class ContentResource extends AbstractResource {
       throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
     this.contentId = contentId;
-    if (logger.isDebugEnabled()) {
-      logger.debug("Content ID " + contentId);
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Content ID " + contentId);
     }
     if (contentId.getId() != null && contentId.getId().length > 0) {
       //An existing content
@@ -117,8 +117,8 @@ public class ContentResource extends AbstractResource {
 
   @Path("f/{fieldName}")
   public FieldResource getFieldResource(@PathParam("fieldName") String fieldName) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Trying to get field resource with name " + fieldName);
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Trying to get field resource with name " + fieldName);
     }
     FieldDef fieldDef = content.getContentDefinition().getFieldDefs().get(fieldName);
     FieldResource resource = new FieldResource(getInjectables(), content, fieldDef, tag);
@@ -157,7 +157,7 @@ public class ContentResource extends AbstractResource {
       newContent = adapter.convertInversely(jsonContent);
     }
     catch (Exception ex) {
-      logger.warn("Could not convert to content!", ex);
+      LOGGER.warn("Could not convert to content!", ex);
       return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).type(MediaType.TEXT_PLAIN).build();
     }
     final WriteableContent writeableContent;
@@ -196,7 +196,7 @@ public class ContentResource extends AbstractResource {
       writeableContent.put();
     }
     catch (IOException ex) {
-      logger.error("Could save/update content!", ex);
+      LOGGER.error("Could save/update content!", ex);
       return Response.serverError().build();
     }
     final ResponseBuilder builder;
@@ -227,7 +227,7 @@ public class ContentResource extends AbstractResource {
         builder = Response.ok();
       }
       catch (Exception ex) {
-        logger.error("Could not delete due to server error!", ex);
+        LOGGER.error("Could not delete due to server error!", ex);
         builder = Response.serverError();
       }
     }
@@ -268,8 +268,8 @@ public class ContentResource extends AbstractResource {
         contentImpl.setStatus(status.getName());
       }
       Map<String, Field> fields = fromBean.getFields();
-      if (logger.isDebugEnabled()) {
-        logger.debug("FIELDS: " + fields);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("FIELDS: " + fields);
       }
       String contentUri =
              ContentResource.getContentUri(getRelativeURIBuilder(), fromBean.getContentId()).toASCIIString();
@@ -279,8 +279,8 @@ public class ContentResource extends AbstractResource {
         FieldImpl fieldImpl = new FieldImpl();
         fieldImpl.setName(fieldName);
         getDomainField(getRelativeURIBuilder(), field, contentUri, fieldImpl);
-        if (logger.isDebugEnabled()) {
-          logger.debug("Converting field " + field.getName() + " with value " + field.getValue().toString());
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Converting field " + field.getName() + " with value " + field.getValue().toString());
         }
         contentImpl.getFields().add(fieldImpl);
       }
@@ -357,20 +357,32 @@ public class ContentResource extends AbstractResource {
         fieldValue = collectionFieldValue;
         break;
       case CONTENT:
+        LOGGER.info("Parsing string as Content!");
         MutableContentFieldValue contentFieldValue = SmartContentAPI.getInstance().getContentLoader().
             createContentFieldValue();
         String contentUrl = value.getValue();
+        if (LOGGER.isInfoEnabled()) {
+          LOGGER.info("URL to content is " + contentUrl);
+        }
         try {
           ContentResource resource = context.matchResource(URI.create(contentUrl), ContentResource.class);
+          if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Resource " + resource);
+          }
           if (resource == null) {
             throw new NullPointerException();
+          }
+          if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Content ID " + resource.getContent().getContentId());
           }
           contentFieldValue.setValue(resource.getContent().getContentId());
         }
         catch (Exception ex) {
+          LOGGER.warn("Error getting content!", ex);
           throw new IllegalArgumentException("Invalid Content URI!");
         }
-        contentFieldValue.setValue(null);
+        fieldValue = contentFieldValue;
+        break;
       default:
         fieldValue = SmartContentAPI.getInstance().getContentLoader().getValueFor(value.getValue(), dataType);
     }

@@ -1104,14 +1104,7 @@ public class AppTest {
     Assert.assertNotNull(field1.getFieldRawContentUri());
     Assert.assertNotNull(field1.getFieldUri());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
-
-    /*
-     *
-     */
-//    Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
-    /*
-     *
-     */
+    Assert.assertTrue(field.getValue().getValue().endsWith(field1.getValue().getValue()));
 
     field = iterator1.next();
     field1 = iterator2.next();
@@ -1370,14 +1363,7 @@ public class AppTest {
     Assert.assertNotNull(field1.getFieldRawContentUri());
     Assert.assertNotNull(field1.getFieldUri());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
-
-    /*
-     *
-     */
-//    Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
-    /*
-     *
-     */
+    Assert.assertTrue(field.getValue().getValue().endsWith(field1.getValue().getValue()));
 
     field = iterator1.next();
     field1 = iterator2.next();
@@ -1468,14 +1454,7 @@ public class AppTest {
     Assert.assertNotNull(updateField1.getFieldRawContentUri());
     Assert.assertNotNull(updateField1.getFieldUri());
     Assert.assertEquals(updateField.getValue().getType().toUpperCase(), updateField1.getValue().getType());
-
-    /*
-     *
-     */
-//    Assert.assertEquals(updateField.getValue().getValue(), updateField1.getValue().getValue());
-    /*
-     *
-     */
+    Assert.assertTrue(updateField.getValue().getValue().endsWith(updateField1.getValue().getValue()));
 
     updateField = updateIterator1.next();
     updateField1 = updateIterator2.next();

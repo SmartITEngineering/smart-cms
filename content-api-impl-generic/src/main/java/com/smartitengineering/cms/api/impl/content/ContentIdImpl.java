@@ -77,8 +77,8 @@ public class ContentIdImpl implements ContentId {
   @Override
   public void readExternal(DataInput input) throws IOException, ClassNotFoundException {
     String idString = Utils.readStringInUTF8(input);
-    if (logger.isDebugEnabled()) {
-      logger.debug("Trying to parse content id: " + idString);
+    if (logger.isInfoEnabled()) {
+      logger.info("Trying to parse content id: " + idString);
     }
     if (StringUtils.isBlank(idString)) {
       throw new IOException("No content!");

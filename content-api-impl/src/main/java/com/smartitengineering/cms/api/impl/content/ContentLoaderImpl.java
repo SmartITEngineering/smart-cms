@@ -66,12 +66,16 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author kaisar
  */
 public class ContentLoaderImpl implements ContentLoader {
+
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public MutableField createMutableField(FieldDef fieldDef) {
@@ -351,6 +355,9 @@ public class ContentLoaderImpl implements ContentLoader {
         break;
       case CONTENT:
         MutableContentFieldValue contentFieldValue = createContentFieldValue();
+        if (logger.isInfoEnabled()) {
+          logger.info("Content value: " + value);
+        }
         try {
           DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(StringUtils.getBytesUtf8(value)));
           ContentIdImpl idImpl = new ContentIdImpl();
