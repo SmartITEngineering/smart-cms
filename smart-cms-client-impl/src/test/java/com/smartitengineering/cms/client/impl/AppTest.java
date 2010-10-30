@@ -1091,6 +1091,11 @@ public class AppTest {
     Assert.assertEquals(content.getParentContentUri(), content1.getParentContentUri());
     Assert.assertEquals(content.getStatus(), content1.getStatus());
     Assert.assertEquals(content.getFields().size(), content1.getFields().size());
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Parent Container Uri : " + content1.getParentContentUri());
+      LOGGER.debug("Status : " + content1.getStatus());
+      LOGGER.debug("Number of Fields : " + content1.getFields().size());
+    }
 
     Collection<Field> fields = content.getFields();
     Collections.reverse((List<Field>) fields);
@@ -1099,7 +1104,6 @@ public class AppTest {
     final Iterator<Field> iterator2 = content1.getFields().iterator();
     Field field1 = iterator2.next();
 
-    System.out.println("******************* " + field.getName() + " ** " + field1.getName());
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertNotNull(field1.getFieldRawContentUri());
     Assert.assertNotNull(field1.getFieldUri());
@@ -1351,6 +1355,12 @@ public class AppTest {
     Assert.assertEquals(content.getStatus(), content1.getStatus());
     Assert.assertEquals(content.getFields().size(), content1.getFields().size());
 
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Parent Container Uri : " + content1.getParentContentUri());
+      LOGGER.debug("Status : " + content1.getStatus());
+      LOGGER.debug("Number of Fields : " + content1.getFields().size());
+    }
+
     Collection<Field> fields = content.getFields();
     Collections.reverse((List<Field>) fields);
     Iterator<Field> iterator1 = fields.iterator();
@@ -1358,7 +1368,6 @@ public class AppTest {
     final Iterator<Field> iterator2 = content1.getFields().iterator();
     Field field1 = iterator2.next();
 
-    System.out.println("******************* " + field.getName() + " ** " + field1.getName());
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertNotNull(field1.getFieldRawContentUri());
     Assert.assertNotNull(field1.getFieldUri());
@@ -1442,6 +1451,12 @@ public class AppTest {
     Assert.assertEquals(updateContent.getStatus(), updateContent1.getStatus());
     Assert.assertEquals(updateContent.getFields().size(), updateContent1.getFields().size());
 
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Parent Container Uri : " + updateContent1.getParentContentUri());
+      LOGGER.debug("Status : " + updateContent1.getStatus());
+      LOGGER.debug("Number of Fields : " + updateContent1.getFields().size());
+    }
+
     Collection<Field> updateFields = updateContent.getFields();
     Collections.reverse((List<Field>) updateFields);
     Iterator<Field> updateIterator1 = updateFields.iterator();
@@ -1449,7 +1464,6 @@ public class AppTest {
     final Iterator<Field> updateIterator2 = updateContent1.getFields().iterator();
     Field updateField1 = updateIterator2.next();
 
-    System.out.println("******************* " + updateField.getName() + " ** " + updateField1.getName());
     Assert.assertEquals(updateField.getName(), updateField1.getName());
     Assert.assertNotNull(updateField1.getFieldRawContentUri());
     Assert.assertNotNull(updateField1.getFieldUri());
