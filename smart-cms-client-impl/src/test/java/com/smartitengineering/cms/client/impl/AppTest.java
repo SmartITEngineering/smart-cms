@@ -1524,7 +1524,64 @@ public class AppTest {
     Assert.assertEquals(updateField.getName(), updateField1.getName());
     Assert.assertEquals(updateField.getValue().getType().toUpperCase(), updateField1.getValue().getType());
     Assert.assertEquals(updateField.getValue().getValue(), updateField1.getValue().getValue());
+  }
 
+  @Test
+  public void testContentRepresentation() throws Exception {
+    LOGGER.info(":::::::::::::: CONTENT REPRESENTATION RESOURCE TEST ::::::::::::::");
+
+    ObjectMapper mapper1 = new ObjectMapper();
+    String JSON1 = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("DummyContent.json"));
+    InputStream stream1 = IOUtils.toInputStream(JSON1);
+    Content contentTest = mapper1.readValue(stream1, Content.class);
+    Assert.assertNotNull(contentTest);
+    RootResource resource1 = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources1 = resource1.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
+    WorkspaceFeedResource feedResourceTest = iteratorTest.next();
+    ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
+
+    FieldValueImpl value = new FieldValueImpl();
+    value.setType("content");
+    value.setValue(contentResourceTest.getUri().toASCIIString());
+    FieldImpl authorField = new FieldImpl();
+    authorField.setName("Authors");
+    authorField.setValue(value);
+
+    String valueString = "otherValue";
+    byte[] otherValue = valueString.getBytes();
+    OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
+    otherFieldValueImpl.setMimeType("jpeg/image");
+    otherFieldValueImpl.setType("other");
+    otherFieldValueImpl.setValue(Base64.encodeBase64String(otherValue));
+
+    FieldImpl valueImpl = new FieldImpl();
+    valueImpl.setName("b");
+    valueImpl.setValue(otherFieldValueImpl);
+
+    ObjectMapper mapper = new ObjectMapper();
+    String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
+    InputStream stream = IOUtils.toInputStream(JSON);
+    Content content = mapper.readValue(stream, Content.class);
+
+    content.getFields().add(valueImpl);
+    content.getFields().add(authorField);
+    Assert.assertNotNull(content);
+
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+
+    ContentResource contentResource = feedResource.getContents().createContentResource(content);
+
+    Collection<String> urls = contentResource.getRepresentationUrls();
+    Iterator<String> iterator1 = urls.iterator();
+    while (iterator1.hasNext()) {
+      String next = iterator1.next();
+      String type = contentResource.getRepresentation(next);
+      Assert.assertEquals("some/type", type);
+    }
   }
 
   @Test
