@@ -32,5 +32,7 @@ public interface ContentResource extends WritableResource<Content> {
 
   public void update(Content content);
 
-  public Collection<RepresentationResource> getRepresentation();
+  public Collection<String> getRepresentationUrls();
+
+  public String getRepresentation(String url);
 }

@@ -19,7 +19,6 @@
 package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.ContentTypeResource;
-import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
 import com.smartitengineering.util.rest.client.AbstractClientResource;
 import com.smartitengineering.util.rest.client.Resource;
 import com.smartitengineering.util.rest.client.ResourceLink;
