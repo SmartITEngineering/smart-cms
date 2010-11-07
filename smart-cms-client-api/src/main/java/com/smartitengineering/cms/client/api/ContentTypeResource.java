@@ -25,5 +25,4 @@ import com.smartitengineering.util.rest.client.WritableResource;
  * @author kaisar
  */
 public interface ContentTypeResource extends WritableResource<String> {
-
 }
