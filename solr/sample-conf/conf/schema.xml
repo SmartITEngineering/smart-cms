@@ -61,29 +61,84 @@
         <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
       </analyzer>
     </fieldType>
-
-
   </types>
 
   <fields>
+    <field name="type" type="string" indexed="true" stored="true" required="true"/>
     <field name="id" type="string" indexed="true" stored="true" required="true"/>
-    <field name="name" type="string" indexed="true" stored="true" required="true"/>
-    <field name="price" type="double" indexed="true" stored="true" required="false"/>
-    <field name="totalQuantity" type="string" indexed="true" stored="true" required="false"/>
-    <field name="email" type="string" indexed="true" stored="true" required="false"/>
-    <field name="alltext" type="text" indexed="false" stored="true" required="true"/>
-    <field name="quantity" type="double" indexed="true" stored="true" required="false"/>
-    <field name="transactionDate" type="date" indexed="true" stored="true" required="false"/>
+    <field name="workspaceId" type="string" indexed="true" stored="true" required="true"/>
     <field name="creationDate" type="date" indexed="true" stored="true" required="false"/>
-    <field name="storeId" type="string" indexed="true" stored="true" required="false"/>
-    <field name="productId" type="string" indexed="true" stored="true" required="false"/>
+    <field name="lastModifiedDate" type="date" indexed="true" stored="true" required="false"/>
+    <field name="status" type="string" indexed="true" stored="true" required="false"/>
+    <field name="contentTypeId" type="string" indexed="true" stored="true" required="false"/>
+    <field name="instanceOf" type="string" indexed="true" required="false"/>
 
+    <dynamicField name="*_INTEGER_m" type="int" indexed="false" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_INTEGER_i" type="int" indexed="true" stored="false" required="false"/>
+    <dynamicField name="*_INTEGER_s" type="int" indexed="false" stored="true" required="false"/>
+    <dynamicField name="*_INTEGER_mi" type="int" indexed="true" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_INTEGER_ms" type="int" indexed="false" stored="true" required="false" multiValued="true" />
+    <dynamicField name="*_INTEGER_is" type="int" indexed="true" stored="true" required="false"/>
+    <dynamicField name="*_INTEGER_msi" type="int" indexed="true" stored="true" required="false" multiValued="true" />
 
+    <dynamicField name="*_OTHER_m" type="string" indexed="false" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_OTHER_i" type="string" indexed="true" stored="false" required="false"/>
+    <dynamicField name="*_OTHER_s" type="string" indexed="false" stored="true" required="false"/>
+    <dynamicField name="*_OTHER_mi" type="string" indexed="true" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_OTHER_ms" type="string" indexed="false" stored="true" required="false" multiValued="true" />
+    <dynamicField name="*_OTHER_is" type="string" indexed="true" stored="true" required="false"/>
+    <dynamicField name="*_OTHER_msi" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+
+    <dynamicField name="*_CONTENT_m" type="string" indexed="false" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_CONTENT_i" type="string" indexed="true" stored="false" required="false"/>
+    <dynamicField name="*_CONTENT_s" type="string" indexed="false" stored="true" required="false"/>
+    <dynamicField name="*_CONTENT_mi" type="string" indexed="true" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_CONTENT_ms" type="string" indexed="false" stored="true" required="false" multiValued="true" />
+    <dynamicField name="*_CONTENT_is" type="string" indexed="true" stored="true" required="false"/>
+    <dynamicField name="*_CONTENT_msi" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+
+    <dynamicField name="*_STRING_m" type="string" indexed="false" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_STRING_i" type="string" indexed="true" stored="false" required="false"/>
+    <dynamicField name="*_STRING_s" type="string" indexed="false" stored="true" required="false"/>
+    <dynamicField name="*_STRING_mi" type="string" indexed="true" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_STRING_ms" type="string" indexed="false" stored="true" required="false" multiValued="true" />
+    <dynamicField name="*_STRING_is" type="string" indexed="true" stored="true" required="false"/>
+    <dynamicField name="*_STRING_msi" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+
+    <dynamicField name="*_DATE_TIME_m" type="date" indexed="false" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_DATE_TIME_i" type="date" indexed="true" stored="false" required="false"/>
+    <dynamicField name="*_DATE_TIME_s" type="date" indexed="false" stored="true" required="false"/>
+    <dynamicField name="*_DATE_TIME_mi" type="date" indexed="true" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_DATE_TIME_ms" type="date" indexed="false" stored="true" required="false" multiValued="true" />
+    <dynamicField name="*_DATE_TIME_is" type="date" indexed="true" stored="true" required="false"/>
+    <dynamicField name="*_DATE_TIME_msi" type="date" indexed="true" stored="true" required="false" multiValued="true" />
+
+    <dynamicField name="*_BOOLEAN_m" type="boolean" indexed="false" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_BOOLEAN_i" type="boolean" indexed="true" stored="false" required="false"/>
+    <dynamicField name="*_BOOLEAN_s" type="boolean" indexed="false" stored="true" required="false"/>
+    <dynamicField name="*_BOOLEAN_mi" type="boolean" indexed="true" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_BOOLEAN_ms" type="boolean" indexed="false" stored="true" required="false" multiValued="true" />
+    <dynamicField name="*_BOOLEAN_is" type="boolean" indexed="true" stored="true" required="false"/>
+    <dynamicField name="*_BOOLEAN_msi" type="boolean" indexed="true" stored="true" required="false" multiValued="true" />
+
+    <dynamicField name="*_DOUBLE_m" type="double" indexed="false" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_DOUBLE_i" type="double" indexed="true" stored="false" required="false"/>
+    <dynamicField name="*_DOUBLE_s" type="double" indexed="false" stored="true" required="false"/>
+    <dynamicField name="*_DOUBLE_mi" type="double" indexed="true" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_DOUBLE_ms" type="double" indexed="false" stored="true" required="false" multiValued="true" />
+    <dynamicField name="*_DOUBLE_is" type="double" indexed="true" stored="true" required="false"/>
+    <dynamicField name="*_DOUBLE_msi" type="double" indexed="true" stored="true" required="false" multiValued="true" />
+
+    <dynamicField name="*_LONG_m" type="long" indexed="false" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_LONG_i" type="long" indexed="true" stored="false" required="false"/>
+    <dynamicField name="*_LONG_s" type="long" indexed="false" stored="true" required="false"/>
+    <dynamicField name="*_LONG_mi" type="long" indexed="true" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_LONG_ms" type="long" indexed="false" stored="true" required="false" multiValued="true" />
+    <dynamicField name="*_LONG_is" type="long" indexed="true" stored="true" required="false"/>
+    <dynamicField name="*_LONG_msi" type="long" indexed="true" stored="true" required="false" multiValued="true" />
   </fields>
 
   <defaultSearchField>name</defaultSearchField>
-
   <uniqueKey>id</uniqueKey>
-
   <solrQueryParser defaultOperator="OR"/>
 </schema>
