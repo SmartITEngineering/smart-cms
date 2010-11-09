@@ -24,112 +24,130 @@ import com.smartitengineering.cms.api.content.Filter;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.spi.content.ContentSearcher;
 import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
+import com.smartitengineering.dao.common.queryparam.BiOperandQueryParameter;
+import com.smartitengineering.dao.common.queryparam.OperatorType;
+import com.smartitengineering.dao.common.queryparam.ParameterType;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
+import com.smartitengineering.dao.common.queryparam.QueryParameterCastHelper;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
+import com.smartitengineering.dao.common.queryparam.StringLikeQueryParameter;
+import com.smartitengineering.dao.common.queryparam.UniOperandQueryParameter;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.solr.client.solrj.util.ClientUtils;
 
 /**
  *
  * @author kaisar
  */
-public class ContentSearcherImpl {
+public class ContentSearcherImpl implements ContentSearcher {
 
   @Inject
   private CommonFreeTextSearchDao<Content> textSearchDao;
+  private StringBuilder query = new StringBuilder();
 
+  @Override
   public Collection<Content> search(Filter filter) {
     String orSeperator = " OR ";
     String andSeperator = " AND ";
-    int i = 0;
-    StringBuilder query = new StringBuilder();
+    int count = 0;
     Set<ContentTypeId> contentTypeIds = filter.getContentTypeFilters();
     for (ContentTypeId contentTypeId : contentTypeIds) {
-      if (i == 0) {
+      if (count == 0) {
         query.append("(");
       }
       else {
-        query.append(andSeperator + "(");
+        query.append(orSeperator + "(");
       }
-      String contentName = contentTypeId.getName();
-      if (StringUtils.isNotBlank(contentName)) {
-        query.append("+contentName: ").append(ClientUtils.escapeQueryChars(contentName));
-      }
-      String contentNamespace = contentTypeId.getNamespace();
-      if (StringUtils.isNotBlank(contentNamespace)) {
-        query.append(orSeperator);
-        query.append("+contentNamespace: ").append(ClientUtils.escapeQueryChars(contentNamespace));
-      }
-      WorkspaceId contentWorkspaceId = contentTypeId.getWorkspace();
-      String contentWorkspaceName = contentWorkspaceId.getName();
-      if (StringUtils.isNotBlank(contentWorkspaceName)) {
-        query.append(orSeperator);
-        query.append("+contentWorkspaceName: ").append(ClientUtils.escapeQueryChars(contentWorkspaceName));
-      }
-      String contentGlobalNamespace = contentWorkspaceId.getGlobalNamespace();
-      if (StringUtils.isNotBlank(contentGlobalNamespace)) {
-        query.append(orSeperator);
-        query.append("+contentGlobalNamespace: ").append(ClientUtils.escapeQueryChars(contentGlobalNamespace));
-      }
-      query.append(") ");
-      i++;
-    }
-
-    i = 0;
-
-    QueryParameter<Date> cDate = filter.getCreationDateFilter();
-    String contentCreationDate = "";
-    if (cDate != null) {
-      contentCreationDate = DateFormatUtils.ISO_DATETIME_FORMAT.format(cDate);
-    }
-    if (StringUtils.isNotBlank(contentCreationDate)) {
-      query.append("+contentCreationDate: ").append(ClientUtils.escapeQueryChars(contentCreationDate));
-    }
-
-    Collection<QueryParameter> fieldFilters = filter.getFieldFilters();
-    for (QueryParameter queryParms : fieldFilters) {
-      String contentFieldQuery = queryParms.toString();
-      if (i != 0) {
-        query.append(orSeperator);
-      }
-      query.append("+contentFieldQuery: ").append(ClientUtils.escapeQueryChars(contentFieldQuery));
-      i++;
-    }
-
-    i = 0;
-
-    QueryParameter<Date> lmDate = filter.getLastModifiedDateFilter();
-    String contentLastModifiedDate = "";
-    if (lmDate != null) {
-      contentLastModifiedDate = DateFormatUtils.ISO_DATETIME_FORMAT.format(lmDate);
-      query.append("+contentLastModifiedDate: ").append(ClientUtils.escapeQueryChars(contentLastModifiedDate));
-    }
-
-    Set<ContentStatus> contentStatuses = filter.getStatusFilters();
-    for (ContentStatus contentStatus : contentStatuses) {
-      if (i == 0) {
-        query.append("(");
-      }
-      else {
-        query.append(andSeperator + "(");
-      }
-      int contentStatusId = contentStatus.getId();
-      String statusName = contentStatus.getName();
-      if (StringUtils.isNotBlank(statusName)) {
-        query.append("+contentStatusId: ").append(String.valueOf(contentStatusId));
-      }
-      if (StringUtils.isNotBlank(statusName)) {
-        query.append(orSeperator);
-        query.append("+statusName: ").append(ClientUtils.escapeQueryChars(statusName));
+      WorkspaceId workspaceId = contentTypeId.getWorkspace();
+      if (workspaceId != null) {
+        query.append("+workspaceId: ").append(workspaceId);
       }
       query.append(")");
-      i++;
+      count++;
     }
+    if (filter.getCreationDateFilter() != null) {
+      query.append(orSeperator);
+      QueryParameter<Date> creationDateFilter = filter.getCreationDateFilter();
+      String queryStr = generateDateQuery(creationDateFilter);
+      query.append("creationDate: ").append(queryStr);
+    }
+    if (filter.getLastModifiedDateFilter() != null) {
+      query.append(orSeperator);
+      QueryParameter<Date> lastModifiedDateFilter = filter.getLastModifiedDateFilter();
+      String queryStr = generateDateQuery(lastModifiedDateFilter);
+      query.append("lastModifiedDate: ").append(queryStr);
+    }
+    Set<ContentStatus> statuses = filter.getStatusFilters();
+    for (ContentStatus contentStatus : statuses) {
+      query.append(orSeperator);
+      if (StringUtils.isNotBlank(contentStatus.getName())) {
+        query.append("status: ").append(ClientUtils.escapeQueryChars(contentStatus.getName()));
+      }
+    }
+    Collection<QueryParameter> fieldQuery = filter.getFieldFilters();
+    if (fieldQuery != null && !fieldQuery.isEmpty()) {
+      for (QueryParameter parameter : fieldQuery) {
+        if (parameter.getParameterType().equals(ParameterType.PARAMETER_TYPE_PROPERTY)
+            && parameter instanceof StringLikeQueryParameter) {
+          query.append(orSeperator);
+          StringLikeQueryParameter param = QueryParameterCastHelper.STRING_PARAM_HELPER.cast(parameter);
+          query.append(param.getPropertyName()).append(": ").append(ClientUtils.escapeQueryChars(param.getValue()));
+        }
+      }
+    }
+
+    System.out.println(query.toString());
     return textSearchDao.search(QueryParameterFactory.getStringLikePropertyParam("q", query.toString()));
+  }
+
+  private String generateDateQuery(QueryParameter<Date> creationDateFilter) {
+    String dateQuery = "";
+    switch (creationDateFilter.getParameterType()) {
+      case PARAMETER_TYPE_PROPERTY:
+        if (creationDateFilter instanceof UniOperandQueryParameter) {
+          UniOperandQueryParameter<Date> param =
+                                         (UniOperandQueryParameter<Date>) creationDateFilter;
+          switch (param.getOperatorType()) {
+            case OPERATOR_EQUAL:
+              dateQuery = param.getValue().toString();
+              break;
+            case OPERATOR_LESSER:
+              dateQuery = "NOT [" + param.getValue() + " TO *]";
+//              dateQuery = "-[" + param.getValue() + " TO *]";
+              break;
+            case OPERATOR_GREATER_EQUAL:
+              dateQuery = "[" + param.getValue() + " TO *]";
+              break;
+            case OPERATOR_GREATER:
+              dateQuery = "NOT [* TO " + param.getValue() + "]";
+//              dateQuery = "-[* TO " + param.getValue() + "]";
+              break;
+            case OPERATOR_LESSER_EQUAL:
+              dateQuery = "[* TO " + param.getValue() + "]";
+              break;
+            default:
+              dateQuery = "[* TO *]";
+          }
+        }
+        if (creationDateFilter instanceof BiOperandQueryParameter) {
+          BiOperandQueryParameter<Date> param =
+                                        (BiOperandQueryParameter<Date>) creationDateFilter;
+          if (param.getOperatorType().equals(OperatorType.OPERATOR_BETWEEN)) {
+            dateQuery = "[" + param.getFirstValue() + " TO " + param.getSecondValue() + "]";
+          }
+        }
+        break;
+      default:
+        UniOperandQueryParameter<Date> param =
+                                       (UniOperandQueryParameter<Date>) creationDateFilter;
+        dateQuery = param.getPropertyName() + ": [* TO *]";
+        break;
+    }
+    return dateQuery;
   }
 }
