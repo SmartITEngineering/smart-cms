@@ -51,6 +51,8 @@ import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.PersistableContent;
+import com.smartitengineering.dao.common.queryparam.QueryParameter;
+import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.util.ArrayList;
@@ -429,5 +431,50 @@ public class ContentLoaderImpl implements ContentLoader {
   @Override
   public MutableVariation createMutableVariation() {
     return new VariationImpl();
+  }
+
+  @Override
+  public boolean isValidContent(Content content) {
+    if (!isValid(content)) {
+      return false;
+    }
+    return true;
+  }
+
+  protected boolean isValid(Content content) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Mutable content: " + content);
+      if (content != null) {
+        logger.debug("Mutable content ID: " + content.getContentId());
+        logger.debug("Mutable content Definition: " + content.getContentDefinition());
+        if (content.getContentDefinition() != null) {
+          logger.debug("Mutable required fields present: " + isMandatoryFieldsPresent(content));
+        }
+      }
+    }
+    return content != null && content.getContentId() != null && content.getContentDefinition()
+        != null && isMandatoryFieldsPresent(content);
+  }
+
+  protected boolean isMandatoryFieldsPresent(Content content) {
+    ContentType type = content.getContentDefinition();
+    boolean valid = true;
+    for (FieldDef def : type.getFieldDefs().values()) {
+      if (logger.isDebugEnabled()) {
+        logger.debug(def.getName() + " is required: " + def.isRequired());
+        logger.debug(def.getName() + ": " + content.getField(def.getName()));
+      }
+      if (def.isRequired() && content.getField(def.getName()) == null) {
+        valid = valid && false;
+      }
+    }
+    return valid;
+  }
+
+
+  protected void addQueryForContentId(final ContentId contentId, Filter filter) {
+    QueryParameter<String> param = QueryParameterFactory.getStringLikePropertyParam("id", new StringBuilder("\"").append(contentId.
+        toString()).append('"').toString());
+    filter.addFieldFilter(param);
   }
 }
