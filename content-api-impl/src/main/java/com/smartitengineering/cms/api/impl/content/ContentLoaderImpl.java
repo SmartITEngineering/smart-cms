@@ -438,22 +438,25 @@ public class ContentLoaderImpl implements ContentLoader {
     if (!isValid(content)) {
       return false;
     }
+    if (!isValidByCustomValidator(content)) {
+      return false;
+    }
     return true;
   }
 
   protected boolean isValid(Content content) {
     if (logger.isDebugEnabled()) {
-      logger.debug("Mutable content: " + content);
+      logger.debug("Content: " + content);
       if (content != null) {
-        logger.debug("Mutable content ID: " + content.getContentId());
-        logger.debug("Mutable content Definition: " + content.getContentDefinition());
+        logger.debug("Content ID: " + content.getContentId());
+        logger.debug("Content Definition: " + content.getContentDefinition());
         if (content.getContentDefinition() != null) {
-          logger.debug("Mutable required fields present: " + isMandatoryFieldsPresent(content));
+          logger.debug("Required fields present: " + isMandatoryFieldsPresent(content));
         }
       }
     }
-    return content != null && content.getContentId() != null && content.getContentDefinition()
-        != null && isMandatoryFieldsPresent(content);
+    return content != null && content.getContentId() != null && content.getContentDefinition() != null && isMandatoryFieldsPresent(
+        content);
   }
 
   protected boolean isMandatoryFieldsPresent(Content content) {
@@ -471,6 +474,13 @@ public class ContentLoaderImpl implements ContentLoader {
     return valid;
   }
 
+  protected boolean isValidByCustomValidator(Content content) {
+    boolean valid = true;
+    for (Field field : content.getFields().values()) {
+      valid = valid && SmartContentSPI.getInstance().getValidatorProvider().isValidField(content, field);
+    }
+    return valid;
+  }
 
   protected void addQueryForContentId(final ContentId contentId, Filter filter) {
     QueryParameter<String> param = QueryParameterFactory.getStringLikePropertyParam("id", new StringBuilder("\"").append(contentId.
