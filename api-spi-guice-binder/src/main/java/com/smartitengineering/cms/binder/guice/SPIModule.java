@@ -32,6 +32,7 @@ import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.spi.content.ContentSearcher;
 import com.smartitengineering.cms.spi.content.PersistentContentReader;
 import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
 import com.smartitengineering.cms.spi.impl.content.ContentAdapterHelper;
@@ -42,6 +43,7 @@ import com.smartitengineering.cms.spi.impl.content.guice.ContentFilterConfigsPro
 import com.smartitengineering.cms.spi.impl.content.guice.ContentSchemaBaseConfigProvider;
 import com.smartitengineering.cms.spi.impl.content.search.ContentHelper;
 import com.smartitengineering.cms.spi.impl.content.search.ContentIdentifierQueryImpl;
+import com.smartitengineering.cms.spi.impl.content.search.ContentSearcherImpl;
 import com.smartitengineering.cms.spi.impl.content.search.SearchFieldNameGeneratorImpl;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
@@ -243,6 +245,7 @@ public class SPIModule extends PrivateModule {
     bind(new TypeLiteral<CommonFreeTextSearchDao<PersistentContent>>() {
     }).to(new TypeLiteral<SolrFreeTextSearchDao<PersistentContent>>() {
     }).in(Scopes.SINGLETON);
+    bind(ContentSearcher.class).to(ContentSearcherImpl.class).in(Scopes.SINGLETON);
 
     bind(new TypeLiteral<ObjectRowConverter<PersistentContent>>() {
     }).to(ContentObjectConverter.class).in(Singleton.class);
