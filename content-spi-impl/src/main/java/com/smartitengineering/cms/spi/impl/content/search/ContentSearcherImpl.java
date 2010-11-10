@@ -24,6 +24,7 @@ import com.smartitengineering.cms.api.content.Filter;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.spi.content.ContentSearcher;
+import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
 import com.smartitengineering.dao.common.queryparam.BiOperandQueryParameter;
 import com.smartitengineering.dao.common.queryparam.OperatorType;
@@ -33,7 +34,9 @@ import com.smartitengineering.dao.common.queryparam.QueryParameterCastHelper;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.dao.common.queryparam.StringLikeQueryParameter;
 import com.smartitengineering.dao.common.queryparam.UniOperandQueryParameter;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
@@ -50,7 +53,7 @@ public class ContentSearcherImpl implements ContentSearcher {
 
   protected final Logger logger = LoggerFactory.getLogger(getClass());
   @Inject
-  private CommonFreeTextSearchDao<Content> textSearchDao;
+  private CommonFreeTextSearchDao<PersistentContent> textSearchDao;
   private static final String SOLR_DATE_FORMAT = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern() + "'Z'";
 
   @Override
@@ -120,8 +123,22 @@ public class ContentSearcherImpl implements ContentSearcher {
     if (logger.isInfoEnabled()) {
       logger.info("Query q = " + finalQuery.toString());
     }
-    return textSearchDao.search(QueryParameterFactory.getStringLikePropertyParam("q", finalQuery.toString()), QueryParameterFactory.
-        getFirstResultParam(filter.getStartFrom()), QueryParameterFactory.getMaxResultsParam(filter.getMaxContents()));
+    final Collection<PersistentContent> searchResult = textSearchDao.search(QueryParameterFactory.
+        getStringLikePropertyParam("q", finalQuery.toString()), QueryParameterFactory.getFirstResultParam(filter.
+        getStartFrom()), QueryParameterFactory.getMaxResultsParam(filter.getMaxContents()));
+    final Collection<Content> result;
+    if (searchResult == null || searchResult.isEmpty()) {
+      result = Collections.emptyList();
+    }
+    else {
+      result = new ArrayList<Content>();
+      for (PersistentContent content : searchResult) {
+        if (content != null && content.getMutableContent() != null) {
+          result.add(content.getMutableContent());
+        }
+      }
+    }
+    return result;
   }
 
   private String generateDateQuery(QueryParameter<Date> creationDateFilter) {
