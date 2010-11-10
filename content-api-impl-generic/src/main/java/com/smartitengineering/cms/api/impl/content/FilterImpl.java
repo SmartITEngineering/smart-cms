@@ -42,6 +42,7 @@ public class FilterImpl implements Filter {
   private QueryParameter<Date> creationDateParameter;
   private final List<QueryParameter> parameters = new ArrayList<QueryParameter>();
   private final Set<ContentStatus> statuses = new HashSet<ContentStatus>();
+  private boolean disjunction;
 
   @Override
   public void addContentTypeToFilter(ContentTypeId... types) {
@@ -118,5 +119,15 @@ public class FilterImpl implements Filter {
   @Override
   public Set<ContentStatus> getStatusFilters() {
     return Collections.unmodifiableSet(statuses);
+  }
+
+  @Override
+  public boolean isDisjunction() {
+    return disjunction;
+  }
+
+  @Override
+  public void setDisjunction(boolean disjunction) {
+    this.disjunction = disjunction;
   }
 }

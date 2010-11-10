@@ -56,4 +56,8 @@ public interface Filter {
   void removeStatusFilter(ContentStatus... status);
 
   Set<ContentStatus> getStatusFilters();
+
+  boolean isDisjunction();
+
+  void setDisjunction(boolean disjunction);
 }
