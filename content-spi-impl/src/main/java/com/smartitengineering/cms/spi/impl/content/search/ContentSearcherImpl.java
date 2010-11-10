@@ -23,7 +23,6 @@ import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.Filter;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
-import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.content.ContentSearcher;
 import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
 import com.smartitengineering.dao.common.queryparam.BiOperandQueryParameter;
@@ -38,6 +37,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.solr.client.solrj.util.ClientUtils;
 
 /**
@@ -48,43 +48,46 @@ public class ContentSearcherImpl implements ContentSearcher {
 
   @Inject
   private CommonFreeTextSearchDao<Content> textSearchDao;
-  private StringBuilder query = new StringBuilder();
+  private static final String SOLR_DATE_FORMAT = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern() + "'Z'";
 
   @Override
   public Collection<Content> search(Filter filter) {
-    String orSeperator = " OR ";
-    String andSeperator = " AND ";
+    final StringBuilder query = new StringBuilder();
+    String disjunctionSeperator = " OR ";
+    String conjunctionSeperator = " AND ";
+    String seperator = filter.isDisjunction() ? disjunctionSeperator : conjunctionSeperator;
     int count = 0;
     Set<ContentTypeId> contentTypeIds = filter.getContentTypeFilters();
+    if (contentTypeIds != null && !contentTypeIds.isEmpty()) {
+      query.append("(");
+    }
     for (ContentTypeId contentTypeId : contentTypeIds) {
-      if (count == 0) {
-        query.append("(");
+      if (count > 0) {
+        query.append(disjunctionSeperator);
       }
-      else {
-        query.append(orSeperator + "(");
+      if (contentTypeId != null) {
+        query.append("instanceOf: ").append(ClientUtils.escapeQueryChars(contentTypeId.toString()));
       }
-      WorkspaceId workspaceId = contentTypeId.getWorkspace();
-      if (workspaceId != null) {
-        query.append("+workspaceId: ").append(workspaceId);
-      }
-      query.append(")");
       count++;
     }
+    if (contentTypeIds != null && !contentTypeIds.isEmpty()) {
+      query.append(")");
+    }
     if (filter.getCreationDateFilter() != null) {
-      query.append(orSeperator);
+      query.append(seperator);
       QueryParameter<Date> creationDateFilter = filter.getCreationDateFilter();
       String queryStr = generateDateQuery(creationDateFilter);
       query.append("creationDate: ").append(queryStr);
     }
     if (filter.getLastModifiedDateFilter() != null) {
-      query.append(orSeperator);
+      query.append(seperator);
       QueryParameter<Date> lastModifiedDateFilter = filter.getLastModifiedDateFilter();
       String queryStr = generateDateQuery(lastModifiedDateFilter);
       query.append("lastModifiedDate: ").append(queryStr);
     }
     Set<ContentStatus> statuses = filter.getStatusFilters();
     for (ContentStatus contentStatus : statuses) {
-      query.append(orSeperator);
+      query.append(seperator);
       if (StringUtils.isNotBlank(contentStatus.getName())) {
         query.append("status: ").append(ClientUtils.escapeQueryChars(contentStatus.getName()));
       }
@@ -92,9 +95,9 @@ public class ContentSearcherImpl implements ContentSearcher {
     Collection<QueryParameter> fieldQuery = filter.getFieldFilters();
     if (fieldQuery != null && !fieldQuery.isEmpty()) {
       for (QueryParameter parameter : fieldQuery) {
-        if (parameter.getParameterType().equals(ParameterType.PARAMETER_TYPE_PROPERTY)
-            && parameter instanceof StringLikeQueryParameter) {
-          query.append(orSeperator);
+        if (parameter.getParameterType().equals(ParameterType.PARAMETER_TYPE_PROPERTY) &&
+            parameter instanceof StringLikeQueryParameter) {
+          query.append(seperator);
           StringLikeQueryParameter param = QueryParameterCastHelper.STRING_PARAM_HELPER.cast(parameter);
           query.append(param.getPropertyName()).append(": ").append(ClientUtils.escapeQueryChars(param.getValue()));
         }
@@ -114,21 +117,21 @@ public class ContentSearcherImpl implements ContentSearcher {
                                          (UniOperandQueryParameter<Date>) creationDateFilter;
           switch (param.getOperatorType()) {
             case OPERATOR_EQUAL:
-              dateQuery = param.getValue().toString();
+              dateQuery = formatDateInSolrFormat(param.getValue());
               break;
             case OPERATOR_LESSER:
-              dateQuery = "NOT [" + param.getValue() + " TO *]";
+              dateQuery = "NOT [" + formatDateInSolrFormat(param.getValue()) + " TO *]";
 //              dateQuery = "-[" + param.getValue() + " TO *]";
               break;
             case OPERATOR_GREATER_EQUAL:
-              dateQuery = "[" + param.getValue() + " TO *]";
+              dateQuery = "[" + formatDateInSolrFormat(param.getValue()) + " TO *]";
               break;
             case OPERATOR_GREATER:
-              dateQuery = "NOT [* TO " + param.getValue() + "]";
+              dateQuery = "NOT [* TO " + formatDateInSolrFormat(param.getValue()) + "]";
 //              dateQuery = "-[* TO " + param.getValue() + "]";
               break;
             case OPERATOR_LESSER_EQUAL:
-              dateQuery = "[* TO " + param.getValue() + "]";
+              dateQuery = "[* TO " + formatDateInSolrFormat(param.getValue()) + "]";
               break;
             default:
               dateQuery = "[* TO *]";
@@ -138,7 +141,8 @@ public class ContentSearcherImpl implements ContentSearcher {
           BiOperandQueryParameter<Date> param =
                                         (BiOperandQueryParameter<Date>) creationDateFilter;
           if (param.getOperatorType().equals(OperatorType.OPERATOR_BETWEEN)) {
-            dateQuery = "[" + param.getFirstValue() + " TO " + param.getSecondValue() + "]";
+            dateQuery = "[" + formatDateInSolrFormat(param.getFirstValue()) + " TO " + formatDateInSolrFormat(param.
+                getSecondValue()) + "]";
           }
         }
         break;
@@ -149,5 +153,9 @@ public class ContentSearcherImpl implements ContentSearcher {
         break;
     }
     return dateQuery;
+  }
+
+  public static String formatDateInSolrFormat(Date date) {
+    return DateFormatUtils.formatUTC(date, SOLR_DATE_FORMAT);
   }
 }
