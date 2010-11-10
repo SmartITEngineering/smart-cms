@@ -49,6 +49,15 @@ import org.slf4j.LoggerFactory;
  */
 public class ContentHelper extends AbstractAdapterHelper<PersistentContent, MultivalueMap<String, Object>> {
 
+  public static final String CONTENT = "content";
+  public static final String CONTENTTYPEID = "contentTypeId";
+  public static final String CREATIONDATE = "creationDate";
+  public static final String ID = "id";
+  public static final String INSTANCE_OF = "instanceOf";
+  public static final String LASTMODIFIEDDATE = "lastModifiedDate";
+  public static final String STATUS = "status";
+  public static final String TYPE = "type";
+  public static final String WORKSPACEID = "workspaceId";
   @Inject
   private SchemaInfoProvider<PersistentContent, ContentId> contentScehmaProvider;
   @Inject
@@ -63,22 +72,22 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
   @Override
   protected void mergeFromF2T(PersistentContent fromBean,
                               MultivalueMap<String, Object> toBean) {
-    toBean.addValue("type", "content");
+    toBean.addValue(TYPE, CONTENT);
     final ContentId id = fromBean.getId();
-    toBean.addValue("id", id.toString());
-    toBean.addValue("workspaceId", id.getWorkspaceId().toString());
+    toBean.addValue(ID, id.toString());
+    toBean.addValue(WORKSPACEID, id.getWorkspaceId().toString());
     final WriteableContent mutableContent = fromBean.getMutableContent();
-    toBean.addValue("creationDate", mutableContent.getCreationDate());
-    toBean.addValue("lastModifiedDate", mutableContent.getLastModifiedDate());
-    toBean.addValue("status", mutableContent.getStatus().getName());
+    toBean.addValue(CREATIONDATE, mutableContent.getCreationDate());
+    toBean.addValue(LASTMODIFIEDDATE, mutableContent.getLastModifiedDate());
+    toBean.addValue(STATUS, mutableContent.getStatus().getName());
     final String typeIdString = mutableContent.getContentDefinition().getContentTypeID().toString();
-    toBean.addValue("contentTypeId", typeIdString);
-    toBean.addValue("instanceOf", typeIdString);
+    toBean.addValue(CONTENTTYPEID, typeIdString);
+    toBean.addValue(INSTANCE_OF, typeIdString);
     //Content is a instance of all it parent types
     ContentType contentType = mutableContent.getContentDefinition();
     ContentTypeId parent = contentType.getParent();
     while (parent != null) {
-      toBean.addValue("instanceOf", parent.toString());
+      toBean.addValue(INSTANCE_OF, parent.toString());
       final ContentType partentType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(parent);
       parent = partentType.getParent();
     }
@@ -121,7 +130,7 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
   @Override
   protected PersistentContent convertFromT2F(MultivalueMap<String, Object> toBean) {
     try {
-      byte[] contentId = StringUtils.getBytesUtf8(toBean.getFirst("id").toString());
+      byte[] contentId = StringUtils.getBytesUtf8(toBean.getFirst(ID).toString());
       ContentId id = contentScehmaProvider.getIdFromRowId(contentId);
       return readDao.getById(id);
     }
