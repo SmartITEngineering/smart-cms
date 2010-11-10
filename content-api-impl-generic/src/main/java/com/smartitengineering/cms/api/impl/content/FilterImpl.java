@@ -21,6 +21,7 @@ package com.smartitengineering.cms.api.impl.content;
 import com.smartitengineering.cms.api.content.Filter;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +44,9 @@ public class FilterImpl implements Filter {
   private final List<QueryParameter> parameters = new ArrayList<QueryParameter>();
   private final Set<ContentStatus> statuses = new HashSet<ContentStatus>();
   private boolean disjunction;
+  private int startFrom = 0;
+  private int maxContents = 10;
+  private WorkspaceId workspaceId;
 
   @Override
   public void addContentTypeToFilter(ContentTypeId... types) {
@@ -129,5 +133,35 @@ public class FilterImpl implements Filter {
   @Override
   public void setDisjunction(boolean disjunction) {
     this.disjunction = disjunction;
+  }
+
+  @Override
+  public void setWorkspaceId(WorkspaceId workspaceId) {
+    this.workspaceId = workspaceId;
+  }
+
+  @Override
+  public WorkspaceId getWorkspaceId() {
+    return workspaceId;
+  }
+
+  @Override
+  public int getMaxContents() {
+    return maxContents;
+  }
+
+  @Override
+  public int getStartFrom() {
+    return startFrom;
+  }
+
+  @Override
+  public void setMaxContents(int maxContents) {
+    this.maxContents = maxContents;
+  }
+
+  @Override
+  public void setStartFrom(int startFrom) {
+    this.startFrom = startFrom;
   }
 }

@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.content;
 
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import java.util.Collection;
 import java.util.Date;
@@ -56,6 +57,18 @@ public interface Filter {
   void removeStatusFilter(ContentStatus... status);
 
   Set<ContentStatus> getStatusFilters();
+
+  void setWorkspaceId(WorkspaceId workspaceId);
+
+  WorkspaceId getWorkspaceId();
+
+  int getMaxContents();
+
+  int getStartFrom();
+
+  void setMaxContents(int maxContents);
+
+  void setStartFrom(int startFrom);
 
   boolean isDisjunction();
 
