@@ -39,6 +39,8 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.solr.client.solrj.util.ClientUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -46,19 +48,27 @@ import org.apache.solr.client.solrj.util.ClientUtils;
  */
 public class ContentSearcherImpl implements ContentSearcher {
 
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
   @Inject
   private CommonFreeTextSearchDao<Content> textSearchDao;
   private static final String SOLR_DATE_FORMAT = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern() + "'Z'";
 
   @Override
   public Collection<Content> search(Filter filter) {
-    final StringBuilder query = new StringBuilder();
+    final StringBuilder finalQuery = new StringBuilder();
     String disjunctionSeperator = " OR ";
     String conjunctionSeperator = " AND ";
     String seperator = filter.isDisjunction() ? disjunctionSeperator : conjunctionSeperator;
     int count = 0;
     Set<ContentTypeId> contentTypeIds = filter.getContentTypeFilters();
+    finalQuery.append(ContentHelper.TYPE).append(": ").append(ContentHelper.CONTENT);
+    if (filter.getWorkspaceId() != null) {
+      finalQuery.append(disjunctionSeperator);
+      finalQuery.append(ContentHelper.WORKSPACEID).append(": ").append(filter.getWorkspaceId().toString());
+    }
+    final StringBuilder query = new StringBuilder();
     if (contentTypeIds != null && !contentTypeIds.isEmpty()) {
+      query.append(seperator);
       query.append("(");
     }
     for (ContentTypeId contentTypeId : contentTypeIds) {
@@ -66,7 +76,8 @@ public class ContentSearcherImpl implements ContentSearcher {
         query.append(disjunctionSeperator);
       }
       if (contentTypeId != null) {
-        query.append("instanceOf: ").append(ClientUtils.escapeQueryChars(contentTypeId.toString()));
+        query.append(ContentHelper.INSTANCE_OF).append(": ").append(ClientUtils.escapeQueryChars(
+            contentTypeId.toString()));
       }
       count++;
     }
@@ -77,19 +88,19 @@ public class ContentSearcherImpl implements ContentSearcher {
       query.append(seperator);
       QueryParameter<Date> creationDateFilter = filter.getCreationDateFilter();
       String queryStr = generateDateQuery(creationDateFilter);
-      query.append("creationDate: ").append(queryStr);
+      query.append(ContentHelper.CREATIONDATE).append(": ").append(queryStr);
     }
     if (filter.getLastModifiedDateFilter() != null) {
       query.append(seperator);
       QueryParameter<Date> lastModifiedDateFilter = filter.getLastModifiedDateFilter();
       String queryStr = generateDateQuery(lastModifiedDateFilter);
-      query.append("lastModifiedDate: ").append(queryStr);
+      query.append(ContentHelper.LASTMODIFIEDDATE).append(": ").append(queryStr);
     }
     Set<ContentStatus> statuses = filter.getStatusFilters();
     for (ContentStatus contentStatus : statuses) {
       query.append(seperator);
       if (StringUtils.isNotBlank(contentStatus.getName())) {
-        query.append("status: ").append(ClientUtils.escapeQueryChars(contentStatus.getName()));
+        query.append(ContentHelper.STATUS).append(": ").append(ClientUtils.escapeQueryChars(contentStatus.getName()));
       }
     }
     Collection<QueryParameter> fieldQuery = filter.getFieldFilters();
@@ -103,9 +114,14 @@ public class ContentSearcherImpl implements ContentSearcher {
         }
       }
     }
-
-    System.out.println(query.toString());
-    return textSearchDao.search(QueryParameterFactory.getStringLikePropertyParam("q", query.toString()));
+    if (query.length() > 0) {
+      finalQuery.append(disjunctionSeperator).append('(').append(query.toString()).append(')');
+    }
+    if (logger.isInfoEnabled()) {
+      logger.info("Query q = " + finalQuery.toString());
+    }
+    return textSearchDao.search(QueryParameterFactory.getStringLikePropertyParam("q", finalQuery.toString()), QueryParameterFactory.
+        getFirstResultParam(filter.getStartFrom()), QueryParameterFactory.getMaxResultsParam(filter.getMaxContents()));
   }
 
   private String generateDateQuery(QueryParameter<Date> creationDateFilter) {
