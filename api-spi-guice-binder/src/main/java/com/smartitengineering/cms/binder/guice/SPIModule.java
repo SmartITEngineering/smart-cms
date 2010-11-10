@@ -246,6 +246,7 @@ public class SPIModule extends PrivateModule {
     }).to(new TypeLiteral<SolrFreeTextSearchDao<PersistentContent>>() {
     }).in(Scopes.SINGLETON);
     bind(ContentSearcher.class).to(ContentSearcherImpl.class).in(Scopes.SINGLETON);
+    binder().expose(ContentSearcher.class);
 
     bind(new TypeLiteral<ObjectRowConverter<PersistentContent>>() {
     }).to(ContentObjectConverter.class).in(Singleton.class);
