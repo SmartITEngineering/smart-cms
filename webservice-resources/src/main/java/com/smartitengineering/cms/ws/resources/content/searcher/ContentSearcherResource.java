@@ -25,8 +25,6 @@ import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
-import com.smartitengineering.cms.spi.SmartContentSPI;
-import com.smartitengineering.cms.spi.content.ContentSearcher;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
@@ -52,14 +50,8 @@ import org.slf4j.LoggerFactory;
 @Path("/search")
 public class ContentSearcherResource extends AbstractResource {
 
-  @QueryParam("content")
-  private String content;
   @QueryParam("TypeId")
   private List<String> contentTypeId;
-  @QueryParam("id")
-  private String id;
-  @QueryParam("instanceOf")
-  private String instanceOf;
   @QueryParam("status")
   private List<String> statuses;
   @QueryParam("WSId")
@@ -81,11 +73,10 @@ public class ContentSearcherResource extends AbstractResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
-    ContentSearcher searcher = SmartContentSPI.getInstance().getContentSearcher();
     Collection<Content> searchContent;
     ResponseBuilder responseBuilder;
     Filter filter = getFilter();
-    searchContent = searcher.search(filter);
+    searchContent = SmartContentAPI.getInstance().getContentLoader().search(filter);
     if (searchContent.isEmpty() || searchContent == null) {
       responseBuilder = Response.status(Response.Status.NO_CONTENT);
     }
