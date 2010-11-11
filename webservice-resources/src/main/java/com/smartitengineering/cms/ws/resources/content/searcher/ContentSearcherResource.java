@@ -36,7 +36,9 @@ import java.util.Date;
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -77,6 +79,7 @@ public class ContentSearcherResource extends AbstractResource {
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
   @GET
+  @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
     ContentSearcher searcher = SmartContentSPI.getInstance().getContentSearcher();
     Collection<Content> searchContent;
@@ -84,7 +87,7 @@ public class ContentSearcherResource extends AbstractResource {
     Filter filter = getFilter();
     searchContent = searcher.search(filter);
     if (searchContent.isEmpty() || searchContent == null) {
-      responseBuilder = Response.status(Response.Status.NOT_FOUND);
+      responseBuilder = Response.status(Response.Status.NO_CONTENT);
     }
     else {
       responseBuilder = Response.ok(searchContent);
@@ -94,11 +97,19 @@ public class ContentSearcherResource extends AbstractResource {
 
   private Filter getFilter() {
     Filter filter = SmartContentAPI.getInstance().getContentLoader().craeteFilter();
-    filter.addContentTypeToFilter(parseCollectionContentTypeId(contentTypeId));
-    filter.addStatusFilter(parseContentStatus(statuses));
-    filter.addFieldFilter(parseFieldQuery(fieldQuery));
+    if (contentTypeId != null && !contentTypeId.isEmpty()) {
+      filter.addContentTypeToFilter(parseCollectionContentTypeId(contentTypeId));
+    }
+    if (statuses != null && !statuses.isEmpty()) {
+      filter.addStatusFilter(parseContentStatus(statuses));
+    }
+    if (fieldQuery != null && !fieldQuery.isEmpty()) {
+      filter.addFieldFilter(parseFieldQuery(fieldQuery));
+    }
     logger.info(":::WORKSPACE ID : " + workspaceId);
-    filter.setWorkspaceId(parseWorkspaceId(workspaceId));
+    if (StringUtils.isNotBlank(workspaceId)) {
+      filter.setWorkspaceId(parseWorkspaceId(workspaceId));
+    }
     logger.info(":::START FROM : " + String.valueOf(start));
     filter.setStartFrom(start);
     logger.info(":::NUMBER OF ITEM : " + String.valueOf(count));
@@ -106,9 +117,13 @@ public class ContentSearcherResource extends AbstractResource {
     logger.info(String.valueOf(":::VAULE OF DISJUNCTION : " + disJunction));
     filter.setDisjunction(disJunction);
     logger.info(":::CREATION DATE : " + creationDate);
-    filter.setCreationDateFilter(formatDate(creationDate));
+    if (creationDate != null) {
+      filter.setCreationDateFilter(formatDate(creationDate));
+    }
     logger.info(":::LAST MODIFIED DATE : " + lastModifiedDate);
-    filter.setLastModifiedDateFilter(formatDate(lastModifiedDate));
+    if (lastModifiedDate != null) {
+      filter.setLastModifiedDateFilter(formatDate(lastModifiedDate));
+    }
     return filter;
   }
 
@@ -116,7 +131,13 @@ public class ContentSearcherResource extends AbstractResource {
     Collection<ContentTypeId> contentTypeIds = new ArrayList<ContentTypeId>();
     for (String strContentTypeId : strCollectionContentTypeId) {
       logger.info(":::CONTENT TYPE ID AS STRING : " + strContentTypeId);
-      contentTypeIds.add(parseContentTypeId(strContentTypeId));
+      if (StringUtils.isBlank(strContentTypeId)) {
+        continue;
+      }
+      final ContentTypeId id = parseContentTypeId(strContentTypeId);
+      if (id != null) {
+        contentTypeIds.add(id);
+      }
     }
     ContentTypeId[] retContentTypeIds = contentTypeIds.toArray(new ContentTypeId[contentTypeIds.size()]);
     return retContentTypeIds;
@@ -125,6 +146,9 @@ public class ContentSearcherResource extends AbstractResource {
   private ContentStatus[] parseContentStatus(List<String> strCollectionContentStatus) {
     Collection<ContentStatus> contentStatuses = new ArrayList<ContentStatus>();
     for (String strContentStatus : strCollectionContentStatus) {
+      if (StringUtils.isBlank(strContentStatus)) {
+        continue;
+      }
       logger.info(":::CONTENT STATUS : " + strContentStatus);
       MutableContentStatus contentStatus = SmartContentAPI.getInstance().getContentTypeLoader().
           createMutableContentStatus();
@@ -136,8 +160,14 @@ public class ContentSearcherResource extends AbstractResource {
   }
 
   private WorkspaceId parseWorkspaceId(String strWorkspaceId) {
+    if (StringUtils.isBlank(strWorkspaceId)) {
+      return null;
+    }
     logger.info(":::WORKSPACE ID : " + strWorkspaceId);
     String[] workspaceParam = splitStr(strWorkspaceId, ",");
+    if (workspaceParam.length < 2) {
+      return null;
+    }
     WorkspaceId parsedWorkspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId(workspaceParam[0],
                                                                                                       workspaceParam[1]);
     return parsedWorkspaceId;
@@ -146,8 +176,14 @@ public class ContentSearcherResource extends AbstractResource {
   private QueryParameter[] parseFieldQuery(List<String> strFieldQuery) {
     Collection<QueryParameter> parseQuery = new ArrayList<QueryParameter>();
     for (String strSingleFieldQuery : strFieldQuery) {
+      if (StringUtils.isBlank(strSingleFieldQuery)) {
+        continue;
+      }
       logger.info(":::FIELD QUERY : " + strSingleFieldQuery);
       String[] values = splitStr(strSingleFieldQuery, ",");
+      if (values.length < 2) {
+        continue;
+      }
       parseQuery.add(QueryParameterFactory.getStringLikePropertyParam(values[0], values[1]));
     }
     QueryParameter[] parsedQueryParameter = parseQuery.toArray(new QueryParameter[parseQuery.size()]);
@@ -156,6 +192,9 @@ public class ContentSearcherResource extends AbstractResource {
 
   private ContentTypeId parseContentTypeId(String strContentTypeId) {
     String[] contentTypeIdStr = splitStr(strContentTypeId, ",");
+    if (contentTypeIdStr.length < 4) {
+      return null;
+    }
     WorkspaceId contentWorkspaceId =
                 SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId(contentTypeIdStr[0],
                                                                                   contentTypeIdStr[1]);
