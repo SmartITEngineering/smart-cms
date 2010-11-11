@@ -138,7 +138,7 @@
     <dynamicField name="*_LONG_msi" type="long" indexed="true" stored="true" required="false" multiValued="true" />
   </fields>
 
-  <defaultSearchField>name</defaultSearchField>
+  <defaultSearchField>id</defaultSearchField>
   <uniqueKey>id</uniqueKey>
   <solrQueryParser defaultOperator="OR"/>
 </schema>
