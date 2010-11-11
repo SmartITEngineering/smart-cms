@@ -81,13 +81,7 @@
     <dynamicField name="*_INTEGER_is" type="int" indexed="true" stored="true" required="false"/>
     <dynamicField name="*_INTEGER_msi" type="int" indexed="true" stored="true" required="false" multiValued="true" />
 
-    <dynamicField name="*_OTHER_m" type="string" indexed="false" stored="false" required="false" multiValued="true" />
-    <dynamicField name="*_OTHER_i" type="string" indexed="true" stored="false" required="false"/>
-    <dynamicField name="*_OTHER_s" type="string" indexed="false" stored="true" required="false"/>
-    <dynamicField name="*_OTHER_mi" type="string" indexed="true" stored="false" required="false" multiValued="true" />
-    <dynamicField name="*_OTHER_ms" type="string" indexed="false" stored="true" required="false" multiValued="true" />
-    <dynamicField name="*_OTHER_is" type="string" indexed="true" stored="true" required="false"/>
-    <dynamicField name="*_OTHER_msi" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+    <dynamicField name="*_OTHER_*" type="string" indexed="false" stored="false" required="false" multiValued="true" />
 
     <dynamicField name="*_CONTENT_m" type="string" indexed="false" stored="false" required="false" multiValued="true" />
     <dynamicField name="*_CONTENT_i" type="string" indexed="true" stored="false" required="false"/>
