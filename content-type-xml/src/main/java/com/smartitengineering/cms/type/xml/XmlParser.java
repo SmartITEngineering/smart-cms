@@ -270,8 +270,7 @@ public class XmlParser implements XmlConstants {
         type.setTypeDef(parseContentTypeId(rootElement, DEFINITION, workspaceId));
       }
       if (StringUtils.equalsIgnoreCase(rootElement.getChildElements().get(i).getLocalName(), BIDIRECTIONAL)) {
-        type.setBiBidirectionalFieldName(
-            parseOptionalStringElement(rootElement.getChildElements().get(i), BIDIRECTIONAL));
+        type.setBiBidirectionalFieldName(parseOptionalStringElement(rootElement, BIDIRECTIONAL));
       }
       if (StringUtils.equalsIgnoreCase(rootElement.getChildElements().get(i).getLocalName(), AVAILABLE_FOR_SEARCH)) {
         final String availStrVal = parseOptionalStringElement(rootElement, AVAILABLE_FOR_SEARCH);

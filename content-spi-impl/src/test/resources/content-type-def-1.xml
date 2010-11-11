@@ -42,6 +42,7 @@
               <typeNS>asdfasdf1</typeNS>
               <typeName>XYZ</typeName>
             </definition>
+            <bidirectional>test</bidirectional>
             <availableForSearch>true</availableForSearch>
           </content>
         </value>

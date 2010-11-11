@@ -221,10 +221,10 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals(FieldValueType.CONTENT.name(), fieldDef.getValueDef().getType().name());
 
     ContentDataType contentDataType = (ContentDataType) fieldDef.getValueDef();
-    Assert.assertNull(contentDataType.getBidirectionalFieldName());
     Assert.assertEquals("XYZ", contentDataType.getTypeDef().getName());
     Assert.assertEquals("asdfasdf1", contentDataType.getTypeDef().getNamespace());
     Assert.assertEquals(true, contentDataType.isAvaialbleForSearch());
+    Assert.assertEquals("test", contentDataType.getBidirectionalFieldName());
     Assert.assertEquals("testWS", contentDataType.getTypeDef().getWorkspace().getGlobalNamespace());
     Assert.assertEquals("test", contentDataType.getTypeDef().getWorkspace().getName());
 
