@@ -94,6 +94,7 @@
                   <typeNS>jpeg</typeNS>
                   <typeName>RST</typeName>
                 </definition>
+                <availableForSearch>false</availableForSearch>
               </content>
             </simple-value>
             <minSize>2</minSize>

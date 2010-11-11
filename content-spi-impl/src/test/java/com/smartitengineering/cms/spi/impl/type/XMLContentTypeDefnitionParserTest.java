@@ -224,6 +224,7 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertNull(contentDataType.getBidirectionalFieldName());
     Assert.assertEquals("XYZ", contentDataType.getTypeDef().getName());
     Assert.assertEquals("asdfasdf1", contentDataType.getTypeDef().getNamespace());
+    Assert.assertEquals(true, contentDataType.isAvaialbleForSearch());
     Assert.assertEquals("testWS", contentDataType.getTypeDef().getWorkspace().getGlobalNamespace());
     Assert.assertEquals("test", contentDataType.getTypeDef().getWorkspace().getName());
 
@@ -318,6 +319,7 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertNull(contentDataType1.getBidirectionalFieldName());
     Assert.assertEquals("RST", contentDataType1.getTypeDef().getName());
     Assert.assertEquals("jpeg", contentDataType1.getTypeDef().getNamespace());
+    Assert.assertEquals(false, contentDataType1.isAvaialbleForSearch());
     Assert.assertEquals("testWS", contentDataType1.getTypeDef().getWorkspace().getGlobalNamespace());
     Assert.assertEquals("test", contentDataType1.getTypeDef().getWorkspace().getName());
 

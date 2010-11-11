@@ -263,6 +263,9 @@ public class XmlParser implements XmlConstants {
   protected ContentDataType parseContent(Element rootElement) {
     MutableContentDataType type = new ContentDataTypeImpl();
     for (int i = 0; i < rootElement.getChildElements().size(); i++) {
+      if (logger.isInfoEnabled()) {
+        logger.info("Config name for content data type: " + rootElement.getChildElements().get(i).getLocalName());
+      }
       if (StringUtils.equalsIgnoreCase(rootElement.getChildElements().get(i).getLocalName(), DEFINITION)) {
         type.setTypeDef(parseContentTypeId(rootElement, DEFINITION, workspaceId));
       }
@@ -271,8 +274,11 @@ public class XmlParser implements XmlConstants {
             parseOptionalStringElement(rootElement.getChildElements().get(i), BIDIRECTIONAL));
       }
       if (StringUtils.equalsIgnoreCase(rootElement.getChildElements().get(i).getLocalName(), AVAILABLE_FOR_SEARCH)) {
-        type.setAvailableForSearch(Boolean.parseBoolean(parseOptionalStringElement(rootElement.getChildElements().get(i),
-                                                                                   AVAILABLE_FOR_SEARCH)));
+        final String availStrVal = parseOptionalStringElement(rootElement, AVAILABLE_FOR_SEARCH);
+        if (logger.isInfoEnabled()) {
+          logger.info("Available For Search " + availStrVal);
+        }
+        type.setAvailableForSearch(Boolean.parseBoolean(availStrVal));
       }
     }
     return type;
