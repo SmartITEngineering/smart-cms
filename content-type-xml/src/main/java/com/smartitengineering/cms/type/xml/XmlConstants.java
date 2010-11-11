@@ -33,6 +33,7 @@ public interface XmlConstants {
   public String CONTENT_POINTER = "contentPointer";
   public String DEFINITION = "definition";
   public String BIDIRECTIONAL = "bidirectional";
+  public String AVAILABLE_FOR_SEARCH = "availableForSearch";
   public String CONTENT = "content";
   public String LONG = "long";
   public String INTEGER = "integer";

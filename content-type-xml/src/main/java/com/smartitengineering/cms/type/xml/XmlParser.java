@@ -270,6 +270,10 @@ public class XmlParser implements XmlConstants {
         type.setBiBidirectionalFieldName(
             parseOptionalStringElement(rootElement.getChildElements().get(i), BIDIRECTIONAL));
       }
+      if (StringUtils.equalsIgnoreCase(rootElement.getChildElements().get(i).getLocalName(), AVAILABLE_FOR_SEARCH)) {
+        type.setAvailableForSearch(Boolean.parseBoolean(parseOptionalStringElement(rootElement.getChildElements().get(i),
+                                                                                   AVAILABLE_FOR_SEARCH)));
+      }
     }
     return type;
   }

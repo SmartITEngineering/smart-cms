@@ -91,6 +91,7 @@
                   <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
                   <typeName>Publisher</typeName>
                 </definition>
+                <availableForSearch>true</availableForSearch>
               </content>
             </simple-value>
             <maxSize>30</maxSize>

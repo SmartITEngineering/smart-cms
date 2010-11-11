@@ -31,6 +31,7 @@ public class ContentDataTypeImpl implements MutableContentDataType {
 
   private ContentTypeId contentTypeId;
   private String bidirectionalFieldName;
+  private boolean availableForSearch;
 
   @Override
   public ContentTypeId getTypeDef() {
@@ -87,5 +88,15 @@ public class ContentDataTypeImpl implements MutableContentDataType {
   public String toString() {
     return "ContentDataTypeImpl{" + "contentTypeId=" + contentTypeId + "; bidirectionalFieldName="
         + bidirectionalFieldName + '}';
+  }
+
+  @Override
+  public void setAvailableForSearch(boolean availableForSearch) {
+    this.availableForSearch = availableForSearch;
+  }
+
+  @Override
+  public boolean isAvaialbleForSearch() {
+    return this.availableForSearch;
   }
 }

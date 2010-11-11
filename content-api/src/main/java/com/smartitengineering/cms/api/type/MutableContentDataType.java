@@ -35,4 +35,6 @@ public interface MutableContentDataType
   public void setTypeDef(ContentTypeId typeDef);
 
   public void setBiBidirectionalFieldName(String fieldName);
+
+  public void setAvailableForSearch(boolean availableForSearch);
 }

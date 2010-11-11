@@ -33,4 +33,6 @@ public interface ContentDataType
   public ContentTypeId getTypeDef();
 
   public String getBidirectionalFieldName();
+
+  public boolean isAvaialbleForSearch();
 }
