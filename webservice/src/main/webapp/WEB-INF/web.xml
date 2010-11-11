@@ -21,6 +21,10 @@
       <param-value>/(images|css|jsp|script)/.*</param-value>
     </init-param>
   </filter>
+  <!--
+    Since we are using Jetty for deployment initially we are assuming that Jetty will be configured to do this
+  -->
+  <!--
   <filter>
     <filter-name>Date Filter</filter-name>
     <filter-class>com.smartitengineering.cms.ws.DateFilter</filter-class>
@@ -29,6 +33,7 @@
     <filter-name>Date Filter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
+  -->
   <filter-mapping>
     <filter-name>Jersey Filter</filter-name>
     <url-pattern>/*</url-pattern>
