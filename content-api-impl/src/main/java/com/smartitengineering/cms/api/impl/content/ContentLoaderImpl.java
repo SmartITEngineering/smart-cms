@@ -44,7 +44,9 @@ import com.smartitengineering.cms.api.content.OtherFieldValue;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
@@ -438,6 +440,9 @@ public class ContentLoaderImpl implements ContentLoader {
     if (!isValid(content)) {
       return false;
     }
+    if (!checkForRelatedContents(content)) {
+      return false;
+    }
     if (!isValidByCustomValidator(content)) {
       return false;
     }
@@ -482,9 +487,44 @@ public class ContentLoaderImpl implements ContentLoader {
     return valid;
   }
 
-  protected void addQueryForContentId(final ContentId contentId, Filter filter) {
+  protected void addQueryForContentId(final ContentId contentId, ContentTypeId instanceOfId, Filter filter) {
     QueryParameter<String> param = QueryParameterFactory.getStringLikePropertyParam("id", new StringBuilder("\"").append(contentId.
         toString()).append('"').toString());
     filter.addFieldFilter(param);
+  }
+
+  protected boolean checkForRelatedContents(Content content) {
+    boolean valid = true;
+    for (Field field : content.getFields().values()) {
+      if (field != null && field.getFieldDef() != null) {
+        FieldDef def = field.getFieldDef();
+        switch (def.getValueDef().getType()) {
+          case COLLECTION:
+            if (((CollectionDataType) def.getValueDef()).getItemDataType().getType().equals(FieldValueType.CONTENT)) {
+              DataType contentDataType = ((CollectionDataType) def.getValueDef()).getItemDataType();
+              for (FieldValue val : ((CollectionFieldValue) field.getValue()).getValue()) {
+                valid = valid && checkContentTypeValidity(val, contentDataType);
+              }
+            }
+            break;
+          case CONTENT:
+            valid = valid && checkContentTypeValidity(field.getValue(), def.getValueDef());
+            break;
+          default:
+            break;
+        }
+      }
+      if (!valid) {
+        return valid;
+      }
+    }
+    return valid;
+  }
+
+  protected boolean checkContentTypeValidity(FieldValue val, DataType contentDataType) {
+    Filter filter = craeteFilter();
+    addQueryForContentId(((ContentFieldValue) val).getValue(), ((ContentDataType) contentDataType).getTypeDef(), filter);
+    Set<Content> contents = search(filter);
+    return !contents.isEmpty();
   }
 }
