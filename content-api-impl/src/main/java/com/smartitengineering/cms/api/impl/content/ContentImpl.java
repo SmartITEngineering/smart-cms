@@ -55,6 +55,17 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   private String entityTagValue;
 
   @Override
+  public void put() throws IOException {
+    if(!isValid()) {
+      logger.info("Content not in valid state!");
+      //First get contents indexed before attempting to use this validity!
+      //Uncomment the following line once indexing is ensured in testing
+      //throw new IOException("Content is not in valid state!");
+    }
+    super.put();
+  }
+
+  @Override
   public void setParentId(ContentId contentId) {
     if (contentDef == null) {
       throw new IllegalArgumentException("Content Type Definition must be set before setting parent content ID");
@@ -245,5 +256,10 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   @Override
   public String getEntityTagValue() {
     return this.entityTagValue;
+  }
+
+  @Override
+  public boolean isValid() {
+    return SmartContentAPI.getInstance().getContentLoader().isValidContent(this);
   }
 }

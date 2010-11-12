@@ -22,6 +22,8 @@ import com.smartitengineering.cms.api.factory.write.Lock;
 import com.smartitengineering.cms.spi.lock.Key;
 import com.smartitengineering.cms.spi.lock.LockManager;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Integrates lock implementation for domain objects needing locking support. It
@@ -32,6 +34,8 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractLockableDomain
     implements Lock,
                Key {
+
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   protected Lock lock;
 

@@ -36,4 +36,6 @@ public interface MutableContent extends Content {
   public void removeField(String fieldName);
 
   public void setStatus(ContentStatus contentStatus);
+
+  public boolean isValid();
 }
