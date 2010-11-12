@@ -50,11 +50,11 @@ import org.slf4j.LoggerFactory;
 @Path("/search")
 public class ContentSearcherResource extends AbstractResource {
 
-  @QueryParam("TypeId")
+  @QueryParam("typeId")
   private List<String> contentTypeId;
   @QueryParam("status")
   private List<String> statuses;
-  @QueryParam("WSId")
+  @QueryParam("workspaceId")
   private String workspaceId;
   @QueryParam("field")
   private List<String> fieldQuery;
