@@ -88,7 +88,7 @@ public class ContentsResource extends AbstractResource {
 
   @Path("/" + PATH_TO_SEARCH)
   public ContentSearcherResource search() {
-    final ContentSearcherResource contentSearcherResource = new ContentSearcherResource();
+    final ContentSearcherResource contentSearcherResource = new ContentSearcherResource(getInjectables());
     contentSearcherResource.setWorkspaceId(workspace.getId().toString());
     return contentSearcherResource;
   }

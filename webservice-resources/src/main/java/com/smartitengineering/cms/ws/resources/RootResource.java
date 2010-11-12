@@ -113,7 +113,7 @@ public class RootResource extends AbstractResource {
 
   @Path("/" + PATH_TO_SEARCH)
   public ContentSearcherResource search() {
-    return new ContentSearcherResource();
+    return new ContentSearcherResource(getInjectables());
   }
 
   @Override

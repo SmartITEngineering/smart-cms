@@ -25,9 +25,15 @@ import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.ws.common.domains.SearchResult;
+import com.smartitengineering.cms.ws.resources.content.ContentResource;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
+import com.smartitengineering.util.bean.adapter.GenericAdapter;
+import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
+import com.smartitengineering.util.rest.server.ServerResourceInjectables;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -38,6 +44,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,18 +65,32 @@ public class ContentSearcherResource extends AbstractResource {
   private int start;
   private int count;
   private boolean disJunction;
+  protected final GenericAdapter<Content, com.smartitengineering.cms.ws.common.domains.Content> adapter;
+  private final static String WORKSPACE_ID = "workspaceId", STATUS = "status", TYPE_ID = "typeId", FIELD = "field",
+      CREATION_DATE = "creationDate", LAST_MODIFIED_DATE = "lastModifiedDate", START = "start", COUNT = "count",
+      DISJUNCTION = "disjunction";
+
+  public ContentSearcherResource(ServerResourceInjectables injectables) {
+    super(injectables);
+    GenericAdapterImpl adapterImpl =
+                       new GenericAdapterImpl<Content, com.smartitengineering.cms.ws.common.domains.Content>();
+    adapterImpl.setHelper(
+        new ContentResource(injectables, SmartContentAPI.getInstance().getContentLoader().
+        createContentId(SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId("", ""), new byte[0])).new ContentAdapterHelper());
+    adapter = adapterImpl;
+  }
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public Response get(@QueryParam("typeId") List<String> contentTypeId,
-                      @QueryParam("status") List<String> statuses,
-                      @QueryParam("workspaceId") String workspaceId,
-                      @QueryParam("field") List<String> fieldQuery,
-                      @QueryParam("creationDate") String creationDate,
-                      @QueryParam("lastModifiedDate") String lastModifiedDate,
-                      @QueryParam("start") int start,
-                      @QueryParam("count") int count,
-                      @QueryParam("disjunction") boolean disJunction) {
+  public Response get(@QueryParam(TYPE_ID) List<String> contentTypeId,
+                      @QueryParam(STATUS) List<String> statuses,
+                      @QueryParam(WORKSPACE_ID) String workspaceId,
+                      @QueryParam(FIELD) List<String> fieldQuery,
+                      @QueryParam(CREATION_DATE) String creationDate,
+                      @QueryParam(LAST_MODIFIED_DATE) String lastModifiedDate,
+                      @QueryParam(START) int start,
+                      @QueryParam(COUNT) int count,
+                      @QueryParam(DISJUNCTION) boolean disJunction) {
     this.contentTypeId = contentTypeId;
     this.statuses = statuses;
     this.workspaceId = workspaceId;
@@ -87,9 +108,33 @@ public class ContentSearcherResource extends AbstractResource {
       responseBuilder = Response.status(Response.Status.NO_CONTENT);
     }
     else {
-      responseBuilder = Response.ok(searchContent);
+      SearchResult result = new SearchResult();
+      result.setResult(adapter.convert(searchContent.toArray(new Content[searchContent.size()])));
+      result.setCount(count);
+      result.setStart(start);
+      result.setNext(getNextPage());
+      result.setPrevious(getPreviousPage());
+      responseBuilder = Response.ok(result);
     }
     return responseBuilder.build();
+  }
+
+  protected URI getNextPage() {
+    if (start - count < 0) {
+      return null;
+    }
+    return getPage(1);
+  }
+
+  protected URI getPreviousPage() {
+    return getPage(-1);
+  }
+
+  protected URI getPage(int offset) {
+    return UriBuilder.fromUri(getUriInfo().getRequestUri()).queryParam(WORKSPACE_ID, workspaceId).queryParam(TYPE_ID, contentTypeId.
+        toArray()).queryParam(STATUS, statuses.toArray()).queryParam(CREATION_DATE, creationDate).queryParam(
+        LAST_MODIFIED_DATE, lastModifiedDate).queryParam(START, start + offset * count).queryParam(COUNT, count).
+        queryParam(DISJUNCTION, disJunction).build();
   }
 
   private Filter getFilter() {

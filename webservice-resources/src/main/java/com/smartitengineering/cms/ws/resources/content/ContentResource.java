@@ -244,7 +244,7 @@ public class ContentResource extends AbstractResource {
                          StringUtils.newStringUtf8(contentId.getId()));
   }
 
-  protected class ContentAdapterHelper extends AbstractAdapterHelper<Content, com.smartitengineering.cms.ws.common.domains.Content> {
+  public class ContentAdapterHelper extends AbstractAdapterHelper<Content, com.smartitengineering.cms.ws.common.domains.Content> {
 
     @Override
     protected com.smartitengineering.cms.ws.common.domains.Content newTInstance() {
