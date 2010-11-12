@@ -44,13 +44,17 @@ import com.smartitengineering.cms.api.content.OtherFieldValue;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.PersistableContent;
+import com.smartitengineering.dao.common.queryparam.QueryParameter;
+import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.util.ArrayList;
@@ -429,5 +433,98 @@ public class ContentLoaderImpl implements ContentLoader {
   @Override
   public MutableVariation createMutableVariation() {
     return new VariationImpl();
+  }
+
+  @Override
+  public boolean isValidContent(Content content) {
+    if (!isValid(content)) {
+      return false;
+    }
+    if (!checkForRelatedContents(content)) {
+      return false;
+    }
+    if (!isValidByCustomValidator(content)) {
+      return false;
+    }
+    return true;
+  }
+
+  protected boolean isValid(Content content) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Content: " + content);
+      if (content != null) {
+        logger.debug("Content ID: " + content.getContentId());
+        logger.debug("Content Definition: " + content.getContentDefinition());
+        if (content.getContentDefinition() != null) {
+          logger.debug("Required fields present: " + isMandatoryFieldsPresent(content));
+        }
+      }
+    }
+    return content != null && content.getContentId() != null && content.getContentDefinition() != null && isMandatoryFieldsPresent(
+        content);
+  }
+
+  protected boolean isMandatoryFieldsPresent(Content content) {
+    ContentType type = content.getContentDefinition();
+    boolean valid = true;
+    for (FieldDef def : type.getFieldDefs().values()) {
+      if (logger.isDebugEnabled()) {
+        logger.debug(def.getName() + " is required: " + def.isRequired());
+        logger.debug(def.getName() + ": " + content.getField(def.getName()));
+      }
+      if (def.isRequired() && content.getField(def.getName()) == null) {
+        valid = valid && false;
+      }
+    }
+    return valid;
+  }
+
+  protected boolean isValidByCustomValidator(Content content) {
+    boolean valid = true;
+    for (Field field : content.getFields().values()) {
+      valid = valid && SmartContentSPI.getInstance().getValidatorProvider().isValidField(content, field);
+    }
+    return valid;
+  }
+
+  protected void addQueryForContentId(final ContentId contentId, ContentTypeId instanceOfId, Filter filter) {
+    QueryParameter<String> param = QueryParameterFactory.getStringLikePropertyParam("id", new StringBuilder("\"").append(contentId.
+        toString()).append('"').toString());
+    filter.addFieldFilter(param);
+  }
+
+  protected boolean checkForRelatedContents(Content content) {
+    boolean valid = true;
+    for (Field field : content.getFields().values()) {
+      if (field != null && field.getFieldDef() != null) {
+        FieldDef def = field.getFieldDef();
+        switch (def.getValueDef().getType()) {
+          case COLLECTION:
+            if (((CollectionDataType) def.getValueDef()).getItemDataType().getType().equals(FieldValueType.CONTENT)) {
+              DataType contentDataType = ((CollectionDataType) def.getValueDef()).getItemDataType();
+              for (FieldValue val : ((CollectionFieldValue) field.getValue()).getValue()) {
+                valid = valid && checkContentTypeValidity(val, contentDataType);
+              }
+            }
+            break;
+          case CONTENT:
+            valid = valid && checkContentTypeValidity(field.getValue(), def.getValueDef());
+            break;
+          default:
+            break;
+        }
+      }
+      if (!valid) {
+        return valid;
+      }
+    }
+    return valid;
+  }
+
+  protected boolean checkContentTypeValidity(FieldValue val, DataType contentDataType) {
+    Filter filter = craeteFilter();
+    addQueryForContentId(((ContentFieldValue) val).getValue(), ((ContentDataType) contentDataType).getTypeDef(), filter);
+    Set<Content> contents = search(filter);
+    return !contents.isEmpty();
   }
 }

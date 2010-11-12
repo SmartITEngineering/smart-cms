@@ -109,6 +109,8 @@ public interface ContentLoader {
 
   Variation getVariation(Content content, Field field, String name);
 
+  boolean isValidContent(Content content);
+
   ContentId generateContentId(WorkspaceId workspaceId);
 
   String getEntityTagValueForContent(Content content);
