@@ -20,13 +20,17 @@ package com.smartitengineering.cms.spi.impl.content.search;
 
 import com.google.inject.Inject;
 import com.smartitengineering.cms.api.content.CollectionFieldValue;
+import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
+import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.spi.SmartContentSPI;
@@ -91,35 +95,58 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
       final ContentType partentType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(parent);
       parent = partentType.getParent();
     }
+    indexFields(mutableContent, toBean, "");
+  }
+
+  protected void indexFields(final Content mutableContent, MultivalueMap<String, Object> toBean, String prefix) {
     Map<String, Field> fields = mutableContent.getFields();
     for (Entry<String, Field> entry : fields.entrySet()) {
       FieldDef def = entry.getValue().getFieldDef();
       Field field = entry.getValue();
-      String searchFieldName = SmartContentSPI.getInstance().getSearchFieldNameGenerator().getSearchFieldName(def);
+      StringBuilder builder = new StringBuilder();
+      if(org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
+        builder.append(prefix).append('_');
+      }
+      String searchFieldName = builder.append(SmartContentSPI.getInstance().
+          getSearchFieldNameGenerator().getSearchFieldName(def)).toString();
       if (org.apache.commons.lang.StringUtils.isNotBlank(searchFieldName)) {
-        addFieldValue(toBean, searchFieldName, field);
+        addFieldValue(toBean, searchFieldName, field, prefix);
       }
     }
   }
 
-  protected void addFieldValue(MultivalueMap<String, Object> toBean, String indexFieldName, Field field) {
+  protected void addFieldValue(MultivalueMap<String, Object> toBean, String indexFieldName, Field field, String prefix) {
     final Object value = field.getValue().getValue();
-    addSimpleValue(field.getValue(), toBean, indexFieldName, value);
+    StringBuilder builder = new StringBuilder();
+      if(org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
+        builder.append(prefix).append('_');
+      }
+    final String name = builder.append(field.getName()).toString();
+    addSimpleValue(field.getValue(), field.getFieldDef().getValueDef(), toBean, name, indexFieldName, value);
+
   }
 
-  protected void addSimpleValue(final FieldValue def,
-                                MultivalueMap<String, Object> toBean, String indexFieldName, final Object value) {
+  protected void addSimpleValue(final FieldValue def, DataType fieldDataType, MultivalueMap<String, Object> toBean,
+                                String fieldName, String indexFieldName, final Object value) {
     final FieldValueType valueDef = def.getDataType();
     switch (valueDef) {
       case COLLECTION:
         CollectionFieldValue fieldValue = (CollectionFieldValue) def;
         Collection<FieldValue> values = fieldValue.getValue();
         for (FieldValue val : values) {
-          addSimpleValue(val, toBean, indexFieldName, val.getValue());
+          addSimpleValue(val, ((CollectionDataType) fieldDataType).getItemDataType(), toBean, fieldName, indexFieldName, val.
+              getValue());
         }
         break;
       case CONTENT:
         toBean.addValue(indexFieldName, value.toString());
+        final ContentDataType contentDataType = (ContentDataType) fieldDataType;
+        if (contentDataType.isAvaialbleForSearch()) {
+          Content content = SmartContentAPI.getInstance().getContentLoader().loadContent((ContentId) value);
+          if (content != null) {
+            indexFields(content, toBean, fieldName);
+          }
+        }
         break;
       default:
         toBean.addValue(indexFieldName, value);
