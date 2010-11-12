@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -47,32 +46,39 @@ import org.slf4j.LoggerFactory;
  *
  * @author kaisar
  */
-@Path("/search")
 public class ContentSearcherResource extends AbstractResource {
 
-  @QueryParam("typeId")
-  private List<String> contentTypeId;
-  @QueryParam("status")
-  private List<String> statuses;
-  @QueryParam("workspaceId")
-  private String workspaceId;
-  @QueryParam("field")
-  private List<String> fieldQuery;
-  @QueryParam("creationDate")
-  private String creationDate;
-  @QueryParam("lastModifiedDate")
-  private String lastModifiedDate;
-  @QueryParam("start")
-  private int start;
-  @QueryParam("count")
-  private int count;
-  @QueryParam("disjunction")
-  private boolean disJunction;
   private final Logger logger = LoggerFactory.getLogger(getClass());
+  private List<String> contentTypeId;
+  private List<String> statuses;
+  private String workspaceId;
+  private List<String> fieldQuery;
+  private String creationDate;
+  private String lastModifiedDate;
+  private int start;
+  private int count;
+  private boolean disJunction;
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public Response get() {
+  public Response get(@QueryParam("typeId") List<String> contentTypeId,
+                      @QueryParam("status") List<String> statuses,
+                      @QueryParam("workspaceId") String workspaceId,
+                      @QueryParam("field") List<String> fieldQuery,
+                      @QueryParam("creationDate") String creationDate,
+                      @QueryParam("lastModifiedDate") String lastModifiedDate,
+                      @QueryParam("start") int start,
+                      @QueryParam("count") int count,
+                      @QueryParam("disjunction") boolean disJunction) {
+    this.contentTypeId = contentTypeId;
+    this.statuses = statuses;
+    this.workspaceId = workspaceId;
+    this.fieldQuery = fieldQuery;
+    this.creationDate = creationDate;
+    this.lastModifiedDate = lastModifiedDate;
+    this.start = start;
+    this.count = count;
+    this.disJunction = disJunction;
     Collection<Content> searchContent;
     ResponseBuilder responseBuilder;
     Filter filter = getFilter();
@@ -237,5 +243,77 @@ public class ContentSearcherResource extends AbstractResource {
   @Override
   protected String getAuthor() {
     return "Smart CMS";
+  }
+
+  public List<String> getContentTypeId() {
+    return contentTypeId;
+  }
+
+  public void setContentTypeId(List<String> contentTypeId) {
+    this.contentTypeId = contentTypeId;
+  }
+
+  public int getCount() {
+    return count;
+  }
+
+  public void setCount(int count) {
+    this.count = count;
+  }
+
+  public String getCreationDate() {
+    return creationDate;
+  }
+
+  public void setCreationDate(String creationDate) {
+    this.creationDate = creationDate;
+  }
+
+  public boolean isDisJunction() {
+    return disJunction;
+  }
+
+  public void setDisJunction(boolean disJunction) {
+    this.disJunction = disJunction;
+  }
+
+  public List<String> getFieldQuery() {
+    return fieldQuery;
+  }
+
+  public void setFieldQuery(List<String> fieldQuery) {
+    this.fieldQuery = fieldQuery;
+  }
+
+  public String getLastModifiedDate() {
+    return lastModifiedDate;
+  }
+
+  public void setLastModifiedDate(String lastModifiedDate) {
+    this.lastModifiedDate = lastModifiedDate;
+  }
+
+  public int getStart() {
+    return start;
+  }
+
+  public void setStart(int start) {
+    this.start = start;
+  }
+
+  public List<String> getStatuses() {
+    return statuses;
+  }
+
+  public void setStatuses(List<String> statuses) {
+    this.statuses = statuses;
+  }
+
+  public String getWorkspaceId() {
+    return workspaceId;
+  }
+
+  public void setWorkspaceId(String workspaceId) {
+    this.workspaceId = workspaceId;
   }
 }

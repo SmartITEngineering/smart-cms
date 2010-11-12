@@ -23,6 +23,7 @@ import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.ws.common.domains.Content;
+import com.smartitengineering.cms.ws.resources.content.searcher.ContentSearcherResource;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import java.io.UnsupportedEncodingException;
 import javax.ws.rs.Consumes;
@@ -47,6 +48,7 @@ public class ContentsResource extends AbstractResource {
   static final String PARAM_CONTENT = "contentId";
   public static final String PATH_TO_CONTENT = "i/{" + PARAM_CONTENT + "}";
   public static final String PATH_TO_CONTAINER = "container";
+  public static final String PATH_TO_SEARCH = "search";
 
   public ContentsResource(@PathParam("wsNS") String namespace, @PathParam("wsName") String name) {
     final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
@@ -82,5 +84,12 @@ public class ContentsResource extends AbstractResource {
   public Response get() {
     return Response.seeOther(getAbsoluteURIBuilder().path(ContentsResource.class).path(PATH_TO_CONTAINER).build(workspace.
         getId().getGlobalNamespace(), workspace.getId().getName())).build();
+  }
+
+  @Path("/" + PATH_TO_SEARCH)
+  public ContentSearcherResource search() {
+    final ContentSearcherResource contentSearcherResource = new ContentSearcherResource();
+    contentSearcherResource.setWorkspaceId(workspace.getId().toString());
+    return contentSearcherResource;
   }
 }

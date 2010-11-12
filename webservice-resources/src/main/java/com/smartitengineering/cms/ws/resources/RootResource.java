@@ -22,6 +22,7 @@ import com.smartitengineering.cms.ws.resources.workspace.WorkspaceResource;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.ws.resources.content.searcher.ContentSearcherResource;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,6 +59,8 @@ public class RootResource extends AbstractResource {
     }
   };
 
+  public static final String PATH_TO_SEARCH = "search";
+
   @GET
   @Produces(MediaType.APPLICATION_ATOM_XML)
   public Response get(@HeaderParam(HttpHeaders.IF_MODIFIED_SINCE) Date ifModifiedSince) {
@@ -88,6 +91,7 @@ public class RootResource extends AbstractResource {
         entry.addLink(link);
         feed.addEntry(entry);
       }
+      feed.addLink(getLink(getRelativeURIBuilder().path(PATH_TO_SEARCH).build(), "search", MediaType.APPLICATION_JSON));
       response.entity(feed);
       response.lastModified(lastModifiedDate);
     }
@@ -105,6 +109,11 @@ public class RootResource extends AbstractResource {
     catch (IllegalArgumentException exception) {
       return Response.status(Response.Status.BAD_REQUEST).build();
     }
+  }
+
+  @Path("/" + PATH_TO_SEARCH)
+  public ContentSearcherResource search() {
+    return new ContentSearcherResource();
   }
 
   @Override

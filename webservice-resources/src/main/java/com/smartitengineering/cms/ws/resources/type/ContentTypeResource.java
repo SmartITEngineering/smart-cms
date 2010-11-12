@@ -22,7 +22,6 @@ import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
-import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import java.net.URI;
@@ -39,7 +38,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

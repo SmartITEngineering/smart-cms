@@ -26,6 +26,8 @@ import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
+import com.smartitengineering.cms.ws.resources.content.ContentsResource;
+import com.smartitengineering.cms.ws.resources.content.searcher.ContentSearcherResource;
 import com.smartitengineering.cms.ws.resources.workspace.WorkspaceResource;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import java.io.InputStream;
@@ -58,6 +60,7 @@ public class ContentTypesResource extends AbstractResource {
 
   public static final String PATH_TO_CONTENT_TYPE = "{typeNS}/{typeName}";
   public static final String REL_CONTENT_TYPE = "contentType";
+  public static final String PATH_TO_SEARCH = "search";
   private static final Comparator<ContentType> CONTENT_TYPE_COMPRATOR = new Comparator<ContentType>() {
 
     @Override
@@ -98,6 +101,9 @@ public class ContentTypesResource extends AbstractResource {
                                                                          MediaType.APPLICATION_XML));
       feed.addEntry(entry);
     }
+    feed.addLink(
+        getLink(getRelativeURIBuilder().path(ContentsResource.class).path(ContentsResource.PATH_TO_SEARCH).build(workspace.
+        getId().getGlobalNamespace(), workspace.getId().getName()), "search", MediaType.APPLICATION_JSON));
     Response.ResponseBuilder builder = Response.ok(feed);
     CacheControl control = new CacheControl();
     control.setMaxAge(180);
@@ -133,6 +139,13 @@ public class ContentTypesResource extends AbstractResource {
       logger.error(ex.getMessage(), ex);
     }
     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+  }
+
+  @Path("/" + PATH_TO_SEARCH)
+  public ContentSearcherResource search() {
+    final ContentSearcherResource contentSearcherResource = new ContentSearcherResource();
+    contentSearcherResource.setWorkspaceId(workspace.getId().toString());
+    return contentSearcherResource;
   }
 
   @Override
