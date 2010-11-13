@@ -1097,7 +1097,7 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
     System.out.println("!!! " + JSON);
-    Thread.sleep(100);
+    Thread.sleep(1000);
     ContentResource contentResource = feedResource.getContents().createContentResource(content);
     Content content1 = contentResource.get();
     Assert.assertNotNull(content1);
@@ -1178,7 +1178,7 @@ public class AppTest {
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
   }
 
-//  @Test
+  @Test
   public void testAddContainerContent() throws Exception {
     LOGGER.info(":::::::::::::: CREATE CONTENT IN CONTAINER RESOURCE TEST ::::::::::::::");
 
@@ -1246,7 +1246,7 @@ public class AppTest {
         next().getUri().toASCIIString());
   }
 
-//  @Test
+  @Test
   public void testUpdateCointainerContent() throws Exception {
     LOGGER.info(":::::::::::::: UPDATE CONTAINER CONTENT RESOURCE TEST ::::::::::::::");
 
@@ -1314,7 +1314,7 @@ public class AppTest {
     Assert.assertEquals(0, containerResource.getContainerContents().size());
   }
 
-//  @Test
+  @Test
   public void testUpdateContent() throws Exception {
     LOGGER.info(":::::::::::::: UPDATE CONTENT RESOURCE TEST ::::::::::::::");
 
@@ -1538,7 +1538,7 @@ public class AppTest {
     Assert.assertEquals(updateField.getValue().getValue(), updateField1.getValue().getValue());
   }
 
-//  @Test
+  @Test
   public void testContentRepresentation() throws Exception {
     LOGGER.info(":::::::::::::: CONTENT REPRESENTATION RESOURCE TEST ::::::::::::::");
 
@@ -1596,7 +1596,7 @@ public class AppTest {
     }
   }
 
-//  @Test
+  @Test
   public void testFieldVariation() throws Exception {
     ObjectMapper mapper1 = new ObjectMapper();
     String JSON1 = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("DummyContent.json"));
@@ -1655,7 +1655,7 @@ public class AppTest {
     }
   }
 
-//  @Test
+  @Test
   public void testDeleteContent() throws Exception {
     LOGGER.info(":::::::::::::: DELETE CONTENT RESOURCE TEST ::::::::::::::");
 
@@ -1704,7 +1704,7 @@ public class AppTest {
     Assert.assertEquals(0, feedResource.getContents().getContentResources().size());
   }
 
-//  @Test
+  @Test
   public void testDeleteContentType() throws Exception {
     LOGGER.info(":::::::::::::: DELETE CONTENT_TYPE RESOURCE TEST ::::::::::::::");
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
