@@ -66,8 +66,8 @@ public class ContentTypesResourceImpl extends AbstractFeedClientResource<Content
       List<Entry> entries = feed.getEntries();
       List<ContentTypeResource> list = new ArrayList<ContentTypeResource>(entries.size());
       for (Entry entry : entries) {
-        list.add(new ContentTypeResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(entry.
-            getLink("contentType"))));
+        list.add(new ContentTypeResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(entry.getLink(
+            "contentType"))));
       }
       return Collections.unmodifiableCollection(list);
     }

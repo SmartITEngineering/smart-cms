@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.client.impl;
 
+import com.smartitengineering.cms.client.api.ContentSearcherResource;
 import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
@@ -153,6 +154,19 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
       else {
         return Collections.emptyList();
       }
+    }
+  }
+
+  @Override
+  public ContentSearcherResource searchContent() {
+    try {
+      final Feed feed = get();
+      Link link = feed.getLink("search");
+      return new ContentSearcherResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(link));
+    }
+    catch (UniformInterfaceException exception) {
+      exception.printStackTrace();
+      return null;
     }
   }
 }
