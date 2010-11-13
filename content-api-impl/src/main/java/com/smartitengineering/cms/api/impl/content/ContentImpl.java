@@ -56,11 +56,11 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
 
   @Override
   public void put() throws IOException {
-    if(!isValid()) {
+    if (!isValid()) {
       logger.info("Content not in valid state!");
       //First get contents indexed before attempting to use this validity!
       //Uncomment the following line once indexing is ensured in testing
-      //throw new IOException("Content is not in valid state!");
+      throw new IOException("Content is not in valid state!");
     }
     super.put();
   }
@@ -226,8 +226,8 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
       return false;
     }
     final Content other = (Content) obj;
-    if (this.contentId != other.getContentId() && (this.contentId == null ||
-                                                   !this.contentId.equals(other.getContentId()))) {
+    if (this.contentId != other.getContentId() && (this.contentId == null
+        || !this.contentId.equals(other.getContentId()))) {
       return false;
     }
     return true;
@@ -260,6 +260,8 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
 
   @Override
   public boolean isValid() {
-    return SmartContentAPI.getInstance().getContentLoader().isValidContent(this);
+    boolean validContent = SmartContentAPI.getInstance().getContentLoader().isValidContent(this);
+    System.out.println("!!! Checking Content" + validContent);
+    return validContent;
   }
 }
