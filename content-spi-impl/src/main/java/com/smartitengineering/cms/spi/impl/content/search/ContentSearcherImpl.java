@@ -66,7 +66,7 @@ public class ContentSearcherImpl implements ContentSearcher {
     Set<ContentTypeId> contentTypeIds = filter.getContentTypeFilters();
     finalQuery.append(ContentHelper.TYPE).append(": ").append(ContentHelper.CONTENT);
     if (filter.getWorkspaceId() != null) {
-      finalQuery.append(disjunctionSeperator);
+      finalQuery.append(conjunctionSeperator);
       finalQuery.append(ContentHelper.WORKSPACEID).append(": ").append(ClientUtils.escapeQueryChars(filter.
           getWorkspaceId().toString()));
     }
@@ -135,7 +135,7 @@ public class ContentSearcherImpl implements ContentSearcher {
       }
     }
     if (query.length() > 0) {
-      finalQuery.append(disjunctionSeperator).append('(').append(query.toString()).append(')');
+      finalQuery.append(conjunctionSeperator).append('(').append(query.toString()).append(')');
     }
     if (logger.isInfoEnabled()) {
       logger.info("Query q = " + finalQuery.toString());
