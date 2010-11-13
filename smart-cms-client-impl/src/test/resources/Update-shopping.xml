@@ -381,10 +381,6 @@
 
   <contentType namespace="com.smartitengineering.smart-shopping.content">
     <name>Author</name>
-    <parent>
-      <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
-      <typeName>Book</typeName>
-    </parent>
     <fields>
       <field>
         <name>name</name>

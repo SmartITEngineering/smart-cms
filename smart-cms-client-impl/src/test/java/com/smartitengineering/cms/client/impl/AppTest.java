@@ -1192,6 +1192,7 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
+    Thread.sleep(1100);
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -1260,6 +1261,7 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
+    Thread.sleep(1100);
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -1328,6 +1330,8 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
+
+    Thread.sleep(1100);
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -1553,6 +1557,8 @@ public class AppTest {
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
 
+    Thread.sleep(1100);
+
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
     value.setValue(contentResourceTest.getUri().toASCIIString());
@@ -1608,6 +1614,7 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
+    Thread.sleep(1100);
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -1669,6 +1676,7 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
+    Thread.sleep(1100);
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");

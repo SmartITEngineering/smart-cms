@@ -4,11 +4,11 @@
       "name":"name",
       "value": {
         "@valueType":"string",
-        "value":"Publisher Address",
+        "value":"Author",
         "type":"string"
       }
     }
   ],
-  "contentTypeUri":"http://localhost:10080/cms/t/atest2/additional/com.smartitengineering.smart-shopping.content/Address",
+  "contentTypeUri":"http://localhost:10080/cms/t/atest2/additional/com.smartitengineering.smart-shopping.content/Author",
   "status":"published"
 }
