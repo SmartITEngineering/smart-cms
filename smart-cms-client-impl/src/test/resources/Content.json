@@ -62,6 +62,6 @@
       }
     }
   ],
-  "contentTypeUri":"http://localhost:10080/t/atest2/additional/com.smartitengineering.smart-shopping.content/Publisher",
+  "contentTypeUri":"http://localhost:10080/cms/t/atest2/additional/com.smartitengineering.smart-shopping.content/Publisher",
   "status":"published"
 }

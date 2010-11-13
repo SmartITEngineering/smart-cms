@@ -57,12 +57,6 @@
             </uri>
           </variation>
         </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
         <search>
           <index>true</index>
           <store>false</store>
@@ -103,12 +97,6 @@
             </uri>
           </variation>
         </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
       </field>
       <field>
         <name>authors</name>
@@ -144,12 +132,6 @@
             </uri>
           </variation>
         </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
       </field>
     </fields>
     <status>
@@ -206,12 +188,6 @@
             </uri>
           </variation>
         </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
       </field>
       <field>
         <name>books</name>
@@ -242,26 +218,12 @@
             </uri>
           </variation>
         </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
       </field>
       <field>
         <name>publisher-no</name>
         <value>
           <integer />
         </value>
-        <validator>
-          <validatorType>javascript</validatorType>
-          <uri>
-            <internal>
-              <name>internalvar</name>
-            </internal>
-          </uri>
-        </validator>
       </field>
       <field>
         <name>Authors</name>
@@ -449,12 +411,6 @@
             </uri>
           </variation>
         </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
       </field>
     </fields>
     <status>
@@ -490,12 +446,6 @@
             </uri>
           </variation>
         </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
       </field>
     </fields>
     <status>

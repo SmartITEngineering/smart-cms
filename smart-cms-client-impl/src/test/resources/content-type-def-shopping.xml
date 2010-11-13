@@ -57,12 +57,6 @@
             </uri>
           </variation>
         </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
         <search>
           <index>true</index>
           <store>false</store>
@@ -103,12 +97,6 @@
             </uri>
           </variation>
         </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
       </field>
       <field>
         <name>authors</name>
@@ -120,7 +108,6 @@
                   <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
                   <typeName>Author</typeName>
                 </definition>
-                <bidirectional>books</bidirectional>
               </content>
             </simple-value>
           </collection>
@@ -144,12 +131,6 @@
             </uri>
           </variation>
         </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
       </field>
     </fields>
     <status>
@@ -209,12 +190,6 @@
             </uri>
           </variation>
         </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
       </field>
     </fields>
     <status>
@@ -274,12 +249,6 @@
             </uri>
           </variation>
         </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
       </field>
       <field>
         <name>books</name>
@@ -314,12 +283,6 @@
             </uri>
           </variation>
         </variations>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
       </field>
     </fields>
     <status>
