@@ -106,6 +106,12 @@ public class ContentSearcherImpl implements ContentSearcher {
       String queryStr = generateDateQuery(ContentHelper.LASTMODIFIEDDATE, lastModifiedDateFilter);
       query.append(queryStr);
     }
+    if (StringUtils.isNotBlank(filter.getSearchTerms())) {
+      if (query.length() > 0) {
+        query.append(seperator);
+      }
+      query.append(ContentHelper.ALL_TEXT).append(": ").append(ClientUtils.escapeQueryChars(filter.getSearchTerms()));
+    }
     Set<ContentStatus> statuses = filter.getStatusFilters();
     for (ContentStatus contentStatus : statuses) {
       if (query.length() > 0) {

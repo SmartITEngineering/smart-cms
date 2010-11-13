@@ -31,6 +31,7 @@ import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
+import com.smartitengineering.util.opensearch.impl.OpenSearchDescriptorBuilder;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import java.net.URI;
@@ -59,6 +60,7 @@ public class ContentSearcherResource extends AbstractResource {
   private List<String> contentTypeId;
   private List<String> statuses;
   private String workspaceId;
+  private String searchTerms;
   private List<String> fieldQuery;
   private String creationDate;
   private String lastModifiedDate;
@@ -68,7 +70,7 @@ public class ContentSearcherResource extends AbstractResource {
   protected final GenericAdapter<Content, com.smartitengineering.cms.ws.common.domains.Content> adapter;
   private final static String WORKSPACE_ID = "workspaceId", STATUS = "status", TYPE_ID = "typeId", FIELD = "field",
       CREATION_DATE = "creationDate", LAST_MODIFIED_DATE = "lastModifiedDate", START = "start", COUNT = "count",
-      DISJUNCTION = "disjunction";
+      DISJUNCTION = "disjunction", SEARCH_TERMS = "q";
 
   public ContentSearcherResource(ServerResourceInjectables injectables) {
     super(injectables);
@@ -83,6 +85,7 @@ public class ContentSearcherResource extends AbstractResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(@QueryParam(TYPE_ID) List<String> contentTypeId,
+                      @QueryParam(SEARCH_TERMS) String searchTerms,
                       @QueryParam(STATUS) List<String> statuses,
                       @QueryParam(WORKSPACE_ID) String workspaceId,
                       @QueryParam(FIELD) List<String> fieldQuery,
@@ -91,15 +94,9 @@ public class ContentSearcherResource extends AbstractResource {
                       @QueryParam(START) int start,
                       @QueryParam(COUNT) int count,
                       @QueryParam(DISJUNCTION) boolean disJunction) {
-    this.contentTypeId = contentTypeId;
-    this.statuses = statuses;
-    this.workspaceId = workspaceId;
-    this.fieldQuery = fieldQuery;
-    this.creationDate = creationDate;
-    this.lastModifiedDate = lastModifiedDate;
-    this.start = start;
-    this.count = count;
-    this.disJunction = disJunction;
+    initParams(contentTypeId, searchTerms, statuses, workspaceId, fieldQuery, creationDate, lastModifiedDate, start,
+               count,
+               disJunction);
     Collection<Content> searchContent;
     ResponseBuilder responseBuilder;
     Filter filter = getFilter();
@@ -117,6 +114,22 @@ public class ContentSearcherResource extends AbstractResource {
       responseBuilder = Response.ok(result);
     }
     return responseBuilder.build();
+  }
+
+  protected void initParams(List<String> contentTypeId, String searchTerms,
+                            List<String> statuses, String workspaceId,
+                            List<String> fieldQuery, String creationDate, String lastModifiedDate, int start, int count,
+                            boolean disJunction) {
+    this.contentTypeId = contentTypeId;
+    this.statuses = statuses;
+    this.workspaceId = workspaceId;
+    this.fieldQuery = fieldQuery;
+    this.creationDate = creationDate;
+    this.lastModifiedDate = lastModifiedDate;
+    this.start = start;
+    this.count = count;
+    this.disJunction = disJunction;
+    this.searchTerms = searchTerms;
   }
 
   protected URI getNextPage() {
@@ -139,6 +152,9 @@ public class ContentSearcherResource extends AbstractResource {
 
   private Filter getFilter() {
     Filter filter = SmartContentAPI.getInstance().getContentLoader().craeteFilter();
+    if (StringUtils.isNotBlank(searchTerms)) {
+      filter.setSearchTerms(searchTerms);
+    }
     if (contentTypeId != null && !contentTypeId.isEmpty()) {
       filter.addContentTypeToFilter(parseCollectionContentTypeId(contentTypeId));
     }

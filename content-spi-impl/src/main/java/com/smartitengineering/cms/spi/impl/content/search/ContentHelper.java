@@ -61,6 +61,7 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
   public static final String LASTMODIFIEDDATE = "lastModifiedDate";
   public static final String STATUS = "status";
   public static final String TYPE = "type";
+  public static final String ALL_TEXT = "alltext";
   public static final String WORKSPACEID = "workspaceId";
   @Inject
   private SchemaInfoProvider<PersistentContent, ContentId> contentScehmaProvider;

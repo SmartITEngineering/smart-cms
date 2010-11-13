@@ -47,6 +47,7 @@ public class FilterImpl implements Filter {
   private int startFrom = 0;
   private int maxContents = 10;
   private WorkspaceId workspaceId;
+  private String searchTerms;
 
   @Override
   public void addContentTypeToFilter(ContentTypeId... types) {
@@ -163,5 +164,15 @@ public class FilterImpl implements Filter {
   @Override
   public void setStartFrom(int startFrom) {
     this.startFrom = startFrom;
+  }
+
+  @Override
+  public String getSearchTerms() {
+    return searchTerms;
+  }
+
+  @Override
+  public void setSearchTerms(String searchTerms) {
+    this.searchTerms = searchTerms;
   }
 }

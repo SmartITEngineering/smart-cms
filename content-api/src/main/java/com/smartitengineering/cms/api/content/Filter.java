@@ -73,4 +73,8 @@ public interface Filter {
   boolean isDisjunction();
 
   void setDisjunction(boolean disjunction);
+
+  String getSearchTerms();
+
+  void setSearchTerms(String searchTerms);
 }
