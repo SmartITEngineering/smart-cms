@@ -1064,6 +1064,7 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
+    Thread.sleep(1100);
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
     value.setValue(contentResourceTest.getUri().toASCIIString());
@@ -1097,7 +1098,6 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
     System.out.println("!!! " + JSON);
-    Thread.sleep(1000);
     ContentResource contentResource = feedResource.getContents().createContentResource(content);
     Content content1 = contentResource.get();
     Assert.assertNotNull(content1);

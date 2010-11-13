@@ -488,9 +488,10 @@ public class ContentLoaderImpl implements ContentLoader {
   }
 
   protected void addQueryForContentId(final ContentId contentId, ContentTypeId instanceOfId, Filter filter) {
-    QueryParameter<String> param = QueryParameterFactory.getStringLikePropertyParam("id", new StringBuilder("\"").append(contentId.
-        toString()).append('"').toString());
+    QueryParameter<String> param = QueryParameterFactory.getStringLikePropertyParam("id", new StringBuilder().append(contentId.
+        toString()).toString());
     filter.addFieldFilter(param);
+    filter.addContentTypeToFilter(instanceOfId);
   }
 
   protected boolean checkForRelatedContents(Content content) {

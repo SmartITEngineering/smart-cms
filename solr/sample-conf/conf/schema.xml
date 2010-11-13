@@ -73,7 +73,7 @@
     <field name="contentTypeId" type="string" indexed="true" stored="true" required="false"/>
     <field name="instanceOf" type="string" indexed="true" required="false"/>
 
-    <dynamicField name="alltext" type="text" indexed="true" stored="false" required="false" multiValued="true" />
+    <field name="alltext" type="text" indexed="true" stored="false" required="false" multiValued="true" />
 
     <dynamicField name="*_INTEGER_m" type="int" indexed="false" stored="false" required="false" multiValued="true" />
     <dynamicField name="*_INTEGER_i" type="int" indexed="true" stored="false" required="false"/>
