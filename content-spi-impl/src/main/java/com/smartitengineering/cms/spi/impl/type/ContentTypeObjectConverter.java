@@ -583,9 +583,15 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
           throw new RuntimeException(msg);
         }
         logger.info("Set all fields into the field definition!");
-        fieldDef.setCustomValidator(validatorDef);
-        fieldDef.setSearchDefinition(searchDef);
-        fieldDef.setVariations(fieldVariations.values());
+        if (validatorDef.geType() != null && validatorDef.getUri() != null) {
+          fieldDef.setCustomValidator(validatorDef);
+        }
+        if (searchDef.isIndexed() || searchDef.isStored() || StringUtils.isNotBlank(searchDef.getBoostConfig())) {
+          fieldDef.setSearchDefinition(searchDef);
+        }
+        if (!fieldVariations.isEmpty()) {
+          fieldDef.setVariations(fieldVariations.values());
+        }
         contentType.getMutableFieldDefs().add(fieldDef);
       }
       /*

@@ -102,13 +102,19 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
     Map<String, Field> fields = mutableContent.getFields();
     for (Entry<String, Field> entry : fields.entrySet()) {
       FieldDef def = entry.getValue().getFieldDef();
+      if (def.getSearchDefinition() == null) {
+        continue;
+      }
       Field field = entry.getValue();
       StringBuilder builder = new StringBuilder();
-      if(org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
+      if (org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
         builder.append(prefix).append('_');
       }
-      String searchFieldName = builder.append(SmartContentSPI.getInstance().
-          getSearchFieldNameGenerator().getSearchFieldName(def)).toString();
+      String defName = SmartContentSPI.getInstance().getSearchFieldNameGenerator().getSearchFieldName(def);
+      if (org.apache.commons.lang.StringUtils.isBlank(defName)) {
+        continue;
+      }
+      String searchFieldName = builder.append(defName).toString();
       if (org.apache.commons.lang.StringUtils.isNotBlank(searchFieldName)) {
         addFieldValue(toBean, searchFieldName, field, prefix);
       }
@@ -118,9 +124,9 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
   protected void addFieldValue(MultivalueMap<String, Object> toBean, String indexFieldName, Field field, String prefix) {
     final Object value = field.getValue().getValue();
     StringBuilder builder = new StringBuilder();
-      if(org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
-        builder.append(prefix).append('_');
-      }
+    if (org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
+      builder.append(prefix).append('_');
+    }
     final String name = builder.append(field.getName()).toString();
     addSimpleValue(field.getValue(), field.getFieldDef().getValueDef(), toBean, name, indexFieldName, value);
 

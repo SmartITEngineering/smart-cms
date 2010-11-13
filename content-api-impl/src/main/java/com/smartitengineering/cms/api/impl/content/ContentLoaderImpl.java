@@ -524,7 +524,7 @@ public class ContentLoaderImpl implements ContentLoader {
   protected boolean checkContentTypeValidity(FieldValue val, DataType contentDataType) {
     Filter filter = craeteFilter();
     addQueryForContentId(((ContentFieldValue) val).getValue(), ((ContentDataType) contentDataType).getTypeDef(), filter);
-    filter.setDisjunction(true);
+    filter.setDisjunction(false);
     Set<Content> contents = search(filter);
     return !contents.isEmpty();
   }

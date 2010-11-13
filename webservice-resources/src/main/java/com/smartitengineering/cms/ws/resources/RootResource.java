@@ -39,7 +39,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriBuilder;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
@@ -83,10 +82,10 @@ public class RootResource extends AbstractResource {
       for (Workspace workspace : workspaces) {
         final WorkspaceId id = workspace.getId();
         Link link = getLink(
-            UriBuilder.fromResource(WorkspaceResource.class).build(id.getGlobalNamespace(), id.getName()),
+            getRelativeURIBuilder().path(WorkspaceResource.class).build(id.getGlobalNamespace(), id.getName()),
             WorkspaceResource.REL_WORKSPACE_CONTENT, MediaType.APPLICATION_JSON);
         Entry entry = getEntry(id.toString(), id.getName(), workspace.getCreationDate(), link);
-        link = getLink(UriBuilder.fromResource(WorkspaceResource.class).build(id.getGlobalNamespace(), id.getName()),
+        link = getLink(getRelativeURIBuilder().path(WorkspaceResource.class).build(id.getGlobalNamespace(), id.getName()),
                        WorkspaceResource.REL_WORKSPACE_CONTENT, MediaType.APPLICATION_ATOM_XML);
         entry.addLink(link);
         feed.addEntry(entry);

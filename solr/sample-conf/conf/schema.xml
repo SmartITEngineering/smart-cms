@@ -73,6 +73,8 @@
     <field name="contentTypeId" type="string" indexed="true" stored="true" required="false"/>
     <field name="instanceOf" type="string" indexed="true" required="false"/>
 
+    <dynamicField name="alltext" type="text" indexed="false" stored="false" required="false" multiValued="true" />
+
     <dynamicField name="*_INTEGER_m" type="int" indexed="false" stored="false" required="false" multiValued="true" />
     <dynamicField name="*_INTEGER_i" type="int" indexed="true" stored="false" required="false"/>
     <dynamicField name="*_INTEGER_s" type="int" indexed="false" stored="true" required="false"/>
@@ -91,13 +93,13 @@
     <dynamicField name="*_CONTENT_is" type="string" indexed="true" stored="true" required="false"/>
     <dynamicField name="*_CONTENT_msi" type="string" indexed="true" stored="true" required="false" multiValued="true" />
 
-    <dynamicField name="*_STRING_m" type="string" indexed="false" stored="false" required="false" multiValued="true" />
-    <dynamicField name="*_STRING_i" type="string" indexed="true" stored="false" required="false"/>
-    <dynamicField name="*_STRING_s" type="string" indexed="false" stored="true" required="false"/>
-    <dynamicField name="*_STRING_mi" type="string" indexed="true" stored="false" required="false" multiValued="true" />
-    <dynamicField name="*_STRING_ms" type="string" indexed="false" stored="true" required="false" multiValued="true" />
-    <dynamicField name="*_STRING_is" type="string" indexed="true" stored="true" required="false"/>
-    <dynamicField name="*_STRING_msi" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+    <dynamicField name="*_STRING_m" type="text" indexed="false" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_STRING_i" type="text" indexed="true" stored="false" required="false"/>
+    <dynamicField name="*_STRING_s" type="text" indexed="false" stored="true" required="false"/>
+    <dynamicField name="*_STRING_mi" type="text" indexed="true" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_STRING_ms" type="text" indexed="false" stored="true" required="false" multiValued="true" />
+    <dynamicField name="*_STRING_is" type="text" indexed="true" stored="true" required="false"/>
+    <dynamicField name="*_STRING_msi" type="text" indexed="true" stored="true" required="false" multiValued="true" />
 
     <dynamicField name="*_DATE_TIME_m" type="date" indexed="false" stored="false" required="false" multiValued="true" />
     <dynamicField name="*_DATE_TIME_i" type="date" indexed="true" stored="false" required="false"/>
@@ -132,7 +134,8 @@
     <dynamicField name="*_LONG_msi" type="long" indexed="true" stored="true" required="false" multiValued="true" />
   </fields>
 
-  <defaultSearchField>id</defaultSearchField>
+  <defaultSearchField>alltext</defaultSearchField>
   <uniqueKey>id</uniqueKey>
   <solrQueryParser defaultOperator="OR"/>
+  <copyField source="*_STRING_*" dest="alltext"/>
 </schema>
