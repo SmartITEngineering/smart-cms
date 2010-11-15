@@ -48,6 +48,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
+import org.apache.abdera.ext.opensearch.OpenSearchConstants;
+import org.apache.abdera.ext.opensearch.model.IntegerElement;
+import org.apache.abdera.ext.opensearch.model.Query;
+import org.apache.abdera.model.Entry;
+import org.apache.abdera.model.Feed;
+import org.apache.abdera.model.Link;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +74,7 @@ public class ContentSearcherResource extends AbstractResource {
   private String lastModifiedDate;
   private int start;
   private int count;
-  private boolean disJunction;
+  private boolean disjunction;
   protected final GenericAdapter<Content, com.smartitengineering.cms.ws.common.domains.Content> adapter;
   private final static String WORKSPACE_ID = "workspaceId", STATUS = "status", TYPE_ID = "typeId", FIELD = "field",
       CREATION_DATE = "creationDate", LAST_MODIFIED_DATE = "lastModifiedDate", START = "start", COUNT = "count",
@@ -90,24 +96,7 @@ public class ContentSearcherResource extends AbstractResource {
     OpenSearchDescriptorBuilder descBuilder = OpenSearchDescriptorBuilder.getBuilder();
     descBuilder.shortName("Content Search");
     descBuilder.description("Search the content repository for contents!");
-    StringBuilder templateBuilder = new StringBuilder(getUriInfo().getRequestUri().toASCIIString());
-    templateBuilder.append('?').append(SEARCH_TERMS).append("=").append(StringUtils.isBlank(searchTerms) ? "{searchTerms}" :
-        searchTerms);
-    templateBuilder.append('&').append(START).append("=").append(start <= 0 ? "{startIndex?}" : start);
-    templateBuilder.append('&').append(COUNT).append("=").append(count <= 0 ? "{count?}" : count);
-    templateBuilder.append('&').append(WORKSPACE_ID).append("=").append(StringUtils.isBlank(workspaceId) ?
-        "{workspaceId?}" : workspaceId);
-    templateBuilder.append('&').append(CREATION_DATE).append("=").append(StringUtils.isBlank(creationDate) ?
-        "{creationModifiedDateSpec?}" : creationDate);
-    templateBuilder.append('&').append(LAST_MODIFIED_DATE).append("=").append(StringUtils.isBlank(lastModifiedDate) ?
-        "{lastModifiedDateSpec?}" : lastModifiedDate);
-    templateBuilder.append('&').append(TYPE_ID).append("=").append(contentTypeId == null || contentTypeId.isEmpty() ?
-        "{contentTypeId?}" : contentTypeId.toArray());
-    templateBuilder.append('&').append(STATUS).append("=").append(statuses == null || statuses.isEmpty() ?
-        "{statuses?}" : statuses.toArray());
-    templateBuilder.append('&').append(FIELD).append("=").append(fieldQuery == null || fieldQuery.isEmpty() ?
-        "{fieldQuery?}" : fieldQuery.toArray());
-    templateBuilder.append('&').append(DISJUNCTION).append("=").append("{disjunction?}");
+    StringBuilder templateBuilder = getSearchUri(true);
     final String urlTemplate = templateBuilder.toString();
     if (logger.isInfoEnabled()) {
       logger.info("Template URL: " + urlTemplate);
@@ -119,6 +108,63 @@ public class ContentSearcherResource extends AbstractResource {
     descBuilder.urls(xmlBuilder.build(), jsonBulder.build());
     ResponseBuilder builder = Response.ok(descBuilder.build());
     return builder.build();
+  }
+
+  protected StringBuilder getSearchUri(boolean withTemplate) {
+    StringBuilder templateBuilder = new StringBuilder(getUriInfo().getRequestUri().toASCIIString());
+    if (withTemplate) {
+      templateBuilder.append('?').append(SEARCH_TERMS).append("=").
+          append(StringUtils.isBlank(searchTerms) ? "{searchTerms}" : searchTerms);
+      templateBuilder.append('&').append(START).append("=").append(start <= 0 ? "{startIndex?}" : start);
+      templateBuilder.append('&').append(COUNT).append("=").append(count <= 0 ? "{count?}" : count);
+      templateBuilder.append('&').append(WORKSPACE_ID).append("=").
+          append(StringUtils.isBlank(workspaceId) ? "{workspaceId?}" : workspaceId);
+      templateBuilder.append('&').append(CREATION_DATE).append("=").
+          append(StringUtils.isBlank(creationDate) ? "{creationModifiedDateSpec?}" : creationDate);
+      templateBuilder.append('&').append(LAST_MODIFIED_DATE).append("=").
+          append(StringUtils.isBlank(lastModifiedDate) ? "{lastModifiedDateSpec?}" : lastModifiedDate);
+      templateBuilder.append('&').append(TYPE_ID).append("=").
+          append(contentTypeId == null || contentTypeId.isEmpty() ? "{contentTypeId?}" : contentTypeId.toArray());
+      templateBuilder.append('&').append(STATUS).append("=").
+          append(statuses == null || statuses.isEmpty() ? "{statuses?}" : statuses.toArray());
+      templateBuilder.append('&').append(FIELD).append("=").
+          append(fieldQuery == null || fieldQuery.isEmpty() ? "{fieldQuery?}" : fieldQuery.toArray());
+      templateBuilder.append('&').append(DISJUNCTION).append("=").append("{disjunction?}");
+    }
+    else {
+      templateBuilder.append('?');
+      if (StringUtils.isNotBlank(searchTerms)) {
+        templateBuilder.append(SEARCH_TERMS).append("=").append(searchTerms).append('&');
+      }
+      if (StringUtils.isNotBlank(workspaceId)) {
+        templateBuilder.append(WORKSPACE_ID).append("=").append(workspaceId).append('&');
+      }
+      if (StringUtils.isNotBlank(creationDate)) {
+        templateBuilder.append(CREATION_DATE).append("=").append(creationDate).append('&');
+      }
+      if (StringUtils.isNotBlank(lastModifiedDate)) {
+        templateBuilder.append(LAST_MODIFIED_DATE).append("=").append(lastModifiedDate).append('&');
+      }
+      if (start >= 0) {
+        templateBuilder.append(START).append("=").append(start).append('&');
+      }
+      if (count >= 0) {
+        templateBuilder.append(COUNT).append("=").append(count).append('&');
+      }
+      if (disjunction) {
+        templateBuilder.append(DISJUNCTION).append("=").append(disjunction).append('&');
+      }
+      if (contentTypeId != null && !contentTypeId.isEmpty()) {
+        templateBuilder.append(TYPE_ID).append("=").append(contentTypeId).append('&');
+      }
+      if (statuses != null && !statuses.isEmpty()) {
+        templateBuilder.append(STATUS).append("=").append(statuses).append('&');
+      }
+      if (fieldQuery != null && !fieldQuery.isEmpty()) {
+        templateBuilder.append(FIELD).append("=").append(fieldQuery);
+      }
+    }
+    return templateBuilder;
   }
 
   @GET
@@ -135,8 +181,39 @@ public class ContentSearcherResource extends AbstractResource {
                                 @QueryParam(DISJUNCTION) boolean disJunction) {
     initParams(contentTypeId, searchTerms, statuses, workspaceId, fieldQuery, creationDate, lastModifiedDate, start,
                count, disJunction);
-    // Not implemented yet!
-    return null;
+    ResponseBuilder responseBuilder;
+    Filter filter = getFilter();
+    final Collection<Content> searchContent = SmartContentAPI.getInstance().getContentLoader().search(filter);
+    Feed feed = getFeed("search", "Content Search Result", new Date());
+    feed.addLink(getLink(getUriInfo().getRequestUri().toASCIIString(), Link.REL_ALTERNATE, MediaType.APPLICATION_JSON));
+    feed.addLink(getLink(new StringBuilder(getUriInfo().getBaseUri().toASCIIString()).append(getUriInfo().getPath()).
+        toString(), "search",
+                         com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
+    Query query = feed.<Query>addExtension(OpenSearchConstants.QUERY);
+    query.setRole(Query.Role.REQUEST);
+    query.setCount(count);
+    query.setStartIndex(start);
+    query.setSearchTerms(searchTerms);
+    IntegerElement countElem = feed.<IntegerElement>addExtension(OpenSearchConstants.ITEMS_PER_PAGE);
+    countElem.setValue(count);
+    IntegerElement startIndexElem = feed.<IntegerElement>addExtension(OpenSearchConstants.START_INDEX);
+    startIndexElem.setValue(start);
+    if (searchContent != null && !searchContent.isEmpty()) {
+      feed.addLink(getLink(getNextPage().toASCIIString(), Link.REL_NEXT, MediaType.APPLICATION_ATOM_XML));
+      if (getPreviousPage() != null) {
+        feed.addLink(getLink(getNextPage().toASCIIString(), Link.REL_PREVIOUS, MediaType.APPLICATION_ATOM_XML));
+      }
+      for (Content content : searchContent) {
+        final URI contentUri = ContentResource.getContentUri(getRelativeURIBuilder(), content.getContentId());
+        Entry entry = getEntry(content.getContentId().toString(), new StringBuilder("Content ").append(content.
+            getContentId().toString()).toString(), content.getLastModifiedDate(),
+                               getLink(contentUri, Link.REL_ALTERNATE, MediaType.APPLICATION_ATOM_XML), getLink(
+            contentUri, Link.REL_ALTERNATE, MediaType.APPLICATION_JSON));
+        feed.addEntry(entry);
+      }
+    }
+    responseBuilder = Response.ok(feed);
+    return responseBuilder.build();
   }
 
   @GET
@@ -185,18 +262,18 @@ public class ContentSearcherResource extends AbstractResource {
     this.lastModifiedDate = lastModifiedDate;
     this.start = start;
     this.count = count;
-    this.disJunction = disJunction;
+    this.disjunction = disJunction;
     this.searchTerms = searchTerms;
   }
 
   protected URI getNextPage() {
-    if (start - count < 0) {
-      return null;
-    }
     return getPage(1);
   }
 
   protected URI getPreviousPage() {
+    if (start - count < 0) {
+      return null;
+    }
     return getPage(-1);
   }
 
@@ -204,7 +281,7 @@ public class ContentSearcherResource extends AbstractResource {
     return UriBuilder.fromUri(getUriInfo().getRequestUri()).queryParam(WORKSPACE_ID, workspaceId).queryParam(TYPE_ID, contentTypeId.
         toArray()).queryParam(STATUS, statuses.toArray()).queryParam(CREATION_DATE, creationDate).queryParam(
         LAST_MODIFIED_DATE, lastModifiedDate).queryParam(START, start + offset * count).queryParam(COUNT, count).
-        queryParam(DISJUNCTION, disJunction).build();
+        queryParam(DISJUNCTION, disjunction).build();
   }
 
   private Filter getFilter() {
@@ -229,8 +306,8 @@ public class ContentSearcherResource extends AbstractResource {
     filter.setStartFrom(start);
     logger.info(":::NUMBER OF ITEM : " + String.valueOf(count));
     filter.setMaxContents(count);
-    logger.info(String.valueOf(":::VAULE OF DISJUNCTION : " + disJunction));
-    filter.setDisjunction(disJunction);
+    logger.info(String.valueOf(":::VAULE OF DISJUNCTION : " + disjunction));
+    filter.setDisjunction(disjunction);
     logger.info(":::CREATION DATE : " + creationDate);
     if (creationDate != null) {
       filter.setCreationDateFilter(formatDate(creationDate));
@@ -388,11 +465,11 @@ public class ContentSearcherResource extends AbstractResource {
   }
 
   public boolean isDisJunction() {
-    return disJunction;
+    return disjunction;
   }
 
   public void setDisJunction(boolean disJunction) {
-    this.disJunction = disJunction;
+    this.disjunction = disJunction;
   }
 
   public List<String> getFieldQuery() {

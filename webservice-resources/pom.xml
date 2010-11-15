@@ -45,6 +45,10 @@
       <artifactId>jackson-jaxrs</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.abdera</groupId>
+      <artifactId>abdera-extensions-opensearch</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
       <artifactId>content-api-factory</artifactId>
       <version>${project.version}</version>
