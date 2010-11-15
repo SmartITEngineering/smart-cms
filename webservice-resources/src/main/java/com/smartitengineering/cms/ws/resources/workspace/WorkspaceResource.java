@@ -24,6 +24,7 @@ import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
 import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.cms.ws.resources.content.ContentsResource;
+import com.smartitengineering.cms.ws.resources.content.searcher.ContentSearcherResource;
 import com.smartitengineering.cms.ws.resources.domains.Factory;
 import com.smartitengineering.cms.ws.resources.type.ContentTypesResource;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
@@ -63,11 +64,13 @@ public class WorkspaceResource extends AbstractResource {
   public static final String PATH_FRIENDLIES = "friendlies";
   public static final String PATH_REPRESENTATIONS = "representations";
   public static final String PATH_VARIATIONS = "variations";
+  public static final String PATH_SEARCH = "search";
   public static final String REL_FRIENDLIES = "friendlies";
   public static final String REL_REPRESENTATIONS = "representations";
   public static final String REL_VARIATIONS = "variations";
   public static final String REL_CONTENT_TYPES = "content-types";
   public static final String REL_CONTENTS = "contents";
+  public static final String REL_SEARCH = "search";
   public static final String REL_WORKSPACE_CONTENT = "workspaceContent";
   private final String namespace;
   private final String workspaceName;
@@ -104,6 +107,13 @@ public class WorkspaceResource extends AbstractResource {
     }
   }
 
+  @Path(PATH_SEARCH)
+  public ContentSearcherResource searchWithinWorkspace() {
+    ContentSearcherResource resource = new ContentSearcherResource(getInjectables());
+    resource.setWorkspaceId(workspace.getId().toString());
+    return resource;
+  }
+
   @GET
   @Produces(MediaType.APPLICATION_ATOM_XML)
   public Response getWorkspaceFeed() {
@@ -122,6 +132,9 @@ public class WorkspaceResource extends AbstractResource {
       feed.addLink(getLink(
           getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_VARIATIONS).build(namespace, workspaceName),
           REL_VARIATIONS, MediaType.APPLICATION_ATOM_XML));
+      feed.addLink(getLink(
+          getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_SEARCH).build(namespace, workspaceName),
+          REL_SEARCH, com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
       feed.addLink(getLink(
           getAbsoluteURIBuilder().path(ContentTypesResource.class).build(namespace, workspaceName), REL_CONTENT_TYPES,
           MediaType.APPLICATION_ATOM_XML));
