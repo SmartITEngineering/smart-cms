@@ -31,7 +31,9 @@ import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
+import com.smartitengineering.util.opensearch.api.Url.RelEnum;
 import com.smartitengineering.util.opensearch.impl.OpenSearchDescriptorBuilder;
+import com.smartitengineering.util.opensearch.impl.UrlBuilder;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import java.net.URI;
@@ -78,8 +80,63 @@ public class ContentSearcherResource extends AbstractResource {
                        new GenericAdapterImpl<Content, com.smartitengineering.cms.ws.common.domains.Content>();
     adapterImpl.setHelper(
         new ContentResource(injectables, SmartContentAPI.getInstance().getContentLoader().
-        createContentId(SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId("", ""), new byte[0])).new ContentAdapterHelper());
+        createContentId(SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId("", "NULL"), new byte[0])).new ContentAdapterHelper());
     adapter = adapterImpl;
+  }
+
+  @GET
+  @Produces(com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML)
+  public Response getSpec() {
+    OpenSearchDescriptorBuilder descBuilder = OpenSearchDescriptorBuilder.getBuilder();
+    descBuilder.shortName("Content Search");
+    descBuilder.description("Search the content repository for contents!");
+    StringBuilder templateBuilder = new StringBuilder(getUriInfo().getRequestUri().toASCIIString());
+    templateBuilder.append('?').append(SEARCH_TERMS).append("=").append(StringUtils.isBlank(searchTerms) ? "{searchTerms}" :
+        searchTerms);
+    templateBuilder.append('&').append(START).append("=").append(start <= 0 ? "{startIndex?}" : start);
+    templateBuilder.append('&').append(COUNT).append("=").append(count <= 0 ? "{count?}" : count);
+    templateBuilder.append('&').append(WORKSPACE_ID).append("=").append(StringUtils.isBlank(workspaceId) ?
+        "{workspaceId?}" : workspaceId);
+    templateBuilder.append('&').append(CREATION_DATE).append("=").append(StringUtils.isBlank(creationDate) ?
+        "{creationModifiedDateSpec?}" : creationDate);
+    templateBuilder.append('&').append(LAST_MODIFIED_DATE).append("=").append(StringUtils.isBlank(lastModifiedDate) ?
+        "{lastModifiedDateSpec?}" : lastModifiedDate);
+    templateBuilder.append('&').append(TYPE_ID).append("=").append(contentTypeId == null || contentTypeId.isEmpty() ?
+        "{contentTypeId?}" : contentTypeId.toArray());
+    templateBuilder.append('&').append(STATUS).append("=").append(statuses == null || statuses.isEmpty() ?
+        "{statuses?}" : statuses.toArray());
+    templateBuilder.append('&').append(FIELD).append("=").append(fieldQuery == null || fieldQuery.isEmpty() ?
+        "{fieldQuery?}" : fieldQuery.toArray());
+    templateBuilder.append('&').append(DISJUNCTION).append("=").append("{disjunction?}");
+    final String urlTemplate = templateBuilder.toString();
+    if (logger.isInfoEnabled()) {
+      logger.info("Template URL: " + urlTemplate);
+    }
+    UrlBuilder xmlBuilder = UrlBuilder.getBuilder().rel(RelEnum.RESULTS).indexOffset(start).template(urlTemplate).type(
+        MediaType.APPLICATION_ATOM_XML);
+    UrlBuilder jsonBulder = UrlBuilder.getBuilder().rel(RelEnum.RESULTS).indexOffset(start).template(urlTemplate).
+        type(MediaType.APPLICATION_JSON);
+    descBuilder.urls(xmlBuilder.build(), jsonBulder.build());
+    ResponseBuilder builder = Response.ok(descBuilder.build());
+    return builder.build();
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_ATOM_XML)
+  public Response getResultFeed(@QueryParam(TYPE_ID) List<String> contentTypeId,
+                                @QueryParam(SEARCH_TERMS) String searchTerms,
+                                @QueryParam(STATUS) List<String> statuses,
+                                @QueryParam(WORKSPACE_ID) String workspaceId,
+                                @QueryParam(FIELD) List<String> fieldQuery,
+                                @QueryParam(CREATION_DATE) String creationDate,
+                                @QueryParam(LAST_MODIFIED_DATE) String lastModifiedDate,
+                                @QueryParam(START) int start,
+                                @QueryParam(COUNT) int count,
+                                @QueryParam(DISJUNCTION) boolean disJunction) {
+    initParams(contentTypeId, searchTerms, statuses, workspaceId, fieldQuery, creationDate, lastModifiedDate, start,
+               count, disJunction);
+    // Not implemented yet!
+    return null;
   }
 
   @GET
