@@ -21,6 +21,8 @@ package com.smartitengineering.cms.spi.impl.content.search;
 import com.google.inject.Inject;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.Filter;
+import com.smartitengineering.cms.api.content.SearchResult;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.spi.content.ContentSearcher;
@@ -57,7 +59,7 @@ public class ContentSearcherImpl implements ContentSearcher {
   private static final String SOLR_DATE_FORMAT = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern() + "'Z'";
 
   @Override
-  public Collection<Content> search(Filter filter) {
+  public SearchResult search(Filter filter) {
     final StringBuilder finalQuery = new StringBuilder();
     String disjunctionSeperator = " OR ";
     String conjunctionSeperator = " AND ";
@@ -140,22 +142,22 @@ public class ContentSearcherImpl implements ContentSearcher {
     if (logger.isInfoEnabled()) {
       logger.info("Query q = " + finalQuery.toString());
     }
-    final Collection<PersistentContent> searchResult = textSearchDao.search(QueryParameterFactory.
-        getStringLikePropertyParam("q", finalQuery.toString()), QueryParameterFactory.getFirstResultParam(filter.
-        getStartFrom()), QueryParameterFactory.getMaxResultsParam(filter.getMaxContents()));
+    final com.smartitengineering.common.dao.search.SearchResult<PersistentContent> searchResult = textSearchDao.
+        detailedSearch(QueryParameterFactory.getStringLikePropertyParam("q", finalQuery.toString()), QueryParameterFactory.
+        getFirstResultParam(filter.getStartFrom()), QueryParameterFactory.getMaxResultsParam(filter.getMaxContents()));
     final Collection<Content> result;
-    if (searchResult == null || searchResult.isEmpty()) {
+    if (searchResult == null || searchResult.getResult() == null || searchResult.getResult().isEmpty()) {
       result = Collections.emptyList();
     }
     else {
       result = new ArrayList<Content>();
-      for (PersistentContent content : searchResult) {
+      for (PersistentContent content : searchResult.getResult()) {
         if (content != null && content.getMutableContent() != null) {
           result.add(content.getMutableContent());
         }
       }
     }
-    return result;
+    return SmartContentAPI.getInstance().getContentLoader().createSearchResult(result, searchResult.getTotalResults());
   }
 
   private String generateDateQuery(String fieldName, QueryParameter<Date> creationDateFilter) {

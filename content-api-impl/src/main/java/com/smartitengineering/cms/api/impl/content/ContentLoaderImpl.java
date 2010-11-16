@@ -41,6 +41,7 @@ import com.smartitengineering.cms.api.content.MutableOtherFieldValue;
 import com.smartitengineering.cms.api.content.MutableStringFieldValue;
 import com.smartitengineering.cms.api.content.NumberFieldValue;
 import com.smartitengineering.cms.api.content.OtherFieldValue;
+import com.smartitengineering.cms.api.content.SearchResult;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.type.CollectionDataType;
@@ -61,7 +62,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.UUID;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
@@ -218,9 +218,8 @@ public class ContentLoaderImpl implements ContentLoader {
   }
 
   @Override
-  public Set<Content> search(Filter filter) {
-    return Collections.unmodifiableSet(new LinkedHashSet<Content>(SmartContentSPI.getInstance().getContentSearcher().
-        search(filter)));
+  public SearchResult search(Filter filter) {
+    return SmartContentSPI.getInstance().getContentSearcher().search(filter);
   }
 
   @Override
@@ -526,7 +525,15 @@ public class ContentLoaderImpl implements ContentLoader {
     Filter filter = craeteFilter();
     addQueryForContentId(((ContentFieldValue) val).getValue(), ((ContentDataType) contentDataType).getTypeDef(), filter);
     filter.setDisjunction(false);
-    Set<Content> contents = search(filter);
+    Collection<Content> contents = search(filter).getResult();
     return !contents.isEmpty();
+  }
+
+  @Override
+  public SearchResult createSearchResult(Collection<Content> result, long totalResultsCount) {
+    SearchResultImpl resultImpl = new SearchResultImpl();
+    resultImpl.setResult(result);
+    resultImpl.setTotalResultsCount(totalResultsCount);
+    return resultImpl;
   }
 }

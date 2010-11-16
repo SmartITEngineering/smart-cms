@@ -183,7 +183,9 @@ public class ContentSearcherResource extends AbstractResource {
                count, disJunction);
     ResponseBuilder responseBuilder;
     Filter filter = getFilter();
-    final Collection<Content> searchContent = SmartContentAPI.getInstance().getContentLoader().search(filter);
+    final com.smartitengineering.cms.api.content.SearchResult result = SmartContentAPI.getInstance().getContentLoader().
+        search(filter);
+    final Collection<Content> searchContent = result.getResult();
     Feed feed = getFeed("search", "Content Search Result", new Date());
     feed.addLink(getLink(getUriInfo().getRequestUri().toASCIIString(), Link.REL_ALTERNATE, MediaType.APPLICATION_JSON));
     feed.addLink(getLink(new StringBuilder(getUriInfo().getBaseUri().toASCIIString()).append(getUriInfo().getPath()).
@@ -198,6 +200,8 @@ public class ContentSearcherResource extends AbstractResource {
     countElem.setValue(count);
     IntegerElement startIndexElem = feed.<IntegerElement>addExtension(OpenSearchConstants.START_INDEX);
     startIndexElem.setValue(start);
+    IntegerElement totalResultsElem = feed.<IntegerElement>addExtension(OpenSearchConstants.TOTAL_RESULTS);
+    totalResultsElem.setValue(Long.valueOf(result.getTotalResultsCount()).intValue());
     if (searchContent != null && !searchContent.isEmpty()) {
       feed.addLink(getLink(getNextPage().toASCIIString(), Link.REL_NEXT, MediaType.APPLICATION_ATOM_XML));
       if (getPreviousPage() != null) {
@@ -234,7 +238,7 @@ public class ContentSearcherResource extends AbstractResource {
     Collection<Content> searchContent;
     ResponseBuilder responseBuilder;
     Filter filter = getFilter();
-    searchContent = SmartContentAPI.getInstance().getContentLoader().search(filter);
+    searchContent = SmartContentAPI.getInstance().getContentLoader().search(filter).getResult();
     if (searchContent.isEmpty() || searchContent == null) {
       responseBuilder = Response.status(Response.Status.NO_CONTENT);
     }

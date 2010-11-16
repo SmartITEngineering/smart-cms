@@ -39,13 +39,14 @@ import com.smartitengineering.cms.api.content.MutableStringFieldValue;
 import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.content.NumberFieldValue;
 import com.smartitengineering.cms.api.content.OtherFieldValue;
+import com.smartitengineering.cms.api.content.SearchResult;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.type.FieldDef;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  *
@@ -105,7 +106,9 @@ public interface ContentLoader {
 
   Filter craeteFilter();
 
-  Set<Content> search(Filter filter);
+  SearchResult createSearchResult(Collection<Content> result, long totalResultsCount);
+
+  SearchResult search(Filter filter);
 
   Variation getVariation(Content content, Field field, String name);
 

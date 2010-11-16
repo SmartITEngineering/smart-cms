@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,16 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.content;
+package com.smartitengineering.cms.api.content;
 
-import com.smartitengineering.cms.api.content.Filter;
-import com.smartitengineering.cms.api.content.SearchResult;
+import java.util.Collection;
 
 /**
  *
  * @author imyousuf
  */
-public interface ContentSearcher {
+public interface SearchResult {
 
-  SearchResult search(Filter filter);
+  long getTotalResultsCount();
+
+  Collection<Content> getResult();
 }
