@@ -57,7 +57,6 @@ public class RootResource extends AbstractResource {
       return o1.getCreationDate().compareTo(o2.getCreationDate());
     }
   };
-
   public static final String PATH_TO_SEARCH = "search";
 
   @GET
@@ -85,12 +84,14 @@ public class RootResource extends AbstractResource {
             getRelativeURIBuilder().path(WorkspaceResource.class).build(id.getGlobalNamespace(), id.getName()),
             WorkspaceResource.REL_WORKSPACE_CONTENT, MediaType.APPLICATION_JSON);
         Entry entry = getEntry(id.toString(), id.getName(), workspace.getCreationDate(), link);
-        link = getLink(getRelativeURIBuilder().path(WorkspaceResource.class).build(id.getGlobalNamespace(), id.getName()),
+        link = getLink(
+            getRelativeURIBuilder().path(WorkspaceResource.class).build(id.getGlobalNamespace(), id.getName()),
                        WorkspaceResource.REL_WORKSPACE_CONTENT, MediaType.APPLICATION_ATOM_XML);
         entry.addLink(link);
         feed.addEntry(entry);
       }
-      feed.addLink(getLink(getRelativeURIBuilder().path(PATH_TO_SEARCH).build(), "search", MediaType.APPLICATION_JSON));
+      feed.addLink(getLink(getRelativeURIBuilder().path(PATH_TO_SEARCH).build(), "search",
+                           com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
       response.entity(feed);
       response.lastModified(lastModifiedDate);
     }

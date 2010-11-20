@@ -103,7 +103,8 @@ public class ContentTypesResource extends AbstractResource {
     }
     feed.addLink(
         getLink(getRelativeURIBuilder().path(ContentsResource.class).path(ContentsResource.PATH_TO_SEARCH).build(workspace.
-        getId().getGlobalNamespace(), workspace.getId().getName()), "search", MediaType.APPLICATION_JSON));
+        getId().getGlobalNamespace(), workspace.getId().getName()), "search",
+                com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
     Response.ResponseBuilder builder = Response.ok(feed);
     CacheControl control = new CacheControl();
     control.setMaxAge(180);
