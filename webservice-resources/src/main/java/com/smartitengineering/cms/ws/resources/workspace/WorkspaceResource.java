@@ -100,6 +100,7 @@ public class WorkspaceResource extends AbstractResource {
       CacheControl control = new CacheControl();
       control.setMaxAge(MAX_AGE);
       builder.cacheControl(control);
+      builder.header(HttpHeaders.VARY, HttpHeaders.ACCEPT);
       return builder.build();
     }
     else {
@@ -147,6 +148,7 @@ public class WorkspaceResource extends AbstractResource {
       control.setMaxAge(MAX_AGE);
       builder.cacheControl(control);
       builder.tag(tag);
+      builder.header(HttpHeaders.VARY, HttpHeaders.ACCEPT);
       return builder.build();
     }
     else {
