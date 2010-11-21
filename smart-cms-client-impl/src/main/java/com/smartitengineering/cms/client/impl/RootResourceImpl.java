@@ -158,15 +158,11 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
   }
 
   @Override
-  public ContentSearcherResource searchContent() {
-    try {
-      final Feed feed = get();
-      Link link = feed.getLink("search");
-      return new ContentSearcherResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(link));
-    }
-    catch (UniformInterfaceException exception) {
-      exception.printStackTrace();
-      return null;
-    }
+  public ContentSearcherResource searchContent(String query) {
+    Link link = get().getLink("search");
+    String strLink = link.getHref().toASCIIString() + "?" + query;
+    link.setHref(strLink);
+    System.out.println("~~~~ Media type of Link "+link.getMimeType().toString());
+    return new ContentSearcherResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(link));
   }
 }

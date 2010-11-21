@@ -18,13 +18,12 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.cms.ws.common.domains.SearchResult;
+import com.smartitengineering.util.rest.client.WritableResource;
+import org.apache.abdera.model.Feed;
 
 /**
  *
  * @author kaisar
  */
-public interface ContentSearcherResource {
-
-  public SearchResult searchResult();
+public interface ContentSearcherResource extends WritableResource<Feed> {
 }
