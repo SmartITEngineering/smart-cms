@@ -178,7 +178,7 @@ public class ContentSearcherResource extends AbstractResource {
                                 @QueryParam(CREATION_DATE) String creationDate,
                                 @QueryParam(LAST_MODIFIED_DATE) String lastModifiedDate,
                                 @QueryParam(START) int start,
-                                @QueryParam(COUNT) int count,
+                                @QueryParam(COUNT) @DefaultValue("5") int count,
                                 @QueryParam(DISJUNCTION) boolean disJunction) {
     initParams(contentTypeId, searchTerms, statuses, workspaceId, fieldQuery, creationDate, lastModifiedDate, start,
                count, disJunction);
@@ -231,7 +231,7 @@ public class ContentSearcherResource extends AbstractResource {
                       @QueryParam(CREATION_DATE) String creationDate,
                       @QueryParam(LAST_MODIFIED_DATE) String lastModifiedDate,
                       @QueryParam(START) int start,
-                      @QueryParam(COUNT) int count,
+                      @QueryParam(COUNT) @DefaultValue("5") int count,
                       @QueryParam(DISJUNCTION) boolean disJunction) {
     initParams(contentTypeId, searchTerms, statuses, workspaceId, fieldQuery, creationDate, lastModifiedDate, start,
                count,
