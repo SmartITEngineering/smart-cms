@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -282,10 +283,7 @@ public class ContentSearcherResource extends AbstractResource {
   }
 
   protected URI getPage(int offset) {
-    return UriBuilder.fromUri(getUriInfo().getRequestUri()).queryParam(WORKSPACE_ID, workspaceId).queryParam(TYPE_ID, contentTypeId.
-        toArray()).queryParam(STATUS, statuses.toArray()).queryParam(CREATION_DATE, creationDate).queryParam(
-        LAST_MODIFIED_DATE, lastModifiedDate).queryParam(START, start + offset * count).queryParam(COUNT, count).
-        queryParam(DISJUNCTION, disjunction).build();
+    return UriBuilder.fromUri(getUriInfo().getRequestUri()).replaceQueryParam(START, start + offset * count).build();
   }
 
   private Filter getFilter() {
