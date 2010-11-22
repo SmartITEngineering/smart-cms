@@ -162,7 +162,6 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
     Link link = get().getLink("search");
     String strLink = link.getHref().toASCIIString() + "?" + query;
     link.setHref(strLink);
-    System.out.println("~~~~ Media type of Link "+link.getMimeType().toString());
     return new ContentSearcherResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(link));
   }
 }

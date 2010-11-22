@@ -24,9 +24,9 @@
     Description:
         A sample content type definition in context of smart shopping
 -->
-<contentTypes xmlns="http://www.smartitengineering.com/smart-cms/content/content-type-schema"
-              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-              xsi:schemaLocation="http://www.smartitengineering.com/smart-cms/content/content-type-schema http://github.com/smart-it/smart-cms/raw/master/content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd">
+<contentTypes  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+               xmlns='http://www.smartitengineering.com/smart-cms/content/content-type-schema'
+               xsi:schemaLocation='http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../../../content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd'>
 
   <contentType namespace="com.smartitengineering.smart-shopping.content">
     <name>Book</name>
