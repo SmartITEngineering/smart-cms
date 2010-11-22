@@ -20,6 +20,7 @@ package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.ContentTypesResource;
 import com.smartitengineering.cms.client.api.ContentsResource;
+import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
 import com.smartitengineering.cms.client.api.WorkspaceRepresentationsResource;
@@ -31,6 +32,7 @@ import com.smartitengineering.util.rest.client.ResourceLink;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.config.ClientConfig;
 import org.apache.abdera.model.Feed;
+import org.apache.abdera.model.Link;
 
 /**
  *
@@ -81,5 +83,11 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
   public ContentsResource getContents() {
     return new ContentsResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
         getLink("contents")));
+  }
+
+  @Override
+  public WorkspaceContentResouce getWorkspace() {
+    return new WorkspaceContentResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+        getLink(Link.REL_ALTERNATE)));
   }
 }
