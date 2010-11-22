@@ -35,6 +35,7 @@ import com.smartitengineering.cms.client.api.ContentResource;
 import com.smartitengineering.cms.client.api.ContentSearcherResource;
 import com.smartitengineering.cms.client.api.ContentTypeResource;
 import com.smartitengineering.cms.client.api.ContentTypesResource;
+import com.smartitengineering.cms.client.api.ContentsResource;
 import com.smartitengineering.cms.client.api.FieldResource;
 import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
@@ -1066,7 +1067,6 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    Thread.sleep(1100);
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
     value.setValue(contentResourceTest.getUri().toASCIIString());
@@ -1084,6 +1084,8 @@ public class AppTest {
     FieldImpl valueImpl = new FieldImpl();
     valueImpl.setName("b");
     valueImpl.setValue(otherFieldValueImpl);
+
+    Thread.sleep(1200);
 
     LOGGER.info(":::::::::::::: CREATE CONTENT RESOURCE TEST ::::::::::::::");
     ObjectMapper mapper = new ObjectMapper();
@@ -1372,6 +1374,15 @@ public class AppTest {
     Assert.assertEquals(content.getParentContentUri(), content1.getParentContentUri());
     Assert.assertEquals(content.getStatus(), content1.getStatus());
     Assert.assertEquals(content.getFields().size(), content1.getFields().size());
+
+    LOGGER.info("::: TEST SEARCHING FROM WORKSPACE RESOURCE");
+    ContentSearcherResource contentSearcherResource = feedResource.searchContent("count=3");
+    Assert.assertEquals(3, contentSearcherResource.get().getEntries().size());
+
+    LOGGER.info("::: TEST SEARCHING FROM CONTENT RESOURCE");
+    ContentsResource contentsResource = feedResource.getContents();
+    ContentSearcherResource contentSearcherResource1 = contentsResource.searchContent("count=6");
+    Assert.assertEquals(6, contentSearcherResource1.get().getEntries().size());
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Parent Container Uri : " + content1.getParentContentUri());
