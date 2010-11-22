@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.ws.common.domains;
 
 import java.util.Date;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
@@ -49,6 +50,12 @@ public class ResourceTemplateImpl implements ResourceTemplate {
   @Override
   public byte[] getTemplate() {
     return template;
+  }
+
+  @Override
+  @JsonIgnore
+  public String getTemplateString() {
+    return new String(template);
   }
 
   @Override

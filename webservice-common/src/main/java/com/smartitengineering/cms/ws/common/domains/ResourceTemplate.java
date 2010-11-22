@@ -36,6 +36,8 @@ public interface ResourceTemplate {
 
   byte[] getTemplate();
 
+  String getTemplateString();
+
   Date getCreatedDate();
 
   Date getLastModifiedDate();
