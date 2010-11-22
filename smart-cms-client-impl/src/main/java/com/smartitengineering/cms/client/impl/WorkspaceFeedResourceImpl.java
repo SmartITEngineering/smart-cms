@@ -87,7 +87,14 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
 
   @Override
   public WorkspaceContentResouce getWorkspace() {
-    return new WorkspaceContentResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
-        getLink(Link.REL_ALTERNATE)));
+    final ResourceLink link =
+                       AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().getLink(
+        Link.REL_ALTERNATE));
+    if (logger.isInfoEnabled()) {
+      logger.info("Link Rel: " + link.getRel());
+      logger.info("Link URI: " + link.getUri().toASCIIString());
+      logger.info("Link MIME Type: " + link.getMimeType());
+    }
+    return new WorkspaceContentResourceImpl(this, link);
   }
 }
