@@ -56,6 +56,9 @@ public class WorkspaceVariationsResourceImpl extends AbstractFeedClientResource<
 
   @Override
   public Collection<WorkspaceVariationResource> getVariationResources() {
+    if (getLastReadStateOfEntity() == null) {
+      return Collections.emptyList();
+    }
     final List<Entry> entries = getLastReadStateOfEntity().getEntries();
     if (entries == null || entries.isEmpty()) {
       return Collections.emptyList();

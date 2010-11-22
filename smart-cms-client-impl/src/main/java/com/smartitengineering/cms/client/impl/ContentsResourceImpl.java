@@ -71,6 +71,9 @@ public class ContentsResourceImpl extends AbstractFeedClientResource<ContentsRes
 
   @Override
   public Collection<ContentResource> getContentResources() {
+    if (getLastReadStateOfEntity() == null) {
+      return Collections.emptyList();
+    }
     final List<Entry> entries = getLastReadStateOfEntity().getEntries();
     if (entries == null || entries.isEmpty()) {
       return Collections.emptyList();
