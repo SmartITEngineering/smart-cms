@@ -20,6 +20,7 @@ package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.ContainerResource;
 import com.smartitengineering.cms.client.api.ContentResource;
+import com.smartitengineering.cms.client.api.ContentSearcherResource;
 import com.smartitengineering.cms.client.api.ContentsResource;
 import com.smartitengineering.cms.ws.common.domains.Content;
 import com.smartitengineering.util.rest.atom.AbstractFeedClientResource;
@@ -35,6 +36,7 @@ import java.util.List;
 import javax.ws.rs.core.MediaType;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Link;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -90,5 +92,16 @@ public class ContentsResourceImpl extends AbstractFeedClientResource<ContentsRes
   public ContentResource createContentResource(Content content) {
     ClientResponse response = post(MediaType.APPLICATION_JSON, content, ClientResponse.Status.CREATED);
     return new ContentResourceImpl(this, response.getLocation());
+  }
+
+  @Override
+  public ContentSearcherResource searchContent(String query) {
+    Link link = get().getLink("search");
+    if (StringUtils.isNotBlank(query)) {
+      String strLink = link.getHref().toASCIIString();
+      strLink = strLink + "?" + query;
+      link.setHref(strLink);
+    }
+    return new ContentSearcherResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(link));
   }
 }

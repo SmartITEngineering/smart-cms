@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.client.impl;
 
+import com.smartitengineering.cms.client.api.ContentSearcherResource;
 import com.smartitengineering.cms.client.api.ContentTypesResource;
 import com.smartitengineering.cms.client.api.ContentsResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
@@ -33,6 +34,7 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.config.ClientConfig;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -96,5 +98,16 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
       logger.info("Link MIME Type: " + link.getMimeType());
     }
     return new WorkspaceContentResourceImpl(this, link);
+  }
+
+  @Override
+  public ContentSearcherResource searchContent(String query) {
+    Link link = get().getLink("search");
+    if (StringUtils.isNotBlank(query)) {
+      String strLink = link.getHref().toASCIIString();
+      strLink = strLink + "?" + query;
+      link.setHref(strLink);
+    }
+    return new ContentSearcherResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(link));
   }
 }
