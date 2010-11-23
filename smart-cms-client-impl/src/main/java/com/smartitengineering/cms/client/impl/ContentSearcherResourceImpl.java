@@ -19,7 +19,6 @@
 package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.ContentSearcherResource;
-import com.smartitengineering.cms.ws.common.domains.SearchResult;
 import com.smartitengineering.util.rest.atom.AbstractFeedClientResource;
 import com.smartitengineering.util.rest.client.Resource;
 import com.smartitengineering.util.rest.client.ResourceLink;
@@ -44,14 +43,17 @@ public class ContentSearcherResourceImpl extends AbstractFeedClientResource<Reso
   }
 
   @Override
-  protected Resource<? extends Feed> instantiatePageableResource(ResourceLink link) {
+  protected ResourceLink getNextUri() {
     return null;
   }
 
   @Override
-  public SearchResult searchResult() {
-    SearchResult result = new SearchResult();
-    get();
-    return result;
+  protected ResourceLink getPreviousUri() {
+    return null;
+  }
+
+  @Override
+  protected Resource instantiatePageableResource(ResourceLink link) {
+    return null;
   }
 }

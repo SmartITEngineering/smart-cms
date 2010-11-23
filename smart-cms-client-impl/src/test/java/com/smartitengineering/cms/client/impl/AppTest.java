@@ -32,8 +32,10 @@ import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.binder.guice.Initializer;
 import com.smartitengineering.cms.client.api.ContainerResource;
 import com.smartitengineering.cms.client.api.ContentResource;
+import com.smartitengineering.cms.client.api.ContentSearcherResource;
 import com.smartitengineering.cms.client.api.ContentTypeResource;
 import com.smartitengineering.cms.client.api.ContentTypesResource;
+import com.smartitengineering.cms.client.api.ContentsResource;
 import com.smartitengineering.cms.client.api.FieldResource;
 import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
@@ -79,6 +81,7 @@ import java.util.Set;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Feed;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.Header;
@@ -1064,7 +1067,6 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    Thread.sleep(1100);
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
     value.setValue(contentResourceTest.getUri().toASCIIString());
@@ -1083,6 +1085,8 @@ public class AppTest {
     valueImpl.setName("b");
     valueImpl.setValue(otherFieldValueImpl);
 
+    Thread.sleep(1200);
+
     LOGGER.info(":::::::::::::: CREATE CONTENT RESOURCE TEST ::::::::::::::");
     ObjectMapper mapper = new ObjectMapper();
     String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
@@ -1097,7 +1101,6 @@ public class AppTest {
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
-    System.out.println("!!! " + JSON);
     ContentResource contentResource = feedResource.getContents().createContentResource(content);
     Content content1 = contentResource.get();
     Assert.assertNotNull(content1);
@@ -1371,6 +1374,15 @@ public class AppTest {
     Assert.assertEquals(content.getParentContentUri(), content1.getParentContentUri());
     Assert.assertEquals(content.getStatus(), content1.getStatus());
     Assert.assertEquals(content.getFields().size(), content1.getFields().size());
+
+    LOGGER.info("::: TEST SEARCHING FROM WORKSPACE RESOURCE");
+    ContentSearcherResource contentSearcherResource = feedResource.searchContent("count=3");
+    Assert.assertEquals(3, contentSearcherResource.get().getEntries().size());
+
+    LOGGER.info("::: TEST SEARCHING FROM CONTENT RESOURCE");
+    ContentsResource contentsResource = feedResource.getContents();
+    ContentSearcherResource contentSearcherResource1 = contentsResource.searchContent("count=6");
+    Assert.assertEquals(6, contentSearcherResource1.get().getEntries().size());
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Parent Container Uri : " + content1.getParentContentUri());
@@ -1660,6 +1672,23 @@ public class AppTest {
         Assert.assertEquals("some/type", variation);
       }
     }
+  }
+
+  @Test
+  public void testSearch() throws Exception {
+    LOGGER.info(":::::::::::::: SEARCH CONTENT RESOURCE TEST ::::::::::::::");
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Thread.sleep(1100);
+    String query =
+           "typeId=atest2:additional:com.smartitengineering.smart-shopping.content:Author&status=published&status=draft&disjunction=true";
+    ContentSearcherResource searchContent = resource.searchContent(query);
+    Assert.assertEquals(5, searchContent.get().getEntries().size());
+    IRI href = searchContent.get().getLink("next").getHref();
+    query =
+    "typeId=atest2:additional:com.smartitengineering.smart-shopping.content:Author&status=published&status=draft&disjunction=true&count=10";
+    searchContent = resource.searchContent(query);
+    Assert.assertEquals(10, searchContent.get().getEntries().size());
+
   }
 
   @Test

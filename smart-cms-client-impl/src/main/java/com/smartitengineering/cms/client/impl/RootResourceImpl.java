@@ -47,6 +47,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,15 +159,13 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
   }
 
   @Override
-  public ContentSearcherResource searchContent() {
-    try {
-      final Feed feed = get();
-      Link link = feed.getLink("search");
-      return new ContentSearcherResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(link));
+  public ContentSearcherResource searchContent(String query) {
+    Link link = get().getLink("search");
+    if (StringUtils.isNotBlank(query)) {
+      String strLink = link.getHref().toASCIIString();
+      strLink = strLink + "?" + query;
+      link.setHref(strLink);
     }
-    catch (UniformInterfaceException exception) {
-      exception.printStackTrace();
-      return null;
-    }
+    return new ContentSearcherResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(link));
   }
 }

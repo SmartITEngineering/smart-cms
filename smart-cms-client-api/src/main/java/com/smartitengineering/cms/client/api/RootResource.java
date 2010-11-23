@@ -37,5 +37,5 @@ public interface RootResource extends WritableResource<Feed> {
 
   public Workspace createWorkspace(WorkspaceId workspaceId) throws URISyntaxException;
 
-  public ContentSearcherResource searchContent();
+  public ContentSearcherResource searchContent(String query);
 }
