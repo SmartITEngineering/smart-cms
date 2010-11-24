@@ -33,6 +33,7 @@ import com.smartitengineering.cms.binder.guice.Initializer;
 import com.smartitengineering.cms.client.api.ContainerResource;
 import com.smartitengineering.cms.client.api.ContentResource;
 import com.smartitengineering.cms.client.api.ContentSearcherResource;
+import com.smartitengineering.cms.client.api.ContentTypeFeedResource;
 import com.smartitengineering.cms.client.api.ContentTypeResource;
 import com.smartitengineering.cms.client.api.ContentTypesResource;
 import com.smartitengineering.cms.client.api.ContentsResource;
@@ -580,6 +581,11 @@ public class AppTest {
     contentTypesResource.get();
     Collection<ContentTypeResource> collection = contentTypesResource.getContentTypes();
     Assert.assertEquals(3, collection.size());
+    Collection<ContentTypeFeedResource> feedCollection = contentTypesResource.getContentTypeFeeds();
+    Assert.assertEquals(3, feedCollection.size());
+    for (ContentTypeFeedResource res : feedCollection) {
+      Assert.assertTrue(res.getFieldDefs().size() > 0);
+    }
 
     InputStream inputStream = IOUtils.toInputStream(XML);
 

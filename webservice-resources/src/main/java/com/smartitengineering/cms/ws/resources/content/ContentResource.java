@@ -256,7 +256,7 @@ public class ContentResource extends AbstractResource {
       ContentImpl contentImpl = (ContentImpl) toBean;
       ContentType type = fromBean.getContentDefinition();
       contentImpl.setContentTypeUri(
-          ContentTypeResource.getContentTypeRelativeURI(type.getContentTypeID()).toASCIIString());
+          ContentTypeResource.getContentTypeRelativeURI(getUriInfo(), type.getContentTypeID()).toASCIIString());
       if (fromBean.getParentId() != null) {
         contentImpl.setParentContentUri(ContentResource.getContentUri(getRelativeURIBuilder(), fromBean.getParentId()).
             toASCIIString());

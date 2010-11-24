@@ -20,12 +20,24 @@ package com.smartitengineering.cms.ws.resources.type;
 
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
+import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
-import com.smartitengineering.util.rest.server.AbstractResource;
+import com.smartitengineering.cms.api.type.DataType;
+import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.type.OtherDataType;
+import com.smartitengineering.cms.ws.common.domains.CollectionFieldDefImpl;
+import com.smartitengineering.cms.ws.common.domains.ContentFieldDefImpl;
+import com.smartitengineering.cms.ws.common.domains.FieldDefImpl;
+import com.smartitengineering.cms.ws.common.domains.OtherFieldDefImpl;
+import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
+import java.io.StringWriter;
 import java.net.URI;
 import java.util.Date;
+import java.util.Map;
+import java.util.Map.Entry;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -38,6 +50,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
+import org.apache.abdera.model.Feed;
+import org.apache.abdera.model.Link;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +88,88 @@ public class ContentTypeResource extends AbstractResource {
           com.smartitengineering.cms.api.common.MediaType.APPLICATION_XML));
       builder.lastModified(lastModified);
       builder.tag(tag);
+      builder.header(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+    }
+    return builder.build();
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_ATOM_XML)
+  public Response getAtomFeed() {
+    ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(lastModified, tag);
+    if (builder == null) {
+      final String id = type.getContentTypeID().toString();
+      Feed feed = getFeed(id, StringUtils.isBlank(type.getDisplayName()) ? id : type.getDisplayName(), lastModified);
+      if (type.getParent() != null) {
+        feed.addLink(getLink(getContentTypeRelativeURI(getUriInfo(), type.getParent()), "parent",
+                             MediaType.APPLICATION_ATOM_XML));
+      }
+      feed.addLink(getLink(getUriInfo().getRequestUri(), Link.REL_ALTERNATE, MediaType.APPLICATION_XML));
+      builder = Response.ok(feed);
+      builder.lastModified(lastModified);
+      builder.tag(tag);
+      builder.header(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+      Map<String, FieldDef> fieldDefs = type.getFieldDefs();
+      if (fieldDefs != null && !fieldDefs.isEmpty()) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        for (Entry<String, FieldDef> fieldDef : fieldDefs.entrySet()) {
+          org.apache.abdera.model.Entry entry = getEntry(fieldDef.getKey(), fieldDef.getKey(), lastModified);
+          StringWriter writer = new StringWriter();
+          final FieldDefImpl def;
+          final DataType dataType = fieldDef.getValue().getValueDef();
+          switch (dataType.getType()) {
+            case OTHER:
+            case STRING:
+              def = new OtherFieldDefImpl();
+              ((OtherFieldDefImpl) def).setMimeType(((OtherDataType) fieldDef.getValue().getValueDef()).getMIMEType());
+              break;
+            case COLLECTION:
+              def = new CollectionFieldDefImpl();
+              CollectionDataType collectionDataType = ((CollectionDataType) fieldDef.getValue().getValueDef());
+              FieldDefImpl itemFieldDef;
+              switch (collectionDataType.getItemDataType().getType()) {
+                case OTHER:
+                case STRING:
+                  itemFieldDef = new OtherFieldDefImpl();
+                  ((OtherFieldDefImpl) itemFieldDef).setMimeType(((OtherDataType) collectionDataType.getItemDataType()).
+                      getMIMEType());
+                  break;
+                case CONTENT:
+                  itemFieldDef = new ContentFieldDefImpl();
+                  ((ContentFieldDefImpl) itemFieldDef).setInstanceOfId(((ContentDataType) collectionDataType.
+                                                                        getItemDataType()).getTypeDef().toString());
+                  break;
+                default:
+                  itemFieldDef = new FieldDefImpl();
+                  break;
+              }
+              itemFieldDef.setType(collectionDataType.getItemDataType().getType().name());
+              itemFieldDef.setName(fieldDef.getKey());
+              itemFieldDef.setRequired(fieldDef.getValue().isRequired());
+              ((CollectionFieldDefImpl) def).setItemDef(itemFieldDef);
+              break;
+            case CONTENT:
+              def = new ContentFieldDefImpl();
+              ((ContentFieldDefImpl) def).setInstanceOfId(((ContentDataType) fieldDef.getValue().getValueDef()).
+                  getTypeDef().toString());
+              break;
+            default:
+              def = new FieldDefImpl();
+              break;
+          }
+          def.setName(fieldDef.getKey());
+          def.setRequired(fieldDef.getValue().isRequired());
+          def.setType(fieldDef.getValue().getValueDef().getType().name());
+          try {
+            objectMapper.writeValue(writer, def);
+            entry.setContent(writer.toString(), MediaType.APPLICATION_JSON);
+            feed.addEntry(entry);
+          }
+          catch (Exception ex) {
+            logger.error("Could not add field entry", ex);
+          }
+        }
+      }
     }
     return builder.build();
   }
@@ -99,14 +198,20 @@ public class ContentTypeResource extends AbstractResource {
     }
   }
 
-  public static URI getContentTypeRelativeURI(ContentTypeId typeId) {
-    UriBuilder builder = UriBuilder.fromResource(ContentTypesResource.class);
+  public static URI getContentTypeRelativeURI(UriInfo info, ContentTypeId typeId) {
+    UriBuilder builder = UriBuilder.fromUri(info.getBaseUri());
+    builder.path(ContentTypesResource.class);
     builder.path(ContentTypesResource.PATH_TO_CONTENT_TYPE);
     return builder.build(typeId.getWorkspace().getGlobalNamespace(), typeId.getWorkspace().getName(), typeId.
-        getWorkspace(), typeId.getName());
+        getNamespace(), typeId.getName());
   }
 
   public ContentType getType() {
     return type;
+  }
+
+  @Override
+  protected String getAuthor() {
+    return "Smart CMS";
   }
 }

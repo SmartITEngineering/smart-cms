@@ -60,6 +60,7 @@ public class ContentTypesResource extends AbstractResource {
 
   public static final String PATH_TO_CONTENT_TYPE = "{typeNS}/{typeName}";
   public static final String REL_CONTENT_TYPE = "contentType";
+  public static final String REL_CONTENT_TYPE_FEED = "contentTypeFeed";
   public static final String PATH_TO_SEARCH = "search";
   private static final Comparator<ContentType> CONTENT_TYPE_COMPRATOR = new Comparator<ContentType>() {
 
@@ -98,7 +99,8 @@ public class ContentTypesResource extends AbstractResource {
           getNamespace(), contentTypeId.getName());
       final String toString = contentTypeId.toString();
       Entry entry = getEntry(toString, toString, lastChangeDate, getLink(uri, REL_CONTENT_TYPE,
-                                                                         MediaType.APPLICATION_XML));
+                                                                         MediaType.APPLICATION_XML),
+                             getLink(uri, REL_CONTENT_TYPE_FEED, MediaType.APPLICATION_ATOM_XML));
       feed.addEntry(entry);
     }
     feed.addLink(

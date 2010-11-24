@@ -16,20 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.client.api;
+package com.smartitengineering.cms.ws.common.domains;
 
-import com.smartitengineering.util.rest.client.WritableResource;
-import java.util.Collection;
-import org.apache.abdera.model.Feed;
+import com.smartitengineering.cms.ws.common.jackson.FieldDefTypeIdResolver;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.map.annotate.JsonTypeIdResolver;
 
 /**
  *
- * @author kaisar
+ * @author imyousuf
  */
-public interface ContentTypesResource extends WritableResource<Feed> {
+@JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, include = JsonTypeInfo.As.PROPERTY, property = "@valueType")
+@JsonTypeIdResolver(FieldDefTypeIdResolver.class)
+@JsonDeserialize(as = FieldDefImpl.class)
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
+public interface FieldDef {
 
-  public Collection<ContentTypeResource> getContentTypes();
-  public Collection<ContentTypeFeedResource> getContentTypeFeeds();
+  String getName();
 
-  public void createContentType(String contentType);
+  String getType();
+
+  boolean isRequired();
 }

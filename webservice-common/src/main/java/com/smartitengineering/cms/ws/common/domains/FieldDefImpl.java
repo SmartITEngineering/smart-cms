@@ -16,20 +16,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.client.api;
-
-import com.smartitengineering.util.rest.client.WritableResource;
-import java.util.Collection;
-import org.apache.abdera.model.Feed;
+package com.smartitengineering.cms.ws.common.domains;
 
 /**
  *
- * @author kaisar
+ * @author imyousuf
  */
-public interface ContentTypesResource extends WritableResource<Feed> {
+public class FieldDefImpl implements FieldDef {
 
-  public Collection<ContentTypeResource> getContentTypes();
-  public Collection<ContentTypeFeedResource> getContentTypeFeeds();
+  private String name, type;
+  private boolean required;
 
-  public void createContentType(String contentType);
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  @Override
+  public String getType() {
+    return type;
+  }
+
+  @Override
+  public boolean isRequired() {
+    return required;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setRequired(boolean required) {
+    this.required = required;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
 }

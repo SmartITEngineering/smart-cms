@@ -18,18 +18,18 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.util.rest.client.WritableResource;
-import java.util.Collection;
+import com.smartitengineering.cms.ws.common.domains.FieldDef;
+import com.smartitengineering.util.rest.client.Resource;
+import java.util.List;
 import org.apache.abdera.model.Feed;
 
 /**
  *
- * @author kaisar
+ * @author imyousuf
  */
-public interface ContentTypesResource extends WritableResource<Feed> {
+public interface ContentTypeFeedResource extends Resource<Feed> {
 
-  public Collection<ContentTypeResource> getContentTypes();
-  public Collection<ContentTypeFeedResource> getContentTypeFeeds();
+  ContentTypeResource getContentTypeResource();
 
-  public void createContentType(String contentType);
+  List<FieldDef> getFieldDefs();
 }

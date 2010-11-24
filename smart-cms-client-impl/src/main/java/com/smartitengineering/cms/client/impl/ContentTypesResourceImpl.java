@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.client.impl;
 
+import com.smartitengineering.cms.client.api.ContentTypeFeedResource;
 import com.smartitengineering.cms.client.api.ContentTypeResource;
 import com.smartitengineering.cms.client.api.ContentTypesResource;
 import com.smartitengineering.util.rest.atom.AbstractFeedClientResource;
@@ -68,6 +69,23 @@ public class ContentTypesResourceImpl extends AbstractFeedClientResource<Content
       for (Entry entry : entries) {
         list.add(new ContentTypeResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(entry.getLink(
             "contentType"))));
+      }
+      return Collections.unmodifiableCollection(list);
+    }
+  }
+
+  @Override
+  public Collection<ContentTypeFeedResource> getContentTypeFeeds() {
+    final Feed feed = getLastReadStateOfEntity();
+    if (feed == null) {
+      return Collections.emptyList();
+    }
+    else {
+      List<Entry> entries = feed.getEntries();
+      List<ContentTypeFeedResource> list = new ArrayList<ContentTypeFeedResource>(entries.size());
+      for (Entry entry : entries) {
+        list.add(new ContentTypeFeedResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(entry.getLink(
+            "contentTypeFeed"))));
       }
       return Collections.unmodifiableCollection(list);
     }
