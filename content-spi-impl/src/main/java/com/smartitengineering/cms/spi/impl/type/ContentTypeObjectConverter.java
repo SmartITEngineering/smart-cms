@@ -694,7 +694,9 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
           }
           else if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_ITEM_TYPE)) {
             logger.debug("Parsing collection's item data type");
-            collectionDataType.setItemDataType(createDataType(FieldValueType.valueOf(Bytes.toString(value))));
+            if (collectionDataType.getItemDataType() == null) {
+              collectionDataType.setItemDataType(createDataType(FieldValueType.valueOf(Bytes.toString(value))));
+            }
           }
           else if (Bytes.startsWith(infoKey, CELL_FIELD_COLLECTION_ITEM)) {
             logger.debug("Parsing collection's item data type info");

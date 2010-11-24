@@ -136,6 +136,14 @@ public class ContentTypeResource extends AbstractResource {
                   break;
                 case CONTENT:
                   itemFieldDef = new ContentFieldDefImpl();
+                  if (logger.isInfoEnabled()) {
+                    logger.info("Content inner data type (" + fieldDef.getKey() + "): " + collectionDataType.getItemDataType());
+                    if (collectionDataType.getItemDataType() != null) {
+                      logger.info("Content inner data type type def (" + fieldDef.getKey() + "): " + ((ContentDataType) collectionDataType.
+                                                                                                      getItemDataType()).
+                          getTypeDef());
+                    }
+                  }
                   ((ContentFieldDefImpl) itemFieldDef).setInstanceOfId(((ContentDataType) collectionDataType.
                                                                         getItemDataType()).getTypeDef().toString());
                   break;
