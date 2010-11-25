@@ -29,6 +29,10 @@
       <artifactId>jersey-atom-abdera</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.sun.jersey.contribs</groupId>
+      <artifactId>jersey-multipart</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.smartitengineering.smart-util.opensearch</groupId>
       <artifactId>jaxrs</artifactId>
     </dependency>
