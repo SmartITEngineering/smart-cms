@@ -25,14 +25,17 @@ import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.ws.common.domains.ResourceTemplateImpl;
 import com.smartitengineering.cms.ws.resources.domains.Factory;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
+import com.sun.jersey.multipart.FormDataParam;
 import java.util.Date;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.CacheControl;
@@ -88,11 +91,34 @@ public class WorkspaceRepresentationResource extends AbstractResource {
 
   protected static String getETag(ResourceTemplate template) {
     final String etag = template.getEntityTagValue();
-        if (LOGGER.isDebugEnabled()) {
+    if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("ETag from persistence " + etag);
     }
 
     return etag;
+  }
+
+  @POST
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  public Response postRepresentationsForm(@FormDataParam("templateType") String templateType,
+                                          @FormDataParam("templateData") byte[] templateData) {
+    if (StringUtils.isBlank(templateType) || templateData == null || templateData.length <=
+        0) {
+      return Response.status(Response.Status.BAD_REQUEST).build();
+    }
+    try {
+      TemplateType.valueOf(templateType);
+    }
+    catch (Exception ex) {
+      return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
+    }
+    ResourceTemplateImpl newTemplate = new ResourceTemplateImpl();
+    newTemplate.setName(repName);
+    newTemplate.setTemplate(templateData);
+    newTemplate.setTemplateType(templateType);
+    WorkspaceRepresentationResource resource = new WorkspaceRepresentationResource(newTemplate.getName(), workspace,
+                                                                                   getInjectables());
+    return resource.put(newTemplate, "*");
   }
 
   @PUT
