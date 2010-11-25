@@ -67,8 +67,13 @@ public class ContentTypesResourceImpl extends AbstractFeedClientResource<Content
       List<Entry> entries = feed.getEntries();
       List<ContentTypeResource> list = new ArrayList<ContentTypeResource>(entries.size());
       for (Entry entry : entries) {
-        list.add(new ContentTypeResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(entry.getLink(
-            "contentType"))));
+        try {
+          list.add(new ContentTypeResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(entry.getLink(
+              "contentType"))));
+        }
+        catch (Exception ex) {
+          logger.warn("Could not fetch content type", ex);
+        }
       }
       return Collections.unmodifiableCollection(list);
     }
@@ -84,8 +89,13 @@ public class ContentTypesResourceImpl extends AbstractFeedClientResource<Content
       List<Entry> entries = feed.getEntries();
       List<ContentTypeFeedResource> list = new ArrayList<ContentTypeFeedResource>(entries.size());
       for (Entry entry : entries) {
-        list.add(new ContentTypeFeedResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(entry.getLink(
-            "contentTypeFeed"))));
+        try {
+          list.add(new ContentTypeFeedResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(entry.getLink(
+              "contentTypeFeed"))));
+        }
+        catch (Exception ex) {
+          logger.warn("Could not fetch content type", ex);
+        }
       }
       return Collections.unmodifiableCollection(list);
     }
