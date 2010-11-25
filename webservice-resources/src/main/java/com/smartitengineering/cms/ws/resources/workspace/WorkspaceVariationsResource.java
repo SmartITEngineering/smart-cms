@@ -18,12 +18,15 @@
  */
 package com.smartitengineering.cms.ws.resources.workspace;
 
+import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI.ResourceSortCriteria;
 import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
+import com.smartitengineering.cms.ws.common.domains.ResourceTemplateImpl;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
+import com.sun.jersey.multipart.FormDataParam;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -80,6 +83,30 @@ public class WorkspaceVariationsResource extends AbstractResource {
     if (StringUtils.isBlank(template.getName())) {
       return Response.status(Response.Status.BAD_REQUEST).build();
     }
+    WorkspaceVariationResource resource = new WorkspaceVariationResource(template.getName(), workspace,
+                                                                         getInjectables());
+    return resource.put(template, null);
+  }
+
+  @POST
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  public Response postVariationsForm(@FormDataParam("name") String name,
+                                     @FormDataParam("templateType") String templateType,
+                                     @FormDataParam("templateData") byte[] templateData) {
+    if (StringUtils.isBlank(name) || StringUtils.isBlank(templateType) || templateData == null || templateData.length <=
+        0) {
+      return Response.status(Response.Status.BAD_REQUEST).build();
+    }
+    try {
+      TemplateType.valueOf(templateType);
+    }
+    catch (Exception ex) {
+      return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
+    }
+    ResourceTemplateImpl template = new ResourceTemplateImpl();
+    template.setName(name);
+    template.setTemplate(templateData);
+    template.setTemplateType(templateType);
     WorkspaceVariationResource resource = new WorkspaceVariationResource(template.getName(), workspace,
                                                                          getInjectables());
     return resource.put(template, null);
