@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.ws.common.domains.Content;
 import com.smartitengineering.cms.ws.resources.content.searcher.ContentSearcherResource;
 import com.smartitengineering.util.rest.server.AbstractResource;
+import com.sun.jersey.multipart.FormDataMultiPart;
 import java.io.UnsupportedEncodingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -69,6 +70,15 @@ public class ContentsResource extends AbstractResource {
   @Path(ContentsResource.PATH_TO_CONTAINER)
   public WorkspaceContentContainerResource getContainer() {
     return new WorkspaceContentContainerResource(getInjectables(), workspace);
+  }
+
+  @POST
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  public Response createContent(FormDataMultiPart multiPart) {
+    final ContentLoader contentLoader = SmartContentAPI.getInstance().getContentLoader();
+    ContentResource r = new ContentResource(getInjectables(), contentLoader.createContentId(workspace.getId(),
+                                                                                            new byte[0]));
+    return r.post(multiPart);
   }
 
   @POST

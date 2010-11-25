@@ -49,15 +49,20 @@ import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import com.sun.jersey.api.core.ResourceContext;
+import com.sun.jersey.multipart.FormDataBodyPart;
+import com.sun.jersey.multipart.FormDataMultiPart;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -146,6 +151,66 @@ public class ContentResource extends AbstractResource {
       builder.cacheControl(control);
     }
     return builder.build();
+  }
+
+  @POST
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  public Response post(FormDataMultiPart multiPart) {
+    ContentImpl contentImpl = new ContentImpl();
+    contentImpl.setContentTypeUri(multiPart.getField("contentTypeUri").getValue());
+    contentImpl.setParentContentUri(multiPart.getField("parentContentUri").getValue());
+    contentImpl.setStatus(multiPart.getField("status").getValue());
+    if (org.apache.commons.lang.StringUtils.isNotBlank(contentImpl.getContentTypeUri())) {
+      final ContentType contentType;
+      try {
+        contentType = getResourceContext().matchResource(URI.create(contentImpl.getContentTypeUri()),
+                                                         ContentTypeResource.class).getType();
+      }
+      catch (Exception ex) {
+        LOGGER.warn("Count not extract content type info!", ex);
+        return Response.status(Response.Status.BAD_REQUEST).build();
+      }
+      for (Entry<String, FieldDef> fieldDef : contentType.getFieldDefs().entrySet()) {
+        List<FormDataBodyPart> bodyParts = multiPart.getFields(fieldDef.getKey());
+        if (bodyParts != null && !bodyParts.isEmpty()) {
+          FieldImpl fieldImpl = new FieldImpl();
+          fieldImpl.setName(fieldDef.getKey());
+          switch (fieldDef.getValue().getValueDef().getType()) {
+            case COLLECTION:
+              CollectionDataType collectionFieldDef = (CollectionDataType) fieldDef.getValue().getValueDef();
+              CollectionFieldValueImpl fieldValueImpl = new CollectionFieldValueImpl();
+              for (FormDataBodyPart bodyPart : bodyParts) {
+                FieldValueImpl valueImpl = addFieldFromBodyPart(bodyPart, collectionFieldDef.getItemDataType());
+                fieldValueImpl.getValues().add(valueImpl);
+              }
+              break;
+            default:
+              FieldValueImpl valueImpl = addFieldFromBodyPart(bodyParts.get(0), fieldDef.getValue().getValueDef());
+              fieldImpl.setValue(valueImpl);
+              break;
+          }
+          contentImpl.getFields().add(fieldImpl);
+        }
+      }
+    }
+    return put(contentImpl, this.content == null ? null : new EntityTag("*"));
+  }
+
+  protected FieldValueImpl addFieldFromBodyPart(FormDataBodyPart bodyPart, DataType dataType) {
+    switch (dataType.getType()) {
+      case STRING:
+      case OTHER:
+        OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
+        otherFieldValueImpl.setType(dataType.getType().name());
+        otherFieldValueImpl.setMimeType(bodyPart.getMediaType().toString());
+        otherFieldValueImpl.setValue(bodyPart.getValue());
+        return otherFieldValueImpl;
+      default:
+        FieldValueImpl valueImpl = new FieldValueImpl();
+        valueImpl.setType(dataType.getType().name());
+        valueImpl.setType(bodyPart.getValue());
+        return valueImpl;
+    }
   }
 
   @PUT
