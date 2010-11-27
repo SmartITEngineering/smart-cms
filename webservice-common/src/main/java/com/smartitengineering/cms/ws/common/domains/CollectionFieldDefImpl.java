@@ -25,13 +25,32 @@ package com.smartitengineering.cms.ws.common.domains;
 public class CollectionFieldDefImpl extends FieldDefImpl implements CollectionFieldDef {
 
   private FieldDef itemDef;
+  private int maxSize, minSize;
 
   @Override
   public FieldDef getItemDef() {
     return itemDef;
   }
 
+  @Override
+  public int getMaxSize() {
+    return maxSize;
+  }
+
+  @Override
+  public int getMinSize() {
+    return minSize;
+  }
+
   public void setItemDef(FieldDef itemDef) {
     this.itemDef = itemDef;
+  }
+
+  public void setMaxSize(int maxSize) {
+    this.maxSize = maxSize;
+  }
+
+  public void setMinSize(int minSize) {
+    this.minSize = minSize;
   }
 }

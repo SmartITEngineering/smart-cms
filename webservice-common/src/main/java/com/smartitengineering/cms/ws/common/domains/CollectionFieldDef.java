@@ -28,4 +28,8 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize;
 public interface CollectionFieldDef extends FieldDef {
 
   FieldDef getItemDef();
+
+  int getMinSize();
+
+  int getMaxSize();
 }

@@ -137,7 +137,8 @@ public class ContentTypeResource extends AbstractResource {
                 case CONTENT:
                   itemFieldDef = new ContentFieldDefImpl();
                   if (logger.isInfoEnabled()) {
-                    logger.info("Content inner data type (" + fieldDef.getKey() + "): " + collectionDataType.getItemDataType());
+                    logger.info("Content inner data type (" + fieldDef.getKey() + "): " + collectionDataType.
+                        getItemDataType());
                     if (collectionDataType.getItemDataType() != null) {
                       logger.info("Content inner data type type def (" + fieldDef.getKey() + "): " + ((ContentDataType) collectionDataType.
                                                                                                       getItemDataType()).
@@ -155,6 +156,8 @@ public class ContentTypeResource extends AbstractResource {
               itemFieldDef.setName(fieldDef.getKey());
               itemFieldDef.setRequired(fieldDef.getValue().isRequired());
               ((CollectionFieldDefImpl) def).setItemDef(itemFieldDef);
+              ((CollectionFieldDefImpl) def).setMaxSize(collectionDataType.getMaxSize());
+              ((CollectionFieldDefImpl) def).setMinSize(collectionDataType.getMinSize());
               break;
             case CONTENT:
               def = new ContentFieldDefImpl();
