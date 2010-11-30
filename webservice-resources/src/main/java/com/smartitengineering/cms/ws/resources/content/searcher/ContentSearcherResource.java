@@ -124,12 +124,30 @@ public class ContentSearcherResource extends AbstractResource {
           append(StringUtils.isBlank(creationDate) ? "{creationModifiedDateSpec?}" : creationDate);
       templateBuilder.append('&').append(LAST_MODIFIED_DATE).append("=").
           append(StringUtils.isBlank(lastModifiedDate) ? "{lastModifiedDateSpec?}" : lastModifiedDate);
-      templateBuilder.append('&').append(TYPE_ID).append("=").
-          append(contentTypeId == null || contentTypeId.isEmpty() ? "{contentTypeId?}" : contentTypeId.toArray());
-      templateBuilder.append('&').append(STATUS).append("=").
-          append(statuses == null || statuses.isEmpty() ? "{statuses?}" : statuses.toArray());
-      templateBuilder.append('&').append(FIELD).append("=").
-          append(fieldQuery == null || fieldQuery.isEmpty() ? "{fieldQuery?}" : fieldQuery.toArray());
+      if (contentTypeId != null && !contentTypeId.isEmpty()) {
+        for (String typeId : contentTypeId) {
+          templateBuilder.append('&').append(TYPE_ID).append("=").append(typeId);
+        }
+      }
+      else {
+        templateBuilder.append('&').append(TYPE_ID).append("=").append("{contentTypeId?}");
+      }
+      if (statuses != null && !statuses.isEmpty()) {
+        for (String status : statuses) {
+          templateBuilder.append('&').append(STATUS).append("=").append(status);
+        }
+      }
+      else {
+        templateBuilder.append('&').append(STATUS).append("=").append("{statuses?}");
+      }
+      if (fieldQuery != null && !fieldQuery.isEmpty()) {
+        for (String query : fieldQuery) {
+          templateBuilder.append('&').append(FIELD).append("=").append(query);
+        }
+      }
+      else {
+        templateBuilder.append('&').append(FIELD).append("=").append("{fieldQuery?}");
+      }
       templateBuilder.append('&').append(DISJUNCTION).append("=").append("{disjunction?}");
     }
     else {
@@ -156,13 +174,19 @@ public class ContentSearcherResource extends AbstractResource {
         templateBuilder.append(DISJUNCTION).append("=").append(disjunction).append('&');
       }
       if (contentTypeId != null && !contentTypeId.isEmpty()) {
-        templateBuilder.append(TYPE_ID).append("=").append(contentTypeId).append('&');
+        for (String typeId : contentTypeId) {
+          templateBuilder.append(TYPE_ID).append("=").append(typeId).append('&');
+        }
       }
       if (statuses != null && !statuses.isEmpty()) {
-        templateBuilder.append(STATUS).append("=").append(statuses).append('&');
+        for (String status : statuses) {
+          templateBuilder.append(STATUS).append("=").append(status).append('&');
+        }
       }
       if (fieldQuery != null && !fieldQuery.isEmpty()) {
-        templateBuilder.append(FIELD).append("=").append(fieldQuery);
+        for (String query : fieldQuery) {
+          templateBuilder.append(FIELD).append("=").append(query);
+        }
       }
     }
     return templateBuilder;
