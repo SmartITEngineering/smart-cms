@@ -31,16 +31,19 @@ import com.smartitengineering.cms.ws.common.domains.CollectionFieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.ContentFieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.OtherFieldDefImpl;
+import com.smartitengineering.cms.ws.resources.content.searcher.ContentSearcherResource;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import java.io.StringWriter;
 import java.net.URI;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
@@ -68,6 +71,7 @@ public class ContentTypeResource extends AbstractResource {
   private final Date lastModified;
   private final EntityTag tag;
   private final Logger logger = LoggerFactory.getLogger(getClass());
+  public static final String PATH_TO_SEARCH = "search";
 
   public ContentTypeResource(ServerResourceInjectables injectables, ContentType type) {
     super(injectables);
@@ -93,6 +97,13 @@ public class ContentTypeResource extends AbstractResource {
     return builder.build();
   }
 
+  @Path(PATH_TO_SEARCH)
+  public ContentSearcherResource search() {
+    ContentSearcherResource resource = new ContentSearcherResource(getInjectables());
+    resource.setContentTypeId(Collections.singletonList(type.getContentTypeID().toString()));
+    return resource;
+  }
+
   @GET
   @Produces(MediaType.APPLICATION_ATOM_XML)
   public Response getAtomFeed() {
@@ -104,6 +115,11 @@ public class ContentTypeResource extends AbstractResource {
         feed.addLink(getLink(getContentTypeRelativeURI(getUriInfo(), type.getParent()), "parent",
                              MediaType.APPLICATION_ATOM_XML));
       }
+      feed.addLink(getLink(getRelativeURIBuilder().path(ContentTypesResource.class).path(
+          ContentTypesResource.PATH_TO_CONTENT_TYPE).path(PATH_TO_SEARCH).build(type.getContentTypeID().getWorkspace().
+          getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(), type.
+          getContentTypeID().getName()), "search",
+                           com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
       feed.addLink(getLink(getUriInfo().getRequestUri(), Link.REL_ALTERNATE, MediaType.APPLICATION_XML));
       builder = Response.ok(feed);
       builder.lastModified(lastModified);
