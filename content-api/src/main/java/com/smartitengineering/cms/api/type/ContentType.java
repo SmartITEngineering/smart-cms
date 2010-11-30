@@ -45,6 +45,10 @@ public interface ContentType {
    */
   public Map<String, ContentStatus> getStatuses();
 
+  public String getPrimaryFieldName();
+
+  public FieldDef getPrimaryFieldDef();
+
   public Map<String, FieldDef> getFieldDefs();
 
   /**

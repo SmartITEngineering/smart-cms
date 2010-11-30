@@ -22,7 +22,9 @@ import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
+import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.api.type.MutableFieldDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.type.PersistableContentType;
@@ -59,6 +61,13 @@ public class XMLContentTypeDefinitionParser implements ContentTypeDefinitionPars
 
       @Override
       public void processMutableContentType(MutableContentType type, Element element) {
+        if(type.getPrimaryFieldDef() != null) {
+          FieldDef fieldDef = type.getPrimaryFieldDef();
+          if(fieldDef instanceof MutableFieldDef) {
+            MutableFieldDef mutableFieldDef = (MutableFieldDef) fieldDef;
+            mutableFieldDef.setRequired(true);
+          }
+        }
         if (type instanceof PersistableContentType) {
           PersistableContentType contentType = (PersistableContentType) type;
           contentType.setRepresentations(Collections.singletonMap(MediaType.APPLICATION_XML, createRootNodeAndAddChild(

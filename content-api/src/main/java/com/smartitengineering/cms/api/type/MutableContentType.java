@@ -56,4 +56,6 @@ public interface MutableContentType
   public void setParent(ContentTypeId parentId);
 
   public void setDisplayName(String displayName);
+
+  public void setPrimaryFieldName(String primaryFieldName);
 }

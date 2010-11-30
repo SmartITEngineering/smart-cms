@@ -113,6 +113,7 @@ public class ContentTypePersistentService implements PersistentService<WritableC
   private PersistableContentType getPersistableContentType(WritableContentType bean) {
     PersistableContentType contentType = SmartContentSPI.getInstance().getPersistableDomainFactory().
         createPersistableContentType();
+    contentType.setPrimaryFieldName(bean.getPrimaryFieldName());
     contentType.setContentTypeID(bean.getContentTypeID());
     contentType.setCreationDate(bean.getCreationDate());
     contentType.setDisplayName(bean.getDisplayName());

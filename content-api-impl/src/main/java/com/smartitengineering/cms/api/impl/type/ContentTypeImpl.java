@@ -29,6 +29,7 @@ import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.type.PersistableContentType;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -38,6 +39,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -55,7 +57,19 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
   private Date creationDate;
   private Date lastModifiedDate;
   private boolean fromPersistentStorage;
+  private String primaryFieldName;
   private final Map<MediaType, String> representations = new HashMap<MediaType, String>();
+
+  @Override
+  public void put() throws IOException {
+    if (!isValid()) {
+      logger.info("Content type not in valid state!");
+      //First get contents indexed before attempting to use this validity!
+      //Uncomment the following line once indexing is ensured in testing
+      throw new IOException("Content is not in valid state!");
+    }
+    super.put();
+  }
 
   @Override
   public void setContentTypeID(ContentTypeId contentTypeID) throws IllegalArgumentException {
@@ -258,5 +272,48 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
     else {
       return map.firstEntry().getValue();
     }
+  }
+
+  @Override
+  public void setPrimaryFieldName(String primaryFieldName) {
+    this.primaryFieldName = primaryFieldName;
+  }
+
+  @Override
+  public FieldDef getPrimaryFieldDef() {
+    if (logger.isInfoEnabled()) {
+      logger.info("Trying to get primary field for type " + getContentTypeID().toString());
+    }
+    if (StringUtils.isBlank(primaryFieldName)) {
+      logger.info("Trying to get primary field from parent!");
+      if (parentTypeId != null) {
+        logger.info("Parent type id " + parentTypeId.toString());
+        ContentType parantType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(parentTypeId);
+        logger.info("Parent type " + parantType);
+        if (parantType != null) {
+          if (logger.isInfoEnabled()) {
+            logger.info("Parent primary field name: " + parantType.getPrimaryFieldName());
+          }
+          return parantType.getPrimaryFieldDef();
+        }
+      }
+      return null;
+    }
+    else {
+      return getFieldDefs().get(primaryFieldName);
+    }
+  }
+
+  private boolean isValid() {
+    if (logger.isInfoEnabled()) {
+      logger.info("Primary Field Def present: " + primaryFieldName + " " + (getPrimaryFieldDef() != null));
+      logger.info("Primary Field Def: " + getPrimaryFieldDef());
+    }
+    return getPrimaryFieldDef() != null;
+  }
+
+  @Override
+  public String getPrimaryFieldName() {
+    return primaryFieldName;
   }
 }

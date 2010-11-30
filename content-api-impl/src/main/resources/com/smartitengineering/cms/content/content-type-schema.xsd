@@ -227,6 +227,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
   </xs:element>
   <xs:element name="parent" type="contentPointer" />
   <xs:element name="statusName" type="xs:string" />
+  <xs:element name="primaryField" type="xs:string" />
   <xs:element name="status">
     <xs:complexType>
       <xs:sequence>
@@ -240,6 +241,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
         <xs:element ref="name" minOccurs="1" maxOccurs="1" />
         <xs:element ref="displayName" minOccurs="0" maxOccurs="1" />
         <xs:element ref="parent" minOccurs="0" maxOccurs="1" />
+        <xs:element ref="primaryField" minOccurs="0" maxOccurs="1" />
         <xs:element ref="fields" minOccurs="1" />
         <xs:element ref="status" minOccurs="1" maxOccurs="1" />
         <xs:element ref="representations" minOccurs="0" maxOccurs="1" />

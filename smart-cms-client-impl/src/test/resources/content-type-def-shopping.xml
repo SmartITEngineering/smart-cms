@@ -30,6 +30,7 @@
 
   <contentType namespace="com.smartitengineering.smart-shopping.content">
     <name>Book</name>
+    <primaryField>isbn</primaryField>
     <fields>
       <field>
         <name>isbn</name>

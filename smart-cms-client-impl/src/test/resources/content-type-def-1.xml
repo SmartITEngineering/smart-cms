@@ -33,6 +33,7 @@
       <typeNS>com.smartitengineering.smart-shopping.content</typeNS>
       <typeName>Product</typeName>
     </parent>
+    <primaryField>fieldA</primaryField>
     <fields>
       <field>
         <name>fieldA</name>
@@ -117,6 +118,7 @@
   <contentType namespace="jpeg">
     <name>RST</name>
     <displayName>JPEG Image</displayName>
+    <primaryField>image</primaryField>
     <fields>
       <field>
         <name>image</name>

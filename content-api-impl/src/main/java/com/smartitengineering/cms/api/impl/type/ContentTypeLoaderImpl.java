@@ -277,6 +277,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   protected void merge(ContentTypeImpl typeImpl, ContentType contentType) throws IllegalArgumentException {
     typeImpl.setContentTypeID(contentType.getContentTypeID());
     typeImpl.setCreationDate(contentType.getCreationDate());
+    typeImpl.setPrimaryFieldName(contentType.getPrimaryFieldName());
     typeImpl.setDisplayName(contentType.getDisplayName());
     typeImpl.setFromPersistentStorage(contentType instanceof PersistableContentType ? ((PersistableContentType) contentType).
         isFromPersistentStorage() : false);

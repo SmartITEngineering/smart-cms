@@ -87,6 +87,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   public final static byte[] FAMILY_STATUSES = Bytes.toBytes("statuses");
   public final static byte[] FAMILY_TYPE_REPRESENTATIONS = Bytes.toBytes("variants");
   public final static byte[] CELL_DISPLAY_NAME = Bytes.toBytes("displayName");
+  public final static byte[] CELL_PRIMARY_FIELD_NAME = Bytes.toBytes("primaryFieldName");
   public final static byte[] CELL_CREATION_DATE = Bytes.toBytes("creationDate");
   public final static byte[] CELL_LAST_MODIFIED_DATE = Bytes.toBytes("lastModifiedDate");
   public final static byte[] CELL_PARENT_ID = Bytes.toBytes("parent");
@@ -141,6 +142,13 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
           logger.debug(new StringBuilder("Set displayName ").append(displayName).toString());
         }
         put.add(FAMILY_SIMPLE, CELL_DISPLAY_NAME, Bytes.toBytes(displayName));
+      }
+      final String primaryFieldName = instance.getMutableContentType().getPrimaryFieldName();
+      if (logger.isInfoEnabled()) {
+        logger.info("Primary field name being saved: " + primaryFieldName);
+      }
+      if (StringUtils.isNotBlank(primaryFieldName)) {
+        put.add(FAMILY_SIMPLE, CELL_PRIMARY_FIELD_NAME, Bytes.toBytes(primaryFieldName));
       }
       put.add(FAMILY_SIMPLE, CELL_ENTITY_TAG, Bytes.toBytes(instance.getMutableContentType().getEntityTagValue()));
       final Date lastModifiedDate = date;
@@ -359,6 +367,14 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       if (displayName != null) {
         logger.debug("Set display name of the content type!");
         contentType.setDisplayName(Bytes.toString(displayName));
+      }
+      byte[] primaryFieldName = startRow.getValue(FAMILY_SIMPLE, CELL_PRIMARY_FIELD_NAME);
+      if (primaryFieldName != null) {
+        final String toString = Bytes.toString(primaryFieldName);
+        if (logger.isInfoEnabled()) {
+          logger.info("Set primary field name of the content type!" + toString);
+        }
+        contentType.setPrimaryFieldName(toString);
       }
       contentType.setEntityTagValue(Bytes.toString(startRow.getValue(FAMILY_SIMPLE, CELL_ENTITY_TAG)));
       logger.debug("Setting creation and last modified date");

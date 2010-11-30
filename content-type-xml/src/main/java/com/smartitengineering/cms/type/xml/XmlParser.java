@@ -124,6 +124,13 @@ public class XmlParser implements XmlConstants {
         statuses = parseContentStatuses(contentTypeElement, STATUS);
         representationDefs = parseRepresentations(contentTypeElement, REPRESENTATIONS);
         contentTypeId = parseContentTypeId(contentTypeElement, PARENT, workspaceId);
+        String primaryFieldName = parseOptionalStringElement(contentTypeElement, PRIMARY_FIELD);
+        if (logger.isInfoEnabled()) {
+          logger.info("Primary field parsed: " + primaryFieldName);
+        }
+        if (StringUtils.isNotBlank(primaryFieldName)) {
+          mutableContent.setPrimaryFieldName(primaryFieldName);
+        }
         mutableContent.setDisplayName(displayName);
         mutableContent.setParent(contentTypeId);
         mutableContent.getMutableFieldDefs().addAll(fieldDefs);
