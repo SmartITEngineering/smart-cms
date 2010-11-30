@@ -226,8 +226,8 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
       return false;
     }
     final Content other = (Content) obj;
-    if (this.contentId != other.getContentId() && (this.contentId == null
-        || !this.contentId.equals(other.getContentId()))) {
+    if (this.contentId != other.getContentId() && (this.contentId == null ||
+                                                   !this.contentId.equals(other.getContentId()))) {
       return false;
     }
     return true;
@@ -261,7 +261,9 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   @Override
   public boolean isValid() {
     boolean validContent = SmartContentAPI.getInstance().getContentLoader().isValidContent(this);
-    System.out.println("!!! Checking Content" + validContent);
+    if (logger.isDebugEnabled()) {
+      logger.debug("!!! Checking Content" + validContent);
+    }
     return validContent;
   }
 }
