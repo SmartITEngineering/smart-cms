@@ -42,7 +42,7 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
   private String newNamespace;
   private String newContentTypeName;
   private WorkspaceId workspaceId;
-  protected Logger logger = LoggerFactory.getLogger(getClass());
+  protected transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public void setNamespace(String newNamespace) {

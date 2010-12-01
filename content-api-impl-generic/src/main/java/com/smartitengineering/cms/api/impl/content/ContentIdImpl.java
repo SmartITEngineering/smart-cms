@@ -40,7 +40,7 @@ public class ContentIdImpl implements ContentId {
 
   private WorkspaceId workspaceId;
   private byte[] id;
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+  private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   public void setWorkspaceId(WorkspaceId workspaceId) {
     if (workspaceId == null) {
