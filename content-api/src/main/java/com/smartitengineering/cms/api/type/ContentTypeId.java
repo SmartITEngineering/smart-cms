@@ -43,6 +43,8 @@ public interface ContentTypeId extends Externalizable, Comparable<ContentTypeId>
    */
   public String getNamespace();
 
+  public ContentType getContentType();
+
   /**
    * Override the toString so that it could be used to compare to ids of this instance. It should represent the state
    * of the Id.

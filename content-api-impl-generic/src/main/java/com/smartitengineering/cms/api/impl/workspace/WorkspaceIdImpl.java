@@ -18,13 +18,17 @@
  */
 package com.smartitengineering.cms.api.impl.workspace;
 
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.impl.Utils;
+import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -34,6 +38,7 @@ public class WorkspaceIdImpl implements WorkspaceId {
 
   private String globalNamespace;
   private String name;
+  protected Logger logger = LoggerFactory.getLogger(getClass());
 
   public void setGlobalNamespace(String globalNamespace) {
     if (StringUtils.isBlank(globalNamespace) || StringUtils.containsAny(globalNamespace, new char[]{':'})) {
@@ -120,5 +125,16 @@ public class WorkspaceIdImpl implements WorkspaceId {
       return 0;
     }
     return toString().compareTo(o.toString());
+  }
+
+  @Override
+  public Workspace getWorkspae() {
+    try {
+      return SmartContentAPI.getInstance().getWorkspaceApi().getWorkspace(this);
+    }
+    catch (Exception ex) {
+      logger.warn("could not load workspace!", ex);
+      return null;
+    }
   }
 }

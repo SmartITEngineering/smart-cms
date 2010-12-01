@@ -18,8 +18,10 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.impl.Utils;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
+import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentTypeId;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
@@ -27,6 +29,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -38,6 +42,7 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
   private String newNamespace;
   private String newContentTypeName;
   private WorkspaceId workspaceId;
+  protected Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public void setNamespace(String newNamespace) {
@@ -149,5 +154,16 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
       return 0;
     }
     return toString().compareTo(o.toString());
+  }
+
+  @Override
+  public ContentType getContentType() {
+    try {
+      return SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(this);
+    }
+    catch (Exception ex) {
+      logger.warn("could not load content type!", ex);
+      return null;
+    }
   }
 }

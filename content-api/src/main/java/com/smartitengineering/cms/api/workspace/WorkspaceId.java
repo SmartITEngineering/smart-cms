@@ -30,6 +30,8 @@ public interface WorkspaceId extends Externalizable, Comparable<WorkspaceId> {
 
   public String getName();
 
+  public Workspace getWorkspae();
+
   /**
    * Override the toString so that it could be used to compare to ids of this instance. It should represent the state
    * of the Id.
