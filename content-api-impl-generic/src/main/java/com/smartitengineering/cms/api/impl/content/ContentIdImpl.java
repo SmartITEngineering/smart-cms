@@ -18,8 +18,10 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
+import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.impl.Utils;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
@@ -52,6 +54,17 @@ public class ContentIdImpl implements ContentId {
       throw new IllegalArgumentException(String.format(ContentTypeIdImpl.STANDARD_ERROR_MSG, "Content Id"));
     }
     this.id = id;
+  }
+
+  @Override
+  public Content getContent() {
+    try {
+      return SmartContentAPI.getInstance().getContentLoader().loadContent(this);
+    }
+    catch (Exception ex) {
+      logger.warn("could not load content!", ex);
+      return null;
+    }
   }
 
   @Override

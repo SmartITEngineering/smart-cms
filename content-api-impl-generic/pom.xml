@@ -18,6 +18,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.smartitengineering.smart-cms</groupId>
+      <artifactId>content-api-factory</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
     </dependency>
