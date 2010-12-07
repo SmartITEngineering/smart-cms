@@ -76,6 +76,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,6 +203,7 @@ public class ContentResource extends AbstractResource {
     return put(contentImpl, this.content == null ? null : new EntityTag("*"));
   }
 
+  private static final byte[] TMP = new byte[0];
   protected FieldValueImpl addFieldFromBodyPart(FormDataBodyPart bodyPart, DataType dataType) {
     switch (dataType.getType()) {
       case STRING:
@@ -216,7 +218,7 @@ public class ContentResource extends AbstractResource {
         otherFieldValueImpl.setMimeType(bodyPart.getMediaType().toString());
         LOGGER.info("Body Part " + bodyPart.getMediaType());
         try {
-          otherFieldValueImpl.setValue(bodyPart.getValueAs(String.class));
+          otherFieldValueImpl.setValue(Base64.encodeBase64String(bodyPart.getValueAs(TMP.getClass())));
           LOGGER.info("Field value " + otherFieldValueImpl.getValue());
         }
         catch (Exception ex) {
