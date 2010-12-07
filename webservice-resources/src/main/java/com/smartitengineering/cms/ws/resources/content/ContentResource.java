@@ -49,6 +49,7 @@ import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import com.sun.jersey.api.core.ResourceContext;
+import com.sun.jersey.multipart.BodyPartEntity;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import java.io.IOException;
@@ -173,6 +174,8 @@ public class ContentResource extends AbstractResource {
       for (Entry<String, FieldDef> fieldDef : contentType.getFieldDefs().entrySet()) {
         List<FormDataBodyPart> bodyParts = multiPart.getFields(fieldDef.getKey());
         if (bodyParts != null && !bodyParts.isEmpty()) {
+          LOGGER.info("Creating field for " + fieldDef.getKey() + " with type " + fieldDef.getValue().getValueDef().
+              getType());
           FieldImpl fieldImpl = new FieldImpl();
           fieldImpl.setName(fieldDef.getKey());
           switch (fieldDef.getValue().getValueDef().getType()) {
@@ -181,8 +184,11 @@ public class ContentResource extends AbstractResource {
               CollectionFieldValueImpl fieldValueImpl = new CollectionFieldValueImpl();
               for (FormDataBodyPart bodyPart : bodyParts) {
                 FieldValueImpl valueImpl = addFieldFromBodyPart(bodyPart, collectionFieldDef.getItemDataType());
-                fieldValueImpl.getValues().add(valueImpl);
+                if (valueImpl != null) {
+                  fieldValueImpl.getValues().add(valueImpl);
+                }
               }
+              fieldImpl.setValue(fieldValueImpl);
               break;
             default:
               FieldValueImpl valueImpl = addFieldFromBodyPart(bodyParts.get(0), fieldDef.getValue().getValueDef());
@@ -199,16 +205,28 @@ public class ContentResource extends AbstractResource {
   protected FieldValueImpl addFieldFromBodyPart(FormDataBodyPart bodyPart, DataType dataType) {
     switch (dataType.getType()) {
       case STRING:
+        OtherFieldValueImpl stringFieldValueImpl = new OtherFieldValueImpl();
+        stringFieldValueImpl.setType(dataType.getType().name());
+        stringFieldValueImpl.setMimeType(bodyPart.getMediaType().toString());
+        stringFieldValueImpl.setValue(bodyPart.getValue());
+        return stringFieldValueImpl;
       case OTHER:
         OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
         otherFieldValueImpl.setType(dataType.getType().name());
         otherFieldValueImpl.setMimeType(bodyPart.getMediaType().toString());
-        otherFieldValueImpl.setValue(bodyPart.getValue());
+        LOGGER.info("Body Part " + bodyPart.getMediaType());
+        try {
+          otherFieldValueImpl.setValue(bodyPart.getValueAs(String.class));
+          LOGGER.info("Field value " + otherFieldValueImpl.getValue());
+        }
+        catch (Exception ex) {
+          LOGGER.warn("Entity not found!", ex);
+        }
         return otherFieldValueImpl;
       default:
         FieldValueImpl valueImpl = new FieldValueImpl();
         valueImpl.setType(dataType.getType().name());
-        valueImpl.setType(bodyPart.getValue());
+        valueImpl.setValue(bodyPart.getValue());
         return valueImpl;
     }
   }
@@ -462,10 +480,11 @@ public class ContentResource extends AbstractResource {
       throw new IllegalArgumentException("No field in content type with name " + field.getName());
     }
     final DataType dataType = fieldDef.getValueDef();
-    if (org.apache.commons.lang.StringUtils.isNotBlank(field.getValue().getType()) &&
-        !org.apache.commons.lang.StringUtils.equalsIgnoreCase(dataType.getType().name(), field.getValue().getType())) {
-      throw new IllegalArgumentException("Type mismatch! NOTE: type of valus in field is optional in this case. " +
-          "Field is " + field.getName());
+    LOGGER.info("Working with field " + field.getName() + " of value " + field.getValue());
+    if (org.apache.commons.lang.StringUtils.isNotBlank(field.getValue().getType()) && !org.apache.commons.lang.StringUtils.
+        equalsIgnoreCase(dataType.getType().name(), field.getValue().getType())) {
+      throw new IllegalArgumentException("Type mismatch! NOTE: type of values in field is optional in this case. "
+          + "Field is " + field.getName() + " - " + dataType.getType().name() + " " +field.getValue().getType());
     }
     final MutableField mutableField =
                        SmartContentAPI.getInstance().getContentLoader().createMutableField(fieldDef);
