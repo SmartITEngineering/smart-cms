@@ -174,8 +174,10 @@ public class ContentResource extends AbstractResource {
       for (Entry<String, FieldDef> fieldDef : contentType.getFieldDefs().entrySet()) {
         List<FormDataBodyPart> bodyParts = multiPart.getFields(fieldDef.getKey());
         if (bodyParts != null && !bodyParts.isEmpty()) {
-          LOGGER.info("Creating field for " + fieldDef.getKey() + " with type " + fieldDef.getValue().getValueDef().
-              getType());
+          if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Creating field for " + fieldDef.getKey() + " with type " + fieldDef.getValue().getValueDef().
+                getType());
+          }
           FieldImpl fieldImpl = new FieldImpl();
           fieldImpl.setName(fieldDef.getKey());
           switch (fieldDef.getValue().getValueDef().getType()) {
@@ -214,10 +216,14 @@ public class ContentResource extends AbstractResource {
         OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
         otherFieldValueImpl.setType(dataType.getType().name());
         otherFieldValueImpl.setMimeType(bodyPart.getMediaType().toString());
-        LOGGER.info("Body Part " + bodyPart.getMediaType());
+        if (LOGGER.isInfoEnabled()) {
+          LOGGER.info("Body Part " + bodyPart.getMediaType());
+        }
         try {
           otherFieldValueImpl.setValue(bodyPart.getValueAs(String.class));
-          LOGGER.info("Field value " + otherFieldValueImpl.getValue());
+          if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Field value " + otherFieldValueImpl.getValue());
+          }
         }
         catch (Exception ex) {
           LOGGER.warn("Entity not found!", ex);
@@ -483,8 +489,8 @@ public class ContentResource extends AbstractResource {
     LOGGER.info("Working with field " + field.getName() + " of value " + field.getValue());
     if (org.apache.commons.lang.StringUtils.isNotBlank(field.getValue().getType()) && !org.apache.commons.lang.StringUtils.
         equalsIgnoreCase(dataType.getType().name(), field.getValue().getType())) {
-      throw new IllegalArgumentException("Type mismatch! NOTE: type of values in field is optional in this case. "
-          + "Field is " + field.getName() + " - " + dataType.getType().name() + " " +field.getValue().getType());
+      throw new IllegalArgumentException("Type mismatch! NOTE: type of values in field is optional in this case. " +
+          "Field is " + field.getName() + " - " + dataType.getType().name() + " " + field.getValue().getType());
     }
     final MutableField mutableField =
                        SmartContentAPI.getInstance().getContentLoader().createMutableField(fieldDef);
