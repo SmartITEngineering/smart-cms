@@ -202,8 +202,8 @@ public class ContentResource extends AbstractResource {
     }
     return put(contentImpl, this.content == null ? null : new EntityTag("*"));
   }
-
   private static final byte[] TMP = new byte[0];
+
   protected FieldValueImpl addFieldFromBodyPart(FormDataBodyPart bodyPart, DataType dataType) {
     switch (dataType.getType()) {
       case STRING:
@@ -361,12 +361,19 @@ public class ContentResource extends AbstractResource {
       for (FieldDef fieldDef : type.getFieldDefs().values()) {
         final String fieldName = fieldDef.getName();
         Field field = fields.get(fieldName);
+        if (LOGGER.isInfoEnabled()) {
+          LOGGER.info("Field " + field);
+          if (field != null) {
+            LOGGER.info("Converting field " + field.getName() + " with value " + field.getValue().toString()
+                + " and URI " + contentUri);
+          }
+        }
+        if (field == null) {
+          continue;
+        }
         FieldImpl fieldImpl = new FieldImpl();
         fieldImpl.setName(fieldName);
         getDomainField(getRelativeURIBuilder(), field, contentUri, fieldImpl);
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Converting field " + field.getName() + " with value " + field.getValue().toString());
-        }
         contentImpl.getFields().add(fieldImpl);
       }
       Collection<RepresentationDef> defs = type.getRepresentationDefs().values();
@@ -486,7 +493,7 @@ public class ContentResource extends AbstractResource {
     if (org.apache.commons.lang.StringUtils.isNotBlank(field.getValue().getType()) && !org.apache.commons.lang.StringUtils.
         equalsIgnoreCase(dataType.getType().name(), field.getValue().getType())) {
       throw new IllegalArgumentException("Type mismatch! NOTE: type of values in field is optional in this case. "
-          + "Field is " + field.getName() + " - " + dataType.getType().name() + " " +field.getValue().getType());
+          + "Field is " + field.getName() + " - " + dataType.getType().name() + " " + field.getValue().getType());
     }
     final MutableField mutableField =
                        SmartContentAPI.getInstance().getContentLoader().createMutableField(fieldDef);
