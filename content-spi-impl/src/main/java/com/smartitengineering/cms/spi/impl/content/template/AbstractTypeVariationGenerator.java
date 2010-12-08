@@ -38,7 +38,7 @@ public abstract class AbstractTypeVariationGenerator implements TypeVariationGen
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
-  public MutableVariation getVariation(VariationTemplate template, Field field) {
+  public MutableVariation getVariation(VariationTemplate template, Field field, String variationName) {
     VariationGenerator generator;
     try {
       generator = getGenerator(template);
@@ -58,7 +58,7 @@ public abstract class AbstractTypeVariationGenerator implements TypeVariationGen
                      SmartContentAPI.getInstance().getContentLoader().createMutableVariation();
     final String name = template.getName();
     variation.setName(name);
-    variation.setMimeType(field.getFieldDef().getVariations().get(name).getMIMEType());
+    variation.setMimeType(field.getFieldDef().getVariations().get(variationName).getMIMEType());
     variation.setVariation(StringUtils.getBytesUtf8(representationForContent));
     return variation;
   }

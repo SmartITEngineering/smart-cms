@@ -35,7 +35,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 public class RepresentationObjectConverter extends AbstractObjectRowConverter<PersistentRepresentation, TemplateId> {
 
   public static final byte[] FAMILY_SELF = Bytes.toBytes("self");
-  public static final byte[] FAMILY_BLOB = Bytes.toBytes("blob");
   public static final byte[] CELL_NAME = Bytes.toBytes("name");
   public static final byte[] CELL_MIME_TYPE = Bytes.toBytes("mimeType");
   public static final byte[] CELL_LAST_MODIFIED = Bytes.toBytes("lastModified");
@@ -73,7 +72,7 @@ public class RepresentationObjectConverter extends AbstractObjectRowConverter<Pe
     mutableRepresentation.setLastModifiedDate(Utils.toDate(startRow.getValue(FAMILY_SELF, CELL_LAST_MODIFIED)));
     mutableRepresentation.setMimeType(Bytes.toString(startRow.getValue(FAMILY_SELF, CELL_MIME_TYPE)));
     mutableRepresentation.setName(Bytes.toString(startRow.getValue(FAMILY_SELF, CELL_NAME)));
-    mutableRepresentation.setRepresentation(startRow.getValue(FAMILY_BLOB, CELL_REP));
+    mutableRepresentation.setRepresentation(startRow.getValue(FAMILY_SELF, CELL_REP));
     representation.setRepresentation(mutableRepresentation);
     return representation;
   }

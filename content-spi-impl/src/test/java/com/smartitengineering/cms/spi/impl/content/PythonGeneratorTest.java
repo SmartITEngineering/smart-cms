@@ -105,7 +105,7 @@ public class PythonGeneratorTest {
         will(returnValue(GroovyGeneratorTest.MIME_TYPE));
       }
     });
-    Representation representation = generator.getRepresentation(template, content);
+    Representation representation = generator.getRepresentation(template, content, REP_NAME);
     Assert.assertNotNull(representation);
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getRepresentation()));

@@ -73,7 +73,7 @@ public class RepresentationProviderImpl extends AbstractRepresentationProvider i
       logger.info("Representation generator is null!");
       return null;
     }
-    final MutableRepresentation representation = generator.getRepresentation(representationTemplate, content);
+    final MutableRepresentation representation = generator.getRepresentation(representationTemplate, content, repName);
     final Date cLastModifiedDate = content.getLastModifiedDate();
     final Date tLastModifiedDate = representationTemplate.getLastModifiedDate();
     if (cLastModifiedDate.before(tLastModifiedDate)) {
