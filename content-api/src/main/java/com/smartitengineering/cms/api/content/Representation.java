@@ -18,19 +18,22 @@
  */
 package com.smartitengineering.cms.api.content;
 
+import com.smartitengineering.cms.api.common.ReferrableResource;
 import java.util.Date;
 
 /**
  *
  * @author imyousuf
  */
-public interface Representation {
+public interface Representation extends ReferrableResource {
 
   public String getName();
 
   public String getMimeType();
 
   public Date getLastModifiedDate();
+
+  public ContentId getContentId();
 
   public byte[] getRepresentation();
 }

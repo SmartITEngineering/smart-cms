@@ -18,19 +18,25 @@
  */
 package com.smartitengineering.cms.api.content;
 
+import com.smartitengineering.cms.api.common.ReferrableResource;
+import com.smartitengineering.cms.api.type.FieldDef;
 import java.util.Date;
 
 /**
  *
  * @author imyousuf
  */
-public interface Variation {
+public interface Variation extends ReferrableResource {
 
   public String getName();
 
   public String getMimeType();
 
   public Date getLastModifiedDate();
+
+  public ContentId getContentId();
+
+  public FieldDef getFieldDef();
 
   public byte[] getVariation();
 }

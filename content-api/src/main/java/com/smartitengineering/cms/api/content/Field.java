@@ -18,17 +18,27 @@
  */
 package com.smartitengineering.cms.api.content;
 
+import com.smartitengineering.cms.api.common.ReferrableResource;
 import com.smartitengineering.cms.api.type.FieldDef;
+import java.net.URI;
 
 /**
  *
  * @author imyousuf
  */
-public interface Field {
+public interface Field extends ReferrableResource {
+
+  public ContentId getContent();
+
+  public URI getRawFieldContentUri();
+
+  public String getEncodedRawFieldContentUriAsString();
 
   public FieldDef getFieldDef();
 
   public String getName();
+
+  public Variation getVariation(String varName);
 
   public FieldValue getValue();
 }

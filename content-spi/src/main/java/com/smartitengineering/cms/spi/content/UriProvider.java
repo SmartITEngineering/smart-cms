@@ -16,29 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.content;
+package com.smartitengineering.cms.spi.content;
 
-import com.smartitengineering.cms.api.common.ReferrableResource;
-import com.smartitengineering.cms.api.workspace.WorkspaceId;
-import com.smartitengineering.dao.impl.hbase.spi.Externalizable;
+import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.type.FieldDef;
+import java.net.URI;
 
 /**
  *
  * @author imyousuf
  */
-public interface ContentId extends Externalizable, Comparable<ContentId>, ReferrableResource {
+public interface UriProvider {
 
-  public WorkspaceId getWorkspaceId();
+  URI getContentUri(ContentId contentId);
 
-  public byte[] getId();
+  URI getFieldUri(ContentId contentId, FieldDef fieldDef);
 
-  public Content getContent();
+  URI getRawFieldContentUri(ContentId contentId, FieldDef fieldDef);
 
-  /**
-   * Override the toString so that it could be used to compare to ids of this instance. It should represent the state
-   * of the Id.
-   * @return String representation, i.e. state, of the id
-   */
-  @Override
-  public String toString();
+  URI getRepresentationUri(ContentId contentId, String name);
+
+  URI getVariationUri(ContentId contentId, FieldDef fieldDef, String name);
 }
