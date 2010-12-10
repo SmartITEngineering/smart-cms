@@ -49,7 +49,6 @@ import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import com.sun.jersey.api.core.ResourceContext;
-import com.sun.jersey.multipart.BodyPartEntity;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import java.io.IOException;
@@ -76,6 +75,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -203,6 +203,7 @@ public class ContentResource extends AbstractResource {
     }
     return put(contentImpl, this.content == null ? null : new EntityTag("*"));
   }
+  private static final byte[] TMP = new byte[0];
 
   protected FieldValueImpl addFieldFromBodyPart(FormDataBodyPart bodyPart, DataType dataType) {
     switch (dataType.getType()) {
@@ -220,7 +221,7 @@ public class ContentResource extends AbstractResource {
           LOGGER.info("Body Part " + bodyPart.getMediaType());
         }
         try {
-          otherFieldValueImpl.setValue(bodyPart.getValueAs(String.class));
+          otherFieldValueImpl.setValue(Base64.encodeBase64String(bodyPart.getValueAs(TMP.getClass())));
           if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Field value " + otherFieldValueImpl.getValue());
           }
@@ -365,12 +366,19 @@ public class ContentResource extends AbstractResource {
       for (FieldDef fieldDef : type.getFieldDefs().values()) {
         final String fieldName = fieldDef.getName();
         Field field = fields.get(fieldName);
+        if (LOGGER.isInfoEnabled()) {
+          LOGGER.info("Field " + field);
+          if (field != null) {
+            LOGGER.info("Converting field " + field.getName() + " with value " + field.getValue().toString()
+                + " and URI " + contentUri);
+          }
+        }
+        if (field == null) {
+          continue;
+        }
         FieldImpl fieldImpl = new FieldImpl();
         fieldImpl.setName(fieldName);
         getDomainField(getRelativeURIBuilder(), field, contentUri, fieldImpl);
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Converting field " + field.getName() + " with value " + field.getValue().toString());
-        }
         contentImpl.getFields().add(fieldImpl);
       }
       Collection<RepresentationDef> defs = type.getRepresentationDefs().values();

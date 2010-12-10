@@ -29,7 +29,7 @@ import com.smartitengineering.cms.api.workspace.VariationTemplate;
  */
 public interface TypeVariationGenerator {
 
-  MutableVariation getVariation(VariationTemplate template, Field field);
+  MutableVariation getVariation(VariationTemplate template, Field field, String variationName);
 
   VariationGenerator getGenerator(VariationTemplate template) throws InvalidTemplateException;
 }

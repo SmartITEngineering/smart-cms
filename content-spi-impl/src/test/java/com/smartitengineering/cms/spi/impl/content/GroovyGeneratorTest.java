@@ -29,7 +29,6 @@ import com.smartitengineering.cms.api.impl.content.RepresentationImpl;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.RepresentationDef;
-import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
@@ -118,7 +117,7 @@ public class GroovyGeneratorTest {
         will(returnValue(GroovyGeneratorTest.MIME_TYPE));
       }
     });
-    Representation representation = generator.getRepresentation(template, content);
+    Representation representation = generator.getRepresentation(template, content, REP_NAME);
     Assert.assertNotNull(representation);
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());
@@ -157,7 +156,7 @@ public class GroovyGeneratorTest {
         will(returnValue(GroovyGeneratorTest.MIME_TYPE));
       }
     });
-    Variation representation = generator.getVariation(template, field);
+    Variation representation = generator.getVariation(template, field, REP_NAME);
     Assert.assertNotNull(representation);
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());

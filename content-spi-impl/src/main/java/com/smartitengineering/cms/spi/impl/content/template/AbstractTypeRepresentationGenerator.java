@@ -38,7 +38,7 @@ public abstract class AbstractTypeRepresentationGenerator implements TypeReprese
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
-  public MutableRepresentation getRepresentation(RepresentationTemplate template, Content content) {
+  public MutableRepresentation getRepresentation(RepresentationTemplate template, Content content, String representationName) {
     RepresentationGenerator generator;
     try {
       generator = getGenerator(template);
@@ -58,7 +58,7 @@ public abstract class AbstractTypeRepresentationGenerator implements TypeReprese
                           SmartContentAPI.getInstance().getContentLoader().createMutableRepresentation();
     final String name = template.getName();
     representation.setName(name);
-    representation.setMimeType(content.getContentDefinition().getRepresentationDefs().get(name).getMIMEType());
+    representation.setMimeType(content.getContentDefinition().getRepresentationDefs().get(representationName).getMIMEType());
     representation.setRepresentation(StringUtils.getBytesUtf8(representationForContent));
     return representation;
   }

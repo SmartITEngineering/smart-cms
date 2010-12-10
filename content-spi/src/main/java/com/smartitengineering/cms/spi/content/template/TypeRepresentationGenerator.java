@@ -29,7 +29,7 @@ import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
  */
 public interface TypeRepresentationGenerator {
 
-  MutableRepresentation getRepresentation(RepresentationTemplate template, Content content);
+  MutableRepresentation getRepresentation(RepresentationTemplate template, Content content, String representationName);
 
   RepresentationGenerator getGenerator(RepresentationTemplate template) throws InvalidTemplateException;
 }

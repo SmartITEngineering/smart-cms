@@ -383,12 +383,12 @@ public class FieldResource extends AbstractResource {
   }
 
   private URI getFieldUri() {
-    return getFieldURI(getRelativeURIBuilder(), content, fieldDef);
+    return getFieldURI(getAbsoluteURIBuilder(), content, fieldDef);
   }
 
   public static URI getFieldURI(UriBuilder builder, Content content, FieldDef fieldDef) {
-    return UriBuilder.fromUri(ContentResource.getContentUri(builder, content.getContentId())).path(fieldDef.getName()).
-        build();
+    return UriBuilder.fromUri(ContentResource.getContentUri(builder, content.getContentId())).path("f")
+        .path(fieldDef.getName()).build();
   }
 
   @Override
@@ -397,8 +397,8 @@ public class FieldResource extends AbstractResource {
   }
 
   private MediaType getUserPreferredType(MediaType defaultType) {
-    return getContext().getRequest().selectVariant(getVariants(MediaType.APPLICATION_ATOM_XML_TYPE,
-                                                               defaultType, MediaType.APPLICATION_JSON_TYPE,
+    return getContext().getRequest().selectVariant(getVariants(defaultType, MediaType.APPLICATION_ATOM_XML_TYPE,
+                                                               MediaType.APPLICATION_JSON_TYPE,
                                                                MediaType.APPLICATION_XML_TYPE,
                                                                MediaType.TEXT_XML_TYPE,
                                                                MediaType.WILDCARD_TYPE)).getMediaType();

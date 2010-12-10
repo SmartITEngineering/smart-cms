@@ -73,9 +73,6 @@
     "columnFamilyConfigurations": [
       {
         "familyName": "self"
-      },
-      {
-        "familyName": "blob"
       }
     ]
   },
@@ -84,9 +81,6 @@
     "columnFamilyConfigurations": [
       {
         "familyName": "self"
-      },
-      {
-        "familyName": "blob"
       }
     ]
   }
