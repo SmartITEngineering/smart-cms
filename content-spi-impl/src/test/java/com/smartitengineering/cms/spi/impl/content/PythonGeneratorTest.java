@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.spi.impl.content;
 
 import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.Representation;
@@ -60,8 +61,8 @@ public class PythonGeneratorTest {
     mockery.checking(new Expectations() {
 
       {
-        exactly(1).of(mock).createMutableRepresentation();
-        will(returnValue(new RepresentationImpl()));
+        exactly(1).of(mock).createMutableRepresentation(this.<ContentId>with(Expectations.<ContentId>anything()));
+        will(returnValue(new RepresentationImpl(null)));
       }
     });
     if (SmartContentAPI.getInstance() == null) {

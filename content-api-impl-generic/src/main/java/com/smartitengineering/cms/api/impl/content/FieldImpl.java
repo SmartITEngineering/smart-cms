@@ -18,11 +18,15 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.content.Variation;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.spi.SmartContentSPI;
+import java.net.URI;
 
 /**
  *
@@ -33,6 +37,7 @@ public class FieldImpl implements MutableField {
   private String fieldName;
   private FieldValue fieldValue;
   private FieldDef fieldDef;
+  private ContentId content;
 
   @Override
   public void setValue(FieldValue fieldValue) {
@@ -63,6 +68,10 @@ public class FieldImpl implements MutableField {
     this.fieldDef = fieldDef;
   }
 
+  public void setContent(ContentId content) {
+    this.content = content;
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (obj == null) {
@@ -83,5 +92,51 @@ public class FieldImpl implements MutableField {
     int hash = 5;
     hash = 97 * hash + (this.fieldName != null ? this.fieldName.hashCode() : 0);
     return hash;
+  }
+
+  @Override
+  public ContentId getContent() {
+    return content;
+  }
+
+  @Override
+  public URI getRawFieldContentUri() {
+    return SmartContentSPI.getInstance().getUriProvider().getRawFieldContentUri(content, fieldDef);
+  }
+
+  @Override
+  public String getEncodedRawFieldContentUriAsString() {
+    URI uri = getRawFieldContentUri();
+    return uri == null ? null : uri.toASCIIString();
+  }
+
+  @Override
+  public URI getAbsoluteRawFieldContentUri() {
+    return SmartContentSPI.getInstance().getUriProvider().getAbsRawFieldContentUri(content, fieldDef);
+  }
+
+  @Override
+  public String getEncodedAbsoluteRawFieldContentUriAsString() {
+    URI uri = getAbsoluteRawFieldContentUri();
+    return uri == null ? null : uri.toASCIIString();
+  }
+
+  @Override
+  public Variation getVariation(String varName) {
+    return SmartContentAPI.getInstance().getContentLoader().getVariation(content.getContent(), this, varName);
+  }
+
+  @Override
+  public URI getUri() {
+    if (content == null || fieldDef == null) {
+      return null;
+    }
+    return SmartContentSPI.getInstance().getUriProvider().getFieldUri(content, fieldDef);
+  }
+
+  @Override
+  public String getEncodedUriString() {
+    URI uri = getUri();
+    return uri == null ? null : uri.toASCIIString();
   }
 }

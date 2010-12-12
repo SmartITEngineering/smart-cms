@@ -427,7 +427,7 @@ public class ContentResource extends AbstractResource {
         writeableContent.setParentId(parentContent.getContentId());
       }
       for (com.smartitengineering.cms.ws.common.domains.Field field : toBean.getFields()) {
-        MutableField mutableField = getField(contentType.getFieldDefs().get(field.getName()), field,
+        MutableField mutableField = getField(writeableContent.getContentId(), contentType.getFieldDefs().get(field.getName()), field,
                                              getResourceContext());
         writeableContent.setField(mutableField);
       }
@@ -486,7 +486,7 @@ public class ContentResource extends AbstractResource {
     return fieldValue;
   }
 
-  protected static MutableField getField(final FieldDef fieldDef,
+  protected static MutableField getField(final ContentId contentId, final FieldDef fieldDef,
                                          com.smartitengineering.cms.ws.common.domains.Field field,
                                          ResourceContext context) throws
       IllegalArgumentException {
@@ -501,7 +501,7 @@ public class ContentResource extends AbstractResource {
           "Field is " + field.getName() + " - " + dataType.getType().name() + " " + field.getValue().getType());
     }
     final MutableField mutableField =
-                       SmartContentAPI.getInstance().getContentLoader().createMutableField(fieldDef);
+                       SmartContentAPI.getInstance().getContentLoader().createMutableField(contentId, fieldDef);
     final FieldValue fieldValue;
     fieldValue = getFieldValue(dataType, field.getValue(), context);
     mutableField.setValue(fieldValue);

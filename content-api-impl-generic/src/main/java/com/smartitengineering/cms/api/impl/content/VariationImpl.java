@@ -19,7 +19,11 @@
 package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.MutableVariation;
+import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.spi.SmartContentSPI;
+import java.net.URI;
 import java.util.Date;
 import org.apache.commons.lang.StringUtils;
 
@@ -33,6 +37,13 @@ public class VariationImpl implements MutableVariation {
   private byte[] variation;
   private String mimeType;
   private Date lastModifiedDate;
+  private ContentId contentId;
+  private FieldDef fieldDef;
+
+  public VariationImpl(ContentId contentId, FieldDef fieldDef) {
+    this.contentId = contentId;
+    this.fieldDef = fieldDef;
+  }
 
   @Override
   public void setName(String name) {
@@ -72,5 +83,26 @@ public class VariationImpl implements MutableVariation {
   @Override
   public Date getLastModifiedDate() {
     return lastModifiedDate;
+  }
+
+  @Override
+  public ContentId getContentId() {
+    return contentId;
+  }
+
+  @Override
+  public FieldDef getFieldDef() {
+    return fieldDef;
+  }
+
+  @Override
+  public URI getUri() {
+    return SmartContentSPI.getInstance().getUriProvider().getVariationUri(getContentId(), fieldDef, name);
+  }
+
+  @Override
+  public String getEncodedUriString() {
+    URI uri = getUri();
+    return uri == null ? null : uri.toASCIIString();
   }
 }

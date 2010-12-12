@@ -174,7 +174,8 @@ public class ContentObjectConverter extends AbstractObjectRowConverter<Persisten
           value = Bytes.toString(startRow.getValue(FAMILY_SIMPLE_FIELDS, entry.getKey()));
           break;
       }
-      MutableField field = SmartContentAPI.getInstance().getContentLoader().createMutableField(fieldDef);
+      MutableField field = SmartContentAPI.getInstance().getContentLoader().createMutableField(content.getContentId(),
+                                                                                               fieldDef);
       field.setValue(SmartContentAPI.getInstance().getContentLoader().getValueFor(value, fieldDef.getValueDef()));
       content.setField(field);
     }

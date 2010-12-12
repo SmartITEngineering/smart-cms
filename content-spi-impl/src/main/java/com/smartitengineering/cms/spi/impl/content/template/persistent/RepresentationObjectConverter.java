@@ -18,10 +18,14 @@
  */
 package com.smartitengineering.cms.spi.impl.content.template.persistent;
 
+import com.google.inject.Inject;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.MutableRepresentation;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.spi.impl.Utils;
+import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
+import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import com.smartitengineering.dao.impl.hbase.spi.impl.AbstractObjectRowConverter;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
@@ -39,6 +43,9 @@ public class RepresentationObjectConverter extends AbstractObjectRowConverter<Pe
   public static final byte[] CELL_MIME_TYPE = Bytes.toBytes("mimeType");
   public static final byte[] CELL_LAST_MODIFIED = Bytes.toBytes("lastModified");
   public static final byte[] CELL_REP = Bytes.toBytes("rep");
+  public static final byte[] CELL_CONTENT_ID = Bytes.toBytes("content");
+  @Inject
+  private SchemaInfoProvider<PersistentContent, ContentId> contentSchemaInfoProvider;
 
   @Override
   protected String[] getTablesToAttainLock() {
@@ -50,6 +57,14 @@ public class RepresentationObjectConverter extends AbstractObjectRowConverter<Pe
     put.add(FAMILY_SELF, CELL_NAME, Bytes.toBytes(instance.getRepresentation().getName()));
     put.add(FAMILY_SELF, CELL_MIME_TYPE, Bytes.toBytes(instance.getRepresentation().getMimeType()));
     put.add(FAMILY_SELF, CELL_LAST_MODIFIED, Utils.toBytes(instance.getRepresentation().getLastModifiedDate()));
+    try {
+      put.add(FAMILY_SELF, CELL_CONTENT_ID, contentSchemaInfoProvider.getRowIdFromId(instance.getRepresentation().
+          getContentId()));
+    }
+    catch (Exception ex) {
+      logger.error("Could not put representation", ex);
+      throw new RuntimeException(ex);
+    }
     put.add(FAMILY_SELF, CELL_REP, instance.getRepresentation().getRepresentation());
   }
 
@@ -67,13 +82,20 @@ public class RepresentationObjectConverter extends AbstractObjectRowConverter<Pe
     catch (Exception ex) {
       throw new RuntimeException(ex);
     }
-    MutableRepresentation mutableRepresentation = SmartContentAPI.getInstance().getContentLoader().
-        createMutableRepresentation();
-    mutableRepresentation.setLastModifiedDate(Utils.toDate(startRow.getValue(FAMILY_SELF, CELL_LAST_MODIFIED)));
-    mutableRepresentation.setMimeType(Bytes.toString(startRow.getValue(FAMILY_SELF, CELL_MIME_TYPE)));
-    mutableRepresentation.setName(Bytes.toString(startRow.getValue(FAMILY_SELF, CELL_NAME)));
-    mutableRepresentation.setRepresentation(startRow.getValue(FAMILY_SELF, CELL_REP));
-    representation.setRepresentation(mutableRepresentation);
-    return representation;
+    try {
+      ContentId contentId = contentSchemaInfoProvider.getIdFromRowId(startRow.getValue(FAMILY_SELF, CELL_CONTENT_ID));
+      MutableRepresentation mutableRepresentation = SmartContentAPI.getInstance().getContentLoader().
+          createMutableRepresentation(contentId);
+      mutableRepresentation.setLastModifiedDate(Utils.toDate(startRow.getValue(FAMILY_SELF, CELL_LAST_MODIFIED)));
+      mutableRepresentation.setMimeType(Bytes.toString(startRow.getValue(FAMILY_SELF, CELL_MIME_TYPE)));
+      mutableRepresentation.setName(Bytes.toString(startRow.getValue(FAMILY_SELF, CELL_NAME)));
+      mutableRepresentation.setRepresentation(startRow.getValue(FAMILY_SELF, CELL_REP));
+      representation.setRepresentation(mutableRepresentation);
+      return representation;
+    }
+    catch (Exception ex) {
+      logger.error("Could not create representation", ex);
+      return null;
+    }
   }
 }

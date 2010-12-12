@@ -57,7 +57,7 @@ public class VariationProviderImpl extends AbstractVariationProvider implements 
       logger.info("Representation generator is null!");
       return null;
     }
-    final MutableVariation variation = generator.getVariation(variationTemplate, field, varName);
+    final MutableVariation variation = generator.getVariation(variationTemplate, content, field, varName);
     Date cLastModifiedDate = content.getLastModifiedDate();
     Date tLastModifiedDate = variationTemplate.getLastModifiedDate();
     if (cLastModifiedDate.before(tLastModifiedDate)) {

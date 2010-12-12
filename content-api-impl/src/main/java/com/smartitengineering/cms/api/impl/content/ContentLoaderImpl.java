@@ -60,8 +60,6 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.UUID;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
@@ -82,11 +80,12 @@ public class ContentLoaderImpl implements ContentLoader {
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
-  public MutableField createMutableField(FieldDef fieldDef) {
+  public MutableField createMutableField(ContentId contentId, FieldDef fieldDef) {
     if (fieldDef != null) {
       FieldImpl fieldImpl = new FieldImpl();
       fieldImpl.setFieldDef(fieldDef);
       fieldImpl.setName(fieldDef.getName());
+      fieldImpl.setContent(contentId);
       return fieldImpl;
     }
     else {
@@ -425,13 +424,13 @@ public class ContentLoaderImpl implements ContentLoader {
   }
 
   @Override
-  public MutableRepresentation createMutableRepresentation() {
-    return new RepresentationImpl();
+  public MutableRepresentation createMutableRepresentation(ContentId contentId) {
+    return new RepresentationImpl(contentId);
   }
 
   @Override
-  public MutableVariation createMutableVariation() {
-    return new VariationImpl();
+  public MutableVariation createMutableVariation(ContentId contentId, FieldDef fieldDef) {
+    return new VariationImpl(contentId, fieldDef);
   }
 
   @Override

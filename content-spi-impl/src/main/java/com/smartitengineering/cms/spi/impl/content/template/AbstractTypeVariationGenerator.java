@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.content.template;
 
+import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
@@ -38,7 +39,7 @@ public abstract class AbstractTypeVariationGenerator implements TypeVariationGen
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
-  public MutableVariation getVariation(VariationTemplate template, Field field, String variationName) {
+  public MutableVariation getVariation(VariationTemplate template, Content content, Field field, String variationName) {
     VariationGenerator generator;
     try {
       generator = getGenerator(template);
@@ -55,7 +56,8 @@ public abstract class AbstractTypeVariationGenerator implements TypeVariationGen
     }
     final String representationForContent = generator.getVariationForField(field);
     MutableVariation variation =
-                     SmartContentAPI.getInstance().getContentLoader().createMutableVariation();
+                     SmartContentAPI.getInstance().getContentLoader().createMutableVariation(content.getContentId(), field.
+        getFieldDef());
     final String name = template.getName();
     variation.setName(name);
     variation.setMimeType(field.getFieldDef().getVariations().get(variationName).getMIMEType());

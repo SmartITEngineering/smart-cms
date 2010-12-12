@@ -19,7 +19,10 @@
 package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.MutableRepresentation;
+import com.smartitengineering.cms.spi.SmartContentSPI;
+import java.net.URI;
 import java.util.Date;
 import org.apache.commons.lang.StringUtils;
 
@@ -33,6 +36,11 @@ public class RepresentationImpl implements MutableRepresentation {
   private byte[] representation;
   private String mimeType;
   private Date lastModifiedDate;
+  private ContentId contentId;
+
+  public RepresentationImpl(ContentId contentId) {
+    this.contentId = contentId;
+  }
 
   @Override
   public void setName(String name) {
@@ -72,5 +80,21 @@ public class RepresentationImpl implements MutableRepresentation {
   @Override
   public Date getLastModifiedDate() {
     return lastModifiedDate;
+  }
+
+  @Override
+  public ContentId getContentId() {
+    return contentId;
+  }
+
+  @Override
+  public URI getUri() {
+    return SmartContentSPI.getInstance().getUriProvider().getRepresentationUri(getContentId(), name);
+  }
+
+  @Override
+  public String getEncodedUriString() {
+    URI uri = getUri();
+    return uri == null ? null : uri.toASCIIString();
   }
 }

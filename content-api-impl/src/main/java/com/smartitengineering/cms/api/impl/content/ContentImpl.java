@@ -32,6 +32,7 @@ import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.PersistableContent;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -265,5 +266,20 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
       logger.debug("!!! Checking Content" + validContent);
     }
     return validContent;
+  }
+
+  @Override
+  public URI getUri() {
+    return SmartContentSPI.getInstance().getUriProvider().getContentUri(contentId);
+  }
+
+  @Override
+  public String getEncodedUriString() {
+    if (getUri() == null) {
+      return null;
+    }
+    else {
+      return getUri().toASCIIString();
+    }
   }
 }

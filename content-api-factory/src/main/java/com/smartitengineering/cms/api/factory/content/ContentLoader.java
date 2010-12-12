@@ -54,7 +54,7 @@ import java.util.Collection;
  */
 public interface ContentLoader {
 
-  MutableField createMutableField(FieldDef fieldDef);
+  MutableField createMutableField(ContentId contentId, FieldDef fieldDef);
 
   MutableField createMutableField(Field field);
 
@@ -90,9 +90,9 @@ public interface ContentLoader {
 
   MutableStringFieldValue createStringFieldValue(StringFieldValue fieldValue);
 
-  MutableRepresentation createMutableRepresentation();
+  MutableRepresentation createMutableRepresentation(ContentId contentId);
 
-  MutableVariation createMutableVariation();
+  MutableVariation createMutableVariation(ContentId contentId, FieldDef fieldDef);
 
   FieldValue getValueFor(String value, DataType fieldDef);
 

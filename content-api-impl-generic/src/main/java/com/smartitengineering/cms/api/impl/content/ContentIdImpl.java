@@ -25,9 +25,11 @@ import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.impl.Utils;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
+import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.net.URI;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,5 +119,16 @@ public class ContentIdImpl implements ContentId {
       return 0;
     }
     return toString().compareTo(o.toString());
+  }
+
+  @Override
+  public URI getUri() {
+    return SmartContentSPI.getInstance().getUriProvider().getContentUri(this);
+  }
+
+  @Override
+  public String getEncodedUriString() {
+    URI uri = getUri();
+    return uri == null ? null : uri.toASCIIString();
   }
 }

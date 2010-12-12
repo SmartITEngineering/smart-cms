@@ -18,10 +18,14 @@
  */
 package com.smartitengineering.cms.spi.impl.content.template.persistent;
 
+import com.google.inject.Inject;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.spi.impl.Utils;
+import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
+import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import com.smartitengineering.dao.impl.hbase.spi.impl.AbstractObjectRowConverter;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
@@ -39,6 +43,10 @@ public class VariationObjectConverter extends AbstractObjectRowConverter<Persist
   public static final byte[] CELL_MIME_TYPE = Bytes.toBytes("mimeType");
   public static final byte[] CELL_LAST_MODIFIED = Bytes.toBytes("lastModified");
   public static final byte[] CELL_REP = Bytes.toBytes("rep");
+  public static final byte[] CELL_CONTENT_ID = Bytes.toBytes("content");
+  public static final byte[] CELL_FIELD_NAME = Bytes.toBytes("fieldName");
+  @Inject
+  private SchemaInfoProvider<PersistentContent, ContentId> contentSchemaInfoProvider;
 
   @Override
   protected String[] getTablesToAttainLock() {
@@ -50,6 +58,15 @@ public class VariationObjectConverter extends AbstractObjectRowConverter<Persist
     put.add(FAMILY_SELF, CELL_NAME, Bytes.toBytes(instance.getVariation().getName()));
     put.add(FAMILY_SELF, CELL_MIME_TYPE, Bytes.toBytes(instance.getVariation().getMimeType()));
     put.add(FAMILY_SELF, CELL_LAST_MODIFIED, Utils.toBytes(instance.getVariation().getLastModifiedDate()));
+    try {
+      put.add(FAMILY_SELF, CELL_CONTENT_ID, contentSchemaInfoProvider.getRowIdFromId(instance.getVariation().
+          getContentId()));
+    }
+    catch (Exception ex) {
+      logger.error("Could not put variation", ex);
+      throw new RuntimeException(ex);
+    }
+    put.add(FAMILY_SELF, CELL_FIELD_NAME, Bytes.toBytes(instance.getVariation().getFieldDef().getName()));
     put.add(FAMILY_SELF, CELL_REP, instance.getVariation().getVariation());
   }
 
@@ -67,13 +84,21 @@ public class VariationObjectConverter extends AbstractObjectRowConverter<Persist
     catch (Exception ex) {
       throw new RuntimeException(ex);
     }
-    MutableVariation mutableRepresentation = SmartContentAPI.getInstance().getContentLoader().
-        createMutableVariation();
-    mutableRepresentation.setLastModifiedDate(Utils.toDate(startRow.getValue(FAMILY_SELF, CELL_LAST_MODIFIED)));
-    mutableRepresentation.setMimeType(Bytes.toString(startRow.getValue(FAMILY_SELF, CELL_MIME_TYPE)));
-    mutableRepresentation.setName(Bytes.toString(startRow.getValue(FAMILY_SELF, CELL_NAME)));
-    mutableRepresentation.setVariation(startRow.getValue(FAMILY_SELF, CELL_REP));
-    representation.setVariation(mutableRepresentation);
-    return representation;
+    try {
+      ContentId contentId = contentSchemaInfoProvider.getIdFromRowId(startRow.getValue(FAMILY_SELF, CELL_CONTENT_ID));
+      MutableVariation mutableRepresentation = SmartContentAPI.getInstance().getContentLoader().
+          createMutableVariation(contentId, contentId.getContent().getContentDefinition().getFieldDefs().get(Bytes.
+          toString(startRow.getValue(FAMILY_SELF, CELL_FIELD_NAME))));
+      mutableRepresentation.setLastModifiedDate(Utils.toDate(startRow.getValue(FAMILY_SELF, CELL_LAST_MODIFIED)));
+      mutableRepresentation.setMimeType(Bytes.toString(startRow.getValue(FAMILY_SELF, CELL_MIME_TYPE)));
+      mutableRepresentation.setName(Bytes.toString(startRow.getValue(FAMILY_SELF, CELL_NAME)));
+      mutableRepresentation.setVariation(startRow.getValue(FAMILY_SELF, CELL_REP));
+      representation.setVariation(mutableRepresentation);
+      return representation;
+    }
+    catch (Exception ex) {
+      logger.error("Could not create variation", ex);
+      return null;
+    }
   }
 }
