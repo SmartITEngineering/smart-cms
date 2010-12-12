@@ -110,6 +110,26 @@ public class FieldResource extends AbstractResource {
   }
 
   @GET
+  @Path("/raw/abs")
+  public Response getAbsoluteRaw() {
+    ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), entityTag);
+    if (builder == null) {
+      Field field = content.getField(fieldDef.getName());
+      if (field == null) {
+        builder = Response.status(Status.NOT_FOUND);
+      }
+      else {
+        builder = Response.ok().tag(entityTag);
+        processDefaultRawContent(builder);
+      }
+      CacheControl control = new CacheControl();
+      control.setMaxAge(300);
+      builder.cacheControl(control);
+    }
+    return builder.build();
+  }
+
+  @GET
   @Path("/raw")
   public Response getRaw() {
     boolean useDefault = false;
@@ -117,7 +137,8 @@ public class FieldResource extends AbstractResource {
     if (accepts == null || accepts.isEmpty()) {
       useDefault = true;
     }
-    ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), entityTag);
+    ResponseBuilder builder =
+                    getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), entityTag);
     if (builder == null) {
       Field field = content.getField(fieldDef.getName());
       if (field == null) {
@@ -189,7 +210,8 @@ public class FieldResource extends AbstractResource {
     if (ifMatchHeader == null) {
       return Response.status(Status.PRECONDITION_FAILED).build();
     }
-    ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), entityTag);
+    ResponseBuilder builder =
+                    getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), entityTag);
     if (builder == null) {
       WriteableContent writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(content);
       writeableContent.removeField(fieldDef.getName());
@@ -213,6 +235,10 @@ public class FieldResource extends AbstractResource {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response put(com.smartitengineering.cms.ws.common.domains.Field field,
                       @HeaderParam(HttpHeaders.IF_MATCH) EntityTag ifMatchHeader) {
+
+
+
+
     if (!fieldDef.isFieldStandaloneUpdateAble()) {
       return Response.status(Status.FORBIDDEN).build();
     }
@@ -220,7 +246,8 @@ public class FieldResource extends AbstractResource {
     if (isUpdate && ifMatchHeader == null) {
       return Response.status(Status.PRECONDITION_FAILED).build();
     }
-    ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), entityTag);
+    ResponseBuilder builder =
+                    getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), entityTag);
     if (builder == null) {
       boolean error = false;
       WriteableContent writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(content);
@@ -387,8 +414,8 @@ public class FieldResource extends AbstractResource {
   }
 
   public static URI getFieldURI(UriBuilder builder, Content content, FieldDef fieldDef) {
-    return UriBuilder.fromUri(ContentResource.getContentUri(builder, content.getContentId())).path("f")
-        .path(fieldDef.getName()).build();
+    return UriBuilder.fromUri(ContentResource.getContentUri(builder, content.getContentId())).path("f").path(fieldDef.
+        getName()).build();
   }
 
   @Override
