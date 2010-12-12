@@ -34,6 +34,8 @@ public interface UriProvider {
 
   URI getRawFieldContentUri(ContentId contentId, FieldDef fieldDef);
 
+  URI getAbsRawFieldContentUri(ContentId contentId, FieldDef fieldDef);
+
   URI getRepresentationUri(ContentId contentId, String name);
 
   URI getVariationUri(ContentId contentId, FieldDef fieldDef, String name);

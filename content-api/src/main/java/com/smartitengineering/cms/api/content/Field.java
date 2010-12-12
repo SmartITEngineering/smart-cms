@@ -34,6 +34,10 @@ public interface Field extends ReferrableResource {
 
   public String getEncodedRawFieldContentUriAsString();
 
+  public URI getAbsoluteRawFieldContentUri();
+
+  public String getEncodedAbsoluteRawFieldContentUriAsString();
+
   public FieldDef getFieldDef();
 
   public String getName();

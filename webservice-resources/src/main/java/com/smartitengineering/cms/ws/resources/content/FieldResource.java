@@ -418,6 +418,16 @@ public class FieldResource extends AbstractResource {
         getName()).build();
   }
 
+  public static URI getFieldRawURI(UriBuilder builder, Content content, FieldDef fieldDef) {
+    return UriBuilder.fromUri(ContentResource.getContentUri(builder, content.getContentId())).path("f").path(fieldDef.
+        getName()).path("raw").build();
+  }
+
+  public static URI getFieldAbsRawURI(UriBuilder builder, Content content, FieldDef fieldDef) {
+    return UriBuilder.fromUri(ContentResource.getContentUri(builder, content.getContentId())).path("f").path(fieldDef.
+        getName()).path("raw").path("abs").build();
+  }
+
   @Override
   protected String getAuthor() {
     return "Smart CMS";
