@@ -127,5 +127,6 @@
     <module>content-api-factory</module>
     <module>content-api-impl-generic</module>
     <module>content-type-xml</module>
+    <module>content-spi-uri-impl</module>
   </modules>
 </project>

@@ -34,6 +34,7 @@ import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.spi.content.ContentSearcher;
 import com.smartitengineering.cms.spi.content.PersistentContentReader;
+import com.smartitengineering.cms.spi.content.UriProvider;
 import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
 import com.smartitengineering.cms.spi.impl.content.ContentAdapterHelper;
 import com.smartitengineering.cms.spi.impl.content.ContentObjectConverter;
@@ -53,6 +54,7 @@ import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLSchemaBasedTypeValidator;
 import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeFilterConfigsProvider;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLContentTypeDefinitionParser;
+import com.smartitengineering.cms.spi.impl.uri.UriProviderImpl;
 import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
@@ -96,6 +98,7 @@ import com.smartitengineering.dao.solr.impl.SolrDao;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
+import java.net.URI;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -111,7 +114,7 @@ public class SPIModule extends PrivateModule {
       "content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd";
   public static final String DEFAULT_SOLR_URI = "http://localhost:8080/solr/";
   private final String schemaLocationForContentType;
-  private final String solrUri;
+  private final String solrUri, uriPrefix;
   private final long waitTime, saveInterval, updateInterval, deleteInterval;
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -131,12 +134,14 @@ public class SPIModule extends PrivateModule {
       updateInterval = toLong > 0 ? toLong : 60l;
       toLong = NumberUtils.toLong(properties.getProperty("com.smartitengineering.cms.deleteIntervalInSec"), 60L);
       deleteInterval = toLong > 0 ? toLong : 60l;
+      uriPrefix = properties.getProperty("com.smartitengineering.cms.uriPrefix", "/cms");
     }
     else {
       schemaLocationForContentType = DEFAULT_LOCATION;
       solrUri = DEFAULT_SOLR_URI;
       waitTime = 10l;
       saveInterval = updateInterval = deleteInterval = 60l;
+      uriPrefix = "/cms";
     }
     logger.debug("SCHEMA Location " + schemaLocationForContentType);
   }
@@ -307,5 +312,8 @@ public class SPIModule extends PrivateModule {
     binder().expose(ContentTypeDefinitionParsers.class);
     binder().expose(LockHandler.class);
     binder().expose(PersistableDomainFactory.class);
+    bind(UriProvider.class).to(UriProviderImpl.class);
+    bind(URI.class).annotatedWith(Names.named("cmsBaseUri")).toInstance(URI.create(uriPrefix));
+    binder().expose(UriProvider.class);
   }
 }

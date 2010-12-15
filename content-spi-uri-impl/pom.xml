@@ -16,8 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
--->
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+--><project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -26,48 +25,19 @@
     <version>0.1-SNAPSHOT</version>
   </parent>
   <groupId>com.smartitengineering.smart-cms</groupId>
-  <artifactId>api-spi-guice-binder</artifactId>
-  <name>API-SPI Google Guice Binder</name>
+  <artifactId>content-spi-uri-impl</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <name>Content SPI URI Impl</name>
   <dependencies>
     <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
-      <artifactId>content-spi-impl</artifactId>
+      <artifactId>content-spi</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
-      <artifactId>content-spi-uri-impl</artifactId>
+      <artifactId>webservice-resources</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.smartitengineering.smart-cms</groupId>
-      <artifactId>content-api-impl</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.inject</groupId>
-      <artifactId>guice</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.inject.extensions</groupId>
-      <artifactId>guice-multibindings</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.smartitengineering.smart-util</groupId>
-      <artifactId>smart-bean-guice-util</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.smartitengineering.smart-dao</groupId>
-      <artifactId>smart-abstract-dao-decorator</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.smartitengineering.smart-dao</groupId>
-      <artifactId>solr-search-dao</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-jdk14</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

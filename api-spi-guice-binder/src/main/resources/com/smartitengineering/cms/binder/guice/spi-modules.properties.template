@@ -7,3 +7,4 @@ com.smartitengineering.cms.waitTimeInSec=10
 com.smartitengineering.cms.saveIntervalInSec=60
 com.smartitengineering.cms.updateIntervalInSec=60
 com.smartitengineering.cms.deleteIntervalInSec=60
+com.smartitengineering.cms.uriPrefix=/cms
