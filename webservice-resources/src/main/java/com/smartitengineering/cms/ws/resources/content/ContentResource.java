@@ -91,6 +91,8 @@ public class ContentResource extends AbstractResource {
   private final EntityTag tag;
   private final static Logger LOGGER = LoggerFactory.getLogger(ContentResource.class);
   protected final GenericAdapter<Content, com.smartitengineering.cms.ws.common.domains.Content> adapter;
+  public static final String PATH_TO_REP = "r/{repName}";
+  public static final String PATH_TO_FIELD = "f/{fieldName}";
 
   public ContentResource(ServerResourceInjectables injectables, ContentId contentId) {
     super(injectables);
@@ -121,7 +123,7 @@ public class ContentResource extends AbstractResource {
     adapter = adapterImpl;
   }
 
-  @Path("f/{fieldName}")
+  @Path(PATH_TO_FIELD)
   public FieldResource getFieldResource(@PathParam("fieldName") String fieldName) {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Trying to get field resource with name " + fieldName);
@@ -131,7 +133,7 @@ public class ContentResource extends AbstractResource {
     return resource;
   }
 
-  @Path("r/{repName}")
+  @Path(PATH_TO_REP)
   public RepresentationResource getRepresentationResource(@PathParam("repName") String repName) {
     return new RepresentationResource(getInjectables(), repName, content);
   }

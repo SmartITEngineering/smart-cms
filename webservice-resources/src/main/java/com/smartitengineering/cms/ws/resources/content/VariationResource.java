@@ -19,17 +19,21 @@
 package com.smartitengineering.cms.ws.resources.content;
 
 import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
+import java.net.URI;
 import java.util.Date;
 import javax.ws.rs.GET;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriBuilder;
 
 /**
  *
@@ -67,5 +71,10 @@ public class VariationResource extends AbstractResource {
       }
     }
     return builder.build();
+  }
+
+  public static URI getUri(UriBuilder baseBuilder, ContentId contentId, FieldDef def, String varName) {
+    return UriBuilder.fromUri(FieldResource.getFieldURI(baseBuilder, contentId, def)).path(FieldResource.PATH_TO_VAR).
+        build(varName);
   }
 }

@@ -19,15 +19,18 @@
 package com.smartitengineering.cms.ws.resources.content;
 
 import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Representation;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
+import java.net.URI;
 import java.util.Date;
 import javax.ws.rs.GET;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriBuilder;
 
 /**
  *
@@ -63,5 +66,10 @@ public class RepresentationResource extends AbstractResource {
       }
     }
     return builder.build();
+  }
+
+  public static URI getUri(UriBuilder baseBuilder, ContentId content, String repName) {
+    return UriBuilder.fromUri(ContentResource.getContentUri(baseBuilder, content)).path(ContentResource.PATH_TO_REP).
+        build(repName);
   }
 }

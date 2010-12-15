@@ -22,6 +22,7 @@ import com.smartitengineering.cms.api.content.BooleanFieldValue;
 import com.smartitengineering.cms.api.content.CollectionFieldValue;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentFieldValue;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.DateTimeFieldValue;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
@@ -83,6 +84,7 @@ public class FieldResource extends AbstractResource {
   private final EntityTag entityTag;
   protected final GenericAdapter<Field, com.smartitengineering.cms.ws.common.domains.Field> adapter;
   protected final Logger logger = LoggerFactory.getLogger(getClass());
+  public static final String PATH_TO_VAR = "v/{varName}";
 
   public FieldResource(ServerResourceInjectables injectables, Content content, FieldDef fieldDef, EntityTag eTag) {
     super(injectables);
@@ -98,7 +100,7 @@ public class FieldResource extends AbstractResource {
     this.entityTag = eTag;
   }
 
-  @Path("v/{varName}")
+  @Path(PATH_TO_VAR)
   public VariationResource getVariation(@PathParam("varName") String varName) {
     Field field = content.getField(fieldDef.getName());
     if (field != null) {
@@ -414,18 +416,30 @@ public class FieldResource extends AbstractResource {
   }
 
   public static URI getFieldURI(UriBuilder builder, Content content, FieldDef fieldDef) {
-    return UriBuilder.fromUri(ContentResource.getContentUri(builder, content.getContentId())).path("f").path(fieldDef.
-        getName()).build();
+    return getFieldURI(builder, content.getContentId(), fieldDef);
   }
 
   public static URI getFieldRawURI(UriBuilder builder, Content content, FieldDef fieldDef) {
-    return UriBuilder.fromUri(ContentResource.getContentUri(builder, content.getContentId())).path("f").path(fieldDef.
-        getName()).path("raw").build();
+    return getFieldRawURI(builder, content.getContentId(), fieldDef);
   }
 
   public static URI getFieldAbsRawURI(UriBuilder builder, Content content, FieldDef fieldDef) {
-    return UriBuilder.fromUri(ContentResource.getContentUri(builder, content.getContentId())).path("f").path(fieldDef.
-        getName()).path("raw").path("abs").build();
+    return getFieldAbsRawURI(builder, content.getContentId(), fieldDef);
+  }
+
+  public static URI getFieldURI(UriBuilder builder, ContentId contentId, FieldDef fieldDef) {
+    return UriBuilder.fromUri(ContentResource.getContentUri(builder, contentId)).path("f").path(fieldDef.getName()).
+        build();
+  }
+
+  public static URI getFieldRawURI(UriBuilder builder, ContentId contentId, FieldDef fieldDef) {
+    return UriBuilder.fromUri(ContentResource.getContentUri(builder, contentId)).path("f").path(fieldDef.getName()).path(
+        "raw").build();
+  }
+
+  public static URI getFieldAbsRawURI(UriBuilder builder, ContentId contentId, FieldDef fieldDef) {
+    return UriBuilder.fromUri(ContentResource.getContentUri(builder, contentId)).path("f").path(fieldDef.getName()).path(
+        "raw").path("abs").build();
   }
 
   @Override
