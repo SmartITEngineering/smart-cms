@@ -23,6 +23,7 @@ import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
 import com.smartitengineering.cms.spi.content.template.VariationGenerator;
@@ -40,6 +41,9 @@ public abstract class AbstractTypeVariationGenerator implements TypeVariationGen
 
   @Override
   public MutableVariation getVariation(VariationTemplate template, Content content, Field field, String variationName) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Parameters: " + content + " " + field + " " + variationName);
+    }
     VariationGenerator generator;
     try {
       generator = getGenerator(template);
@@ -55,12 +59,12 @@ public abstract class AbstractTypeVariationGenerator implements TypeVariationGen
       return null;
     }
     final String representationForContent = generator.getVariationForField(field);
-    MutableVariation variation =
-                     SmartContentAPI.getInstance().getContentLoader().createMutableVariation(content.getContentId(), field.
-        getFieldDef());
+    final FieldDef fieldDef = field.getFieldDef();
+    MutableVariation variation = SmartContentAPI.getInstance().getContentLoader().createMutableVariation(content.
+        getContentId(), fieldDef);
     final String name = template.getName();
     variation.setName(name);
-    variation.setMimeType(field.getFieldDef().getVariations().get(variationName).getMIMEType());
+    variation.setMimeType(fieldDef.getVariations().get(variationName).getMIMEType());
     variation.setVariation(StringUtils.getBytesUtf8(representationForContent));
     return variation;
   }

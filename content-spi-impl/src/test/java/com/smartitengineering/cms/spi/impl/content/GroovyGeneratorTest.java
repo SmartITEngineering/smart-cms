@@ -110,6 +110,8 @@ public class GroovyGeneratorTest {
         will(returnValue(field));
         exactly(1).of(content).getContentDefinition();
         will(returnValue(type));
+        exactly(1).of(content).getContentId();
+        will(returnValue(mockery.mock(ContentId.class)));
         exactly(1).of(type).getRepresentationDefs();
         will(returnValue(reps));
         exactly(1).of(reps).get(with(REP_NAME));
@@ -131,6 +133,7 @@ public class GroovyGeneratorTest {
     final VariationTemplate template = mockery.mock(VariationTemplate.class);
     final Field field = mockery.mock(Field.class, "varField");
     final FieldValue value = mockery.mock(FieldValue.class, "varFieldVal");
+    final Content content = mockery.mock(Content.class, "varContent");
     final FieldDef fieldDef = mockery.mock(FieldDef.class);
     final Map<String, VariationDef> vars = mockery.mock(Map.class, "varMap");
     final VariationDef def = mockery.mock(VariationDef.class);
@@ -149,6 +152,8 @@ public class GroovyGeneratorTest {
         will(returnValue(value));
         exactly(1).of(field).getFieldDef();
         will(returnValue(fieldDef));
+        exactly(1).of(content).getContentId();
+        will(returnValue(mockery.mock(ContentId.class, "varId")));
         exactly(1).of(fieldDef).getVariations();
         will(returnValue(vars));
         exactly(1).of(vars).get(with(REP_NAME));
@@ -157,7 +162,7 @@ public class GroovyGeneratorTest {
         will(returnValue(GroovyGeneratorTest.MIME_TYPE));
       }
     });
-    Variation representation = generator.getVariation(template, null, field, REP_NAME);
+    Variation representation = generator.getVariation(template, content, field, REP_NAME);
     Assert.assertNotNull(representation);
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());

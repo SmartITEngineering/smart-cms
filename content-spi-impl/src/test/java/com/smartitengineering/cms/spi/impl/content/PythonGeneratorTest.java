@@ -98,6 +98,8 @@ public class PythonGeneratorTest {
         will(returnValue(field));
         exactly(1).of(content).getContentDefinition();
         will(returnValue(type));
+        exactly(1).of(content).getContentId();
+        will(returnValue(mockery.mock(ContentId.class)));
         exactly(1).of(type).getRepresentationDefs();
         will(returnValue(reps));
         exactly(1).of(reps).get(with(REP_NAME));
