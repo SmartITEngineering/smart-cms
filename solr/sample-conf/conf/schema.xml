@@ -66,11 +66,11 @@
   <fields>
     <field name="type" type="string" indexed="true" stored="true" required="true"/>
     <field name="id" type="string" indexed="true" stored="true" required="true"/>
-    <field name="workspaceId" type="string" indexed="true" stored="true" required="true"/>
+    <field name="workspaceId" type="text" indexed="true" stored="true" required="true"/>
     <field name="creationDate" type="date" indexed="true" stored="true" required="false"/>
     <field name="lastModifiedDate" type="date" indexed="true" stored="true" required="false"/>
-    <field name="status" type="string" indexed="true" stored="true" required="false"/>
-    <field name="contentTypeId" type="string" indexed="true" stored="true" required="false"/>
+    <field name="status" type="text" indexed="true" stored="true" required="false"/>
+    <field name="contentTypeId" type="text" indexed="true" stored="true" required="false"/>
     <field name="instanceOf" type="string" indexed="true" required="false" multiValued="true" />
 
     <field name="alltext" type="text" indexed="true" stored="false" required="false" multiValued="true" />
