@@ -102,12 +102,18 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
 
   @Override
   public ContentSearcherResource searchContent(String query) {
-    Link link = get().getLink("search");
+    Link link = getLastReadStateOfEntity().getLink("search");
     if (StringUtils.isNotBlank(query)) {
       String strLink = link.getHref().toASCIIString();
       strLink = strLink + "?" + query;
       link.setHref(strLink);
     }
     return new ContentSearcherResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(link));
+  }
+
+  @Override
+  public String getSearchUri() {
+    Link link = getLastReadStateOfEntity().getLink("search");
+    return link != null ? link.getHref().toASCIIString() : "";
   }
 }

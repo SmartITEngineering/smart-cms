@@ -39,5 +39,7 @@ public interface WorkspaceFeedResource extends Resource<Feed> {
 
   WorkspaceContentResouce getWorkspace();
 
+  String getSearchUri();
+
   ContentSearcherResource searchContent(String query);
 }
