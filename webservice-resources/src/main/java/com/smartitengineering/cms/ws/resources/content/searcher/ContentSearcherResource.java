@@ -230,7 +230,7 @@ public class ContentSearcherResource extends AbstractResource {
     if (searchContent != null && !searchContent.isEmpty()) {
       feed.addLink(getLink(getNextPage().toASCIIString(), Link.REL_NEXT, MediaType.APPLICATION_ATOM_XML));
       if (getPreviousPage() != null) {
-        feed.addLink(getLink(getNextPage().toASCIIString(), Link.REL_PREVIOUS, MediaType.APPLICATION_ATOM_XML));
+        feed.addLink(getLink(getPreviousPage().toASCIIString(), Link.REL_PREVIOUS, MediaType.APPLICATION_ATOM_XML));
       }
       for (Content content : searchContent) {
         final URI contentUri = ContentResource.getContentUri(getRelativeURIBuilder(), content.getContentId());
