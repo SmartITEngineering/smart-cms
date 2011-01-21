@@ -137,5 +137,8 @@
   <defaultSearchField>alltext</defaultSearchField>
   <uniqueKey>id</uniqueKey>
   <solrQueryParser defaultOperator="OR"/>
-  <copyField source="*_STRING_*" dest="alltext"/>
+  <copyField source="*_STRING_i" dest="alltext"/>
+  <copyField source="*_STRING_is" dest="alltext"/>
+  <copyField source="*_STRING_mi" dest="alltext"/>
+  <copyField source="*_STRING_mis" dest="alltext"/>
 </schema>
