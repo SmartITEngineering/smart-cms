@@ -32,9 +32,20 @@ import java.util.Map;
 public class ContentImpl implements Content {
 
   private Date creationDate, lastModifiedDate;
-  private String contentTypeUri, parentContentUri, status;
+  private String contentTypeUri, parentContentUri, status, contentId, selfUri;
   private List<Field> fields = new ArrayList<Field>();
   private Map<String, String> templateUris = new LinkedHashMap<String, String>();
+  private Map<String, String> templateNames = new LinkedHashMap<String, String>();
+
+  @Override
+  public String getContentId() {
+    return contentId;
+  }
+
+  @Override
+  public String getSelfUri() {
+    return selfUri;
+  }
 
   @Override
   public Date getCreationDate() {
@@ -93,8 +104,21 @@ public class ContentImpl implements Content {
     this.status = status;
   }
 
+  public void setContentId(String contentId) {
+    this.contentId = contentId;
+  }
+
+  public void setSelfUri(String selfUri) {
+    this.selfUri = selfUri;
+  }
+
   @Override
   public Map<String, String> getRepresentations() {
     return templateUris;
+  }
+
+  @Override
+  public Map<String, String> getRepresentationsByName() {
+    return templateNames;
   }
 }

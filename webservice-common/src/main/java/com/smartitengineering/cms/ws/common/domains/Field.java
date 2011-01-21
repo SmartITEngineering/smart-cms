@@ -39,4 +39,6 @@ public interface Field {
   FieldValue getValue();
 
   Map<String, String> getVariations();
+
+  Map<String, String> getVariationsByNames();
 }

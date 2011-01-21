@@ -30,6 +30,7 @@ public class FieldImpl implements Field {
   private String name, fieldUri, fieldRawContentUri;
   private FieldValue value;
   private Map<String, String> variations = new LinkedHashMap<String, String>();
+  private Map<String, String> variationsByNames = new LinkedHashMap<String, String>();
 
   @Override
   public String getName() {
@@ -54,6 +55,11 @@ public class FieldImpl implements Field {
   @Override
   public Map<String, String> getVariations() {
     return variations;
+  }
+
+  @Override
+  public Map<String, String> getVariationsByNames() {
+    return variationsByNames;
   }
 
   public void setFieldUri(String fieldUri) {

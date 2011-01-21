@@ -347,6 +347,11 @@ public class ContentResource extends AbstractResource {
     protected void mergeFromF2T(Content fromBean, com.smartitengineering.cms.ws.common.domains.Content toBean) {
       ContentImpl contentImpl = (ContentImpl) toBean;
       ContentType type = fromBean.getContentDefinition();
+      if (fromBean.getContentId() != null) {
+        contentImpl.setContentId(fromBean.getContentId().toString());
+        contentImpl.setSelfUri(ContentResource.getContentUri(getRelativeURIBuilder(), fromBean.getContentId()).
+            toASCIIString());
+      }
       contentImpl.setContentTypeUri(
           ContentTypeResource.getContentTypeRelativeURI(getUriInfo(), type.getContentTypeID()).toASCIIString());
       if (fromBean.getParentId() != null) {
@@ -371,8 +376,8 @@ public class ContentResource extends AbstractResource {
         if (LOGGER.isInfoEnabled()) {
           LOGGER.info("Field " + field);
           if (field != null) {
-            LOGGER.info("Converting field " + field.getName() + " with value " + field.getValue().toString()
-                + " and URI " + contentUri);
+            LOGGER.info("Converting field " + field.getName() + " with value " + field.getValue().toString() +
+                " and URI " + contentUri);
           }
         }
         if (field == null) {
@@ -386,9 +391,11 @@ public class ContentResource extends AbstractResource {
       Collection<RepresentationDef> defs = type.getRepresentationDefs().values();
       String currentContext = new StringBuilder(contentUri).append("/r/").toString();
       Map<String, String> repUris = contentImpl.getRepresentations();
+      Map<String, String> repNames = contentImpl.getRepresentationsByName();
       for (RepresentationDef def : defs) {
-        String uri = new StringBuilder(currentContext).append(def.getName()).toString();
+        final String uri = new StringBuilder(currentContext).append(def.getName()).toString();
         repUris.put(uri, def.getMIMEType());
+        repNames.put(def.getName(), uri);
       }
     }
 
@@ -429,7 +436,8 @@ public class ContentResource extends AbstractResource {
         writeableContent.setParentId(parentContent.getContentId());
       }
       for (com.smartitengineering.cms.ws.common.domains.Field field : toBean.getFields()) {
-        MutableField mutableField = getField(writeableContent.getContentId(), contentType.getFieldDefs().get(field.getName()), field,
+        MutableField mutableField = getField(writeableContent.getContentId(), contentType.getFieldDefs().get(field.
+            getName()), field,
                                              getResourceContext());
         writeableContent.setField(mutableField);
       }
@@ -522,9 +530,12 @@ public class ContentResource extends AbstractResource {
       final DataType valueDef = field.getFieldDef().getValueDef();
       value = getFieldvalue(builder, valueDef, contentFieldValue);
       Map<String, String> variations = fieldImpl.getVariations();
+      Map<String, String> variationsByNames = fieldImpl.getVariationsByNames();
       Collection<VariationDef> defs = field.getFieldDef().getVariations().values();
       for (VariationDef def : defs) {
-        variations.put(new StringBuilder(fieldUri).append("/v/").append(def.getName()).toString(), def.getMIMEType());
+        final String uri = new StringBuilder(fieldUri).append("/v/").append(def.getName()).toString();
+        variations.put(uri, def.getMIMEType());
+        variationsByNames.put(def.getName(), uri);
       }
       fieldImpl.setValue(value);
     }

@@ -32,6 +32,10 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_DEFAULT)
 public interface Content {
 
+  String getContentId();
+
+  String getSelfUri();
+
   Date getCreationDate();
 
   Date getLastModifiedDate();
@@ -45,4 +49,6 @@ public interface Content {
   Collection<Field> getFields();
 
   Map<String, String> getRepresentations();
+
+  Map<String, String> getRepresentationsByName();
 }
