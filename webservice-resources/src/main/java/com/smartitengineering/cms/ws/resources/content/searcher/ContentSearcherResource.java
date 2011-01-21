@@ -39,6 +39,7 @@ import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.ws.rs.DefaultValue;
@@ -283,9 +284,16 @@ public class ContentSearcherResource extends AbstractResource {
                             List<String> statuses, String workspaceId,
                             List<String> fieldQuery, String creationDate, String lastModifiedDate, int start, int count,
                             boolean disJunction) {
-    this.contentTypeId = contentTypeId;
+    if (contentTypeId != null && !contentTypeId.isEmpty()) {
+      this.contentTypeId = contentTypeId;
+    }
+    else {
+      this.contentTypeId = Collections.emptyList();
+    }
     this.statuses = statuses;
-    this.workspaceId = workspaceId;
+    if (StringUtils.isNotBlank(workspaceId)) {
+      this.workspaceId = workspaceId;
+    }
     this.fieldQuery = fieldQuery;
     this.creationDate = creationDate;
     this.lastModifiedDate = lastModifiedDate;
