@@ -111,7 +111,7 @@ public class WorkspaceResource extends AbstractResource {
   @Path(PATH_SEARCH)
   public ContentSearcherResource searchWithinWorkspace() {
     ContentSearcherResource resource = new ContentSearcherResource(getInjectables());
-    resource.setWorkspaceId(workspace.getId().toString());
+    resource.setWorkspaceId(workspace.getId().toString().replaceAll(":", ","));
     return resource;
   }
 
