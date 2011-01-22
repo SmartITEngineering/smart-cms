@@ -62,6 +62,6 @@ public class FieldValueImpl<V> implements MutableFieldValue<V> {
 
   @Override
   public final String toString() {
-    return StringUtils.defaultIfEmpty(getValueAsString(), "NULL");
+    return StringUtils.defaultString(getValueAsString());
   }
 }
