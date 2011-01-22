@@ -48,6 +48,7 @@ import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
+import com.sun.jersey.api.container.ContainerException;
 import com.sun.jersey.api.core.ResourceContext;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;
@@ -75,6 +76,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriBuilderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
 import org.slf4j.Logger;
@@ -166,8 +168,7 @@ public class ContentResource extends AbstractResource {
     if (org.apache.commons.lang.StringUtils.isNotBlank(contentImpl.getContentTypeUri())) {
       final ContentType contentType;
       try {
-        contentType = getResourceContext().matchResource(URI.create(contentImpl.getContentTypeUri()),
-                                                         ContentTypeResource.class).getType();
+        contentType = getContentTypeResource(contentImpl.getContentTypeUri()).getType();
       }
       catch (Exception ex) {
         LOGGER.warn("Count not extract content type info!", ex);
@@ -214,6 +215,20 @@ public class ContentResource extends AbstractResource {
       }
     }
     return put(contentImpl, this.content == null ? null : new EntityTag("*"));
+  }
+
+  protected ContentTypeResource getContentTypeResource(String uri) throws ClassCastException,
+                                                                          ContainerException {
+    final URI checkUri;
+    if (uri.startsWith("http:")) {
+      checkUri = URI.create(uri);
+    }
+    else {
+      URI absUri = getAbsoluteURIBuilder().build();
+      checkUri =
+      UriBuilder.fromPath(uri).host(absUri.getHost()).port(absUri.getPort()).scheme(absUri.getScheme()).build();
+    }
+    return getResourceContext().matchResource(checkUri, ContentTypeResource.class);
   }
   private static final byte[] TMP = new byte[0];
 
@@ -425,8 +440,7 @@ public class ContentResource extends AbstractResource {
     protected Content convertFromT2F(com.smartitengineering.cms.ws.common.domains.Content toBean) {
       final ContentType contentType;
       try {
-        ContentTypeResource resource = getResourceContext().matchResource(new URI(toBean.getContentTypeUri()),
-                                                                          ContentTypeResource.class);
+        ContentTypeResource resource = getContentTypeResource(toBean.getContentTypeUri());
         if (resource == null) {
           throw new NullPointerException("No such content type!");
         }
@@ -445,8 +459,8 @@ public class ContentResource extends AbstractResource {
       final String parentContentUri = toBean.getParentContentUri();
       if (org.apache.commons.lang.StringUtils.isNotBlank(parentContentUri)) {
         try {
-          final ContentResource resource = getResourceContext().matchResource(new URI(parentContentUri),
-                                                                              ContentResource.class);
+          final ContentResource resource = getContentResource(parentContentUri, getAbsoluteURIBuilder(),
+                                                              getResourceContext());
           if (resource == null) {
             throw new NullPointerException("No such content type!");
           }
@@ -493,19 +507,7 @@ public class ContentResource extends AbstractResource {
           LOGGER.info("URL to content is " + contentUrl);
         }
         try {
-          final URI uri;
-          if (contentUrl.startsWith("http:")) {
-            uri = URI.create(contentUrl);
-          }
-          else {
-            URI absUri = absBuilder.build();
-            uri = UriBuilder.fromPath(contentUrl).host(absUri.getHost()).port(absUri.getPort()).scheme(
-                absUri.getScheme()).build();
-          }
-          if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("URI to content is " + uri);
-          }
-          ContentResource resource = context.matchResource(uri, ContentResource.class);
+          ContentResource resource = getContentResource(contentUrl, absBuilder, context);
           if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Resource " + resource);
           }
@@ -549,6 +551,25 @@ public class ContentResource extends AbstractResource {
     fieldValue = getFieldValue(dataType, field.getValue(), context, absBuilder);
     mutableField.setValue(fieldValue);
     return mutableField;
+  }
+
+  protected static ContentResource getContentResource(String contentUrl, UriBuilder absBuilder, ResourceContext context)
+      throws ContainerException, IllegalArgumentException, ClassCastException, UriBuilderException {
+    final URI uri;
+    if (contentUrl.startsWith("http:")) {
+      uri = URI.create(contentUrl);
+    }
+    else {
+      URI absUri = absBuilder.build();
+      uri =
+      UriBuilder.fromPath(contentUrl).host(absUri.getHost()).port(absUri.getPort()).scheme(absUri.getScheme()).build();
+    }
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("URI to content is " + uri);
+    }
+    ContentResource resource =
+                    context.matchResource(uri, ContentResource.class);
+    return resource;
   }
 
   protected static void getDomainField(UriBuilder builder, Field field, String contentUri, FieldImpl fieldImpl) {
