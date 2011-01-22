@@ -182,20 +182,30 @@ public class ContentResource extends AbstractResource {
           }
           FieldImpl fieldImpl = new FieldImpl();
           fieldImpl.setName(fieldDef.getKey());
+          final FormDataBodyPart singleBodyPart = bodyParts.get(0);
           switch (fieldDef.getValue().getValueDef().getType()) {
             case COLLECTION:
               CollectionDataType collectionFieldDef = (CollectionDataType) fieldDef.getValue().getValueDef();
               CollectionFieldValueImpl fieldValueImpl = new CollectionFieldValueImpl();
               for (FormDataBodyPart bodyPart : bodyParts) {
+                if (bodyPart == null || org.apache.commons.lang.StringUtils.isBlank(bodyPart.getValue())) {
+                  continue;
+                }
                 FieldValueImpl valueImpl = addFieldFromBodyPart(bodyPart, collectionFieldDef.getItemDataType());
                 if (valueImpl != null) {
                   fieldValueImpl.getValues().add(valueImpl);
                 }
               }
+              if (fieldValueImpl.getValues().isEmpty()) {
+                continue;
+              }
               fieldImpl.setValue(fieldValueImpl);
               break;
             default:
-              FieldValueImpl valueImpl = addFieldFromBodyPart(bodyParts.get(0), fieldDef.getValue().getValueDef());
+              if (singleBodyPart == null || org.apache.commons.lang.StringUtils.isBlank(singleBodyPart.getValue())) {
+                continue;
+              }
+              FieldValueImpl valueImpl = addFieldFromBodyPart(singleBodyPart, fieldDef.getValue().getValueDef());
               fieldImpl.setValue(valueImpl);
               break;
           }
@@ -449,8 +459,7 @@ public class ContentResource extends AbstractResource {
       }
       for (com.smartitengineering.cms.ws.common.domains.Field field : toBean.getFields()) {
         MutableField mutableField = getField(writeableContent.getContentId(), contentType.getFieldDefs().get(field.
-            getName()), field,
-                                             getResourceContext());
+            getName()), field, getResourceContext(), getAbsoluteURIBuilder());
         writeableContent.setField(mutableField);
       }
       return writeableContent;
@@ -459,7 +468,7 @@ public class ContentResource extends AbstractResource {
 
   protected static FieldValue getFieldValue(final DataType dataType,
                                             com.smartitengineering.cms.ws.common.domains.FieldValue value,
-                                            ResourceContext context) {
+                                            ResourceContext context, UriBuilder absBuilder) {
     FieldValue fieldValue;
     switch (dataType.getType()) {
       case COLLECTION:
@@ -470,7 +479,7 @@ public class ContentResource extends AbstractResource {
                                                                           (com.smartitengineering.cms.ws.common.domains.CollectionFieldValue) value;
         ArrayList<FieldValue> list = new ArrayList<FieldValue>(cFieldValue.getValues().size());
         for (com.smartitengineering.cms.ws.common.domains.FieldValue v : cFieldValue.getValues()) {
-          list.add(getFieldValue(collectionDataType.getItemDataType(), v, context));
+          list.add(getFieldValue(collectionDataType.getItemDataType(), v, context, absBuilder));
         }
         collectionFieldValue.setValue(list);
         fieldValue = collectionFieldValue;
@@ -484,7 +493,19 @@ public class ContentResource extends AbstractResource {
           LOGGER.info("URL to content is " + contentUrl);
         }
         try {
-          ContentResource resource = context.matchResource(URI.create(contentUrl), ContentResource.class);
+          final URI uri;
+          if (contentUrl.startsWith("http:")) {
+            uri = URI.create(contentUrl);
+          }
+          else {
+            URI absUri = absBuilder.build();
+            uri = UriBuilder.fromPath(contentUrl).host(absUri.getHost()).port(absUri.getPort()).scheme(
+                absUri.getScheme()).build();
+          }
+          if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("URI to content is " + uri);
+          }
+          ContentResource resource = context.matchResource(uri, ContentResource.class);
           if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Resource " + resource);
           }
@@ -510,7 +531,7 @@ public class ContentResource extends AbstractResource {
 
   protected static MutableField getField(final ContentId contentId, final FieldDef fieldDef,
                                          com.smartitengineering.cms.ws.common.domains.Field field,
-                                         ResourceContext context) throws
+                                         ResourceContext context, UriBuilder absBuilder) throws
       IllegalArgumentException {
     if (fieldDef == null) {
       throw new IllegalArgumentException("No field in content type with name " + field.getName());
@@ -525,7 +546,7 @@ public class ContentResource extends AbstractResource {
     final MutableField mutableField =
                        SmartContentAPI.getInstance().getContentLoader().createMutableField(contentId, fieldDef);
     final FieldValue fieldValue;
-    fieldValue = getFieldValue(dataType, field.getValue(), context);
+    fieldValue = getFieldValue(dataType, field.getValue(), context, absBuilder);
     mutableField.setValue(fieldValue);
     return mutableField;
   }
