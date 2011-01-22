@@ -232,11 +232,23 @@ public class ContentResource extends AbstractResource {
           LOGGER.warn("Entity not found!", ex);
         }
         return otherFieldValueImpl;
-      default:
+      case BOOLEAN: {
+        FieldValueImpl valueImpl = new FieldValueImpl();
+        valueImpl.setType(dataType.getType().name());
+        if (org.apache.commons.lang.StringUtils.isNotBlank(bodyPart.getValue())) {
+          valueImpl.setValue(bodyPart.getValue().equals("on") ? "true" : "false");
+        }
+        else {
+          valueImpl.setValue(bodyPart.getValue());
+        }
+        return valueImpl;
+      }
+      default: {
         FieldValueImpl valueImpl = new FieldValueImpl();
         valueImpl.setType(dataType.getType().name());
         valueImpl.setValue(bodyPart.getValue());
         return valueImpl;
+      }
     }
   }
 
