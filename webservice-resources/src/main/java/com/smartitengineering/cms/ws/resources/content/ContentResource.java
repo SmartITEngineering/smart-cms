@@ -619,7 +619,7 @@ public class ContentResource extends AbstractResource {
                                ((CollectionFieldValue) contentFieldValue).getValue();
         final DataType itemDataType = ((CollectionDataType) valueDef).getItemDataType();
         for (FieldValue contentValue : contentValues) {
-          valueImpl.getValues().add(getFieldvalue(builder, itemDataType, contentValue));
+          valueImpl.getValues().add(getFieldvalue(builder.clone(), itemDataType, contentValue));
         }
         value = valueImpl;
         break;
