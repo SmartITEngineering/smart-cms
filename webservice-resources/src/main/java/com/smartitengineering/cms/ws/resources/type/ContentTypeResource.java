@@ -226,7 +226,7 @@ public class ContentTypeResource extends AbstractResource {
   }
 
   public static URI getContentTypeRelativeURI(UriInfo info, ContentTypeId typeId) {
-    UriBuilder builder = UriBuilder.fromUri(info.getBaseUri());
+    UriBuilder builder = UriBuilder.fromPath(info.getBaseUri().getPath());
     builder.path(ContentTypesResource.class);
     builder.path(ContentTypesResource.PATH_TO_CONTENT_TYPE);
     return builder.build(typeId.getWorkspace().getGlobalNamespace(), typeId.getWorkspace().getName(), typeId.
