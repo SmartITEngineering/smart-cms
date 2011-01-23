@@ -202,6 +202,10 @@ public class ContentResource extends AbstractResource {
               }
               fieldImpl.setValue(fieldValueImpl);
               break;
+            case OTHER:
+              FieldValueImpl valueImpl = addFieldFromBodyPart(singleBodyPart, fieldDef.getValue().getValueDef());
+              fieldImpl.setValue(valueImpl);
+              break;
             default:
               if (singleBodyPart == null || org.apache.commons.lang.StringUtils.isBlank(singleBodyPart.getValue())) {
                 continue;
