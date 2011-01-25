@@ -33,9 +33,17 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
   <xs:element name="displayName" type="xs:string" />
   <xs:element name="typeNS" type="xs:string" />
   <xs:element name="typeName" type="xs:string" />
+  <xs:element name="workspaceNS" type="xs:string" />
   <xs:element name="workspaceName" type="xs:string" />
+  <xs:complexType name="workspaceDef">
+    <xs:sequence>
+      <xs:element ref="workspaceNS" minOccurs="1" maxOccurs="1" />
+      <xs:element ref="workspaceName" minOccurs="1" maxOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
   <xs:complexType name="contentPointer">
     <xs:sequence>
+      <xs:element name="workspace" type="workspaceDef" minOccurs="0" maxOccurs="1" />
       <xs:element ref="typeNS" minOccurs="1" maxOccurs="1" />
       <xs:element ref="typeName" minOccurs="1" maxOccurs="1" />
     </xs:sequence>

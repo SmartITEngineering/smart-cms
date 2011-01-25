@@ -30,6 +30,7 @@ import com.smartitengineering.cms.api.impl.type.SearchDefImpl;
 import com.smartitengineering.cms.api.impl.type.StringDataTypeImpl;
 import com.smartitengineering.cms.api.impl.type.ValidatorDefImpl;
 import com.smartitengineering.cms.api.impl.type.VariationDefImpl;
+import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
@@ -158,6 +159,14 @@ public class XmlParser implements XmlConstants {
     return contentTypeId;
   }
 
+  protected WorkspaceId getWorkspaceId(String namespace, String name) throws
+      IllegalArgumentException {
+    WorkspaceIdImpl formedWorkspaceId = new WorkspaceIdImpl();
+    formedWorkspaceId.setGlobalNamespace(namespace);
+    formedWorkspaceId.setName(name);
+    return formedWorkspaceId;
+  }
+
   protected String parseMandatoryStringElement(Element rootElement, final String elementName) throws
       IllegalStateException {
     Element elem = getChildNode(rootElement, elementName);
@@ -251,16 +260,35 @@ public class XmlParser implements XmlConstants {
     return resourceUri;
   }
 
-  protected ContentTypeId parseContentTypeId(Element rootElement, String elementName, WorkspaceId workspaceId) throws
-      IllegalStateException {
+  protected ContentTypeId parseContentTypeId(Element rootElement, String elementName, final WorkspaceId workspaceId)
+      throws IllegalStateException {
     Elements elems = rootElement.getChildElements(elementName, NAMESPACE);
     if (elems.size() > 1) {
       throw new IllegalStateException("More than one " + elementName);
     }
     if (elems.size() > 0) {
-      ContentTypeId contentTypeId = getContentTypeId(workspaceId, parseMandatoryStringElement(elems.get(0), TYPE_NS), parseMandatoryStringElement(elems.
-          get(0), TYPE_NAME));
+      final Element contentTypeElement = elems.get(0);
+      final WorkspaceId parsedWorkspaceId = parseWorkspaeId(contentTypeElement, WORKSPACE);
+      ContentTypeId contentTypeId = getContentTypeId(parsedWorkspaceId == null ? workspaceId : parsedWorkspaceId,
+                                                     parseMandatoryStringElement(contentTypeElement, TYPE_NS),
+                                                     parseMandatoryStringElement(contentTypeElement, TYPE_NAME));
       return contentTypeId;
+    }
+    else {
+      return null;
+    }
+  }
+
+  protected WorkspaceId parseWorkspaeId(Element rootElement, String elementName) {
+    Elements elems = rootElement.getChildElements(elementName, NAMESPACE);
+    if (elems.size() > 1) {
+      throw new IllegalStateException("More than one " + elementName);
+    }
+    if (elems.size() > 0) {
+      Element workspaceElement = elems.get(0);
+      WorkspaceId parsedWorkspaceId = getWorkspaceId(parseMandatoryStringElement(workspaceElement, WORKSPACE_NAMESPACE),
+                                                     parseMandatoryStringElement(workspaceElement, WORKSPACE_NAME));
+      return parsedWorkspaceId;
     }
     else {
       return null;

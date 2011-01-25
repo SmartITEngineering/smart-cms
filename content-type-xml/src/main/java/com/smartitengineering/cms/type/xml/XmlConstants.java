@@ -29,6 +29,8 @@ public interface XmlConstants {
   public String DISPLAY_NAME = "displayName";
   public String TYPE_NS = "typeNS";
   public String TYPE_NAME = "typeName";
+  public String WORKSPACE = "workspace";
+  public String WORKSPACE_NAMESPACE = "workspaceNS";
   public String WORKSPACE_NAME = "workspaceName";
   public String CONTENT_POINTER = "contentPointer";
   public String DEFINITION = "definition";
