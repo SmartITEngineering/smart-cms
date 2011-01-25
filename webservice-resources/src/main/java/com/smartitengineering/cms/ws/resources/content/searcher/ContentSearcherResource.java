@@ -264,12 +264,16 @@ public class ContentSearcherResource extends AbstractResource {
     Collection<Content> searchContent;
     ResponseBuilder responseBuilder;
     Filter filter = getFilter();
-    searchContent = SmartContentAPI.getInstance().getContentLoader().search(filter).getResult();
+    final com.smartitengineering.cms.api.content.SearchResult searchResult =
+                                                              SmartContentAPI.getInstance().getContentLoader().
+        search(filter);
+    searchContent = searchResult.getResult();
     if (searchContent.isEmpty() || searchContent == null) {
       responseBuilder = Response.status(Response.Status.NO_CONTENT);
     }
     else {
       SearchResult result = new SearchResult();
+      result.setTotalResults(searchResult.getTotalResultsCount());
       result.setResult(adapter.convert(searchContent.toArray(new Content[searchContent.size()])));
       result.setCount(count);
       result.setStart(start);

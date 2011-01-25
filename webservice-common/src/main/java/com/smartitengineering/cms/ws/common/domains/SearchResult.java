@@ -34,6 +34,15 @@ public class SearchResult {
   private URI previous;
   private int count;
   private int start;
+  private long totalResults;
+
+  public long getTotalResults() {
+    return totalResults;
+  }
+
+  public void setTotalResults(long totalResults) {
+    this.totalResults = totalResults;
+  }
 
   public int getCount() {
     return count;
