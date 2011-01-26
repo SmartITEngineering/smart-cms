@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class ContentTypeDefinitionValidator {
 
   private Collection<MutableContentType> contentTypes = new ArrayList<MutableContentType>();
-  private Logger logger = LoggerFactory.getLogger(getClass());
+  private transient Logger logger = LoggerFactory.getLogger(getClass());
 
   public ContentTypeDefinitionValidator(WorkspaceId workspaceID, InputStream inputStream,
                                         XMLParserIntrospector introspector) {

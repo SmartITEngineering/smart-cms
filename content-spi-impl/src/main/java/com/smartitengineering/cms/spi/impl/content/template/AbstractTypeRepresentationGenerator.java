@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractTypeRepresentationGenerator implements TypeRepresentationGenerator {
 
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public MutableRepresentation getRepresentation(RepresentationTemplate template, Content content, String representationName) {

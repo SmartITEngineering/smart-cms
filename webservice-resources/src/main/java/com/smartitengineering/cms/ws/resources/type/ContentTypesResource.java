@@ -69,7 +69,7 @@ public class ContentTypesResource extends AbstractResource {
       return o1.getLastModifiedDate().compareTo(o2.getLastModifiedDate());
     }
   };
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
   private final Workspace workspace;
 
   public ContentTypesResource(@PathParam(WorkspaceResource.PARAM_NAMESPACE) String namespace,

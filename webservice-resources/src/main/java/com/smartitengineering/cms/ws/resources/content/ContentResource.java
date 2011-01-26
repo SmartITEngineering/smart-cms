@@ -91,7 +91,7 @@ public class ContentResource extends AbstractResource {
   private final Content content;
   private final ContentId contentId;
   private final EntityTag tag;
-  private final static Logger LOGGER = LoggerFactory.getLogger(ContentResource.class);
+  private final static transient Logger LOGGER = LoggerFactory.getLogger(ContentResource.class);
   protected final GenericAdapter<Content, com.smartitengineering.cms.ws.common.domains.Content> adapter;
   public static final String PATH_TO_REP = "r/{repName}";
   public static final String PATH_TO_FIELD = "f/{fieldName}";

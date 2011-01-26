@@ -32,7 +32,7 @@ public class FieldValueImpl<V> implements MutableFieldValue<V> {
 
   private FieldValueType fieldValueType;
   private V value;
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public void setValue(V newV) {

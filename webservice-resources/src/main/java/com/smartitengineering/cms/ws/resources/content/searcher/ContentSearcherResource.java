@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ContentSearcherResource extends AbstractResource {
 
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+  private final transient Logger logger = LoggerFactory.getLogger(getClass());
   private List<String> contentTypeId;
   private List<String> statuses;
   private String workspaceId;

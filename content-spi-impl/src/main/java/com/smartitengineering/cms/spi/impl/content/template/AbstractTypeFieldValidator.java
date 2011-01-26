@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractTypeFieldValidator implements TypeFieldValidator {
 
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public boolean isValid(ValidatorTemplate template, Field field) {

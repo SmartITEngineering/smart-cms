@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AbstractVariationProvider {
 
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   protected VariationTemplate getTemplate(String varName, Content content, Field field) {
     VariationDef variationDef = field.getFieldDef().getVariations().get(varName);

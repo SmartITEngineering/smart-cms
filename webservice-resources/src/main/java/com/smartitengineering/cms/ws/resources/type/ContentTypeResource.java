@@ -71,7 +71,7 @@ public class ContentTypeResource extends AbstractResource {
   private final Date lastModified;
   private final EntityTag tag;
   private final Logger logger = LoggerFactory.getLogger(getClass());
-  public static final String PATH_TO_SEARCH = "search";
+  public static transient final String PATH_TO_SEARCH = "search";
 
   public ContentTypeResource(ServerResourceInjectables injectables, ContentType type) {
     super(injectables);

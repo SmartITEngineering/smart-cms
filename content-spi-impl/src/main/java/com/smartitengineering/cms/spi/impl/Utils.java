@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class Utils {
 
-  private static final Logger logger = LoggerFactory.getLogger(Utils.class);
+  private static final transient Logger logger = LoggerFactory.getLogger(Utils.class);
 
   private Utils() {
   }

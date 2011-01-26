@@ -77,7 +77,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ContentLoaderImpl implements ContentLoader {
 
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public MutableField createMutableField(ContentId contentId, FieldDef fieldDef) {

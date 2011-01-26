@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 public class CollectionFieldValueImplTest extends TestCase {
 
-  private Logger logger = LoggerFactory.getLogger(getClass());
+  private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   public void testToString() {
     CollectionFieldValueImpl impl = new CollectionFieldValueImpl();

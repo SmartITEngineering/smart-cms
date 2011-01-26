@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ContentTypeLoaderImpl implements ContentTypeLoader {
 
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+  private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public ContentType loadContentType(ContentTypeId contentTypeID) throws NullPointerException {

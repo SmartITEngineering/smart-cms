@@ -79,7 +79,7 @@ public class WorkspaceResource extends AbstractResource {
   private Date ifModifiedSince;
   @HeaderParam(HttpHeaders.IF_NONE_MATCH)
   private EntityTag entityTag;
-  private final static Logger LOGGER = LoggerFactory.getLogger(WorkspaceResource.class);
+  private final static transient Logger LOGGER = LoggerFactory.getLogger(WorkspaceResource.class);
 
   public WorkspaceResource(@PathParam(PARAM_NAMESPACE) String namespace, @PathParam(PARAM_NAME) String workspaceName) {
     this.namespace = namespace;

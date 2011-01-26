@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AbstractRepresentationProvider {
 
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   protected RepresentationTemplate getTemplate(String repName, ContentType contentType, Content content) {
     RepresentationDef representationDef = contentType.getRepresentationDefs().get(repName);

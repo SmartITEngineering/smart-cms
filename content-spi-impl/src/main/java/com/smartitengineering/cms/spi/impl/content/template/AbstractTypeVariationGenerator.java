@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractTypeVariationGenerator implements TypeVariationGenerator {
 
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public MutableVariation getVariation(VariationTemplate template, Content content, Field field, String variationName) {

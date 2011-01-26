@@ -81,7 +81,7 @@ import org.slf4j.LoggerFactory;
  */
 public class XMLContentTypeDefnitionParserTest {
 
-  private Logger logger = LoggerFactory.getLogger(getClass());
+  private transient final Logger logger = LoggerFactory.getLogger(getClass());
   public static WorkspaceId TEST_WS_ID;
 
   @BeforeClass

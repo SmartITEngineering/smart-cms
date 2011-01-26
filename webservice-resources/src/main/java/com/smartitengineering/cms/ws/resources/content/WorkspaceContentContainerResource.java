@@ -57,7 +57,7 @@ public class WorkspaceContentContainerResource extends AbstractResource {
 
   private final Workspace workspace;
   private static final String CONTENT_URI = "contentUri";
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   public WorkspaceContentContainerResource(ServerResourceInjectables injectables, Workspace workspace) {
     super(injectables);

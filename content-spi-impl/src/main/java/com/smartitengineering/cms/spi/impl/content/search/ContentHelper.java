@@ -67,7 +67,7 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
   private SchemaInfoProvider<PersistentContent, ContentId> contentScehmaProvider;
   @Inject
   private CommonReadDao<PersistentContent, ContentId> readDao;
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+  private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   protected MultivalueMap<String, Object> newTInstance() {

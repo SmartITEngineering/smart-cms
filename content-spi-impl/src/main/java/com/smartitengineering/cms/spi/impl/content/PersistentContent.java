@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public class PersistentContent extends AbstractGenericPersistentDTO<PersistentContent, ContentId, Long> {
 
   private WriteableContent mutableContent;
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public boolean isValid() {

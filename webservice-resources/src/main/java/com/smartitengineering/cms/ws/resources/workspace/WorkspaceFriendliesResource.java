@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 public class WorkspaceFriendliesResource extends AbstractResource {
 
   private final Workspace workspace;
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+  private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   public WorkspaceFriendliesResource(Workspace workspace, ServerResourceInjectables injectables) {
     super(injectables);

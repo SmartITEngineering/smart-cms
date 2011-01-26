@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ValidatorProviderImpl implements ValidatorProvider {
 
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
   @Inject
   private Map<ValidatorType, TypeFieldValidator> generators;
 

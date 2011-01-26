@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class XMLContentTypeDefinitionParser implements ContentTypeDefinitionParser {
 
-  private Logger logger = LoggerFactory.getLogger(getClass());
+  private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public Collection<WritableContentType> parseStream(WorkspaceId workspaceId, InputStream inputStream) throws

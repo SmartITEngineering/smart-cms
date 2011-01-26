@@ -59,7 +59,7 @@ public class WorkspaceRepresentationResource extends AbstractResource {
   private final String repName;
   private final RepresentationTemplate template;
   private final Workspace workspace;
-  private static final Logger LOGGER = LoggerFactory.getLogger(WorkspaceRepresentationResource.class);
+  private static final transient Logger LOGGER = LoggerFactory.getLogger(WorkspaceRepresentationResource.class);
 
   public WorkspaceRepresentationResource(String repName, Workspace workspace, ServerResourceInjectables injectables) {
     super(injectables);

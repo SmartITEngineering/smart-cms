@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ContentSearcherImpl implements ContentSearcher {
 
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
   @Inject
   private CommonFreeTextSearchDao<PersistentContent> textSearchDao;
   private static final String SOLR_DATE_FORMAT = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern() + "'Z'";

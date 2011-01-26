@@ -83,7 +83,7 @@ public class FieldResource extends AbstractResource {
   private final FieldDef fieldDef;
   private final EntityTag entityTag;
   protected final GenericAdapter<Field, com.smartitengineering.cms.ws.common.domains.Field> adapter;
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
   public static final String PATH_TO_VAR = "v/{varName}";
 
   public FieldResource(ServerResourceInjectables injectables, Content content, FieldDef fieldDef, EntityTag eTag) {

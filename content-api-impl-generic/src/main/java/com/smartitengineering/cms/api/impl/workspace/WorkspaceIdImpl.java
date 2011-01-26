@@ -38,7 +38,7 @@ public class WorkspaceIdImpl implements WorkspaceId {
 
   private String globalNamespace;
   private String name;
-  protected transient Logger logger = LoggerFactory.getLogger(getClass());
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   public void setGlobalNamespace(String globalNamespace) {
     if (StringUtils.isBlank(globalNamespace) || StringUtils.containsAny(globalNamespace, new char[]{':'})) {

@@ -78,7 +78,7 @@ public class XmlParser implements XmlConstants {
 
   private final InputStream source;
   private final WorkspaceId workspaceId;
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+  private final transient Logger logger = LoggerFactory.getLogger(getClass());
   private final XMLParserIntrospector introspector;
 
   public XmlParser(WorkspaceId workspaceId, InputStream stream, XMLParserIntrospector introspector) {

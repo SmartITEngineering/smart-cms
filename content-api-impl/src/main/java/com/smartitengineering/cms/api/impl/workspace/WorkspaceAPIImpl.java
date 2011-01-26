@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 public class WorkspaceAPIImpl implements WorkspaceAPI {
 
   private String globalNamespace;
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+  private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Inject
   public void setGlobalNamespace(@Named("globalNamespace") String globalNamespace) {
