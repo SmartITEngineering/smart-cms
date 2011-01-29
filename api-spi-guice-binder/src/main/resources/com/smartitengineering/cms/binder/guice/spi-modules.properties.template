@@ -1,5 +1,5 @@
 contextName=com.smartitnengineering.smart-cms.spi
-modules=com.smartitengineering.cms.binder.guice.SPIModule,com.smartitengineering.cms.binder.guice.SPIWorkspaceServiceModule,com.smartitengineering.cms.binder.guice.SPITemplateEngineModule
+modules=com.smartitengineering.cms.binder.guice.SPIModule,com.smartitengineering.cms.binder.guice.SPIWorkspaceServiceModule,com.smartitengineering.cms.binder.guice.SPITemplateEngineModule,com.smartitengineering.cms.binder.guice.SPIContentCacheModule
 ignoreMissingDependency=false
 com.smartitengineering.cms.schemaLocationForContentType=http://github.com/smart-it/smart-cms/raw/master/content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd
 com.smartitengineering.cms.solrUri=http://localhost:10080/solr/
@@ -8,3 +8,5 @@ com.smartitengineering.cms.saveIntervalInSec=60
 com.smartitengineering.cms.updateIntervalInSec=60
 com.smartitengineering.cms.deleteIntervalInSec=60
 com.smartitengineering.cms.uriPrefix=/cms
+com.smartitengineering.cms.cache.resource=com/smartitengineering/cms/binder/guice/ehcache.xml
+com.smartitengineering.cms.cache.name=cmsCache

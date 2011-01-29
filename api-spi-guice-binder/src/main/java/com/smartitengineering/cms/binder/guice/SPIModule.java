@@ -73,6 +73,9 @@ import com.smartitengineering.common.dao.search.solr.SolrFreeTextSearchDao;
 import com.smartitengineering.common.dao.search.solr.spi.ObjectIdentifierQuery;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
+import com.smartitengineering.dao.common.cache.BasicKey;
+import com.smartitengineering.dao.common.cache.dao.CacheableDao;
+import com.smartitengineering.dao.common.cache.impl.CacheAPIFactory;
 import com.smartitengineering.dao.impl.hbase.CommonDao;
 import com.smartitengineering.dao.impl.hbase.spi.AsyncExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.DomainIdInstanceProvider;
@@ -98,11 +101,15 @@ import com.smartitengineering.dao.solr.impl.SolrDao;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URI;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,8 +120,10 @@ public class SPIModule extends PrivateModule {
                              "http://github.com/smart-it/smart-cms/raw/master/" +
       "content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd";
   public static final String DEFAULT_SOLR_URI = "http://localhost:8080/solr/";
+  public static final String PREFIX_SEPARATOR_PROP_KEY = "com.smartitengineering.user.cache.prefixSeparator";
+  public static final String PREFIX_SEPARATOR_PROP_DEFAULT = "|";
   private final String schemaLocationForContentType;
-  private final String solrUri, uriPrefix;
+  private final String solrUri, uriPrefix, cacheConfigRsrc, cacheName;
   private final long waitTime, saveInterval, updateInterval, deleteInterval;
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -135,6 +144,9 @@ public class SPIModule extends PrivateModule {
       toLong = NumberUtils.toLong(properties.getProperty("com.smartitengineering.cms.deleteIntervalInSec"), 60L);
       deleteInterval = toLong > 0 ? toLong : 60l;
       uriPrefix = properties.getProperty("com.smartitengineering.cms.uriPrefix", "/cms");
+      cacheConfigRsrc = properties.getProperty("com.smartitengineering.cms.cache.resource",
+                                               "com/smartitengineering/cms/binder/guice/ehcache.xml");
+      cacheName = properties.getProperty("com.smartitengineering.cms.cache.name", "cmsCache");
     }
     else {
       schemaLocationForContentType = DEFAULT_LOCATION;
@@ -142,6 +154,8 @@ public class SPIModule extends PrivateModule {
       waitTime = 10l;
       saveInterval = updateInterval = deleteInterval = 60l;
       uriPrefix = "/cms";
+      cacheConfigRsrc = "com/smartitengineering/cms/binder/guice/ehcache.xml";
+      cacheName = "cmsCache";
     }
     logger.debug("SCHEMA Location " + schemaLocationForContentType);
   }
@@ -231,7 +245,12 @@ public class SPIModule extends PrivateModule {
     }).annotatedWith(Names.named("searchWriteDaoDecoratee")).to(new TypeLiteral<CommonDao<PersistentContent, ContentId>>() {
     }).in(Singleton.class);
     bind(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
-    }).to(new TypeLiteral<CommonWriteDaoDecorator<PersistentContent>>() {
+    }).annotatedWith(Names.named("primaryCacheableWriteDao")).to(new TypeLiteral<CommonWriteDaoDecorator<PersistentContent>>() {
+    }).in(Singleton.class);
+    binder().expose(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
+    }).annotatedWith(Names.named("primaryCacheableWriteDao"));
+    bind(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
+    }).to(new TypeLiteral<CacheableDao<PersistentContent, ContentId, String>>() {
     }).in(Singleton.class);
     TypeLiteral<CommonFreeTextPersistentDao<PersistentContent>> prodLit =
                                                                 new TypeLiteral<CommonFreeTextPersistentDao<PersistentContent>>() {
@@ -256,7 +275,12 @@ public class SPIModule extends PrivateModule {
     bind(new TypeLiteral<ObjectRowConverter<PersistentContent>>() {
     }).to(ContentObjectConverter.class).in(Singleton.class);
     bind(new TypeLiteral<CommonReadDao<PersistentContent, ContentId>>() {
-    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContent, ContentId>>() {
+    }).annotatedWith(Names.named("primaryCacheableReadDao")).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContent, ContentId>>() {
+    }).in(Singleton.class);
+    binder().expose(new TypeLiteral<CommonReadDao<PersistentContent, ContentId>>() {
+    }).annotatedWith(Names.named("primaryCacheableReadDao"));
+    bind(new TypeLiteral<CommonReadDao<PersistentContent, ContentId>>() {
+    }).to(new TypeLiteral<CacheableDao<PersistentContent, ContentId, String>>() {
     }).in(Singleton.class);
     bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContent, ContentId>>() {
     }).to(new TypeLiteral<CommonDao<PersistentContent, ContentId>>() {
@@ -315,5 +339,23 @@ public class SPIModule extends PrivateModule {
     bind(UriProvider.class).to(UriProviderImpl.class);
     bind(URI.class).annotatedWith(Names.named("cmsBaseUri")).toInstance(URI.create(uriPrefix));
     binder().expose(UriProvider.class);
+    /*
+     * Configure Cache
+     */
+    InputStream inputStream = getClass().getClassLoader().getResourceAsStream(cacheConfigRsrc);
+    if (inputStream == null) {
+      throw new IllegalArgumentException("Cache configuration not available!");
+    }
+    CacheManager cacheManager = new CacheManager(inputStream);
+    Cache cache = cacheManager.getCache(cacheName);
+    if (cache == null) {
+      throw new IllegalStateException("Could not retrieve cache!");
+    }
+    bind(Cache.class).toInstance(cache);
+    binder().expose(Cache.class);
+  }
+
+  static <T extends Serializable> BasicKey<T> getKeyInstance(String keyPrefix, String prefixSeparator) {
+    return CacheAPIFactory.<T>getBasicKey(keyPrefix, prefixSeparator);
   }
 }

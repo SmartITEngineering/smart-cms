@@ -1,0 +1,15 @@
+
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">
+  <defaultCache eternal="false" maxElementsInMemory="1000" overflowToDisk="false"></defaultCache>
+  <cache name="cmsCache"
+       maxElementsInMemory="50000"
+       eternal="false"
+       timeToIdleSeconds="300"
+       timeToLiveSeconds="600"
+       overflowToDisk="false"
+       diskPersistent="false"
+       diskExpiryThreadIntervalSeconds="1">
+          
+  </cache>
+</ehcache>
