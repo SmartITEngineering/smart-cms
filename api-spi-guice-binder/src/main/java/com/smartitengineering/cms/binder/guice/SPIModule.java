@@ -200,10 +200,20 @@ public class SPIModule extends PrivateModule {
     bind(new TypeLiteral<ObjectRowConverter<PersistentContentType>>() {
     }).to(ContentTypeObjectConverter.class).in(Singleton.class);
     bind(new TypeLiteral<CommonReadDao<PersistentContentType, ContentTypeId>>() {
-    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, ContentTypeId>>() {
+    }).annotatedWith(Names.named("primaryCacheableReadDao")).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, ContentTypeId>>() {
     }).in(Singleton.class);
     bind(new TypeLiteral<CommonWriteDao<PersistentContentType>>() {
-    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, ContentTypeId>>() {
+    }).annotatedWith(Names.named("primaryCacheableWriteDao")).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, ContentTypeId>>() {
+    }).in(Singleton.class);
+    binder().expose(new TypeLiteral<CommonWriteDao<PersistentContentType>>() {
+    }).annotatedWith(Names.named("primaryCacheableWriteDao"));
+    binder().expose(new TypeLiteral<CommonReadDao<PersistentContentType, ContentTypeId>>() {
+    }).annotatedWith(Names.named("primaryCacheableReadDao"));
+    bind(new TypeLiteral<CommonWriteDao<PersistentContentType>>() {
+    }).to(new TypeLiteral<CacheableDao<PersistentContentType, ContentTypeId, String>>() {
+    }).in(Singleton.class);
+    bind(new TypeLiteral<CommonReadDao<PersistentContentType, ContentTypeId>>() {
+    }).to(new TypeLiteral<CacheableDao<PersistentContentType, ContentTypeId, String>>() {
     }).in(Singleton.class);
     bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, ContentTypeId>>() {
     }).to(new TypeLiteral<CommonDao<PersistentContentType, ContentTypeId>>() {
