@@ -46,6 +46,10 @@ The module is responsible for Implementing the SPI for the CMS.
       <artifactId>solr-dao</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.smartitengineering</groupId>
+      <artifactId>smart-cache</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.smartitengineering.smart-dao</groupId>
       <artifactId>solr-search-dao</artifactId>
     </dependency>

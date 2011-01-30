@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.workspace;
 
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.type.ContentType;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 
@@ -27,7 +28,7 @@ import java.util.Date;
  *
  * @author imyousuf
  */
-public interface Workspace {
+public interface Workspace extends Serializable {
 
   public WorkspaceId getId();
 

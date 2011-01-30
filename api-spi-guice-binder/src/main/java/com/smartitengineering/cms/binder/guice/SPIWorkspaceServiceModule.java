@@ -26,6 +26,7 @@ import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.spi.impl.cache.WorkspaceServiceCacheImpl;
 import com.smartitengineering.cms.spi.impl.workspace.PersistentWorkspace;
 import com.smartitengineering.cms.spi.impl.workspace.WorkspaceAdapterHelper;
 import com.smartitengineering.cms.spi.impl.workspace.WorkspaceObjectConverter;
@@ -35,6 +36,9 @@ import com.smartitengineering.cms.spi.impl.workspace.guice.WorkspaceSchemaBaseCo
 import com.smartitengineering.cms.spi.workspace.WorkspaceService;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
+import com.smartitengineering.dao.common.cache.BasicKey;
+import com.smartitengineering.dao.common.cache.CacheServiceProvider;
+import com.smartitengineering.dao.common.cache.impl.ehcache.EhcacheCacheServiceProviderImpl;
 import com.smartitengineering.dao.impl.hbase.CommonDao;
 import com.smartitengineering.dao.impl.hbase.spi.DomainIdInstanceProvider;
 import com.smartitengineering.dao.impl.hbase.spi.FilterConfigs;
@@ -49,12 +53,20 @@ import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
+import java.util.Properties;
 
 /**
  *
  * @author imyousuf
  */
 public class SPIWorkspaceServiceModule extends PrivateModule {
+
+  private final String prefixSeparator;
+
+  public SPIWorkspaceServiceModule(Properties properties) {
+    prefixSeparator = properties.getProperty(SPIModule.PREFIX_SEPARATOR_PROP_KEY,
+                                             SPIModule.PREFIX_SEPARATOR_PROP_DEFAULT);
+  }
 
   @Override
   protected void configure() {
@@ -64,7 +76,7 @@ public class SPIWorkspaceServiceModule extends PrivateModule {
     /*
      * Start injection specific to common dao of workspace
      */
-    bind(WorkspaceService.class).to(WorkspaceServiceImpl.class).in(Singleton.class);
+    bind(WorkspaceService.class).annotatedWith(Names.named("primary")).to(WorkspaceServiceImpl.class).in(Singleton.class);
     bind(new TypeLiteral<ObjectRowConverter<PersistentWorkspace>>() {
     }).to(WorkspaceObjectConverter.class).in(Singleton.class);
     bind(new TypeLiteral<CommonReadDao<PersistentWorkspace, WorkspaceId>>() {
@@ -97,6 +109,12 @@ public class SPIWorkspaceServiceModule extends PrivateModule {
     }).in(Scopes.SINGLETON);
     bind(new TypeLiteral<AbstractAdapterHelper<Workspace, PersistentWorkspace>>() {
     }).to(WorkspaceAdapterHelper.class).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<CacheServiceProvider<String, Workspace>>() {
+    }).to(new TypeLiteral<EhcacheCacheServiceProviderImpl<String, Workspace>>() {
+    });
+    bind(new TypeLiteral<BasicKey<String>>() {
+    }).toInstance(SPIModule.<String>getKeyInstance("Workspace", prefixSeparator));
+    bind(WorkspaceService.class).to(WorkspaceServiceCacheImpl.class).in(Singleton.class);
     binder().expose(WorkspaceService.class);
     /*
      * End injection specific to common dao of workspace
