@@ -243,8 +243,8 @@ public class ContentSearcherImpl implements ContentSearcher {
           param = null;
         }
         else {
-          param = QueryParameterFactory.getStringLikePropertyParam("id", Bytes.toBytes(new StringBuilder(workspaceId.
-              toString()).append(':').toString()), MatchMode.START);
+          param = QueryParameterFactory.getStringLikePropertyParam("id", new StringBuilder(workspaceId.toString()).
+              append(':').toString(), MatchMode.START);
         }
         final QueryParameter<Integer> maxResultsParam = QueryParameterFactory.getMaxResultsParam(100);
         boolean hasMore = true;
