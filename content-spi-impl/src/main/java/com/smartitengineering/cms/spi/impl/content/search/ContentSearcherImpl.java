@@ -20,15 +20,20 @@ package com.smartitengineering.cms.spi.impl.content.search;
 
 import com.google.inject.Inject;
 import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Filter;
 import com.smartitengineering.cms.api.content.SearchResult;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.content.ContentSearcher;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
+import com.smartitengineering.common.dao.search.CommonFreeTextPersistentDao;
 import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
+import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.queryparam.BiOperandQueryParameter;
+import com.smartitengineering.dao.common.queryparam.MatchMode;
 import com.smartitengineering.dao.common.queryparam.OperatorType;
 import com.smartitengineering.dao.common.queryparam.ParameterType;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
@@ -36,13 +41,18 @@ import com.smartitengineering.dao.common.queryparam.QueryParameterCastHelper;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.dao.common.queryparam.StringLikeQueryParameter;
 import com.smartitengineering.dao.common.queryparam.UniOperandQueryParameter;
+import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +66,13 @@ public class ContentSearcherImpl implements ContentSearcher {
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
   @Inject
   private CommonFreeTextSearchDao<PersistentContent> textSearchDao;
+  @Inject
+  private CommonReadDao<PersistentContent, ContentId> readDao;
+  @Inject
+  private SchemaInfoProvider<PersistentContent, ContentId> schemaInfoProvider;
+  @Inject
+  private CommonFreeTextPersistentDao<PersistentContent> textSearchWriteDao;
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor();
   private static final String SOLR_DATE_FORMAT = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern() + "'Z'";
 
   @Override
@@ -213,5 +230,52 @@ public class ContentSearcherImpl implements ContentSearcher {
 
   public static String formatDateInSolrFormat(Date date) {
     return DateFormatUtils.formatUTC(date, SOLR_DATE_FORMAT);
+  }
+
+  @Override
+  public void reIndex(final WorkspaceId workspaceId) {
+    executorService.submit(new Runnable() {
+
+      @Override
+      public void run() {
+        final QueryParameter param;
+        if (workspaceId == null) {
+          param = null;
+        }
+        else {
+          param = QueryParameterFactory.getStringLikePropertyParam("id", Bytes.toBytes(new StringBuilder(workspaceId.
+              toString()).append(':').toString()), MatchMode.START);
+        }
+        final int pageContentSize = 100;
+        boolean hasMore = true;
+        ContentId lastId = null;
+        List<QueryParameter> params = new ArrayList<QueryParameter>();
+        while (hasMore) {
+          params.clear();
+          if (param != null) {
+            params.add(param);
+          }
+          params.add(QueryParameterFactory.getMaxResultsParam(pageContentSize));
+          if (lastId != null) {
+            try {
+              params.add(QueryParameterFactory.getGreaterThanPropertyParam("id", schemaInfoProvider.getRowIdFromId(
+                  lastId)));
+            }
+            catch (Exception ex) {
+              logger.warn("Could not add last id clause " + lastId.toString(), ex);
+            }
+          }
+          List<PersistentContent> list = readDao.getList(params);
+          if (list == null || list.isEmpty()) {
+            hasMore = false;
+          }
+          else {
+            final PersistentContent[] contents = new PersistentContent[list.size()];
+            textSearchWriteDao.update(list.toArray(contents));
+            lastId = contents[contents.length - 1].getId();
+          }
+        }
+      }
+    });
   }
 }

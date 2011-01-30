@@ -535,4 +535,9 @@ public class ContentLoaderImpl implements ContentLoader {
     resultImpl.setTotalResultsCount(totalResultsCount);
     return resultImpl;
   }
+
+  @Override
+  public void reIndex(WorkspaceId workspaceId) {
+    SmartContentSPI.getInstance().getContentSearcher().reIndex(workspaceId);
+  }
 }

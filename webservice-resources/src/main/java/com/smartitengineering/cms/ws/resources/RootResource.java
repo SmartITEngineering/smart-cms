@@ -22,6 +22,7 @@ import com.smartitengineering.cms.ws.resources.workspace.WorkspaceResource;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.ws.resources.content.ReIndexResource;
 import com.smartitengineering.cms.ws.resources.content.searcher.ContentSearcherResource;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ public class RootResource extends AbstractResource {
     }
   };
   public static final String PATH_TO_SEARCH = "search";
+  public static final String PATH_TO_REINDEX = "reindex";
 
   @GET
   @Produces(MediaType.APPLICATION_ATOM_XML)
@@ -86,12 +88,14 @@ public class RootResource extends AbstractResource {
         Entry entry = getEntry(id.toString(), id.getName(), workspace.getCreationDate(), link);
         link = getLink(
             getRelativeURIBuilder().path(WorkspaceResource.class).build(id.getGlobalNamespace(), id.getName()),
-                       WorkspaceResource.REL_WORKSPACE_CONTENT, MediaType.APPLICATION_ATOM_XML);
+            WorkspaceResource.REL_WORKSPACE_CONTENT, MediaType.APPLICATION_ATOM_XML);
         entry.addLink(link);
         feed.addEntry(entry);
       }
       feed.addLink(getLink(getRelativeURIBuilder().path(PATH_TO_SEARCH).build(), "search",
                            com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
+      feed.addLink(getLink(getRelativeURIBuilder().path(PATH_TO_REINDEX).build(), "re-index",
+                           MediaType.TEXT_PLAIN));
       response.entity(feed);
       response.lastModified(lastModifiedDate);
     }
@@ -114,6 +118,11 @@ public class RootResource extends AbstractResource {
   @Path("/" + PATH_TO_SEARCH)
   public ContentSearcherResource search() {
     return new ContentSearcherResource(getInjectables());
+  }
+
+  @Path("/" + PATH_TO_REINDEX)
+  public ReIndexResource reIndex() {
+    return new ReIndexResource(getInjectables());
   }
 
   @Override
