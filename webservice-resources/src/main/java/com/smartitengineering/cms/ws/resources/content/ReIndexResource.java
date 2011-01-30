@@ -23,8 +23,18 @@ import org.apache.commons.lang.StringUtils;
  */
 public class ReIndexResource extends AbstractResource {
 
+  private WorkspaceId workspaceId;
+
   public ReIndexResource(ServerResourceInjectables injectables) {
     super(injectables);
+  }
+
+  public WorkspaceId getWorkspaceId() {
+    return workspaceId;
+  }
+
+  public void setWorkspaceId(WorkspaceId workspaceId) {
+    this.workspaceId = workspaceId;
   }
 
   @GET
@@ -35,22 +45,27 @@ public class ReIndexResource extends AbstractResource {
 
   @POST
   public Response reIndex(@QueryParam("workspaceId") @DefaultValue("") final String workspaceIdStr) {
-    WorkspaceId workspaceId;
-    if (StringUtils.isBlank(workspaceIdStr)) {
-      workspaceId = null;
+    WorkspaceId cWorkspaceId;
+    if (workspaceId == null) {
+      if (StringUtils.isBlank(workspaceIdStr)) {
+        cWorkspaceId = null;
+      }
+      else {
+        try {
+          String[] splits = workspaceIdStr.split(":");
+          String ns = splits[0], name = splits[1];
+          cWorkspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId(ns, name);
+        }
+        catch (Exception ex) {
+          cWorkspaceId = null;
+        }
+      }
     }
     else {
-      try {
-        String[] splits = workspaceIdStr.split(":");
-        String ns = splits[0], name = splits[1];
-        workspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId(ns, name);
-      }
-      catch (Exception ex) {
-        workspaceId = null;
-      }
+      cWorkspaceId = workspaceId;
     }
     Response.ResponseBuilder builder = Response.status(Response.Status.ACCEPTED);
-    SmartContentAPI.getInstance().getContentLoader().reIndex(workspaceId);
+    SmartContentAPI.getInstance().getContentLoader().reIndex(cWorkspaceId);
     return builder.build();
   }
 }
