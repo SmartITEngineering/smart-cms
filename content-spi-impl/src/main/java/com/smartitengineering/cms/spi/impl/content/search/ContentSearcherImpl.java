@@ -246,7 +246,7 @@ public class ContentSearcherImpl implements ContentSearcher {
           param = QueryParameterFactory.getStringLikePropertyParam("id", Bytes.toBytes(new StringBuilder(workspaceId.
               toString()).append(':').toString()), MatchMode.START);
         }
-        final int pageContentSize = 100;
+        final QueryParameter<Integer> maxResultsParam = QueryParameterFactory.getMaxResultsParam(100);
         boolean hasMore = true;
         ContentId lastId = null;
         List<QueryParameter> params = new ArrayList<QueryParameter>();
@@ -255,7 +255,7 @@ public class ContentSearcherImpl implements ContentSearcher {
           if (param != null) {
             params.add(param);
           }
-          params.add(QueryParameterFactory.getMaxResultsParam(pageContentSize));
+          params.add(maxResultsParam);
           if (lastId != null) {
             try {
               params.add(QueryParameterFactory.getGreaterThanPropertyParam("id", schemaInfoProvider.getRowIdFromId(
