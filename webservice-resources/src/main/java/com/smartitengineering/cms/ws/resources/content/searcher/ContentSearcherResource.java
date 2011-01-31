@@ -77,10 +77,11 @@ public class ContentSearcherResource extends AbstractResource {
   private int start;
   private int count;
   private boolean disjunction;
+  private Boolean includeFriendlies = null;
   protected final GenericAdapter<Content, com.smartitengineering.cms.ws.common.domains.Content> adapter;
   private final static String WORKSPACE_ID = "workspaceId", STATUS = "status", TYPE_ID = "typeId", FIELD = "field",
       CREATION_DATE = "creationDate", LAST_MODIFIED_DATE = "lastModifiedDate", START = "start", COUNT = "count",
-      DISJUNCTION = "disjunction", SEARCH_TERMS = "q";
+      DISJUNCTION = "disjunction", SEARCH_TERMS = "q", INCLUDE_FRIENDLIES = "includeFriendlies";
 
   public ContentSearcherResource(ServerResourceInjectables injectables) {
     super(injectables);
@@ -125,6 +126,8 @@ public class ContentSearcherResource extends AbstractResource {
           append(StringUtils.isBlank(creationDate) ? "{creationModifiedDateSpec?}" : creationDate);
       templateBuilder.append('&').append(LAST_MODIFIED_DATE).append("=").
           append(StringUtils.isBlank(lastModifiedDate) ? "{lastModifiedDateSpec?}" : lastModifiedDate);
+      templateBuilder.append('&').append(INCLUDE_FRIENDLIES).append("=").
+          append(includeFriendlies == null ? "{includeFriendlies?}" : includeFriendlies.booleanValue());
       if (contentTypeId != null && !contentTypeId.isEmpty()) {
         for (String typeId : contentTypeId) {
           templateBuilder.append('&').append(TYPE_ID).append("=").append(typeId);
@@ -165,6 +168,9 @@ public class ContentSearcherResource extends AbstractResource {
       if (StringUtils.isNotBlank(lastModifiedDate)) {
         templateBuilder.append(LAST_MODIFIED_DATE).append("=").append(lastModifiedDate).append('&');
       }
+      if (includeFriendlies != null) {
+        templateBuilder.append(INCLUDE_FRIENDLIES).append("=").append(includeFriendlies.booleanValue()).append('&');
+      }
       if (start >= 0) {
         templateBuilder.append(START).append("=").append(start).append('&');
       }
@@ -202,11 +208,12 @@ public class ContentSearcherResource extends AbstractResource {
                                 @QueryParam(FIELD) List<String> fieldQuery,
                                 @QueryParam(CREATION_DATE) String creationDate,
                                 @QueryParam(LAST_MODIFIED_DATE) String lastModifiedDate,
+                                @QueryParam(INCLUDE_FRIENDLIES) boolean includeFriendlies,
                                 @QueryParam(START) int start,
                                 @QueryParam(COUNT) @DefaultValue("5") int count,
                                 @QueryParam(DISJUNCTION) boolean disJunction) {
     initParams(contentTypeId, searchTerms, statuses, workspaceId, fieldQuery, creationDate, lastModifiedDate, start,
-               count, disJunction);
+               count, disJunction, includeFriendlies);
     ResponseBuilder responseBuilder;
     Filter filter = getFilter();
     final com.smartitengineering.cms.api.content.SearchResult result = SmartContentAPI.getInstance().getContentLoader().
@@ -255,12 +262,12 @@ public class ContentSearcherResource extends AbstractResource {
                       @QueryParam(FIELD) List<String> fieldQuery,
                       @QueryParam(CREATION_DATE) String creationDate,
                       @QueryParam(LAST_MODIFIED_DATE) String lastModifiedDate,
+                      @QueryParam(INCLUDE_FRIENDLIES) boolean includeFriendlies,
                       @QueryParam(START) int start,
                       @QueryParam(COUNT) @DefaultValue("5") int count,
                       @QueryParam(DISJUNCTION) boolean disJunction) {
     initParams(contentTypeId, searchTerms, statuses, workspaceId, fieldQuery, creationDate, lastModifiedDate, start,
-               count,
-               disJunction);
+               count, disJunction, includeFriendlies);
     Collection<Content> searchContent;
     ResponseBuilder responseBuilder;
     Filter filter = getFilter();
@@ -287,7 +294,7 @@ public class ContentSearcherResource extends AbstractResource {
   protected void initParams(List<String> contentTypeId, String searchTerms,
                             List<String> statuses, String workspaceId,
                             List<String> fieldQuery, String creationDate, String lastModifiedDate, int start, int count,
-                            boolean disJunction) {
+                            boolean disJunction, boolean includeFriendlies) {
     if (contentTypeId != null && !contentTypeId.isEmpty()) {
       this.contentTypeId = contentTypeId;
     }
@@ -305,6 +312,7 @@ public class ContentSearcherResource extends AbstractResource {
     this.count = count;
     this.disjunction = disJunction;
     this.searchTerms = searchTerms;
+    this.includeFriendlies = includeFriendlies;
   }
 
   protected URI getNextPage() {
@@ -346,6 +354,14 @@ public class ContentSearcherResource extends AbstractResource {
     filter.setMaxContents(count);
     logger.info(String.valueOf(":::VAULE OF DISJUNCTION : " + disjunction));
     filter.setDisjunction(disjunction);
+    if (includeFriendlies != null) {
+      logger.info(String.valueOf(":::VAULE OF Inclue Friendlies : " + includeFriendlies));
+      filter.setFriendliesIncluded(includeFriendlies);
+    }
+    else {
+      logger.info(String.valueOf(":::VAULE OF Inclue Friendlies is true"));
+      filter.setFriendliesIncluded(true);
+    }
     logger.info(":::CREATION DATE : " + creationDate);
     if (creationDate != null) {
       filter.setCreationDateFilter(formatDate(creationDate));
@@ -524,6 +540,14 @@ public class ContentSearcherResource extends AbstractResource {
 
   public void setLastModifiedDate(String lastModifiedDate) {
     this.lastModifiedDate = lastModifiedDate;
+  }
+
+  public Boolean getIncludeFriendlies() {
+    return includeFriendlies;
+  }
+
+  public void setIncludeFriendlies(Boolean includeFriendlies) {
+    this.includeFriendlies = includeFriendlies;
   }
 
   public int getStart() {

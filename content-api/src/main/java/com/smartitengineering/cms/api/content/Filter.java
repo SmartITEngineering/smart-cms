@@ -77,4 +77,8 @@ public interface Filter {
   String getSearchTerms();
 
   void setSearchTerms(String searchTerms);
+
+  void setFriendliesIncluded(boolean friendliesIncluded);
+
+  boolean isFriendliesIncluded();
 }

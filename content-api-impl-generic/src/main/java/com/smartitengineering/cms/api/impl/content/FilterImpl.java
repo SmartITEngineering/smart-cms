@@ -48,6 +48,7 @@ public class FilterImpl implements Filter {
   private int maxContents = 10;
   private WorkspaceId workspaceId;
   private String searchTerms;
+  private boolean friendliesIncluded = true;
 
   @Override
   public void addContentTypeToFilter(ContentTypeId... types) {
@@ -174,5 +175,15 @@ public class FilterImpl implements Filter {
   @Override
   public void setSearchTerms(String searchTerms) {
     this.searchTerms = searchTerms;
+  }
+
+  @Override
+  public boolean isFriendliesIncluded() {
+    return friendliesIncluded;
+  }
+
+  @Override
+  public void setFriendliesIncluded(boolean friendliesIncluded) {
+    this.friendliesIncluded = friendliesIncluded;
   }
 }

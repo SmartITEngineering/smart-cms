@@ -83,10 +83,24 @@ public class ContentSearcherImpl implements ContentSearcher {
     int count = 0;
     Set<ContentTypeId> contentTypeIds = filter.getContentTypeFilters();
     finalQuery.append(ContentHelper.TYPE).append(": ").append(ContentHelper.CONTENT);
-    if (filter.getWorkspaceId() != null) {
+    final WorkspaceId workspaceId = filter.getWorkspaceId();
+    if (workspaceId != null) {
       finalQuery.append(conjunctionSeperator);
-      finalQuery.append(ContentHelper.WORKSPACEID).append(": ").append(ClientUtils.escapeQueryChars(filter.
-          getWorkspaceId().toString()));
+      finalQuery.append((" ("));
+      finalQuery.append(ContentHelper.WORKSPACEID).append(": ").append(ClientUtils.escapeQueryChars(
+          workspaceId.toString()));
+      if (filter.isFriendliesIncluded()) {
+        Collection<WorkspaceId> friendlies = workspaceId.getWorkspae().getFriendlies();
+        if (friendlies != null && !friendlies.isEmpty()) {
+          for (WorkspaceId friendly : friendlies) {
+            if (friendly != null) {
+              finalQuery.append(disjunctionSeperator).append(ContentHelper.WORKSPACEID).append(": ").append(ClientUtils.
+                  escapeQueryChars(friendly.toString()));
+            }
+          }
+        }
+      }
+      finalQuery.append((") "));
     }
     final StringBuilder query = new StringBuilder();
     if (contentTypeIds != null && !contentTypeIds.isEmpty()) {
