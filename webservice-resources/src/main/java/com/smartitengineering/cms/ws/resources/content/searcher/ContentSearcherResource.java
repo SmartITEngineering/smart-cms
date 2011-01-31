@@ -208,7 +208,7 @@ public class ContentSearcherResource extends AbstractResource {
                                 @QueryParam(FIELD) List<String> fieldQuery,
                                 @QueryParam(CREATION_DATE) String creationDate,
                                 @QueryParam(LAST_MODIFIED_DATE) String lastModifiedDate,
-                                @QueryParam(INCLUDE_FRIENDLIES) boolean includeFriendlies,
+                                @QueryParam(INCLUDE_FRIENDLIES) @DefaultValue("true") boolean includeFriendlies,
                                 @QueryParam(START) int start,
                                 @QueryParam(COUNT) @DefaultValue("5") int count,
                                 @QueryParam(DISJUNCTION) boolean disJunction) {
@@ -262,7 +262,7 @@ public class ContentSearcherResource extends AbstractResource {
                       @QueryParam(FIELD) List<String> fieldQuery,
                       @QueryParam(CREATION_DATE) String creationDate,
                       @QueryParam(LAST_MODIFIED_DATE) String lastModifiedDate,
-                      @QueryParam(INCLUDE_FRIENDLIES) boolean includeFriendlies,
+                      @QueryParam(INCLUDE_FRIENDLIES) @DefaultValue("true") boolean includeFriendlies,
                       @QueryParam(START) int start,
                       @QueryParam(COUNT) @DefaultValue("5") int count,
                       @QueryParam(DISJUNCTION) boolean disJunction) {
