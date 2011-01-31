@@ -537,6 +537,11 @@ public class ContentLoaderImpl implements ContentLoader {
   }
 
   @Override
+  public void reIndex(ContentId contentId) {
+    SmartContentSPI.getInstance().getContentSearcher().reIndex(contentId);
+  }
+
+  @Override
   public void reIndex(WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getContentSearcher().reIndex(workspaceId);
   }

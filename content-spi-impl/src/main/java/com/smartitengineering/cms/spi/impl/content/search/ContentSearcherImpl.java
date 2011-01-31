@@ -52,7 +52,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -230,6 +229,16 @@ public class ContentSearcherImpl implements ContentSearcher {
 
   public static String formatDateInSolrFormat(Date date) {
     return DateFormatUtils.formatUTC(date, SOLR_DATE_FORMAT);
+  }
+
+  @Override
+  public void reIndex(ContentId contentId) {
+    if (contentId != null) {
+      PersistentContent content = readDao.getById(contentId);
+      if (content != null) {
+        textSearchWriteDao.update(content);
+      }
+    }
   }
 
   @Override

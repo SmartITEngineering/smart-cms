@@ -118,5 +118,7 @@ public interface ContentLoader {
 
   String getEntityTagValueForContent(Content content);
 
+  void reIndex(ContentId contentId);
+
   void reIndex(WorkspaceId workspaceId);
 }

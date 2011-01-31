@@ -34,6 +34,8 @@ public interface Content {
 
   String getContentId();
 
+  String getReindexUri();
+
   String getSelfUri();
 
   Date getCreationDate();

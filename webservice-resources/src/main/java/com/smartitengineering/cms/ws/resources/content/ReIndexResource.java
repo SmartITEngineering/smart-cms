@@ -4,6 +4,7 @@
  */
 package com.smartitengineering.cms.ws.resources.content;
 
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.util.rest.server.AbstractResource;
@@ -24,13 +25,22 @@ import org.apache.commons.lang.StringUtils;
 public class ReIndexResource extends AbstractResource {
 
   private WorkspaceId workspaceId;
+  private ContentId contentId;
 
   public ReIndexResource(ServerResourceInjectables injectables) {
     super(injectables);
   }
 
+  public ContentId getContentId() {
+    return contentId;
+  }
+
   public WorkspaceId getWorkspaceId() {
     return workspaceId;
+  }
+
+  public void setContentId(ContentId contentId) {
+    this.contentId = contentId;
   }
 
   public void setWorkspaceId(WorkspaceId workspaceId) {
@@ -45,27 +55,32 @@ public class ReIndexResource extends AbstractResource {
 
   @POST
   public Response reIndex(@QueryParam("workspaceId") @DefaultValue("") final String workspaceIdStr) {
-    WorkspaceId cWorkspaceId;
-    if (workspaceId == null) {
-      if (StringUtils.isBlank(workspaceIdStr)) {
-        cWorkspaceId = null;
-      }
-      else {
-        try {
-          String[] splits = workspaceIdStr.split(":");
-          String ns = splits[0], name = splits[1];
-          cWorkspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId(ns, name);
-        }
-        catch (Exception ex) {
-          cWorkspaceId = null;
-        }
-      }
+    if (contentId != null) {
+      SmartContentAPI.getInstance().getContentLoader().reIndex(contentId);
     }
     else {
-      cWorkspaceId = workspaceId;
+      WorkspaceId cWorkspaceId;
+      if (workspaceId == null) {
+        if (StringUtils.isBlank(workspaceIdStr)) {
+          cWorkspaceId = null;
+        }
+        else {
+          try {
+            String[] splits = workspaceIdStr.split(":");
+            String ns = splits[0], name = splits[1];
+            cWorkspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId(ns, name);
+          }
+          catch (Exception ex) {
+            cWorkspaceId = null;
+          }
+        }
+      }
+      else {
+        cWorkspaceId = workspaceId;
+      }
+      SmartContentAPI.getInstance().getContentLoader().reIndex(cWorkspaceId);
     }
     Response.ResponseBuilder builder = Response.status(Response.Status.ACCEPTED);
-    SmartContentAPI.getInstance().getContentLoader().reIndex(cWorkspaceId);
     return builder.build();
   }
 }

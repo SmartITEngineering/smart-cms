@@ -32,7 +32,7 @@ import java.util.Map;
 public class ContentImpl implements Content {
 
   private Date creationDate, lastModifiedDate;
-  private String contentTypeUri, parentContentUri, status, contentId, selfUri;
+  private String contentTypeUri, parentContentUri, status, contentId, selfUri, reindexUri;
   private List<Field> fields = new ArrayList<Field>();
   private Map<String, String> templateUris = new LinkedHashMap<String, String>();
   private Map<String, String> templateNames = new LinkedHashMap<String, String>();
@@ -75,6 +75,15 @@ public class ContentImpl implements Content {
   @Override
   public Collection<Field> getFields() {
     return fields;
+  }
+
+  @Override
+  public String getReindexUri() {
+    return this.reindexUri;
+  }
+
+  public void setReindexUri(String reindexUri) {
+    this.reindexUri = reindexUri;
   }
 
   public void setContentTypeUri(String contentTypeUri) {

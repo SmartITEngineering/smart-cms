@@ -95,6 +95,7 @@ public class ContentResource extends AbstractResource {
   protected final GenericAdapter<Content, com.smartitengineering.cms.ws.common.domains.Content> adapter;
   public static final String PATH_TO_REP = "r/{repName}";
   public static final String PATH_TO_FIELD = "f/{fieldName}";
+  public static final String PATH_TO_REINDEX = "reindex";
 
   public ContentResource(ServerResourceInjectables injectables, ContentId contentId) {
     super(injectables);
@@ -138,6 +139,13 @@ public class ContentResource extends AbstractResource {
   @Path(PATH_TO_REP)
   public RepresentationResource getRepresentationResource(@PathParam("repName") String repName) {
     return new RepresentationResource(getInjectables(), repName, content);
+  }
+
+  @Path(PATH_TO_REINDEX)
+  public ReIndexResource reindex() {
+    ReIndexResource resource = new ReIndexResource(getInjectables());
+    resource.setContentId(contentId);
+    return resource;
   }
 
   @GET
@@ -394,6 +402,8 @@ public class ContentResource extends AbstractResource {
         contentImpl.setContentId(fromBean.getContentId().toString());
         contentImpl.setSelfUri(ContentResource.getContentUri(getRelativeURIBuilder(), fromBean.getContentId()).
             toASCIIString());
+        contentImpl.setReindexUri(new StringBuilder(contentImpl.getSelfUri()).append('/').append(PATH_TO_REINDEX).
+            toString());
       }
       contentImpl.setContentTypeUri(
           ContentTypeResource.getContentTypeRelativeURI(getUriInfo(), type.getContentTypeID()).toASCIIString());
