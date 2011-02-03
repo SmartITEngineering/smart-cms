@@ -41,9 +41,10 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
       <xs:element ref="workspaceName" minOccurs="1" maxOccurs="1" />
     </xs:sequence>
   </xs:complexType>
+  <xs:element name="workspace" type="workspaceDef" />
   <xs:complexType name="contentPointer">
     <xs:sequence>
-      <xs:element name="workspace" type="workspaceDef" minOccurs="0" maxOccurs="1" />
+      <xs:element ref="workspace" minOccurs="0" maxOccurs="1" />
       <xs:element ref="typeNS" minOccurs="1" maxOccurs="1" />
       <xs:element ref="typeName" minOccurs="1" maxOccurs="1" />
     </xs:sequence>
