@@ -153,7 +153,7 @@ public class XmlParser implements XmlConstants {
   protected ContentTypeId getContentTypeId(WorkspaceId id, String namespace, String name) throws
       IllegalArgumentException {
     ContentTypeIdImpl contentTypeId = new ContentTypeIdImpl();
-    contentTypeId.setWorkspace(workspaceId);
+    contentTypeId.setWorkspace(id);
     contentTypeId.setNamespace(namespace);
     contentTypeId.setName(name);
     return contentTypeId;
@@ -269,6 +269,9 @@ public class XmlParser implements XmlConstants {
     if (elems.size() > 0) {
       final Element contentTypeElement = elems.get(0);
       final WorkspaceId parsedWorkspaceId = parseWorkspaeId(contentTypeElement, WORKSPACE);
+      if(logger.isInfoEnabled()){
+        logger.info(parsedWorkspaceId == null ? "Parsed Workspace is NULL" : "Parsed Workspace is NOT NULL");
+      }
       ContentTypeId contentTypeId = getContentTypeId(parsedWorkspaceId == null ? workspaceId : parsedWorkspaceId,
                                                      parseMandatoryStringElement(contentTypeElement, TYPE_NS),
                                                      parseMandatoryStringElement(contentTypeElement, TYPE_NAME));

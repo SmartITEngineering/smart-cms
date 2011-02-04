@@ -471,6 +471,19 @@ public class XMLContentTypeDefnitionParserTest {
     }
   }
 
+  @Test
+  public void testParsingContentWorkspace() throws Exception {
+    Collection<WritableContentType> collection = init();
+    Iterator<WritableContentType> iterator = collection.iterator();
+    Collection<FieldDef> fieldDefs = iterator.next().getMutableFieldDefs();
+    Iterator<FieldDef> fieldIterator = fieldDefs.iterator();
+    Assert.assertEquals(4, fieldDefs.size());
+    FieldDef fieldDef = fieldIterator.next();
+    ContentDataType contentDataType = (ContentDataType) fieldDef.getValueDef();
+    Assert.assertEquals("testWS", contentDataType.getTypeDef().getWorkspace().getGlobalNamespace());
+    Assert.assertEquals("test", contentDataType.getTypeDef().getWorkspace().getName());
+  }
+
   protected Collection<WritableContentType> init() throws Exception {
     InputStream inputStream = getClass().getClassLoader().getResourceAsStream("content-type-def-1.xml");
     Assert.assertNotNull(inputStream);
