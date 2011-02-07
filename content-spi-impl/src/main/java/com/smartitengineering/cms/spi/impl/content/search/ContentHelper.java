@@ -103,6 +103,9 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
     Map<String, Field> fields = mutableContent.getFields();
     for (Entry<String, Field> entry : fields.entrySet()) {
       FieldDef def = entry.getValue().getFieldDef();
+      if (logger.isDebugEnabled()) {
+        logger.debug("Field Def " + def.getName() + " available for search: " + def.getSearchDefinition());
+      }
       if (def.getSearchDefinition() == null) {
         continue;
       }
@@ -116,6 +119,9 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
         continue;
       }
       String searchFieldName = builder.append(defName).toString();
+      if (logger.isDebugEnabled()) {
+        logger.debug("Search field name " + searchFieldName);
+      }
       if (org.apache.commons.lang.StringUtils.isNotBlank(searchFieldName)) {
         addFieldValue(toBean, searchFieldName, field, prefix);
       }
@@ -148,6 +154,10 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
       case CONTENT:
         toBean.addValue(indexFieldName, value.toString());
         final ContentDataType contentDataType = (ContentDataType) fieldDataType;
+        if (logger.isDebugEnabled()) {
+          logger.debug("Nested Content " + contentDataType.getTypeDef().toString() + " available for search: " + contentDataType.
+              isAvaialbleForSearch());
+        }
         if (contentDataType.isAvaialbleForSearch()) {
           Content content = SmartContentAPI.getInstance().getContentLoader().loadContent((ContentId) value);
           if (content != null) {

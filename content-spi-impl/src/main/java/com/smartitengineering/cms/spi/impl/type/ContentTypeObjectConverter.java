@@ -98,6 +98,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   public final static byte[] CELL_RSRC_URI_VAL = Bytes.toBytes("resourceUri.value");
   public final static byte[] CELL_FIELD_VAL_TYPE = Bytes.toBytes("fieldValType");
   public final static byte[] CELL_FIELD_STANDALONE = Bytes.toBytes("fieldStandalone");
+  public final static byte[] CELL_FIELD_TYPE_CONTENT_AVAILABLE_FOR_SEARCH = Bytes.toBytes(
+      "contentTypeFieldAvailableForSearch");
   public final static byte[] CELL_FIELD_REQUIRED = Bytes.toBytes("fieldRequired");
   public final static String CELL_FIELD_VAR_DEF = "fieldVariations";
   public final static String CELL_FIELD_VALIDATOR = "fieldValidator";
@@ -313,6 +315,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
           put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_CONTENT_BIDIRECTIONAL), Bytes.toBytes(contentDataType.
               getBidirectionalFieldName()));
         }
+        put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_TYPE_CONTENT_AVAILABLE_FOR_SEARCH), Bytes.toBytes(String.
+            valueOf(contentDataType.isAvaialbleForSearch())));
         put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_CONTENT_TYPE_ID),
                 getInfoProvider().getRowIdFromId(contentDataType.getTypeDef()));
         break;
@@ -733,6 +737,10 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
           else if (Arrays.equals(infoKey, CELL_FIELD_CONTENT_BIDIRECTIONAL)) {
             logger.debug("Parsing content's bi-directional field name");
             contentDataType.setBiBidirectionalFieldName(Bytes.toString(value));
+          }
+          else if (Arrays.equals(infoKey, CELL_FIELD_TYPE_CONTENT_AVAILABLE_FOR_SEARCH)) {
+            logger.debug("Parsing content's available for search");
+            contentDataType.setAvailableForSearch(Boolean.valueOf(Bytes.toString(value)));
           }
           break;
         case STRING:
