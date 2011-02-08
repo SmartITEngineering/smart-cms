@@ -30,6 +30,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,6 +120,33 @@ public class ContentIdImpl implements ContentId {
       return 0;
     }
     return toString().compareTo(o.toString());
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final ContentIdImpl other = (ContentIdImpl) obj;
+    if (this.workspaceId != other.workspaceId &&
+        (this.workspaceId == null || !this.workspaceId.equals(other.workspaceId))) {
+      return false;
+    }
+    if (!Arrays.equals(this.id, other.id)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 3;
+    hash = 89 * hash + (this.workspaceId != null ? this.workspaceId.hashCode() : 0);
+    hash = 89 * hash + Arrays.hashCode(this.id);
+    return hash;
   }
 
   @Override

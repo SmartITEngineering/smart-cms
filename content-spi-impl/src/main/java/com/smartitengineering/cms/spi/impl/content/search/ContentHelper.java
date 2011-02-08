@@ -41,8 +41,10 @@ import com.smartitengineering.dao.solr.MultivalueMap;
 import com.smartitengineering.dao.solr.impl.MultivalueMapImpl;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.commons.codec.binary.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,10 +98,16 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
       final ContentType partentType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(parent);
       parent = partentType.getParent();
     }
-    indexFields(mutableContent, toBean, "");
+    Set<ContentId> indexedContents = new HashSet<ContentId>();
+    indexFields(mutableContent, toBean, "", indexedContents);
   }
 
-  protected void indexFields(final Content mutableContent, MultivalueMap<String, Object> toBean, String prefix) {
+  protected void indexFields(final Content mutableContent, MultivalueMap<String, Object> toBean, String prefix,
+                             Set<ContentId> indexedContents) {
+    if (indexedContents.contains(mutableContent.getContentId())) {
+      return;
+    }
+    indexedContents.add(mutableContent.getContentId());
     Map<String, Field> fields = mutableContent.getFields();
     for (Entry<String, Field> entry : fields.entrySet()) {
       FieldDef def = entry.getValue().getFieldDef();
@@ -123,24 +131,27 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
         logger.debug("Search field name " + searchFieldName);
       }
       if (org.apache.commons.lang.StringUtils.isNotBlank(searchFieldName)) {
-        addFieldValue(toBean, searchFieldName, field, prefix);
+        addFieldValue(toBean, searchFieldName, field, prefix, indexedContents);
       }
     }
   }
 
-  protected void addFieldValue(MultivalueMap<String, Object> toBean, String indexFieldName, Field field, String prefix) {
+  protected void addFieldValue(MultivalueMap<String, Object> toBean, String indexFieldName, Field field, String prefix,
+                               Set<ContentId> indexedContents) {
     final Object value = field.getValue().getValue();
     StringBuilder builder = new StringBuilder();
     if (org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
       builder.append(prefix).append('_');
     }
     final String name = builder.append(field.getName()).toString();
-    addSimpleValue(field.getValue(), field.getFieldDef().getValueDef(), toBean, name, indexFieldName, value);
+    addSimpleValue(field.getValue(), field.getFieldDef().getValueDef(), toBean, name, indexFieldName, value,
+                   indexedContents);
 
   }
 
   protected void addSimpleValue(final FieldValue def, DataType fieldDataType, MultivalueMap<String, Object> toBean,
-                                String fieldName, String indexFieldName, final Object value) {
+                                String fieldName, String indexFieldName, final Object value,
+                                Set<ContentId> indexedContents) {
     final FieldValueType valueDef = def.getDataType();
     switch (valueDef) {
       case COLLECTION:
@@ -148,7 +159,7 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
         Collection<FieldValue> values = fieldValue.getValue();
         for (FieldValue val : values) {
           addSimpleValue(val, ((CollectionDataType) fieldDataType).getItemDataType(), toBean, fieldName, indexFieldName, val.
-              getValue());
+              getValue(), indexedContents);
         }
         break;
       case CONTENT:
@@ -161,7 +172,7 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
         if (contentDataType.isAvaialbleForSearch()) {
           Content content = SmartContentAPI.getInstance().getContentLoader().loadContent((ContentId) value);
           if (content != null) {
-            indexFields(content, toBean, fieldName);
+            indexFields(content, toBean, fieldName, indexedContents);
           }
         }
         break;
