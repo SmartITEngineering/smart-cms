@@ -107,7 +107,13 @@ public class ContentObjectConverter extends AbstractObjectRowConverter<Persisten
     content.setCreationDate(Utils.toDate(startRow.getValue(FAMILY_SELF, CELL_CREATED)));
     content.setLastModifiedDate(Utils.toDate(startRow.getValue(FAMILY_SELF, CELL_LAST_MODIFIED)));
     content.setEntityTagValue(Bytes.toString(startRow.getValue(FAMILY_SELF, CELL_ENTITY_TAG)));
-    content.setPrivate(Bytes.toBoolean(startRow.getValue(FAMILY_SELF, CELL_PRIVATE)));
+    final byte[] isPrivate = startRow.getValue(FAMILY_SELF, CELL_PRIVATE);
+    if (isPrivate != null) {
+      content.setPrivate(Bytes.toBoolean(isPrivate));
+    }
+    else {
+      content.setPrivate(false);
+    }
     ContentType type = null;
     try {
       ContentTypeId typeId =
