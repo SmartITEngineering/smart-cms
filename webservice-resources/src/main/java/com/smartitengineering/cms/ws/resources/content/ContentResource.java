@@ -173,6 +173,9 @@ public class ContentResource extends AbstractResource {
     contentImpl.setContentTypeUri(multiPart.getField("contentTypeUri").getValue());
     contentImpl.setParentContentUri(multiPart.getField("parentContentUri").getValue());
     contentImpl.setStatus(multiPart.getField("status").getValue());
+    final FormDataBodyPart part = multiPart.getField("private");
+    contentImpl.setPrivateContent(part == null || org.apache.commons.lang.StringUtils.isBlank(part.getValue()) ? content.
+        isPrivate() : part.getValue().equals("on") ? true : false);
     if (org.apache.commons.lang.StringUtils.isNotBlank(contentImpl.getContentTypeUri())) {
       final ContentType contentType;
       try {
