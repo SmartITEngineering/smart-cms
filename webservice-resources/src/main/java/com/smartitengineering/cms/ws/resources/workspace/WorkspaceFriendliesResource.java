@@ -24,6 +24,7 @@ import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
+import com.sun.jersey.api.container.ContainerException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +41,8 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriBuilderException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,7 +98,7 @@ public class WorkspaceFriendliesResource extends AbstractResource {
         if (logger.isDebugEnabled()) {
           logger.debug("URI to parse " + uri.toASCIIString());
         }
-        WorkspaceId id = getResourceContext().matchResource(uri, WorkspaceResource.class).getWorkspace().getId();
+        WorkspaceId id = getWorkspaceResource(uri.toASCIIString()).getWorkspace().getId();
         if (id == null) {
           return Response.status(Response.Status.BAD_REQUEST).entity("Some URIs could not be resolved internally!").
               build();
@@ -132,7 +135,7 @@ public class WorkspaceFriendliesResource extends AbstractResource {
         if (logger.isDebugEnabled()) {
           logger.debug("Trying to add " + uri);
         }
-        WorkspaceResource resource = getResourceContext().matchResource(new URI(uri), WorkspaceResource.class);
+        WorkspaceResource resource = getWorkspaceResource(uri);
         workspaceId = resource.getWorkspace().getId();
       }
       catch (Exception ex) {
@@ -161,5 +164,20 @@ public class WorkspaceFriendliesResource extends AbstractResource {
       builder.location(getUriInfo().getAbsolutePath());
     }
     return builder.build();
+  }
+
+  protected WorkspaceResource getWorkspaceResource(final String uri) throws IllegalArgumentException, ContainerException,
+                                                                            ClassCastException, UriBuilderException {
+    final URI checkUri;
+    if (uri.startsWith("http:")) {
+      checkUri = URI.create(uri);
+    }
+    else {
+      URI absUri = getAbsoluteURIBuilder().build();
+      checkUri =
+      UriBuilder.fromPath(uri).host(absUri.getHost()).port(absUri.getPort()).scheme(absUri.getScheme()).build();
+    }
+    WorkspaceResource resource = getResourceContext().matchResource(checkUri, WorkspaceResource.class);
+    return resource;
   }
 }

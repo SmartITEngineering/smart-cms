@@ -291,8 +291,8 @@ public class AppTest {
     Iterator<URI> frdUris = frdUri.iterator();
     Assert.assertEquals(1, frdUri.size());
     Assert.assertEquals(ROOT_URI_STRING + "w/com.smartitengineering/test", frdUris.next().toASCIIString());
-    friendsResource.addFriend(URI.create("/w/a%20test%20namespace/this%20is%20a%20test"));
-    friendsResource.addFriend(new URI("w/testNS/test"));
+    friendsResource.addFriend(URI.create("/cms/w/a%20test%20namespace/this%20is%20a%20test"));
+    friendsResource.addFriend(new URI("cms/w/testNS/test"));
     WorkspaceFriendsResource newFriendsResource = feedResource.getFriends();
     Collection<URI> collection = newFriendsResource.get();
     if (LOGGER.isDebugEnabled()) {
