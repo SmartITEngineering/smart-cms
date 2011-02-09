@@ -31,7 +31,7 @@ import com.smartitengineering.cms.spi.type.SearchFieldNameGenerator;
 public class SearchFieldNameGeneratorImpl implements SearchFieldNameGenerator {
 
   @Override
-  public String getSearchFieldName(FieldDef def) {
+  public String getSearchFieldName(FieldDef def, boolean nestedFieldDef) {
     final SearchDef searchDefinition = def.getSearchDefinition();
     if (searchDefinition != null && (searchDefinition.isIndexed() || searchDefinition.isStored())) {
       StringBuilder indexFieldName = new StringBuilder(def.getName());
@@ -40,6 +40,10 @@ public class SearchFieldNameGeneratorImpl implements SearchFieldNameGenerator {
       final String multi;
       if (type.equals(FieldValueType.COLLECTION)) {
         mainType = ((CollectionDataType) def.getValueDef()).getItemDataType().getType();
+        multi = "m";
+      }
+      else if (nestedFieldDef) {
+        mainType = type;
         multi = "m";
       }
       else {
@@ -58,5 +62,10 @@ public class SearchFieldNameGeneratorImpl implements SearchFieldNameGenerator {
     else {
       return null;
     }
+  }
+
+  @Override
+  public String getSearchFieldName(FieldDef fieldDef) {
+    return getSearchFieldName(fieldDef, false);
   }
 }

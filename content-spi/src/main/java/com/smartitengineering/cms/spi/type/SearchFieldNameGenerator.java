@@ -27,4 +27,6 @@ import com.smartitengineering.cms.api.type.FieldDef;
 public interface SearchFieldNameGenerator {
 
   public String getSearchFieldName(FieldDef fieldDef);
+
+  public String getSearchFieldName(FieldDef fieldDef, boolean nestedFieldDef);
 }

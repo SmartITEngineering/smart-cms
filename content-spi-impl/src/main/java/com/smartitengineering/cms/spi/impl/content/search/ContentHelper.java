@@ -122,7 +122,8 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
       if (org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
         builder.append(prefix).append('_');
       }
-      String defName = SmartContentSPI.getInstance().getSearchFieldNameGenerator().getSearchFieldName(def);
+      String defName = SmartContentSPI.getInstance().getSearchFieldNameGenerator().getSearchFieldName(def, org.apache.commons.lang.StringUtils.
+          isNotBlank(prefix));
       if (org.apache.commons.lang.StringUtils.isBlank(defName)) {
         continue;
       }
