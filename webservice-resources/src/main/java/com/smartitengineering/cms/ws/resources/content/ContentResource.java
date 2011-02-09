@@ -397,6 +397,7 @@ public class ContentResource extends AbstractResource {
     @Override
     protected void mergeFromF2T(Content fromBean, com.smartitengineering.cms.ws.common.domains.Content toBean) {
       ContentImpl contentImpl = (ContentImpl) toBean;
+      contentImpl.setPrivateContent(fromBean.isPrivate());
       ContentType type = fromBean.getContentDefinition();
       if (fromBean.getContentId() != null) {
         contentImpl.setContentId(fromBean.getContentId().toString());
@@ -471,6 +472,7 @@ public class ContentResource extends AbstractResource {
         throw new IllegalArgumentException("No such status in content type!");
       }
       writeableContent.setStatus(status);
+      writeableContent.setPrivate(toBean.isPrivateContent());
       Content parentContent;
       final String parentContentUri = toBean.getParentContentUri();
       if (org.apache.commons.lang.StringUtils.isNotBlank(parentContentUri)) {

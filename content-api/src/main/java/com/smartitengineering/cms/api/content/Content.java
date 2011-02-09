@@ -53,4 +53,6 @@ public interface Content extends ReferrableResource {
   public Date getLastModifiedDate();
 
   public String getEntityTagValue();
+
+  public boolean isPrivate();
 }

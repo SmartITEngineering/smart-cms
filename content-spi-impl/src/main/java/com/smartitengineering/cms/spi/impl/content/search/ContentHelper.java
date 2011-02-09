@@ -65,6 +65,7 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
   public static final String TYPE = "type";
   public static final String ALL_TEXT = "alltext";
   public static final String WORKSPACEID = "workspaceId";
+  public static final String PRIVATE = "private";
   @Inject
   private SchemaInfoProvider<PersistentContent, ContentId> contentScehmaProvider;
   @Inject
@@ -89,6 +90,7 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
     toBean.addValue(STATUS, mutableContent.getStatus().getName());
     final String typeIdString = mutableContent.getContentDefinition().getContentTypeID().toString();
     toBean.addValue(CONTENTTYPEID, typeIdString);
+    toBean.addValue(PRIVATE, mutableContent.isPrivate());
     toBean.addValue(INSTANCE_OF, typeIdString);
     //Content is a instance of all it parent types
     ContentType contentType = mutableContent.getContentDefinition();

@@ -53,4 +53,6 @@ public interface Content {
   Map<String, String> getRepresentations();
 
   Map<String, String> getRepresentationsByName();
+
+  boolean isPrivateContent();
 }

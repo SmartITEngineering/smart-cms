@@ -92,12 +92,14 @@ public class ContentSearcherImpl implements ContentSearcher {
       if (filter.isFriendliesIncluded()) {
         Collection<WorkspaceId> friendlies = workspaceId.getWorkspae().getFriendlies();
         if (friendlies != null && !friendlies.isEmpty()) {
+          finalQuery.append(disjunctionSeperator).append("(private: false AND (");
           for (WorkspaceId friendly : friendlies) {
             if (friendly != null) {
               finalQuery.append(disjunctionSeperator).append(ContentHelper.WORKSPACEID).append(": ").append(ClientUtils.
                   escapeQueryChars(friendly.toString()));
             }
           }
+          finalQuery.append("))");
         }
       }
       finalQuery.append((") "));

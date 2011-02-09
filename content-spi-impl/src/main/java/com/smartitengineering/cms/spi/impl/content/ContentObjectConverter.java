@@ -63,6 +63,7 @@ public class ContentObjectConverter extends AbstractObjectRowConverter<Persisten
   public final static byte[] CELL_CREATED = Bytes.toBytes("created");
   public final static byte[] CELL_LAST_MODIFIED = Bytes.toBytes("lastModified");
   public final static byte[] CELL_ENTITY_TAG = Bytes.toBytes("entityTag");
+  public final static byte[] CELL_PRIVATE = Bytes.toBytes("isPrivate");
   @Inject
   private SchemaInfoProvider<PersistentContentType, ContentTypeId> contentTypeSchemaProvider;
 
@@ -106,6 +107,7 @@ public class ContentObjectConverter extends AbstractObjectRowConverter<Persisten
     content.setCreationDate(Utils.toDate(startRow.getValue(FAMILY_SELF, CELL_CREATED)));
     content.setLastModifiedDate(Utils.toDate(startRow.getValue(FAMILY_SELF, CELL_LAST_MODIFIED)));
     content.setEntityTagValue(Bytes.toString(startRow.getValue(FAMILY_SELF, CELL_ENTITY_TAG)));
+    content.setPrivate(Bytes.toBoolean(startRow.getValue(FAMILY_SELF, CELL_PRIVATE)));
     ContentType type = null;
     try {
       ContentTypeId typeId =
@@ -196,6 +198,7 @@ public class ContentObjectConverter extends AbstractObjectRowConverter<Persisten
     put.add(FAMILY_SELF, CELL_CREATED, Utils.toBytes(content.getCreationDate()));
     put.add(FAMILY_SELF, CELL_LAST_MODIFIED, Utils.toBytes(content.getLastModifiedDate()));
     put.add(FAMILY_SELF, CELL_ENTITY_TAG, Bytes.toBytes(content.getEntityTagValue()));
+    put.add(FAMILY_SELF, CELL_PRIVATE, Bytes.toBytes(content.isPrivate()));
     if (content.getStatus() != null) {
       put.add(FAMILY_SELF, CELL_STATUS, Bytes.toBytes(content.getStatus().getName()));
     }

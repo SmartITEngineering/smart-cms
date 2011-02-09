@@ -33,6 +33,7 @@ public class ContentImpl implements Content {
 
   private Date creationDate, lastModifiedDate;
   private String contentTypeUri, parentContentUri, status, contentId, selfUri, reindexUri;
+  private boolean privateContent;
   private List<Field> fields = new ArrayList<Field>();
   private Map<String, String> templateUris = new LinkedHashMap<String, String>();
   private Map<String, String> templateNames = new LinkedHashMap<String, String>();
@@ -129,5 +130,14 @@ public class ContentImpl implements Content {
   @Override
   public Map<String, String> getRepresentationsByName() {
     return templateNames;
+  }
+
+  @Override
+  public boolean isPrivateContent() {
+    return privateContent;
+  }
+
+  public void setPrivateContent(boolean privateContent) {
+    this.privateContent = privateContent;
   }
 }

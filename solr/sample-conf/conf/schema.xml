@@ -67,6 +67,7 @@
     <field name="type" type="string" indexed="true" stored="true" required="true"/>
     <field name="id" type="string" indexed="true" stored="true" required="true"/>
     <field name="workspaceId" type="text" indexed="true" stored="true" required="true"/>
+    <field name="private" type="boolean" indexed="true" stored="true" required="false"/>
     <field name="creationDate" type="date" indexed="true" stored="true" required="false"/>
     <field name="lastModifiedDate" type="date" indexed="true" stored="true" required="false"/>
     <field name="status" type="text" indexed="true" stored="true" required="false"/>

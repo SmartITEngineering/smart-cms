@@ -38,4 +38,6 @@ public interface MutableContent extends Content {
   public void setStatus(ContentStatus contentStatus);
 
   public boolean isValid();
+
+  public void setPrivate(boolean privateContent);
 }

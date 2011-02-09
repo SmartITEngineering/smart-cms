@@ -54,6 +54,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   private Map<String, Field> map = new HashMap<String, Field>();
   private Map<String, Field> cachedFieldMap;
   private String entityTagValue;
+  private boolean privateContent;
 
   @Override
   public void put() throws IOException {
@@ -281,5 +282,15 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
     else {
       return getUri().toASCIIString();
     }
+  }
+
+  @Override
+  public void setPrivate(boolean privateContent) {
+    this.privateContent = privateContent;
+  }
+
+  @Override
+  public boolean isPrivate() {
+    return this.privateContent;
   }
 }
