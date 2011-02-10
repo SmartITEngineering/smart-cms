@@ -23,6 +23,10 @@ import com.smartitengineering.cms.api.content.Variation;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.event.Event;
+import com.smartitengineering.cms.api.event.Event.EventType;
+import com.smartitengineering.cms.api.event.Event.Type;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.spi.content.VariationProvider;
 import com.smartitengineering.cms.spi.impl.content.template.persistent.PersistentVariation;
@@ -84,9 +88,15 @@ public class PersistentVariationProviderImpl extends AbstractVariationProvider i
       cachedVar.setVariation(var);
       if (update) {
         writeDao.update(cachedVar);
+        Event<Variation> event = SmartContentAPI.getInstance().getEventRegistrar().<Variation>createEvent(
+            EventType.UPDATE, Type.VARIATION, var);
+        SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
       }
       else {
         writeDao.save(cachedVar);
+        Event<Variation> event = SmartContentAPI.getInstance().getEventRegistrar().<Variation>createEvent(
+            EventType.CREATE, Type.VARIATION, var);
+        SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
       }
     }
     return cachedVar.getVariation();

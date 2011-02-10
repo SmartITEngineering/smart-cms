@@ -24,6 +24,9 @@ import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Representation;
+import com.smartitengineering.cms.api.event.Event;
+import com.smartitengineering.cms.api.event.Event.EventType;
+import com.smartitengineering.cms.api.event.Event.Type;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
@@ -95,9 +98,15 @@ public class PersistentRepresentationProviderImpl extends AbstractRepresentation
       cachedRep.setRepresentation(rep);
       if (update) {
         writeDao.update(cachedRep);
+        Event<Representation> event = SmartContentAPI.getInstance().getEventRegistrar().<Representation>createEvent(
+            EventType.UPDATE, Type.REPRESENTATION, rep);
+        SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
       }
       else {
         writeDao.save(cachedRep);
+        Event<Representation> event = SmartContentAPI.getInstance().getEventRegistrar().<Representation>createEvent(
+            EventType.CREATE, Type.REPRESENTATION, rep);
+        SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
       }
     }
     return cachedRep.getRepresentation();
