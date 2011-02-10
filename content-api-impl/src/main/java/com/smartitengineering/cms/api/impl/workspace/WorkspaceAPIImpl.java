@@ -22,6 +22,10 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.event.Event;
+import com.smartitengineering.cms.api.event.Event.EventType;
+import com.smartitengineering.cms.api.event.Event.Type;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
@@ -77,6 +81,9 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   @Override
   public WorkspaceId createWorkspace(WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getWorkspaceService().create(workspaceId);
+    Event<Workspace> event = SmartContentAPI.getInstance().getEventRegistrar().<Workspace>createEvent(
+        EventType.UPDATE, Type.WORKSPACE, getWorkspace(workspaceId));
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
     return workspaceId;
   }
 
@@ -128,7 +135,12 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   @Override
   public RepresentationTemplate putRepresentationTemplate(WorkspaceId to, String name, TemplateType templateType,
                                                           byte[] data) {
-    return SmartContentSPI.getInstance().getWorkspaceService().putRepresentationTemplate(to, name, templateType, data);
+    final RepresentationTemplate putRepresentationTemplate = SmartContentSPI.getInstance().getWorkspaceService().
+        putRepresentationTemplate(to, name, templateType, data);
+    Event<RepresentationTemplate> event = SmartContentAPI.getInstance().getEventRegistrar().<RepresentationTemplate>
+        createEvent(EventType.UPDATE, Type.REPRESENTATION_TEMPLATE, putRepresentationTemplate);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
+    return putRepresentationTemplate;
   }
 
   @Override
@@ -140,17 +152,28 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
 
   @Override
   public VariationTemplate putVariationTemplate(WorkspaceId to, String name, TemplateType templateType, byte[] data) {
-    return SmartContentSPI.getInstance().getWorkspaceService().putVariationTemplate(to, name, templateType, data);
+    final VariationTemplate putVariationTemplate = SmartContentSPI.getInstance().getWorkspaceService().
+        putVariationTemplate(to, name, templateType, data);
+    Event<VariationTemplate> event = SmartContentAPI.getInstance().getEventRegistrar().<VariationTemplate>
+        createEvent(EventType.UPDATE, Type.VARIATION_TEMPLATE, putVariationTemplate);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
+    return putVariationTemplate;
   }
 
   @Override
   public void delete(RepresentationTemplate template) {
     SmartContentSPI.getInstance().getWorkspaceService().deleteRepresentation(template);
+    Event<RepresentationTemplate> event = SmartContentAPI.getInstance().getEventRegistrar().<RepresentationTemplate>
+        createEvent(EventType.DELETE, Type.REPRESENTATION_TEMPLATE, template);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
   }
 
   @Override
   public void delete(VariationTemplate template) {
     SmartContentSPI.getInstance().getWorkspaceService().deleteVariation(template);
+    Event<VariationTemplate> event = SmartContentAPI.getInstance().getEventRegistrar().<VariationTemplate>
+        createEvent(EventType.DELETE, Type.VARIATION_TEMPLATE, template);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
   }
 
   @Override
