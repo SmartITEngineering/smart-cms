@@ -21,10 +21,12 @@ package com.smartitengineering.cms.binder.guice;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.factory.content.ContentLoader;
+import com.smartitengineering.cms.api.factory.event.EventRegistrar;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.content.ContentLoaderImpl;
+import com.smartitengineering.cms.api.impl.event.EventRegistrarImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
 import java.util.Properties;
 import org.slf4j.Logger;
@@ -49,6 +51,7 @@ public class APIModule extends AbstractModule {
     bind(ContentTypeLoader.class).annotatedWith(Names.named("apiContentTypeLoader")).to(ContentTypeLoaderImpl.class);
     bind(ContentLoader.class).annotatedWith(Names.named("apiContentLoader")).to(ContentLoaderImpl.class);
     bind(WorkspaceAPI.class).annotatedWith(Names.named("apiWorkspaceApi")).to(WorkspaceAPIImpl.class);
+    bind(EventRegistrar.class).annotatedWith(Names.named("apiEventRegistrar")).to(EventRegistrarImpl.class);
     final String globalNamespace = properties.getProperty("com.smartitengineering.cms.globalNamespace");
     if (logger.isDebugEnabled()) {
       logger.debug(new StringBuilder("Global Namespace ").append(globalNamespace).toString());

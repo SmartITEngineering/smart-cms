@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.factory;
 
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.factory.content.ContentLoader;
+import com.smartitengineering.cms.api.factory.event.EventRegistrar;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
@@ -70,6 +71,12 @@ public final class SmartContentAPI {
   protected ContentLoader contentLoader;
   @InjectableField(beanName = "apiWorkspaceApi")
   protected WorkspaceAPI workspaceApi;
+  @InjectableField(beanName = "apiEventRegistrar")
+  protected EventRegistrar eventRegistrar;
+
+  public EventRegistrar getEventRegistrar() {
+    return eventRegistrar;
+  }
 
   public ContentTypeLoader getContentTypeLoader() {
     return contentTypeLoader;

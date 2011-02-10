@@ -41,6 +41,7 @@ public class InjectionTest extends TestCase {
     assertNotNull(SmartContentAPI.getInstance().getContentLoader());
     assertNotNull(SmartContentAPI.getInstance().getContentTypeLoader());
     assertNotNull(SmartContentAPI.getInstance().getWorkspaceApi());
+    assertNotNull(SmartContentAPI.getInstance().getEventRegistrar());
   }
 
   public void testSpi() {
