@@ -19,6 +19,9 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.event.Event;
+import com.smartitengineering.cms.api.event.Event.EventType;
+import com.smartitengineering.cms.api.event.Event.Type;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;
@@ -315,5 +318,29 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
   @Override
   public String getPrimaryFieldName() {
     return primaryFieldName;
+  }
+
+  @Override
+  protected void create() throws IOException {
+    super.create();
+    Event<ContentType> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<ContentType>createEvent(
+        EventType.CREATE, Type.CONTENT_TYPE, this);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEvent(contentEvent);
+  }
+
+  @Override
+  public void delete() throws IOException {
+    super.delete();
+    Event<ContentType> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<ContentType>createEvent(
+        EventType.DELETE, Type.CONTENT_TYPE, this);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEvent(contentEvent);
+  }
+
+  @Override
+  protected void update() throws IOException {
+    super.update();
+    Event<ContentType> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<ContentType>createEvent(
+        EventType.UPDATE, Type.CONTENT_TYPE, this);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEvent(contentEvent);
   }
 }

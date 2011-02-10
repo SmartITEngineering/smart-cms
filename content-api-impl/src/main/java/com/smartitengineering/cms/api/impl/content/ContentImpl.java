@@ -23,6 +23,9 @@ import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.Representation;
+import com.smartitengineering.cms.api.event.Event;
+import com.smartitengineering.cms.api.event.Event.EventType;
+import com.smartitengineering.cms.api.event.Event.Type;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;
@@ -217,6 +220,25 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
       throw new IOException("Content ID and Content Type Definition is not set!");
     }
     super.create();
+    Event<Content> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(EventType.CREATE,
+                                                                                                    Type.CONTENT, this);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEvent(contentEvent);
+  }
+
+  @Override
+  public void delete() throws IOException {
+    super.delete();
+    Event<Content> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(EventType.UPDATE,
+                                                                                                    Type.CONTENT, this);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEvent(contentEvent);
+  }
+
+  @Override
+  protected void update() throws IOException {
+    super.update();
+    Event<Content> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(EventType.DELETE,
+                                                                                                    Type.CONTENT, this);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEvent(contentEvent);
   }
 
   @Override
