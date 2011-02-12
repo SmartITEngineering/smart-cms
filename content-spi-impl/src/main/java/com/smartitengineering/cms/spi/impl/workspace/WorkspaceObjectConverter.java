@@ -112,7 +112,11 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
       }
     }
     if (instance.isValidatorsPopulated() && !instance.getValidatorTemplates().isEmpty()) {
+      logger.info("Saving validators");
       for (PersistableValidatorTemplate template : instance.getValidatorTemplates()) {
+        if(logger.isInfoEnabled()) {
+          logger.info("Validator being saved is " + template.getName());
+        }
         populatePutWithValidator(FAMILY_VALIDATORS_INFO, template, put);
         populatePutWithValidatorData(FAMILY_VALIDATORS_DATA, template, put);
       }
@@ -143,7 +147,7 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
     return Bytes.toBytes(new StringBuilder(template.getName()).append(':').toString());
   }
 
-  protected byte[] getPrefixForResource(ValidatorTemplate template) {
+  protected byte[] getPrefixForValidator(ValidatorTemplate template) {
     return Bytes.toBytes(new StringBuilder(template.getName()).append(':').toString());
   }
 
@@ -156,8 +160,8 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
     final Date lastModified = template.getLastModifiedDate() == null ? created : template.getLastModifiedDate();
     put.add(family, Bytes.add(prefix, CELL_LAST_MODIFIED), Utils.toBytes(lastModified));
     template.setLastModifiedDate(lastModified);
-    if (logger.isDebugEnabled()) {
-      logger.debug("PUTTING Entity Tag: " + template.getEntityTagValue());
+    if (logger.isInfoEnabled()) {
+      logger.info("PUTTING Entity Tag: " + template.getEntityTagValue());
     }
     put.add(family, Bytes.add(prefix, CELL_ENTITY_TAG), Bytes.toBytes(template.getEntityTagValue()));
   }
@@ -168,7 +172,7 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
   }
 
   protected void populatePutWithValidator(byte[] family, PersistableValidatorTemplate template, Put put) {
-    byte[] prefix = getPrefixForResource(template);
+    byte[] prefix = getPrefixForValidator(template);
     put.add(family, Bytes.add(prefix, CELL_TEMPLATE_TYPE), Bytes.toBytes(template.getTemplateType().name()));
     final Date created = template.getCreatedDate() == null ? new Date() : template.getCreatedDate();
     put.add(family, Bytes.add(prefix, CELL_CREATED), Utils.toBytes(created));
@@ -338,7 +342,7 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
   }
 
   protected void addValidatorColumnsToDelete(byte[] family, Delete delete, ValidatorTemplate resourceTemplate) {
-    byte[] prefix = getPrefixForResource(resourceTemplate);
+    byte[] prefix = getPrefixForValidator(resourceTemplate);
     delete.deleteColumns(family, Bytes.add(prefix, CELL_CREATED));
     delete.deleteColumns(family, Bytes.add(prefix, CELL_LAST_MODIFIED));
     delete.deleteColumns(family, Bytes.add(prefix, CELL_TEMPLATE_TYPE));
@@ -436,6 +440,7 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
       final NavigableMap<byte[], byte[]> valInfo = allFamilies.get(FAMILY_VALIDATORS_INFO);
       final NavigableMap<byte[], byte[]> valData = allFamilies.get(FAMILY_VALIDATORS_DATA);
       if (valInfo != null) {
+        logger.info("Loading validators");
         persistentWorkspace.setValidatorsPopulated(true);
         final Map<String, Map<String, byte[]>> valsByName = new LinkedHashMap<String, Map<String, byte[]>>();
         Utils.organizeByPrefix(valInfo, valsByName, ':');
@@ -443,12 +448,15 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
         if (valData != null) {
           Utils.organizeByPrefix(valData, valsDataByName, ':');
         }
-        for (String varName : valsByName.keySet()) {
+        for (String valName : valsByName.keySet()) {
+          if (logger.isInfoEnabled()) {
+            logger.info("Loading validator by name " + valName);
+          }
           PersistableValidatorTemplate template = SmartContentSPI.getInstance().getPersistableDomainFactory().
               createPersistableValidatorTemplate();
           template.setWorkspaceId(workspace.getId());
-          populateValidatorTemplateInfo(varName, template, valsByName.get(varName));
-          populateValidatorTemplateData(varName, template, valsDataByName.get(varName));
+          populateValidatorTemplateInfo(valName, template, valsByName.get(valName));
+          populateValidatorTemplateData(valName, template, valsDataByName.get(valName));
           persistentWorkspace.addValidatorTemplate(template);
         }
       }
@@ -483,7 +491,7 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
   protected void populateValidatorTemplateInfo(String valName, PersistableValidatorTemplate template,
                                                Map<String, byte[]> cells) {
     template.setName(valName);
-    String prefix = Bytes.toString(getPrefixForResource(template));
+    String prefix = Bytes.toString(getPrefixForValidator(template));
     String key = new StringBuilder(prefix).append(TEMPLATETYPE).toString();
     String type = Bytes.toString(cells.get(key));
     if (logger.isDebugEnabled()) {
