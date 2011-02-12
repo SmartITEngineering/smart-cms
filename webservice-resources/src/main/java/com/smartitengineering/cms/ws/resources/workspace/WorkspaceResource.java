@@ -71,7 +71,7 @@ public class WorkspaceResource extends AbstractResource {
   public static final String REL_FRIENDLIES = "friendlies";
   public static final String REL_REPRESENTATIONS = "representations";
   public static final String REL_VARIATIONS = "variations";
-  public static final String REL_VALIDATORS = "variations";
+  public static final String REL_VALIDATORS = "validators";
   public static final String REL_CONTENT_TYPES = "content-types";
   public static final String REL_CONTENTS = "contents";
   public static final String REL_SEARCH = "search";
