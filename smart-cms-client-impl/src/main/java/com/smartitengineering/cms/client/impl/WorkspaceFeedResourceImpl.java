@@ -25,6 +25,7 @@ import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
 import com.smartitengineering.cms.client.api.WorkspaceRepresentationsResource;
+import com.smartitengineering.cms.client.api.WorkspaceValidatorsResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationsResource;
 import com.smartitengineering.util.rest.atom.AbstractFeedClientResource;
 import com.smartitengineering.util.rest.atom.AtomClientUtil;
@@ -115,5 +116,11 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
   public String getSearchUri() {
     Link link = getLastReadStateOfEntity().getLink("search");
     return link != null ? link.getHref().toASCIIString() : "";
+  }
+
+  @Override
+  public WorkspaceValidatorsResource getValidators() {
+    return new WorkspaceValidatorsResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+        getLink("validators")));
   }
 }

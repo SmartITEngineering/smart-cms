@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2011  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,30 +18,20 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.util.rest.client.Resource;
+import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
+import com.smartitengineering.util.rest.client.PaginatedResource;
+import com.smartitengineering.util.rest.client.WritableResource;
+import java.util.Collection;
 import org.apache.abdera.model.Feed;
 
 /**
  *
- * @author imyousuf
+ * @author kaisar
  */
-public interface WorkspaceFeedResource extends Resource<Feed> {
+public interface WorkspaceValidatorsResource extends WritableResource<Feed>,
+                                                          PaginatedResource<WorkspaceValidatorsResource> {
 
-  WorkspaceFriendsResource getFriends();
+  public Collection<WorkspaceValidatorResource> getValidatorResources();
 
-  WorkspaceRepresentationsResource getRepresentations();
-
-  WorkspaceValidatorsResource getValidators();
-
-  WorkspaceVariationsResource getVariations();
-
-  ContentTypesResource getContentTypes();
-
-  ContentsResource getContents();
-
-  WorkspaceContentResouce getWorkspace();
-
-  String getSearchUri();
-
-  ContentSearcherResource searchContent(String query);
+  public WorkspaceValidatorResource createRepresentations(ResourceTemplate resourceTemplate);
 }
