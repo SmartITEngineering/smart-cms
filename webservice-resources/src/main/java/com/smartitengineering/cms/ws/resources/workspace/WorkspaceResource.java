@@ -65,11 +65,13 @@ public class WorkspaceResource extends AbstractResource {
   public static final String PATH_FRIENDLIES = "friendlies";
   public static final String PATH_REPRESENTATIONS = "representations";
   public static final String PATH_VARIATIONS = "variations";
+  public static final String PATH_VALIDATORS = "validators";
   public static final String PATH_SEARCH = "search";
   public static final String PATH_REINDEX = "reindex";
   public static final String REL_FRIENDLIES = "friendlies";
   public static final String REL_REPRESENTATIONS = "representations";
   public static final String REL_VARIATIONS = "variations";
+  public static final String REL_VALIDATORS = "variations";
   public static final String REL_CONTENT_TYPES = "content-types";
   public static final String REL_CONTENTS = "contents";
   public static final String REL_SEARCH = "search";
@@ -144,6 +146,9 @@ public class WorkspaceResource extends AbstractResource {
           getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_VARIATIONS).build(namespace, workspaceName),
           REL_VARIATIONS, MediaType.APPLICATION_ATOM_XML));
       feed.addLink(getLink(
+          getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_VALIDATORS).build(namespace, workspaceName),
+          REL_VALIDATORS, MediaType.APPLICATION_ATOM_XML));
+      feed.addLink(getLink(
           getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_SEARCH).build(namespace, workspaceName),
           REL_SEARCH, com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
       feed.addLink(getLink(
@@ -184,6 +189,11 @@ public class WorkspaceResource extends AbstractResource {
     return new WorkspaceVariationsResource(workspace, count, getInjectables());
   }
 
+  @Path(PATH_VALIDATORS)
+  public WorkspaceValidatorsResource getValidatorsResource(@QueryParam("count") @DefaultValue("10") int count) {
+    return new WorkspaceValidatorsResource(workspace, count, getInjectables());
+  }
+
   @Path(PATH_REPRESENTATIONS + "/name/{name}")
   public WorkspaceRepresentationResource getRepresentationsResource(@PathParam("name") String name) {
     return new WorkspaceRepresentationResource(name, workspace, getInjectables());
@@ -192,6 +202,11 @@ public class WorkspaceResource extends AbstractResource {
   @Path(PATH_VARIATIONS + "/name/{name}")
   public WorkspaceVariationResource getVariationResource(@PathParam("name") String name) {
     return new WorkspaceVariationResource(name, workspace, getInjectables());
+  }
+
+  @Path(PATH_VALIDATORS + "/name/{name}")
+  public WorkspaceValidatorResource getValidatorResource(@PathParam("name") String name) {
+    return new WorkspaceValidatorResource(name, workspace, getInjectables());
   }
 
   public static URI getWorkspaceURI(UriBuilder builder, String namespace, String name) {
