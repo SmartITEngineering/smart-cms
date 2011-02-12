@@ -51,7 +51,7 @@ public class ValidatorProviderImpl implements ValidatorProvider {
     }
     ValidatorDef validatorDef = field.getFieldDef().getCustomValidator();
     if (validatorDef == null) {
-      logger.info("Representation def is null, returning true!");
+      logger.info("Validator def is null, returning true!");
       return true;
     }
     if (validatorDef.getUri().getType().equals(ResourceUri.Type.EXTERNAL)) {
@@ -62,12 +62,12 @@ public class ValidatorProviderImpl implements ValidatorProvider {
                       SmartContentAPI.getInstance().getWorkspaceApi().getValidatorTemplate(content.getContentId().
         getWorkspaceId(), validatorDef.getUri().getValue());
     if (variationTemplate == null) {
-      logger.info("Representation template is null, returning true!");
+      logger.info("Validator template is null, returning true!");
       return true;
     }
     TypeFieldValidator generator = generators.get(variationTemplate.getTemplateType());
     if (generator == null) {
-      logger.info("Representation generator is null, returning true!");
+      logger.info("Validator generator is null, returning true!");
       return true;
     }
     return generator.isValid(variationTemplate, field);
@@ -76,12 +76,12 @@ public class ValidatorProviderImpl implements ValidatorProvider {
   @Override
   public boolean isValidTemplate(ValidatorTemplate template) {
     if (template == null) {
-      logger.info("Representation template is null!");
+      logger.info("Validator template is null!");
       return false;
     }
     TypeFieldValidator generator = generators.get(template.getTemplateType());
     if (generator == null) {
-      logger.info("Representation generator is null!");
+      logger.info("Validator generator is null!");
       return false;
     }
     try {
