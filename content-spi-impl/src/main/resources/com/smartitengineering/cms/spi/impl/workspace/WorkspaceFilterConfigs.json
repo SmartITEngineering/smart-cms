@@ -63,6 +63,22 @@
       "filterOnLatestVersionOnly":true,
       "qualifierARangePrefix":false,
       "filterOnRowId":false
+    },
+    "valInfo": {
+      "columnFamilyAsString":"valInfo",
+      "columnQualifierAsString":"",
+      "filterOnIfMissing":false,
+      "filterOnLatestVersionOnly":true,
+      "qualifierARangePrefix":false,
+      "filterOnRowId":false
+    },
+    "valData": {
+      "columnFamilyAsString":"valData",
+      "columnQualifierAsString":"",
+      "filterOnIfMissing":false,
+      "filterOnLatestVersionOnly":true,
+      "qualifierARangePrefix":false,
+      "filterOnRowId":false
     }
   }
 }

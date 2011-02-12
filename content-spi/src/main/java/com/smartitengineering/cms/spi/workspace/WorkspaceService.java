@@ -20,12 +20,14 @@ package com.smartitengineering.cms.spi.workspace;
 
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI.ResourceSortCriteria;
+import com.smartitengineering.cms.api.type.ValidatorType;
 import java.util.Collection;
 
 /**
@@ -81,4 +83,16 @@ public interface WorkspaceService {
   public void removeRootContent(WorkspaceId from, ContentId contentId);
 
   public void removeAllRootContents(WorkspaceId workspaceId);
+
+  public ValidatorTemplate getValidationTemplate(WorkspaceId workspaceId, String name);
+
+  public void deleteValidator(ValidatorTemplate template);
+
+  public ValidatorTemplate putValidatorTemplate(WorkspaceId to, String name, ValidatorType templateType,
+                                                byte[] template);
+
+  public Collection<ValidatorTemplate> getValidatorsWithoutData(WorkspaceId id,
+                                                                ResourceSortCriteria resourceSortCriteria);
+
+  public void removeAllValidatorTemplates(WorkspaceId workspaceId);
 }

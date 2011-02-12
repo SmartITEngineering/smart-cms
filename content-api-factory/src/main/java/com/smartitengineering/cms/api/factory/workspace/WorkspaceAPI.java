@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.factory.workspace;
 
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
@@ -121,5 +122,25 @@ public interface WorkspaceAPI {
 
   public void removeAllRootContents(WorkspaceId workspaceId);
 
+  ValidatorTemplate putValidatorTemplate(WorkspaceId to, String name, ValidatorType templateType, InputStream stream)
+      throws IOException;
+
+  ValidatorTemplate putValidatorTemplate(WorkspaceId to, String name, ValidatorType templateType, byte[] data);
+
+  void delete(ValidatorTemplate template);
+
   public ValidatorTemplate getValidatorTemplate(WorkspaceId workspaceId, String name);
+
+  public void removeAllValidatorTemplates(WorkspaceId workspaceId);
+
+  public Collection<String> getValidatorNames(WorkspaceId id);
+
+  public Collection<String> getValidatorNames(WorkspaceId id, String startPoint, int count);
+
+  public Collection<String> getValidatorNames(WorkspaceId id, ResourceSortCriteria criteria);
+
+  public Collection<String> getValidatorNames(WorkspaceId id, ResourceSortCriteria criteria, String startPoint,
+                                              int count);
+
+  public String getEntityTagValueForValidatorTemplate(ValidatorTemplate validatorTemplate);
 }

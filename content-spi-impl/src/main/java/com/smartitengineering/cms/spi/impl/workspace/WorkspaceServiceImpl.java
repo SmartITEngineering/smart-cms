@@ -24,14 +24,17 @@ import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
+import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI.ResourceSortCriteria;
+import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableResourceTemplate;
+import com.smartitengineering.cms.spi.workspace.PersistableValidatorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 import com.smartitengineering.cms.spi.workspace.WorkspaceService;
@@ -63,6 +66,20 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
 
     @Override
     public int compare(ResourceTemplate o1, ResourceTemplate o2) {
+      return o1.getName().compareTo(o2.getName());
+    }
+  };
+  private static final Comparator<ValidatorTemplate> VALIDATOR_DATE_COMPARATOR = new Comparator<ValidatorTemplate>() {
+
+    @Override
+    public int compare(ValidatorTemplate o1, ValidatorTemplate o2) {
+      return o1.getLastModifiedDate().compareTo(o2.getLastModifiedDate());
+    }
+  };
+  private static final Comparator<ValidatorTemplate> VALIDATOR_NAME_COMPARATOR = new Comparator<ValidatorTemplate>() {
+
+    @Override
+    public int compare(ValidatorTemplate o1, ValidatorTemplate o2) {
       return o1.getName().compareTo(o2.getName());
     }
   };
@@ -343,6 +360,19 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
         template));
   }
 
+  private void updateFields(PersistableValidatorTemplate template, ValidatorTemplate oldTemplate) {
+    final Date date = new Date();
+    if (oldTemplate != null) {
+      template.setCreatedDate(oldTemplate.getCreatedDate());
+    }
+    else {
+      template.setCreatedDate(date);
+    }
+    template.setLastModifiedDate(date);
+    template.setEntityTagValue(SmartContentAPI.getInstance().getWorkspaceApi().getEntityTagValueForValidatorTemplate(
+        template));
+  }
+
   @Override
   public Collection<ContentId> getRootContents(WorkspaceId workspaceId) {
     final QueryParameter rootContentsProp = QueryParameterFactory.getPropProjectionParam("rootContents");
@@ -373,6 +403,95 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
   public void removeAllRootContents(WorkspaceId workspaceId) {
     PersistentWorkspace workspace = getWorkspace(workspaceId);
     workspace.setRootContentsPopulated(true);
+    commonWriteDao.delete(workspace);
+  }
+
+  @Override
+  public ValidatorTemplate getValidationTemplate(WorkspaceId workspaceId, String name) {
+    List<QueryParameter> params = new ArrayList<QueryParameter>();
+    final String info = WorkspaceObjectConverter.VAL_INFO;
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.TEMPLATETYPE).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.CREATED).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.LASTMODIFIED).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.ENTITY_TAG).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(WorkspaceObjectConverter.VAL_DATA).append(
+        ':').append(name).toString()));
+    params.add(SELF_PARAM);
+    params.add(getIdParam(workspaceId));
+    final List<PersistableValidatorTemplate> list = commonReadDao.getSingle(params).getValidatorTemplates();
+    if (list.isEmpty()) {
+      return null;
+    }
+    return list.get(0);
+  }
+
+  @Override
+  public void deleteValidator(ValidatorTemplate template) {
+    PersistentWorkspace workspace = getWorkspace(template.getWorkspaceId());
+    workspace.setVariationPopulated(true);
+    PersistableValidatorTemplate valTemplate = SmartContentSPI.getInstance().getPersistableDomainFactory().
+        createPersistableValidatorTemplate();
+    valTemplate.setCreatedDate(template.getCreatedDate());
+    valTemplate.setLastModifiedDate(template.getLastModifiedDate());
+    valTemplate.setWorkspaceId(template.getWorkspaceId());
+    valTemplate.setName(template.getName());
+    valTemplate.setTemplate(template.getTemplate());
+    valTemplate.setTemplateType(template.getTemplateType());
+    workspace.addValidatorTemplate(valTemplate);
+    commonWriteDao.delete(workspace);
+  }
+
+  @Override
+  public ValidatorTemplate putValidatorTemplate(WorkspaceId workspaceId, String name, ValidatorType templateType,
+                                                byte[] data) {
+    PersistentWorkspace workspace = getWorkspace(workspaceId);
+    PersistableValidatorTemplate template = SmartContentSPI.getInstance().getPersistableDomainFactory().
+        createPersistableValidatorTemplate();
+    workspace.addValidatorTemplate(template);
+    template.setName(name);
+    template.setTemplateType(templateType);
+    template.setWorkspaceId(workspaceId);
+    template.setTemplate(data);
+    ValidatorTemplate oldTemplate = getValidationTemplate(workspaceId, name);
+    updateFields(template, oldTemplate);
+    workspace.setVariationPopulated(true);
+    commonWriteDao.update(workspace);
+    return template;
+
+  }
+
+  @Override
+  public Collection<ValidatorTemplate> getValidatorsWithoutData(WorkspaceId id,
+                                                                ResourceSortCriteria criteria) {
+    List<QueryParameter> params = new ArrayList<QueryParameter>();
+    final String info = WorkspaceObjectConverter.VAL_INFO;
+    params.add(QueryParameterFactory.getPropProjectionParam(info));
+    params.add(getIdParam(id));
+    final PersistentWorkspace single = commonReadDao.getSingle(params);
+    List<? extends ValidatorTemplate> templates = new ArrayList(single == null ? Collections.<ValidatorTemplate>
+        emptyList() : single.getValidatorTemplates());
+    if (templates.isEmpty()) {
+      return Collections.emptyList();
+    }
+    final Comparator<ValidatorTemplate> comp;
+    if (ResourceSortCriteria.BY_DATE.equals(criteria)) {
+      comp = VALIDATOR_DATE_COMPARATOR;
+    }
+    else {
+      comp = VALIDATOR_NAME_COMPARATOR;
+    }
+    Collections.sort(templates, comp);
+    return Collections.unmodifiableCollection(templates);
+  }
+
+  @Override
+  public void removeAllValidatorTemplates(WorkspaceId workspaceId) {
+    PersistentWorkspace workspace = getWorkspace(workspaceId);
+    workspace.setValidatorsPopulated(true);
     commonWriteDao.delete(workspace);
   }
 }

@@ -22,6 +22,7 @@ import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
+import com.smartitengineering.cms.spi.workspace.PersistableValidatorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.domain.AbstractGenericPersistentDTO;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
   private Workspace workspace;
   private boolean representationPopulated;
   private boolean variationPopulated;
+  private boolean validatorsPopulated;
   private boolean friendliesPopulated;
   private boolean rootContentsPopulated;
   private final List<PersistableRepresentationTemplate> representationTemplates =
@@ -45,6 +47,7 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
   private final List<PersistableVariationTemplate> variationTemplates = new ArrayList<PersistableVariationTemplate>();
   private final List<WorkspaceId> friendlies = new ArrayList<WorkspaceId>();
   private final List<ContentId> rootContents = new ArrayList<ContentId>();
+  private final List<PersistableValidatorTemplate> validatorTemplates = new ArrayList<PersistableValidatorTemplate>();
 
   public List<ContentId> getRootContents() {
     return Collections.unmodifiableList(rootContents);
@@ -172,6 +175,33 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
 
   public void setVariationPopulated(boolean variationPopulated) {
     this.variationPopulated = variationPopulated;
+  }
+
+  public boolean isValidatorsPopulated() {
+    return validatorsPopulated;
+  }
+
+  public void setValidatorsPopulated(boolean validatorsPopulated) {
+    this.validatorsPopulated = validatorsPopulated;
+  }
+
+  public List<PersistableValidatorTemplate> getValidatorTemplates() {
+    return Collections.unmodifiableList(validatorTemplates);
+  }
+
+  public void setValidatorTemplates(List<PersistableValidatorTemplate> templates) {
+    validatorTemplates.clear();
+    if(templates != null && !templates.isEmpty()) {
+      validatorTemplates.addAll(templates);
+    }
+  }
+
+  public void addValidatorTemplate(PersistableValidatorTemplate validatorTemplate) {
+    validatorTemplates.add(validatorTemplate);
+  }
+
+  public void removeValidatorTemplate(PersistableValidatorTemplate validatorTemplate) {
+    validatorTemplates.remove(validatorTemplate);
   }
 
   @Override

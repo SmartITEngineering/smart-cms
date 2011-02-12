@@ -32,6 +32,7 @@ import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
+import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.io.IOException;
@@ -213,42 +214,7 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
       return Collections.emptyList();
     }
     List<String> list = new ArrayList<String>(getRepresentationNames(id, criteria));
-    if (logger.isDebugEnabled()) {
-      logger.debug("All names " + list);
-    }
-    int index = Collections.binarySearch(list, startPoint);
-    if (logger.isDebugEnabled()) {
-      logger.debug("Index " + index);
-    }
-    if (index < 0) {
-      index = index * - 1;
-    }
-    if (index >= list.size() && count > 0 && StringUtils.isNotBlank(startPoint)) {
-      logger.debug("Index is equal to size and count is greater than 0");
-      return Collections.emptyList();
-    }
-    if (index <= 0 && count < 0) {
-      logger.debug("Index is zero to size and count is smaller than 0");
-      return Collections.emptyList();
-    }
-    final int fromIndex;
-    final int toIndex;
-    if (count > 0) {
-      fromIndex = StringUtils.isBlank(startPoint) ? 0 : index;
-      toIndex = (fromIndex + count >= list.size()) ? list.size() : fromIndex + count;
-    }
-    else {
-      toIndex = index;
-      fromIndex = (toIndex + count >= 0) ? toIndex + count : 0;
-    }
-    if (logger.isDebugEnabled()) {
-      logger.debug("Sublisting starts at " + fromIndex + " and ends before " + toIndex);
-    }
-    final List<String> result = list.subList(fromIndex, toIndex);
-    if (logger.isDebugEnabled()) {
-      logger.debug("Returning " + result);
-    }
-    return result;
+    return cutList(list, startPoint, count);
   }
 
   @Override
@@ -258,27 +224,7 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
       return Collections.emptyList();
     }
     List<String> list = new ArrayList<String>(getVariationNames(id, criteria));
-    int index = Collections.binarySearch(list, startPoint);
-    if (index < 0) {
-      index = index * - 1;
-    }
-    if (index >= list.size() && count > 0 && StringUtils.isNotBlank(startPoint)) {
-      return Collections.emptyList();
-    }
-    if (index <= 0 && count < 0) {
-      return Collections.emptyList();
-    }
-    final int fromIndex;
-    final int toIndex;
-    if (count > 0) {
-      fromIndex = StringUtils.isBlank(startPoint) ? 0 : index;
-      toIndex = (fromIndex + count >= list.size()) ? list.size() : fromIndex + count;
-    }
-    else {
-      toIndex = index;
-      fromIndex = (toIndex + count >= 0) ? toIndex + count : 0;
-    }
-    return list.subList(fromIndex, toIndex);
+    return cutList(list, startPoint, count);
   }
 
   @Override
@@ -298,6 +244,14 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   protected Collection<String> getResourceNames(Collection<? extends ResourceTemplate> templates) {
     ArrayList<String> list = new ArrayList<String>(templates.size());
     for (ResourceTemplate template : templates) {
+      list.add(template.getName());
+    }
+    return list;
+  }
+
+  protected Collection<String> getValidatorNames(Collection<ValidatorTemplate> templates) {
+    ArrayList<String> list = new ArrayList<String>(templates.size());
+    for (ValidatorTemplate template : templates) {
       list.add(template.getName());
     }
     return list;
@@ -368,6 +322,114 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
 
   @Override
   public ValidatorTemplate getValidatorTemplate(WorkspaceId workspaceId, String name) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return SmartContentSPI.getInstance().getWorkspaceService().getValidationTemplate(workspaceId, name);
+  }
+
+  @Override
+  public void delete(ValidatorTemplate template) {
+    SmartContentSPI.getInstance().getWorkspaceService().deleteValidator(template);
+    Event<ValidatorTemplate> event = SmartContentAPI.getInstance().getEventRegistrar().<ValidatorTemplate>
+        createEvent(EventType.DELETE, Type.VALIDATION_TEMPLATE, template);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
+  }
+
+  @Override
+  public ValidatorTemplate putValidatorTemplate(WorkspaceId to, String name, ValidatorType templateType,
+                                                InputStream stream) throws IOException {
+    return putValidatorTemplate(to, name, templateType, IOUtils.toByteArray(stream));
+  }
+
+  @Override
+  public ValidatorTemplate putValidatorTemplate(WorkspaceId to, String name, ValidatorType templateType, byte[] data) {
+    final ValidatorTemplate validatorTemplate = SmartContentSPI.getInstance().getWorkspaceService().putValidatorTemplate(
+        to, name, templateType, data);
+    Event<ValidatorTemplate> event = SmartContentAPI.getInstance().getEventRegistrar().<ValidatorTemplate>
+        createEvent(EventType.UPDATE, Type.VALIDATION_TEMPLATE, validatorTemplate);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
+    return validatorTemplate;
+  }
+
+  @Override
+  public String getEntityTagValueForValidatorTemplate(ValidatorTemplate template) {
+    final String toString = new StringBuilder(DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(template.
+        getLastModifiedDate())).append(':').append(Arrays.toString(template.getTemplate())).append(':').append(template.
+        getTemplateType().name()).toString();
+    final String etag = DigestUtils.md5Hex(toString);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Generated etag " + etag + " for " + template.getClass().getName() + " with name " +
+          template.getName());
+    }
+    return etag;
+  }
+
+  @Override
+  public Collection<String> getValidatorNames(WorkspaceId id) {
+    return getVariationNames(id, ResourceSortCriteria.BY_NAME);
+  }
+
+  @Override
+  public Collection<String> getValidatorNames(WorkspaceId id, String startPoint, int count) {
+    return getVariationNames(id, ResourceSortCriteria.BY_NAME, startPoint, count);
+  }
+
+  @Override
+  public Collection<String> getValidatorNames(WorkspaceId id, ResourceSortCriteria criteria) {
+    final Collection<ValidatorTemplate> variationsWithoutData = SmartContentSPI.getInstance().getWorkspaceService().
+        getValidatorsWithoutData(id, criteria);
+    return getValidatorNames(variationsWithoutData);
+  }
+
+  @Override
+  public Collection<String> getValidatorNames(WorkspaceId id, ResourceSortCriteria criteria, String startPoint,
+                                              int count) {
+    if (count == 0 || startPoint == null) {
+      return Collections.emptyList();
+    }
+    List<String> list = new ArrayList<String>(getValidatorNames(id, criteria));
+    return cutList(list, startPoint, count);
+  }
+
+  @Override
+  public void removeAllValidatorTemplates(WorkspaceId workspaceId) {
+    SmartContentSPI.getInstance().getWorkspaceService().removeAllValidatorTemplates(workspaceId);
+  }
+
+  protected Collection<String> cutList(List<String> list, String startPoint, int count) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("All names " + list);
+    }
+    int index = Collections.binarySearch(list, startPoint);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Index " + index);
+    }
+    if (index < 0) {
+      index = index * - 1;
+    }
+    if (index >= list.size() && count > 0 && StringUtils.isNotBlank(startPoint)) {
+      logger.debug("Index is equal to size and count is greater than 0");
+      return Collections.emptyList();
+    }
+    if (index <= 0 && count < 0) {
+      logger.debug("Index is zero to size and count is smaller than 0");
+      return Collections.emptyList();
+    }
+    final int fromIndex;
+    final int toIndex;
+    if (count > 0) {
+      fromIndex = StringUtils.isBlank(startPoint) ? 0 : index;
+      toIndex = (fromIndex + count >= list.size()) ? list.size() : fromIndex + count;
+    }
+    else {
+      toIndex = index;
+      fromIndex = (toIndex + count >= 0) ? toIndex + count : 0;
+    }
+    if (logger.isDebugEnabled()) {
+      logger.debug("Sublisting starts at " + fromIndex + " and ends before " + toIndex);
+    }
+    final List<String> result = list.subList(fromIndex, toIndex);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Returning " + result);
+    }
+    return result;
   }
 }

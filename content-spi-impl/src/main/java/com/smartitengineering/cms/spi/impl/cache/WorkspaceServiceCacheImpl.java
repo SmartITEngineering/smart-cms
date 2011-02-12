@@ -10,7 +10,9 @@ import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI.ResourceSortCriteria;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
@@ -187,6 +189,32 @@ public class WorkspaceServiceCacheImpl implements WorkspaceService {
   @Override
   public void addFriend(WorkspaceId to, WorkspaceId... workspaceIds) {
     primaryWorkspaceService.addFriend(to, workspaceIds);
+  }
+
+  @Override
+  public void removeAllValidatorTemplates(WorkspaceId workspaceId) {
+    primaryWorkspaceService.removeAllValidatorTemplates(workspaceId);
+  }
+
+  @Override
+  public ValidatorTemplate putValidatorTemplate(WorkspaceId to, String name, ValidatorType templateType, byte[] template) {
+    return primaryWorkspaceService.putValidatorTemplate(to, name, templateType, template);
+  }
+
+  @Override
+  public Collection<ValidatorTemplate> getValidatorsWithoutData(WorkspaceId id,
+                                                                ResourceSortCriteria resourceSortCriteria) {
+    return primaryWorkspaceService.getValidatorsWithoutData(id, resourceSortCriteria);
+  }
+
+  @Override
+  public ValidatorTemplate getValidationTemplate(WorkspaceId workspaceId, String name) {
+    return primaryWorkspaceService.getValidationTemplate(workspaceId, name);
+  }
+
+  @Override
+  public void deleteValidator(ValidatorTemplate template) {
+    primaryWorkspaceService.deleteValidator(template);
   }
 
   protected void putToCache(Workspace template, String key) {

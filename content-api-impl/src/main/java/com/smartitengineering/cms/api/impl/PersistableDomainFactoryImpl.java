@@ -21,12 +21,14 @@ package com.smartitengineering.cms.api.impl;
 import com.smartitengineering.cms.api.impl.content.ContentImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
 import com.smartitengineering.cms.api.impl.workspace.RepresentationTemplateImpl;
+import com.smartitengineering.cms.api.impl.workspace.ValidatorTemplateImpl;
 import com.smartitengineering.cms.api.impl.workspace.VariationTemplateImpl;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceImpl;
 import com.smartitengineering.cms.spi.content.PersistableContent;
 import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
 import com.smartitengineering.cms.spi.type.PersistableContentType;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
+import com.smartitengineering.cms.spi.workspace.PersistableValidatorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 
@@ -59,5 +61,10 @@ public class PersistableDomainFactoryImpl implements PersistableDomainFactory {
   @Override
   public PersistableContent createPersistableContent() {
     return new ContentImpl();
+  }
+
+  @Override
+  public PersistableValidatorTemplate createPersistableValidatorTemplate() {
+    return new ValidatorTemplateImpl();
   }
 }
