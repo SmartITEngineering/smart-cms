@@ -47,6 +47,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -54,6 +56,7 @@ import java.util.List;
  */
 public class WorkspaceServiceImpl extends AbstractWorkspaceService implements WorkspaceService {
 
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
   public static final QueryParameter<Void> SELF_PARAM = QueryParameterFactory.getPropProjectionParam("workspace");
   private static final Comparator<ResourceTemplate> TEMPLATE_DATE_COMPARATOR = new Comparator<ResourceTemplate>() {
 
@@ -422,7 +425,13 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
         ':').append(name).toString()));
     params.add(SELF_PARAM);
     params.add(getIdParam(workspaceId));
-    final List<PersistableValidatorTemplate> list = commonReadDao.getSingle(params).getValidatorTemplates();
+    final PersistentWorkspace single = commonReadDao.getSingle(params);
+    if (logger.isInfoEnabled()) {
+      logger.info("Workspace ID " + single.getId().toString());
+      logger.info("Validators " + single.isValidatorsPopulated());
+      logger.info("Validators " + single.getValidatorTemplates());
+    }
+    final List<PersistableValidatorTemplate> list = single.getValidatorTemplates();
     if (list.isEmpty()) {
       return null;
     }
@@ -458,7 +467,7 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     template.setTemplate(data);
     ValidatorTemplate oldTemplate = getValidationTemplate(workspaceId, name);
     updateFields(template, oldTemplate);
-    workspace.setVariationPopulated(true);
+    workspace.setValidatorsPopulated(true);
     commonWriteDao.update(workspace);
     return template;
 
