@@ -33,5 +33,5 @@ public interface WorkspaceValidatorsResource extends WritableResource<Feed>,
 
   public Collection<WorkspaceValidatorResource> getValidatorResources();
 
-  public WorkspaceValidatorResource createRepresentations(ResourceTemplate resourceTemplate);
+  public WorkspaceValidatorResource createValidator(ResourceTemplate resourceTemplate);
 }

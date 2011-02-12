@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ws.rs.core.MediaType;
 import org.apache.abdera.model.Entry;
 
@@ -73,7 +75,7 @@ public class WorkspaceValidatorsResourceImpl extends AbstractFeedClientResource<
   }
 
   @Override
-  public WorkspaceValidatorResource createRepresentations(ResourceTemplate resourceTemplate) {
+  public WorkspaceValidatorResource createValidator(ResourceTemplate resourceTemplate) {
     ClientResponse response = post(MediaType.APPLICATION_JSON, resourceTemplate, Status.CREATED);
     return new WorkspaceValidatorResourceImpl(this, response.getLocation());
   }

@@ -27,6 +27,7 @@ import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.RepresentationDef;
+import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.binder.guice.Initializer;
@@ -44,6 +45,8 @@ import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
 import com.smartitengineering.cms.client.api.WorkspaceRepresentationResource;
 import com.smartitengineering.cms.client.api.WorkspaceRepresentationsResource;
+import com.smartitengineering.cms.client.api.WorkspaceValidatorResource;
+import com.smartitengineering.cms.client.api.WorkspaceValidatorsResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationsResource;
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldValue;
@@ -560,6 +563,95 @@ public class AppTest {
     Collection<WorkspaceVariationResource> secondVariationResources = resource.getWorkspaceFeeds().iterator().
         next().getVariations().getVariationResources();
     Assert.assertEquals(1, secondVariationResources.size());
+  }
+
+  @Test
+  public void testCreateValidator() throws Exception {
+
+    ResourceTemplateImpl template = new ResourceTemplateImpl();
+    String temp = "validator";
+    template.setName("val");
+    final byte[] bytes = temp.getBytes();
+    template.setTemplate(bytes);
+    template.setTemplateType(TemplateType.JAVASCRIPT.toString());
+
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    WorkspaceValidatorsResource representationsResource = feedResource.getValidators();
+    WorkspaceValidatorResource validatorResource = representationsResource.createValidator(template);
+    Assert.assertEquals("val", validatorResource.get().getName());
+    Assert.assertEquals(temp, new String(validatorResource.get().getTemplate()));
+    Assert.assertEquals(ValidatorType.JAVASCRIPT.toString(), validatorResource.get().getTemplateType());
+  }
+
+  @Test
+  public void testUpdateValidator() throws Exception {
+    LOGGER.info(":::::::::::::: UPDATE VALIDATOR RESOURCE TEST ::::::::::::::");
+    ResourceTemplateImpl template = new ResourceTemplateImpl();
+    String temp = "newValidator";
+    final byte[] bytes = temp.getBytes();
+    template.setTemplate(bytes);
+    template.setTemplateType(ValidatorType.RUBY.toString());
+
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+
+    Collection<WorkspaceValidatorResource> validatorResources = feedResource.getValidators().getValidatorResources();
+    Assert.assertEquals(1, validatorResources.size());
+    Iterator<WorkspaceValidatorResource> validatorIterator = validatorResources.iterator();
+    WorkspaceValidatorResource validatorRsrc = validatorIterator.next();
+    validatorRsrc.update(template);
+    Assert.assertEquals("val", validatorRsrc.get().getName());
+    Assert.assertEquals(temp, new String(validatorRsrc.get().getTemplate()));
+    Assert.assertEquals(ValidatorType.RUBY.toString(), validatorRsrc.get().getTemplateType());
+    resource.getWorkspaceFeeds();
+    WorkspaceValidatorResource secondValidatorResource = resource.getWorkspaceFeeds().iterator().next().
+        getValidators().getValidatorResources().iterator().next();
+    template.setTemplateType(ValidatorType.JAVASCRIPT.name());
+    secondValidatorResource.update(template);
+    Assert.assertEquals(ValidatorType.JAVASCRIPT.name(), secondValidatorResource.get().getTemplateType());
+    try {
+      validatorRsrc.update(template);
+      Assert.fail("Should not have been able to update!");
+    }
+    catch (UniformInterfaceException ex) {
+      //Exception expected
+      validatorRsrc.get();
+      validatorRsrc.update(template);
+    }
+  }
+
+  @Test
+  public void testDeleteValidator() throws Exception {
+    LOGGER.info(":::::::::::::: DELETE VALIDATOR RESOURCE TEST ::::::::::::::");
+    ResourceTemplateImpl template = new ResourceTemplateImpl();
+    String temp = "Template2";
+    template.setName("val2");
+    final byte[] bytes = temp.getBytes();
+    template.setTemplate(bytes);
+    template.setTemplateType(ValidatorType.GROOVY.name());
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    final WorkspaceValidatorsResource validatorsResource = feedResource.getValidators();
+
+    Collection<WorkspaceValidatorResource> validatorResources = validatorsResource.getValidatorResources();
+    Assert.assertEquals(1, validatorResources.size());
+    validatorsResource.createValidator(template);
+    validatorsResource.get();
+    validatorResources = validatorsResource.getValidatorResources();
+    Iterator<WorkspaceValidatorResource> validatorIterator = validatorResources.iterator();
+    WorkspaceValidatorResource validatorResource = validatorIterator.next();
+
+    validatorResource.delete(ClientResponse.Status.ACCEPTED);
+    Collection<WorkspaceValidatorResource> secondValidatorResources = resource.getWorkspaceFeeds().iterator().
+        next().getValidators().getValidatorResources();
+    Assert.assertEquals(1, secondValidatorResources.size());
   }
 
   @Test
