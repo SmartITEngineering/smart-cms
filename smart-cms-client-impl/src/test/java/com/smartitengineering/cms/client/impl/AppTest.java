@@ -20,6 +20,9 @@ package com.smartitengineering.cms.client.impl;
 
 import com.google.inject.AbstractModule;
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.event.Event;
+import com.smartitengineering.cms.api.event.Event.EventType;
+import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.ContentStatus;
@@ -92,6 +95,7 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.mutable.MutableInt;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -1277,6 +1281,99 @@ public class AppTest {
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
+  }
+
+  @Test
+  public void testContentListener() throws Exception {
+    final MutableInt createCount = new MutableInt(0);
+    final MutableInt updateCount = new MutableInt(0);
+    final MutableInt deleteCount = new MutableInt(0);
+    SmartContentAPI.getInstance().getEventRegistrar().addListener(new EventListener() {
+
+      @Override
+      public boolean accepts(Event event) {
+        return event.getEventSourceType().equals(Event.Type.CONTENT) && event.getEventType().equals(EventType.CREATE);
+      }
+
+      @Override
+      public void notify(Event event) {
+        createCount.add(1);
+      }
+    });
+    SmartContentAPI.getInstance().getEventRegistrar().addListener(new EventListener() {
+
+      @Override
+      public boolean accepts(Event event) {
+        return event.getEventSourceType().equals(Event.Type.CONTENT) && event.getEventType().equals(EventType.UPDATE);
+      }
+
+      @Override
+      public void notify(Event event) {
+        updateCount.add(1);
+      }
+    });
+    SmartContentAPI.getInstance().getEventRegistrar().addListener(new EventListener() {
+
+      @Override
+      public boolean accepts(Event event) {
+        return event.getEventSourceType().equals(Event.Type.CONTENT) && event.getEventType().equals(EventType.DELETE);
+      }
+
+      @Override
+      public void notify(Event event) {
+        deleteCount.add(1);
+      }
+    });
+    ObjectMapper mapper1 = new ObjectMapper();
+    String JSON1 = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("DummyContent.json"));
+    InputStream stream1 = IOUtils.toInputStream(JSON1);
+    Content contentTest = mapper1.readValue(stream1, Content.class);
+    Assert.assertNotNull(contentTest);
+    RootResource resource1 = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources1 = resource1.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
+    WorkspaceFeedResource feedResourceTest = iteratorTest.next();
+    ContentResource authorResource = feedResourceTest.getContents().createContentResource(contentTest);
+    FieldValueImpl value = new FieldValueImpl();
+    value.setType("content");
+    value.setValue(authorResource.getUri().toASCIIString());
+    FieldImpl authorField = new FieldImpl();
+    authorField.setName("Authors");
+    authorField.setValue(value);
+    String valueString = "otherValue";
+    byte[] otherValue = valueString.getBytes();
+    OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
+    otherFieldValueImpl.setMimeType("jpeg/image");
+    otherFieldValueImpl.setType("other");
+    otherFieldValueImpl.setValue(Base64.encodeBase64String(otherValue));
+
+    FieldImpl valueImpl = new FieldImpl();
+    valueImpl.setName("b");
+    valueImpl.setValue(otherFieldValueImpl);
+    ObjectMapper mapper = new ObjectMapper();
+    String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
+    InputStream stream = IOUtils.toInputStream(JSON);
+    Content content = mapper.readValue(stream, Content.class);
+
+    content.getFields().add(valueImpl);
+    content.getFields().add(authorField);
+    Assert.assertNotNull(content);
+
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    Thread.sleep(1200);
+    ContentResource contentResource = feedResource.getContents().createContentResource(content);
+    Assert.assertEquals(2, createCount.intValue());
+    contentResource.update(content);
+    Assert.assertEquals(1, updateCount.intValue());
+    Thread.sleep(1200);
+    authorResource.delete();
+    contentResource.get();
+    contentResource.delete();
+    Assert.assertEquals(2, deleteCount.intValue());
+    Thread.sleep(1200);
   }
 
   @Test
