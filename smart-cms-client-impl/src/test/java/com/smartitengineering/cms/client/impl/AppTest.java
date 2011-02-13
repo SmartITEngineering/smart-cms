@@ -114,6 +114,7 @@ import org.slf4j.LoggerFactory;
  * Unit test for simple App.
  */
 public class AppTest {
+  public static final int SLEEP_DURATION = 1300;
 
   private static final int PORT = 10080;
   public static final String DEFAULT_NS = "com.smartitengineering";
@@ -1187,7 +1188,7 @@ public class AppTest {
     valueImpl.setName("b");
     valueImpl.setValue(otherFieldValueImpl);
 
-    Thread.sleep(1200);
+    Thread.sleep(SLEEP_DURATION);
 
     LOGGER.info(":::::::::::::: CREATE CONTENT RESOURCE TEST ::::::::::::::");
     ObjectMapper mapper = new ObjectMapper();
@@ -1363,17 +1364,16 @@ public class AppTest {
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
-    Thread.sleep(1200);
+    Thread.sleep(SLEEP_DURATION);
     ContentResource contentResource = feedResource.getContents().createContentResource(content);
     Assert.assertEquals(2, createCount.intValue());
     contentResource.update(content);
     Assert.assertEquals(1, updateCount.intValue());
-    Thread.sleep(1200);
     authorResource.delete();
     contentResource.get();
     contentResource.delete();
     Assert.assertEquals(2, deleteCount.intValue());
-    Thread.sleep(1200);
+    Thread.sleep(SLEEP_DURATION);
   }
 
   @Test
@@ -1390,7 +1390,7 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    Thread.sleep(1100);
+    Thread.sleep(SLEEP_DURATION);
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -1459,7 +1459,7 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    Thread.sleep(1100);
+    Thread.sleep(SLEEP_DURATION);
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -1529,7 +1529,7 @@ public class AppTest {
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
 
-    Thread.sleep(1100);
+    Thread.sleep(SLEEP_DURATION);
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -1763,8 +1763,8 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-
-    Thread.sleep(1100);
+    LOGGER.info("Author for representation created!");
+    Thread.sleep(SLEEP_DURATION);
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -1821,7 +1821,7 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    Thread.sleep(1100);
+    Thread.sleep(SLEEP_DURATION);
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -1873,7 +1873,7 @@ public class AppTest {
   public void testSearch() throws Exception {
     LOGGER.info(":::::::::::::: SEARCH CONTENT RESOURCE TEST ::::::::::::::");
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
-    Thread.sleep(1100);
+    Thread.sleep(SLEEP_DURATION);
     String query =
            "typeId=atest2:additional:com.smartitengineering.smart-shopping.content:Author&status=published&status=draft&disjunction=true";
     ContentSearcherResource searchContent = resource.searchContent(query);
@@ -1900,7 +1900,7 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    Thread.sleep(1100);
+    Thread.sleep(SLEEP_DURATION);
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
