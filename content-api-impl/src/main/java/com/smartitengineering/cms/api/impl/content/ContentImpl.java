@@ -228,7 +228,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   @Override
   public void delete() throws IOException {
     super.delete();
-    Event<Content> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(EventType.UPDATE,
+    Event<Content> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(EventType.DELETE,
                                                                                                     Type.CONTENT, this);
     SmartContentAPI.getInstance().getEventRegistrar().notifyEvent(contentEvent);
   }
@@ -236,7 +236,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   @Override
   protected void update() throws IOException {
     super.update();
-    Event<Content> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(EventType.DELETE,
+    Event<Content> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(EventType.UPDATE,
                                                                                                     Type.CONTENT, this);
     SmartContentAPI.getInstance().getEventRegistrar().notifyEvent(contentEvent);
   }
