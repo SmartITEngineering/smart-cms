@@ -37,11 +37,13 @@ import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -185,26 +187,43 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   @Override
   public void addFriend(WorkspaceId to, WorkspaceId... workspaceIds) {
     SmartContentSPI.getInstance().getWorkspaceService().addFriend(to, workspaceIds);
+    for (WorkspaceId friend : workspaceIds) {
+      Event<Entry<WorkspaceId, WorkspaceId>> event = SmartContentAPI.getInstance().getEventRegistrar().<Entry<WorkspaceId, WorkspaceId>>
+          createEvent(EventType.CREATE, Type.FRIENDLY, new SimpleEntry<WorkspaceId, WorkspaceId>(to, friend));
+      SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
+    }
   }
 
   @Override
   public void removeFriend(WorkspaceId from, WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getWorkspaceService().removeFriend(from, workspaceId);
+    Event<Entry<WorkspaceId, WorkspaceId>> event = SmartContentAPI.getInstance().getEventRegistrar().<Entry<WorkspaceId, WorkspaceId>>
+        createEvent(EventType.DELETE, Type.FRIENDLY, new SimpleEntry<WorkspaceId, WorkspaceId>(from, workspaceId));
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
   }
 
   @Override
   public void removeAllFriendlies(WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getWorkspaceService().removeAllFriendlies(workspaceId);
+    Event<WorkspaceId> event = SmartContentAPI.getInstance().getEventRegistrar().<WorkspaceId>
+        createEvent(EventType.DELETE, Type.ALL_FRIENDLIES, workspaceId);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
   }
 
   @Override
   public void removeAllRepresentationTemplates(WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getWorkspaceService().removeAllRepresentationTemplates(workspaceId);
+    Event<WorkspaceId> event = SmartContentAPI.getInstance().getEventRegistrar().<WorkspaceId>
+        createEvent(EventType.DELETE, Type.ALL_REPRESENTATION_TEMPLATES, workspaceId);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
   }
 
   @Override
   public void removeAllVariationTemplates(WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getWorkspaceService().removeAllVariationTemplates(workspaceId);
+    Event<WorkspaceId> event = SmartContentAPI.getInstance().getEventRegistrar().<WorkspaceId>
+        createEvent(EventType.DELETE, Type.ALL_VARIATION_TEMPLATES, workspaceId);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
   }
 
   @Override
@@ -308,16 +327,27 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   @Override
   public void addRootContent(WorkspaceId to, ContentId... contentIds) {
     SmartContentSPI.getInstance().getWorkspaceService().addRootContent(to, contentIds);
+    for (ContentId rootContent : contentIds) {
+      Event<Entry<WorkspaceId, ContentId>> event = SmartContentAPI.getInstance().getEventRegistrar().<Entry<WorkspaceId, ContentId>>
+          createEvent(EventType.CREATE, Type.ROOT_CONTENT, new SimpleEntry<WorkspaceId, ContentId>(to, rootContent));
+      SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
+    }
   }
 
   @Override
   public void removeRootContent(WorkspaceId from, ContentId contentId) {
     SmartContentSPI.getInstance().getWorkspaceService().removeRootContent(from, contentId);
+    Event<Entry<WorkspaceId, ContentId>> event = SmartContentAPI.getInstance().getEventRegistrar().<Entry<WorkspaceId, ContentId>>
+        createEvent(EventType.DELETE, Type.ROOT_CONTENT, new SimpleEntry<WorkspaceId, ContentId>(from, contentId));
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
   }
 
   @Override
   public void removeAllRootContents(WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getWorkspaceService().removeAllRootContents(workspaceId);
+    Event<WorkspaceId> event = SmartContentAPI.getInstance().getEventRegistrar().<WorkspaceId>
+        createEvent(EventType.DELETE, Type.ALL_ROOT_CONTENTS, workspaceId);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
   }
 
   @Override
@@ -392,6 +422,9 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   @Override
   public void removeAllValidatorTemplates(WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getWorkspaceService().removeAllValidatorTemplates(workspaceId);
+    Event<WorkspaceId> event = SmartContentAPI.getInstance().getEventRegistrar().<WorkspaceId>
+        createEvent(EventType.DELETE, Type.ALL_VALIDATION_TEMPLATES, workspaceId);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
   }
 
   protected Collection<String> cutList(List<String> list, String startPoint, int count) {
