@@ -1,5 +1,5 @@
 {
   "schemaNamespace": "com.smartitengineering.cms.spi.impl.type",
-  "mainTableName": "content-type",
+  "mainTableName": "cms_content-type",
   "transactionalDomain": "false"
 }

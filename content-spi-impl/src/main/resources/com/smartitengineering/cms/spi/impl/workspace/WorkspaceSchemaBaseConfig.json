@@ -1,5 +1,5 @@
 {
   "schemaNamespace": "com.smartitengineering.cms.spi.impl.workspace",
-  "mainTableName": "workspace",
+  "mainTableName": "cms_workspace",
   "transactionalDomain": "false"
 }

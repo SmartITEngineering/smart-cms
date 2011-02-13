@@ -1,6 +1,6 @@
 [
   {
-    "tableName": "workspace",
+    "tableName": "cms_workspace",
     "columnFamilyConfigurations": [
       {
         "familyName": "self"
@@ -32,7 +32,7 @@
     ]
   },
   {
-    "tableName": "content",
+    "tableName": "cms_content",
     "columnFamilyConfigurations": [
       {
         "familyName": "self"
@@ -55,7 +55,7 @@
     ]
   },
   {
-    "tableName": "content-type",
+    "tableName": "cms_content-type",
     "columnFamilyConfigurations": [
       {
         "familyName": "simple"
@@ -75,7 +75,7 @@
     ]
   },
   {
-    "tableName": "representations",
+    "tableName": "cms_representations",
     "columnFamilyConfigurations": [
       {
         "familyName": "self"
@@ -83,7 +83,7 @@
     ]
   },
   {
-    "tableName": "variations",
+    "tableName": "cms_variations",
     "columnFamilyConfigurations": [
       {
         "familyName": "self"
