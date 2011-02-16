@@ -1,4 +1,0 @@
-contextName=com.smartitnengineering.smart-cms
-modules.0=com.smartitengineering.cms.binder.guice.APIModule
-ignoreMissingDependency=false
-com.smartitengineering.cms.globalNamespace=com.smartitengineering

@@ -18,17 +18,17 @@
  */
 package com.smartitengineering.cms.spi.impl.content.search;
 
-import com.smartitengineering.cms.spi.impl.content.PersistentContent;
+import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.common.dao.search.solr.spi.ObjectIdentifierQuery;
 
 /**
  *
  * @author imyousuf
  */
-public class ContentIdentifierQueryImpl implements ObjectIdentifierQuery<PersistentContent> {
+public class ContentIdentifierQueryImpl implements ObjectIdentifierQuery<Content> {
 
   @Override
-  public String getQuery(PersistentContent object) {
-    return new StringBuilder("id: \"").append(object.getId().toString()).append('"').toString();
+  public String getQuery(Content object) {
+    return new StringBuilder("id: \"").append(object.getContentId().toString()).append('"').toString();
   }
 }

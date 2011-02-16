@@ -64,13 +64,13 @@ public class ContentSearcherImpl implements ContentSearcher {
 
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
   @Inject
-  private CommonFreeTextSearchDao<PersistentContent> textSearchDao;
+  private CommonFreeTextSearchDao<Content> textSearchDao;
   @Inject
   private CommonReadDao<PersistentContent, ContentId> readDao;
   @Inject
   private SchemaInfoProvider<PersistentContent, ContentId> schemaInfoProvider;
   @Inject
-  private CommonFreeTextPersistentDao<PersistentContent> textSearchWriteDao;
+  private CommonFreeTextPersistentDao<Content> textSearchWriteDao;
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
   private static final String SOLR_DATE_FORMAT = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern() + "'Z'";
 
@@ -96,14 +96,14 @@ public class ContentSearcherImpl implements ContentSearcher {
           boolean first = true;
           for (WorkspaceId friendly : friendlies) {
             if (friendly != null) {
-              if(first) {
+              if (first) {
                 first = false;
               }
               else {
                 finalQuery.append(disjunctionSeperator);
               }
-              finalQuery.append(ContentHelper.WORKSPACEID).append(": ").append(ClientUtils.
-                  escapeQueryChars(friendly.toString()));
+              finalQuery.append(ContentHelper.WORKSPACEID).append(": ").append(ClientUtils.escapeQueryChars(friendly.
+                  toString()));
             }
           }
           finalQuery.append("))");
@@ -181,18 +181,18 @@ public class ContentSearcherImpl implements ContentSearcher {
     if (logger.isInfoEnabled()) {
       logger.info("Query q = " + finalQuery.toString());
     }
-    final com.smartitengineering.common.dao.search.SearchResult<PersistentContent> searchResult = textSearchDao.
-        detailedSearch(QueryParameterFactory.getStringLikePropertyParam("q", finalQuery.toString()), QueryParameterFactory.
-        getFirstResultParam(filter.getStartFrom()), QueryParameterFactory.getMaxResultsParam(filter.getMaxContents()));
+    final com.smartitengineering.common.dao.search.SearchResult<Content> searchResult = textSearchDao.detailedSearch(QueryParameterFactory.
+        getStringLikePropertyParam("q", finalQuery.toString()), QueryParameterFactory.getFirstResultParam(filter.
+        getStartFrom()), QueryParameterFactory.getMaxResultsParam(filter.getMaxContents()));
     final Collection<Content> result;
     if (searchResult == null || searchResult.getResult() == null || searchResult.getResult().isEmpty()) {
       result = Collections.emptyList();
     }
     else {
       result = new ArrayList<Content>();
-      for (PersistentContent content : searchResult.getResult()) {
-        if (content != null && content.getMutableContent() != null) {
-          result.add(content.getMutableContent());
+      for (Content content : searchResult.getResult()) {
+        if (content != null) {
+          result.add(content);
         }
       }
     }
@@ -259,7 +259,7 @@ public class ContentSearcherImpl implements ContentSearcher {
     if (contentId != null) {
       PersistentContent content = readDao.getById(contentId);
       if (content != null) {
-        textSearchWriteDao.update(content);
+        textSearchWriteDao.update(content.getMutableContent());
       }
     }
   }
@@ -302,9 +302,13 @@ public class ContentSearcherImpl implements ContentSearcher {
             hasMore = false;
           }
           else {
-            final PersistentContent[] contents = new PersistentContent[list.size()];
-            textSearchWriteDao.update(list.toArray(contents));
-            lastId = contents[contents.length - 1].getId();
+            final Content[] contents = new Content[list.size()];
+            int index = 0;
+            for (PersistentContent content : list) {
+              contents[index++] = content.getMutableContent();
+            }
+            textSearchWriteDao.update(contents);
+            lastId = contents[contents.length - 1].getContentId();
           }
         }
       }

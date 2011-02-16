@@ -25,7 +25,6 @@ import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
-import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentType;
@@ -35,7 +34,6 @@ import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
-import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import com.smartitengineering.dao.solr.MultivalueMap;
 import com.smartitengineering.dao.solr.impl.MultivalueMapImpl;
@@ -53,7 +51,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author imyousuf
  */
-public class ContentHelper extends AbstractAdapterHelper<PersistentContent, MultivalueMap<String, Object>> {
+public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<String, Object>> {
 
   public static final String CONTENT = "content";
   public static final String CONTENTTYPEID = "contentTypeId";
@@ -68,8 +66,6 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
   public static final String PRIVATE = "private";
   @Inject
   private SchemaInfoProvider<PersistentContent, ContentId> contentScehmaProvider;
-  @Inject
-  private CommonReadDao<PersistentContent, ContentId> readDao;
   private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
@@ -78,13 +74,13 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
   }
 
   @Override
-  protected void mergeFromF2T(PersistentContent fromBean,
+  protected void mergeFromF2T(Content fromBean,
                               MultivalueMap<String, Object> toBean) {
     toBean.addValue(TYPE, CONTENT);
-    final ContentId id = fromBean.getId();
+    final ContentId id = fromBean.getContentId();
     toBean.addValue(ID, id.toString());
     toBean.addValue(WORKSPACEID, id.getWorkspaceId().toString());
-    final WriteableContent mutableContent = fromBean.getMutableContent();
+    final Content mutableContent = fromBean;
     toBean.addValue(CREATIONDATE, mutableContent.getCreationDate());
     toBean.addValue(LASTMODIFIEDDATE, mutableContent.getLastModifiedDate());
     toBean.addValue(STATUS, mutableContent.getStatus().getName());
@@ -186,11 +182,11 @@ public class ContentHelper extends AbstractAdapterHelper<PersistentContent, Mult
   }
 
   @Override
-  protected PersistentContent convertFromT2F(MultivalueMap<String, Object> toBean) {
+  protected Content convertFromT2F(MultivalueMap<String, Object> toBean) {
     try {
       byte[] contentId = StringUtils.getBytesUtf8(toBean.getFirst(ID).toString());
       ContentId id = contentScehmaProvider.getIdFromRowId(contentId);
-      return readDao.getById(id);
+      return SmartContentAPI.getInstance().getContentLoader().loadContent(id);
     }
     catch (Exception ex) {
       logger.error("Error converting to content, returning null!", ex);

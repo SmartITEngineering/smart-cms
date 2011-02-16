@@ -30,7 +30,6 @@ public final class Initializer {
   }
 
   public static void init() {
-    GuiceUtil.getInstance("com/smartitengineering/cms/binder/guice/api-modules.properties").register();
     GuiceUtil.getInstance("com/smartitengineering/cms/binder/guice/spi-modules.properties").register();
   }
 }

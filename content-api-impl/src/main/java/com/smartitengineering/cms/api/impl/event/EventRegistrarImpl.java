@@ -28,6 +28,8 @@ import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -37,6 +39,7 @@ public class EventRegistrarImpl implements EventRegistrar {
 
   private final Collection<EventListener> listeners;
   private final ExecutorService executorService;
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   {
     listeners = new CopyOnWriteArrayList<EventListener>();
@@ -45,6 +48,9 @@ public class EventRegistrarImpl implements EventRegistrar {
 
   @Inject(optional = true)
   public void setInitialListeners(Collection<EventListener> listeners) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Injected Listeners " + listeners);
+    }
     if (listeners == null || listeners.isEmpty()) {
       return;
     }

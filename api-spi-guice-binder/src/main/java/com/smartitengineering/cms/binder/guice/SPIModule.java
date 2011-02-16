@@ -23,10 +23,13 @@ import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
@@ -42,6 +45,7 @@ import com.smartitengineering.cms.spi.impl.content.ContentPersistentService;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentFilterConfigsProvider;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentSchemaBaseConfigProvider;
+import com.smartitengineering.cms.spi.impl.content.search.ContentEventListener;
 import com.smartitengineering.cms.spi.impl.content.search.ContentHelper;
 import com.smartitengineering.cms.spi.impl.content.search.ContentIdentifierQueryImpl;
 import com.smartitengineering.cms.spi.impl.content.search.ContentSearcherImpl;
@@ -89,7 +93,6 @@ import com.smartitengineering.dao.impl.hbase.spi.impl.LockAttainerImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.MixedExecutorServiceImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
-import com.smartitengineering.dao.impl.search.CommonWriteDaoDecorator;
 import com.smartitengineering.dao.solr.MultivalueMap;
 import com.smartitengineering.dao.solr.ServerConfiguration;
 import com.smartitengineering.dao.solr.ServerFactory;
@@ -104,7 +107,9 @@ import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -252,32 +257,37 @@ public class SPIModule extends PrivateModule {
      * Write Dao
      */
     bind(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
-    }).annotatedWith(Names.named("searchWriteDaoDecoratee")).to(new TypeLiteral<CommonDao<PersistentContent, ContentId>>() {
-    }).in(Singleton.class);
-    bind(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
-    }).annotatedWith(Names.named("primaryCacheableWriteDao")).to(new TypeLiteral<CommonWriteDaoDecorator<PersistentContent>>() {
+    }).annotatedWith(Names.named("primaryCacheableWriteDao")).to(new TypeLiteral<CommonDao<PersistentContent, ContentId>>() {
     }).in(Singleton.class);
     binder().expose(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
     }).annotatedWith(Names.named("primaryCacheableWriteDao"));
+    Multibinder<EventListener> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventListener>() {
+    });
+    listenerBinder.addBinding().to(ContentEventListener.class);
+    bind(new TypeLiteral<Collection<EventListener>>() {
+    }).to(new TypeLiteral<Set<EventListener>>() {
+    });
+    binder().expose(new TypeLiteral<Collection<EventListener>>() {
+    });
     bind(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
     }).to(new TypeLiteral<CacheableDao<PersistentContent, ContentId, String>>() {
     }).in(Singleton.class);
-    TypeLiteral<CommonFreeTextPersistentDao<PersistentContent>> prodLit =
-                                                                new TypeLiteral<CommonFreeTextPersistentDao<PersistentContent>>() {
+    TypeLiteral<CommonFreeTextPersistentDao<Content>> prodLit =
+                                                      new TypeLiteral<CommonFreeTextPersistentDao<Content>>() {
     };
-    bind(prodLit).to(new TypeLiteral<CommonAsyncFreeTextPersistentDaoImpl<PersistentContent>>() {
+    bind(prodLit).to(new TypeLiteral<CommonAsyncFreeTextPersistentDaoImpl<Content>>() {
     }).in(Scopes.SINGLETON);
-    bind(prodLit).annotatedWith(Names.named("primaryFreeTextPersistentDao")).to(new TypeLiteral<SolrFreeTextPersistentDao<PersistentContent>>() {
+    bind(prodLit).annotatedWith(Names.named("primaryFreeTextPersistentDao")).to(new TypeLiteral<SolrFreeTextPersistentDao<Content>>() {
     }).in(Scopes.SINGLETON);
-    bind(new TypeLiteral<ObjectIdentifierQuery<PersistentContent>>() {
+    bind(new TypeLiteral<ObjectIdentifierQuery<Content>>() {
     }).to(ContentIdentifierQueryImpl.class).in(Scopes.SINGLETON);
-    bind(new TypeLiteral<GenericAdapter<PersistentContent, MultivalueMap<String, Object>>>() {
-    }).to(new TypeLiteral<GenericAdapterImpl<PersistentContent, MultivalueMap<String, Object>>>() {
+    bind(new TypeLiteral<GenericAdapter<Content, MultivalueMap<String, Object>>>() {
+    }).to(new TypeLiteral<GenericAdapterImpl<Content, MultivalueMap<String, Object>>>() {
     }).in(Scopes.SINGLETON);
-    bind(new TypeLiteral<AbstractAdapterHelper<PersistentContent, MultivalueMap<String, Object>>>() {
+    bind(new TypeLiteral<AbstractAdapterHelper<Content, MultivalueMap<String, Object>>>() {
     }).to(ContentHelper.class).in(Scopes.SINGLETON);
-    bind(new TypeLiteral<CommonFreeTextSearchDao<PersistentContent>>() {
-    }).to(new TypeLiteral<SolrFreeTextSearchDao<PersistentContent>>() {
+    bind(new TypeLiteral<CommonFreeTextSearchDao<Content>>() {
+    }).to(new TypeLiteral<SolrFreeTextSearchDao<Content>>() {
     }).in(Scopes.SINGLETON);
     bind(ContentSearcher.class).to(ContentSearcherImpl.class).in(Scopes.SINGLETON);
     binder().expose(ContentSearcher.class);
