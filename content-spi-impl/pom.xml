@@ -95,6 +95,10 @@ The module is responsible for Implementing the SPI for the CMS.
       <artifactId>velocity</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.smartitengineering.smart-async-events</groupId>
+      <artifactId>async-events-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
       <artifactId>content-api-impl</artifactId>
       <version>${project.version}</version>
