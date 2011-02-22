@@ -72,6 +72,9 @@ public class ContentEventPublicationListener implements EventListener<Content> {
     }
     if (StringUtils.isNotBlank(hexedContentId)) {
       String message = new StringBuilder(event.getEventType().name()).append('\n').append(hexedContentId).toString();
+      if (logger.isInfoEnabled()) {
+        logger.info("Publishing message " + message);
+      }
       publisher.publishEvent("text/plain", message);
     }
   }

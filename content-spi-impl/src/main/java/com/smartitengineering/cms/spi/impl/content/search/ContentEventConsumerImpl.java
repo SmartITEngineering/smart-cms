@@ -30,7 +30,11 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
 import java.io.StringReader;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +55,17 @@ public class ContentEventConsumerImpl implements EventConsumer {
     try {
       reader = new BufferedReader(new StringReader(eventMessage));
       EventType type = EventType.valueOf(reader.readLine());
-      ContentId contentId = (ContentId) new ObjectInputStream(new ByteArrayInputStream(Base64.decodeBase64(reader.
-          readLine()))).readObject();
+      final StringBuilder idStr = new StringBuilder("");
+      String line;
+      do {
+        line = reader.readLine();
+        if (StringUtils.isNotBlank(line)) {
+          idStr.append(line).append('\n');
+        }
+      }
+      while (StringUtils.isNotBlank(line));
+      final ContentId contentId = (ContentId) new ObjectInputStream(new ByteArrayInputStream(Base64.decodeBase64(idStr.
+          toString()))).readObject();
       Content content = SmartContentAPI.getInstance().getContentLoader().loadContent(contentId);
       switch (type) {
         case CREATE:
@@ -62,6 +75,19 @@ public class ContentEventConsumerImpl implements EventConsumer {
           persistentDao.update(content);
           break;
         case DELETE:
+          if (content == null) {
+            content = (Content) Proxy.newProxyInstance(Content.class.getClassLoader(), new Class[]{Content.class},
+                                                       new InvocationHandler() {
+
+              @Override
+              public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                if (method.getName().equals("getContentId")) {
+                  return contentId;
+                }
+                return null;
+              }
+            });
+          }
           persistentDao.delete(content);
           break;
       }
