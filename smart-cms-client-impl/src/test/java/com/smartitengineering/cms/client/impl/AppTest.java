@@ -69,6 +69,8 @@ import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ClientUtil;
 import com.smartitengineering.util.rest.client.ConnectionConfig;
 import com.smartitengineering.util.rest.client.ResourceLink;
+import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
+import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
@@ -114,8 +116,8 @@ import org.slf4j.LoggerFactory;
  * Unit test for simple App.
  */
 public class AppTest {
-  public static final int SLEEP_DURATION = 1300;
 
+  public static final int SLEEP_DURATION = 1300;
   private static final int PORT = 10080;
   public static final String DEFAULT_NS = "com.smartitengineering";
   public static final String ROOT_URI_STRING = "http://localhost:" + PORT + "/cms/";
@@ -158,18 +160,18 @@ public class AppTest {
      */
     jettyServer = new Server(PORT);
     HandlerList handlerList = new HandlerList();
-    final String webapp = "./src/test/webapp/";
-    if (!new File(webapp).exists()) {
-      throw new IllegalStateException("WebApp file/dir does not exist!");
-    }
-    WebAppContext webAppHandler = new WebAppContext(webapp, "/cms");
-    handlerList.addHandler(webAppHandler);
     /*
      * The following is for solr for later, when this is to be used it
      */
     System.setProperty("solr.solr.home", "./target/sample-conf/");
     Handler solr = new WebAppContext("./target/solr/", "/solr");
     handlerList.addHandler(solr);
+    final String webapp = "./src/test/webapp/";
+    if (!new File(webapp).exists()) {
+      throw new IllegalStateException("WebApp file/dir does not exist!");
+    }
+    WebAppContext webAppHandler = new WebAppContext(webapp, "/cms");
+    handlerList.addHandler(webAppHandler);
     jettyServer.setHandler(handlerList);
     jettyServer.setSendDateHeader(true);
     jettyServer.start();
@@ -178,6 +180,12 @@ public class AppTest {
      * Setup client properties
      */
     System.setProperty(ApplicationWideClientFactoryImpl.TRACE, "true");
+
+    Client client = CacheableClient.create();
+    client.resource("http://localhost:9090/api/channels/test").header(HttpHeaders.CONTENT_TYPE,
+                                                                                  MediaType.APPLICATION_JSON).put(
+        "{\"name\":\"test\"}");
+    LOGGER.info("Created test channel!");
   }
 
   @AfterClass

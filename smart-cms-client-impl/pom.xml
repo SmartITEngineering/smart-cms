@@ -147,6 +147,24 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
+            <id>copy-hub-war</id>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <phase>generate-test-resources</phase>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.smartitengineering.event</groupId>
+                  <artifactId>hub-db</artifactId>
+                  <version>${hub.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${project.build.directory}/hub/</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+          <execution>
             <id>copy-solr-war</id>
             <goals>
               <goal>unpack</goal>
@@ -166,6 +184,29 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <configuration>
+          <webApp>${project.build.directory}/hub/</webApp>
+        </configuration>
+        <executions>
+          <execution>
+            <id>run-hub</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>deploy-war</goal>
+            </goals>
+            <configuration>
+              <daemon>true</daemon>
+              <reload>manual</reload>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
+  <properties>
+    <hub.version>0.1-rdbms-SNAPSHOT</hub.version>
+  </properties>
 </project>
