@@ -57,6 +57,10 @@
       <artifactId>smart-bean-guice-util</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.smartitengineering.smart-async-events</groupId>
+      <artifactId>async-events-impl-event-hub</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.smartitengineering.smart-dao</groupId>
       <artifactId>smart-abstract-dao-decorator</artifactId>
     </dependency>

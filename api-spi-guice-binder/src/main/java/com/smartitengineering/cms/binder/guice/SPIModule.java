@@ -45,7 +45,9 @@ import com.smartitengineering.cms.spi.impl.content.ContentPersistentService;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentFilterConfigsProvider;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentSchemaBaseConfigProvider;
+import com.smartitengineering.cms.spi.impl.content.search.ContentEventConsumerImpl;
 import com.smartitengineering.cms.spi.impl.content.search.ContentEventListener;
+import com.smartitengineering.cms.spi.impl.content.search.ContentEventPublicationListener;
 import com.smartitengineering.cms.spi.impl.content.search.ContentHelper;
 import com.smartitengineering.cms.spi.impl.content.search.ContentIdentifierQueryImpl;
 import com.smartitengineering.cms.spi.impl.content.search.ContentSearcherImpl;
@@ -101,9 +103,15 @@ import com.smartitengineering.dao.solr.SolrWriteDao;
 import com.smartitengineering.dao.solr.impl.ServerConfigurationImpl;
 import com.smartitengineering.dao.solr.impl.SingletonRemoteServerFactory;
 import com.smartitengineering.dao.solr.impl.SolrDao;
+import com.smartitengineering.events.async.api.EventConsumer;
+import com.smartitengineering.events.async.api.EventPublisher;
+import com.smartitengineering.events.async.api.EventSubscriber;
+import com.smartitengineering.events.async.api.impl.hub.EventPublisherImpl;
+import com.smartitengineering.events.async.api.impl.hub.EventSubscriberImpl;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
+import com.smartitengineering.util.rest.client.ConnectionConfig;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
@@ -128,8 +136,10 @@ public class SPIModule extends PrivateModule {
   public static final String PREFIX_SEPARATOR_PROP_KEY = "com.smartitengineering.user.cache.prefixSeparator";
   public static final String PREFIX_SEPARATOR_PROP_DEFAULT = "|";
   private final String schemaLocationForContentType;
-  private final String solrUri, uriPrefix, cacheConfigRsrc, cacheName;
+  private final String solrUri, uriPrefix, cacheConfigRsrc, cacheName, hubUri, atomFeedUri, cronExpression;
+  private final String eventHubContextPath, eventHubBaseUri;
   private final long waitTime, saveInterval, updateInterval, deleteInterval;
+  private final boolean enableAsyncEvent, enableEventConsumption;
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   public SPIModule(Properties properties) {
@@ -152,6 +162,16 @@ public class SPIModule extends PrivateModule {
       cacheConfigRsrc = properties.getProperty("com.smartitengineering.cms.cache.resource",
                                                "com/smartitengineering/cms/binder/guice/ehcache.xml");
       cacheName = properties.getProperty("com.smartitengineering.cms.cache.name", "cmsCache");
+      enableAsyncEvent = Boolean.parseBoolean(properties.getProperty("com.smartitengineering.cms.event.async", "true"));
+      enableEventConsumption = Boolean.parseBoolean(properties.getProperty(
+          "com.smartitengineering.cms.event.async.subscribe", "true"));
+      hubUri = properties.getProperty("com.smartitengineering.cms.event.hubUri",
+                                      "http://localhost:10080/hub/api/channels/test/hub");
+      atomFeedUri = properties.getProperty("com.smartitengineering.cms.event.atomFeedUri",
+                                           "http://localhost:10080/hub/api/channels/test/events");
+      cronExpression = properties.getProperty("com.smartitengineering.cms.event.consumerCronExp", "0/1 * * * * ?");
+      eventHubContextPath = properties.getProperty("com.smartitengineering.cms.event.contextPath", "/hub");
+      eventHubBaseUri = properties.getProperty("com.smartitengineering.cms.event.baseUri", "/api");
     }
     else {
       schemaLocationForContentType = DEFAULT_LOCATION;
@@ -161,6 +181,13 @@ public class SPIModule extends PrivateModule {
       uriPrefix = "/cms";
       cacheConfigRsrc = "com/smartitengineering/cms/binder/guice/ehcache.xml";
       cacheName = "cmsCache";
+      enableAsyncEvent = true;
+      enableEventConsumption = true;
+      hubUri = "http://localhost:10080/hub/api/channels/test/hub";
+      atomFeedUri = "http://localhost:10080/hub/api/channels/test/events";
+      cronExpression = "0/1 * * * * ?";
+      eventHubContextPath = "/hub";
+      eventHubBaseUri = "/api";
     }
     logger.debug("SCHEMA Location " + schemaLocationForContentType);
   }
@@ -261,24 +288,60 @@ public class SPIModule extends PrivateModule {
     }).in(Singleton.class);
     binder().expose(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
     }).annotatedWith(Names.named("primaryCacheableWriteDao"));
-    Multibinder<EventListener> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventListener>() {
-    });
-    listenerBinder.addBinding().to(ContentEventListener.class);
-    bind(new TypeLiteral<Collection<EventListener>>() {
-    }).to(new TypeLiteral<Set<EventListener>>() {
-    });
-    binder().expose(new TypeLiteral<Collection<EventListener>>() {
-    });
     bind(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
     }).to(new TypeLiteral<CacheableDao<PersistentContent, ContentId, String>>() {
     }).in(Singleton.class);
     TypeLiteral<CommonFreeTextPersistentDao<Content>> prodLit =
                                                       new TypeLiteral<CommonFreeTextPersistentDao<Content>>() {
     };
-    bind(prodLit).to(new TypeLiteral<CommonAsyncFreeTextPersistentDaoImpl<Content>>() {
-    }).in(Scopes.SINGLETON);
-    bind(prodLit).annotatedWith(Names.named("primaryFreeTextPersistentDao")).to(new TypeLiteral<SolrFreeTextPersistentDao<Content>>() {
-    }).in(Scopes.SINGLETON);
+    if (enableAsyncEvent && enableEventConsumption) {
+      bind(prodLit).to(new TypeLiteral<SolrFreeTextPersistentDao<Content>>() {
+      }).in(Scopes.SINGLETON);
+      ConnectionConfig config = new ConnectionConfig();
+      config.setBasicUri(eventHubBaseUri);
+      config.setContextPath(eventHubContextPath);
+      URI hub = URI.create(this.hubUri);
+      config.setHost(hub.getHost());
+      config.setPort(hub.getPort());
+      bind(ConnectionConfig.class).toInstance(config);
+      bind(EventSubscriber.class).to(EventSubscriberImpl.class);
+      Multibinder<EventConsumer> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventConsumer>() {
+      });
+      listenerBinder.addBinding().to(ContentEventConsumerImpl.class);
+      bind(new TypeLiteral<Collection<EventConsumer>>() {
+      }).to(new TypeLiteral<Set<EventConsumer>>() {
+      });
+    }
+    else {
+      bind(prodLit).to(new TypeLiteral<CommonAsyncFreeTextPersistentDaoImpl<Content>>() {
+      }).in(Scopes.SINGLETON);
+      bind(prodLit).annotatedWith(Names.named("primaryFreeTextPersistentDao")).to(new TypeLiteral<SolrFreeTextPersistentDao<Content>>() {
+      }).in(Scopes.SINGLETON);
+    }
+    if (enableAsyncEvent) {
+      Multibinder<EventListener> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventListener>() {
+      });
+      listenerBinder.addBinding().to(ContentEventPublicationListener.class);
+      bind(new TypeLiteral<Collection<EventListener>>() {
+      }).to(new TypeLiteral<Set<EventListener>>() {
+      });
+      binder().expose(new TypeLiteral<Collection<EventListener>>() {
+      });
+      bind(String.class).annotatedWith(Names.named("channelHubUri")).toInstance(hubUri);
+      bind(String.class).annotatedWith(Names.named("eventAtomFeedUri")).toInstance(atomFeedUri);
+      bind(String.class).annotatedWith(Names.named("subscribtionCronExpression")).toInstance(cronExpression);
+      bind(EventPublisher.class).to(EventPublisherImpl.class);
+    }
+    else {
+      Multibinder<EventListener> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventListener>() {
+      });
+      listenerBinder.addBinding().to(ContentEventListener.class);
+      bind(new TypeLiteral<Collection<EventListener>>() {
+      }).to(new TypeLiteral<Set<EventListener>>() {
+      });
+      binder().expose(new TypeLiteral<Collection<EventListener>>() {
+      });
+    }
     bind(new TypeLiteral<ObjectIdentifierQuery<Content>>() {
     }).to(ContentIdentifierQueryImpl.class).in(Scopes.SINGLETON);
     bind(new TypeLiteral<GenericAdapter<Content, MultivalueMap<String, Object>>>() {

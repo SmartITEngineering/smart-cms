@@ -42,6 +42,7 @@ import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.dao.common.queryparam.StringLikeQueryParameter;
 import com.smartitengineering.dao.common.queryparam.UniOperandQueryParameter;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
+import com.smartitengineering.events.async.api.EventSubscriber;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -71,6 +72,8 @@ public class ContentSearcherImpl implements ContentSearcher {
   private SchemaInfoProvider<PersistentContent, ContentId> schemaInfoProvider;
   @Inject
   private CommonFreeTextPersistentDao<Content> textSearchWriteDao;
+  @Inject(optional = true)
+  private EventSubscriber subscriber;
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
   private static final String SOLR_DATE_FORMAT = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern() + "'Z'";
 
