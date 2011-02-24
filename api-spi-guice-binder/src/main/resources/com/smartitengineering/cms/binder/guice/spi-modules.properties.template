@@ -18,3 +18,5 @@ com.smartitengineering.cms.event.atomFeedUri=http://localhost:9090/api/channels/
 com.smartitengineering.cms.event.consumerCronExp=0/15 * * * * ?
 com.smartitengineering.cms.event.contextPath=
 com.smartitengineering.cms.event.baseUri=/api/
+com.smartitengineering.cms.event.storeFolder=/tmp/cms/
+com.smartitengineering.cms.event.storeFileName=cmsPollUri.txt

@@ -106,8 +106,10 @@ import com.smartitengineering.dao.solr.impl.SolrDao;
 import com.smartitengineering.events.async.api.EventConsumer;
 import com.smartitengineering.events.async.api.EventPublisher;
 import com.smartitengineering.events.async.api.EventSubscriber;
+import com.smartitengineering.events.async.api.UriStorer;
 import com.smartitengineering.events.async.api.impl.hub.EventPublisherImpl;
 import com.smartitengineering.events.async.api.impl.hub.EventSubscriberImpl;
+import com.smartitengineering.events.async.api.impl.hub.FileSystemUriStorer;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
@@ -138,6 +140,7 @@ public class SPIModule extends PrivateModule {
   private final String schemaLocationForContentType;
   private final String solrUri, uriPrefix, cacheConfigRsrc, cacheName, hubUri, atomFeedUri, cronExpression;
   private final String eventHubContextPath, eventHubBaseUri;
+  private final String uriStoreFolder, uriStoreFileName;
   private final long waitTime, saveInterval, updateInterval, deleteInterval;
   private final boolean enableAsyncEvent, enableEventConsumption;
   protected final Logger logger = LoggerFactory.getLogger(getClass());
@@ -172,6 +175,8 @@ public class SPIModule extends PrivateModule {
       cronExpression = properties.getProperty("com.smartitengineering.cms.event.consumerCronExp", "0/1 * * * * ?");
       eventHubContextPath = properties.getProperty("com.smartitengineering.cms.event.contextPath", "/hub");
       eventHubBaseUri = properties.getProperty("com.smartitengineering.cms.event.baseUri", "/api");
+      uriStoreFolder = properties.getProperty("com.smartitengineering.cms.event.storeFolder", "./target/cms/");
+      uriStoreFileName = properties.getProperty("com.smartitengineering.cms.event.storeFileName", "cmsPollUri.txt");
     }
     else {
       schemaLocationForContentType = DEFAULT_LOCATION;
@@ -188,6 +193,8 @@ public class SPIModule extends PrivateModule {
       cronExpression = "0/1 * * * * ?";
       eventHubContextPath = "/hub";
       eventHubBaseUri = "/api";
+      uriStoreFolder = "./target/cms/";
+      uriStoreFileName = "cmsPollUri.txt";
     }
     logger.debug("SCHEMA Location " + schemaLocationForContentType);
   }
@@ -304,6 +311,9 @@ public class SPIModule extends PrivateModule {
       config.setHost(hub.getHost());
       config.setPort(hub.getPort());
       bind(ConnectionConfig.class).toInstance(config);
+      bind(UriStorer.class).to(FileSystemUriStorer.class);
+      bind(String.class).annotatedWith(Names.named("pathToFolderOfUriStorer")).toInstance(uriStoreFolder);
+      bind(String.class).annotatedWith(Names.named("fileNameOfUriStorer")).toInstance(uriStoreFileName);
       bind(EventSubscriber.class).to(EventSubscriberImpl.class);
       Multibinder<EventConsumer> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventConsumer>() {
       });
