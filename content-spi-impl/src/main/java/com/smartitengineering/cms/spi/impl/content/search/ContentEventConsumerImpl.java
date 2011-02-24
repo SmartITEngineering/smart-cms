@@ -24,7 +24,7 @@ import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.event.Event.EventType;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
-import com.smartitengineering.common.dao.search.CommonFreeTextPersistentDao;
+import com.smartitengineering.common.dao.search.CommonFreeTextPersistentTxDao;
 import com.smartitengineering.events.async.api.EventConsumer;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class ContentEventConsumerImpl implements EventConsumer {
 
   @Inject
-  private CommonFreeTextPersistentDao<Content> persistentDao;
+  private CommonFreeTextPersistentTxDao<Content> persistentDao;
   private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
@@ -103,6 +103,25 @@ public class ContentEventConsumerImpl implements EventConsumer {
       catch (Exception ex) {
         logger.warn("Could not close reader!", ex);
       }
+    }
+  }
+
+  @Override
+  public void startConsumption() {
+  }
+
+  @Override
+  public void endConsumption(boolean prematureEnd) {
+    try {
+      if (prematureEnd) {
+        persistentDao.rollback();
+      }
+      else {
+        persistentDao.commit();
+      }
+    }
+    catch (Exception ex) {
+      logger.error("Could not commit/rollback for prematureEnd (" + prematureEnd + ")", ex);
     }
   }
 }

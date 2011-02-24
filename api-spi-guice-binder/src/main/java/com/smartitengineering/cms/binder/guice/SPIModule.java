@@ -72,9 +72,11 @@ import com.smartitengineering.cms.spi.type.SearchFieldNameGenerator;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
 import com.smartitengineering.common.dao.search.CommonFreeTextPersistentDao;
+import com.smartitengineering.common.dao.search.CommonFreeTextPersistentTxDao;
 import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
 import com.smartitengineering.common.dao.search.impl.CommonAsyncFreeTextPersistentDaoImpl;
 import com.smartitengineering.common.dao.search.solr.SolrFreeTextPersistentDao;
+import com.smartitengineering.common.dao.search.solr.SolrFreeTextPersistentTxDao;
 import com.smartitengineering.common.dao.search.solr.SolrFreeTextSearchDao;
 import com.smartitengineering.common.dao.search.solr.spi.ObjectIdentifierQuery;
 import com.smartitengineering.dao.common.CommonReadDao;
@@ -100,6 +102,7 @@ import com.smartitengineering.dao.solr.ServerConfiguration;
 import com.smartitengineering.dao.solr.ServerFactory;
 import com.smartitengineering.dao.solr.SolrQueryDao;
 import com.smartitengineering.dao.solr.SolrWriteDao;
+import com.smartitengineering.dao.solr.impl.DefaultSolrDao;
 import com.smartitengineering.dao.solr.impl.ServerConfigurationImpl;
 import com.smartitengineering.dao.solr.impl.SingletonRemoteServerFactory;
 import com.smartitengineering.dao.solr.impl.SolrDao;
@@ -223,8 +226,6 @@ public class SPIModule extends PrivateModule {
      * waitTime:long and ExecutorService.class from earlier config
      */
     bind(TimeUnit.class).annotatedWith(Names.named("waitTimeUnit")).toInstance(TimeUnit.SECONDS);
-    bind(SolrQueryDao.class).to(SolrDao.class).in(Scopes.SINGLETON);
-    bind(SolrWriteDao.class).to(SolrDao.class).in(Scopes.SINGLETON);
     bind(ServerFactory.class).to(SingletonRemoteServerFactory.class).in(Scopes.SINGLETON);
     bind(ServerConfiguration.class).to(ServerConfigurationImpl.class).in(Scopes.SINGLETON);
     bind(String.class).annotatedWith(Names.named("uri")).toInstance(solrUri);
@@ -298,11 +299,12 @@ public class SPIModule extends PrivateModule {
     bind(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
     }).to(new TypeLiteral<CacheableDao<PersistentContent, ContentId, String>>() {
     }).in(Singleton.class);
-    TypeLiteral<CommonFreeTextPersistentDao<Content>> prodLit =
-                                                      new TypeLiteral<CommonFreeTextPersistentDao<Content>>() {
-    };
+
     if (enableAsyncEvent && enableEventConsumption) {
-      bind(prodLit).to(new TypeLiteral<SolrFreeTextPersistentDao<Content>>() {
+      bind(SolrQueryDao.class).to(DefaultSolrDao.class).in(Scopes.SINGLETON);
+      bind(SolrWriteDao.class).to(DefaultSolrDao.class).in(Scopes.SINGLETON);
+      bind(new TypeLiteral<CommonFreeTextPersistentTxDao<Content>>() {
+      }).to(new TypeLiteral<SolrFreeTextPersistentTxDao<Content>>() {
       }).in(Scopes.SINGLETON);
       ConnectionConfig config = new ConnectionConfig();
       config.setBasicUri(eventHubBaseUri);
@@ -323,6 +325,11 @@ public class SPIModule extends PrivateModule {
       });
     }
     else {
+      bind(SolrQueryDao.class).to(SolrDao.class).in(Scopes.SINGLETON);
+      bind(SolrWriteDao.class).to(SolrDao.class).in(Scopes.SINGLETON);
+      TypeLiteral<CommonFreeTextPersistentDao<Content>> prodLit =
+                                                        new TypeLiteral<CommonFreeTextPersistentDao<Content>>() {
+      };
       bind(prodLit).to(new TypeLiteral<CommonAsyncFreeTextPersistentDaoImpl<Content>>() {
       }).in(Scopes.SINGLETON);
       bind(prodLit).annotatedWith(Names.named("primaryFreeTextPersistentDao")).to(new TypeLiteral<SolrFreeTextPersistentDao<Content>>() {
