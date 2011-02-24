@@ -19,17 +19,20 @@
 package com.smartitengineering.cms.spi.impl.content.search;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Filter;
 import com.smartitengineering.cms.api.content.SearchResult;
+import com.smartitengineering.cms.api.event.Event.EventType;
+import com.smartitengineering.cms.api.event.Event.Type;
+import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.content.ContentSearcher;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
-import com.smartitengineering.common.dao.search.CommonFreeTextPersistentDao;
 import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.queryparam.BiOperandQueryParameter;
@@ -71,7 +74,8 @@ public class ContentSearcherImpl implements ContentSearcher {
   @Inject
   private SchemaInfoProvider<PersistentContent, ContentId> schemaInfoProvider;
   @Inject
-  private CommonFreeTextPersistentDao<Content> textSearchWriteDao;
+  @Named("reindexEventListener")
+  private EventListener<Content> reindexListener;
   @Inject(optional = true)
   private EventSubscriber subscriber;
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -262,7 +266,8 @@ public class ContentSearcherImpl implements ContentSearcher {
     if (contentId != null) {
       PersistentContent content = readDao.getById(contentId);
       if (content != null) {
-        textSearchWriteDao.update(content.getMutableContent());
+        reindexListener.notify(SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(
+            EventType.CREATE, Type.CONTENT, content.getMutableContent()));
       }
     }
   }
@@ -308,9 +313,10 @@ public class ContentSearcherImpl implements ContentSearcher {
             final Content[] contents = new Content[list.size()];
             int index = 0;
             for (PersistentContent content : list) {
-              contents[index++] = content.getMutableContent();
+              reindexListener.notify(SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(
+                  EventType.CREATE, Type.CONTENT, content.getMutableContent()));
             }
-            textSearchWriteDao.update(contents);
+
             lastId = contents[contents.length - 1].getContentId();
           }
         }

@@ -338,7 +338,10 @@ public class SPIModule extends PrivateModule {
     if (enableAsyncEvent) {
       Multibinder<EventListener> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventListener>() {
       });
-      listenerBinder.addBinding().to(ContentEventPublicationListener.class);
+      listenerBinder.addBinding().to(ContentEventPublicationListener.class).in(Singleton.class);
+      bind(new TypeLiteral<EventListener<Content>>() {
+      }).annotatedWith(Names.named("reindexEventListener")).to(ContentEventPublicationListener.class).in(
+          Singleton.class);
       bind(new TypeLiteral<Collection<EventListener>>() {
       }).to(new TypeLiteral<Set<EventListener>>() {
       });
