@@ -462,7 +462,7 @@ public class ContentSearcherResource extends AbstractResource {
     QueryParameter<Date> queryParameter = null;
     if (strDate.startsWith(">")) {
       String date = strDate.replace(">", "");
-      queryParameter = QueryParameterFactory.getGreaterThanPropertyParam("graterThan", new Date(Long.parseLong(date)));
+      queryParameter = QueryParameterFactory.getGreaterThanPropertyParam("greaterThan", new Date(Long.parseLong(date)));
     }
     else if (strDate.startsWith("<")) {
       String date = strDate.replace("<", "");
@@ -470,7 +470,7 @@ public class ContentSearcherResource extends AbstractResource {
     }
     else if (strDate.startsWith(">=")) {
       String date = strDate.replaceAll(">=", "");
-      queryParameter = QueryParameterFactory.getGreaterThanEqualToPropertyParam("graterOrEqual", new Date(Long.parseLong(
+      queryParameter = QueryParameterFactory.getGreaterThanEqualToPropertyParam("greaterOrEqual", new Date(Long.parseLong(
           date)));
     }
     else if (strDate.startsWith("<=")) {
