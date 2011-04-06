@@ -43,6 +43,7 @@ import com.smartitengineering.cms.client.api.ContentTypesResource;
 import com.smartitengineering.cms.client.api.ContentsResource;
 import com.smartitengineering.cms.client.api.FieldResource;
 import com.smartitengineering.cms.client.api.RootResource;
+import com.smartitengineering.cms.client.api.UriTemplateResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
@@ -183,7 +184,7 @@ public class AppTest {
 
     Client client = CacheableClient.create();
     client.resource("http://localhost:9090/api/channels/test").header(HttpHeaders.CONTENT_TYPE,
-                                                                                  MediaType.APPLICATION_JSON).put(
+                                                                      MediaType.APPLICATION_JSON).put(
         "{\"name\":\"test\"}");
     LOGGER.info("Created test channel!");
   }
@@ -1290,6 +1291,20 @@ public class AppTest {
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
+  }
+
+  @Test
+  public void testUriTempaltes() throws URISyntaxException {
+    final String workspaceNS, workspaceId, typeNS, typeId;
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    WorkspaceFeedResource feedResource = resource.getWorkspaceFeeds().iterator().next();
+    workspaceNS = "atest2";
+    workspaceId = "additional";
+    typeNS = "com.smartitengineering.smart-shopping.content";
+    typeId = "Publisher";
+    UriTemplateResource templateResource = resource.getTemplates();
+    Assert.assertNotNull(templateResource.getWorkspaceResource(workspaceNS, workspaceId));
+    Assert.assertNotNull(templateResource.getContentTypeResource(workspaceNS, workspaceId, typeNS, typeId));
   }
 
   @Test
