@@ -60,6 +60,7 @@ public class RootResource extends AbstractResource {
   };
   public static final String PATH_TO_SEARCH = "search";
   public static final String PATH_TO_REINDEX = "reindex";
+  public static final String PATH_TO_TEMPLATES = "templates";
 
   @GET
   @Produces(MediaType.APPLICATION_ATOM_XML)
@@ -96,6 +97,8 @@ public class RootResource extends AbstractResource {
                            com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
       feed.addLink(getLink(getRelativeURIBuilder().path(PATH_TO_REINDEX).build(), "re-index",
                            MediaType.TEXT_PLAIN));
+      feed.addLink(getLink(getRelativeURIBuilder().path(PATH_TO_TEMPLATES).build(), "templates",
+                           com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
       response.entity(feed);
       response.lastModified(lastModifiedDate);
     }
@@ -123,6 +126,11 @@ public class RootResource extends AbstractResource {
   @Path("/" + PATH_TO_REINDEX)
   public ReIndexResource reIndex() {
     return new ReIndexResource(getInjectables());
+  }
+
+  @Path("/" + PATH_TO_TEMPLATES)
+  public UriTemplatesResource templates() {
+    return new UriTemplatesResource(getInjectables());
   }
 
   @Override

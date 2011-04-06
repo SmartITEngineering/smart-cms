@@ -18,26 +18,18 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.cms.ws.common.domains.Workspace;
-import com.smartitengineering.cms.ws.common.domains.WorkspaceId;
-import com.smartitengineering.util.rest.client.WritableResource;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import org.apache.abdera.model.Feed;
+import com.smartitengineering.util.opensearch.api.OpenSearchDescriptor;
+import com.smartitengineering.util.rest.client.Resource;
 
 /**
  *
- * @author kaisar
+ * @author imyousuf
  */
-public interface RootResource extends WritableResource<Feed> {
+public interface UriTemplateResource extends Resource<OpenSearchDescriptor> {
 
-  public Collection<WorkspaceContentResouce> getWorkspaces();
+  WorkspaceFeedResource getWorkspaceResource(String workspaceNS, String workspaceId);
 
-  public Collection<WorkspaceFeedResource> getWorkspaceFeeds();
+  ContentTypeFeedResource getContentTypeResource(String workspaceNS, String workspaceId, String typeNS, String typeId);
 
-  public Workspace createWorkspace(WorkspaceId workspaceId) throws URISyntaxException;
-
-  public ContentSearcherResource searchContent(String query);
-
-  public UriTemplateResource getTemplates();
+  ContentResource getContentResource(String workspaceNS, String workspaceId, String contentId);
 }

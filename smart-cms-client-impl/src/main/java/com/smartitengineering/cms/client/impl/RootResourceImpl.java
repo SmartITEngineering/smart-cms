@@ -20,6 +20,7 @@ package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.ContentSearcherResource;
 import com.smartitengineering.cms.client.api.RootResource;
+import com.smartitengineering.cms.client.api.UriTemplateResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.ws.common.domains.Workspace;
@@ -60,6 +61,7 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
   private static final Logger LOGGER = LoggerFactory.getLogger(RootResourceImpl.class);
   private static final int PORT = 10080;
   public static final String ROOT_URI_STRING = "http://localhost:" + PORT + "/";
+  public static final String REL_TEMPLATES = "templates";
 
   private RootResourceImpl(URI uri) throws IllegalArgumentException,
                                            UniformInterfaceException {
@@ -167,5 +169,15 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
       link.setHref(strLink);
     }
     return new ContentSearcherResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(link));
+  }
+
+  @Override
+  public UriTemplateResource getTemplates() {
+    try {
+      return new UriTemplateResourceImpl(this, getRelatedResourceUris().getFirst(REL_TEMPLATES));
+    }
+    catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
   }
 }
