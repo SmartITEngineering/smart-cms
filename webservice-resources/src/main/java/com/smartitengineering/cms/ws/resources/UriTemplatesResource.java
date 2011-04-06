@@ -49,7 +49,7 @@ public class UriTemplatesResource extends AbstractResource {
   private static String contentTypeResourceUriTemplate;
   private static String contentResourceUriTemplate;
   private final static String REL_WORKSPACE = "workspace";
-  private final static String REL_CONTENT_TYPE = "contentType";
+  private final static String REL_CONTENT_TYPE = "contenttype";
   private final static String REL_CONTENT = "content";
   private static OpenSearchDescriptor descriptor;
   private static final ReentrantLock lock = new ReentrantLock();
@@ -76,11 +76,11 @@ public class UriTemplatesResource extends AbstractResource {
           UrlBuilder workspaceBuilder = UrlBuilder.getBuilder().rel(REL_WORKSPACE).template(orgUrlTemplate).type(
               javax.ws.rs.core.MediaType.APPLICATION_ATOM_XML);
           templateBuilder = getContentTypeUri();
-          final String roleUrlTemplate = templateBuilder.toString();
+          final String typeUrlTemplate = templateBuilder.toString();
           if (logger.isInfoEnabled()) {
-            logger.info("Content type Template URL: " + roleUrlTemplate);
+            logger.info("Content type Template URL: " + typeUrlTemplate);
           }
-          UrlBuilder contentTypeBuilder = UrlBuilder.getBuilder().rel(REL_CONTENT_TYPE).template(roleUrlTemplate).
+          UrlBuilder contentTypeBuilder = UrlBuilder.getBuilder().rel(REL_CONTENT_TYPE).template(typeUrlTemplate).
               type(javax.ws.rs.core.MediaType.APPLICATION_ATOM_XML);
           templateBuilder = getContentUri();
           final String contentUrlTemplate = templateBuilder.toString();

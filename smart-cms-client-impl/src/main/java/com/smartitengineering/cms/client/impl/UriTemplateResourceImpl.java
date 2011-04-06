@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.ContentResource;
+import com.smartitengineering.cms.client.api.ContentTypeFeedResource;
 import com.smartitengineering.cms.client.api.ContentTypeResource;
 import com.smartitengineering.cms.client.api.UriTemplateResource;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
@@ -65,14 +66,15 @@ public class UriTemplateResourceImpl extends AbstractClientResource<OpenSearchDe
   }
 
   @Override
-  public ContentTypeResource getContentTypeResource(String workspaceNS, String workspaceId, String typeNS, String typeId) {
-    ResourceLink link = getResourceLink("contentType",
+  public ContentTypeFeedResource getContentTypeResource(String workspaceNS, String workspaceId, String typeNS,
+                                                        String typeId) {
+    ResourceLink link = getResourceLink("contenttype",
                                         new SimpleImmutableEntry<String, String>(WORKSPACE_NS, workspaceNS),
                                         new SimpleImmutableEntry<String, String>(WORKSPACE_NAME, workspaceId),
                                         new SimpleImmutableEntry<String, String>(TYPE_NS, typeNS),
                                         new SimpleImmutableEntry<String, String>(TYPE_NAME, typeId));
     if (link != null) {
-      return new ContentTypeResourceImpl(this, link);
+      return new ContentTypeFeedResourceImpl(this, link);
     }
     return null;
   }
@@ -114,8 +116,14 @@ public class UriTemplateResourceImpl extends AbstractClientResource<OpenSearchDe
       for (Rel rel : url.getRels()) {
         if (relValue.equals(rel.getValue())) {
           String urlStr = url.getTemplate();
+          if (logger.isInfoEnabled()) {
+            logger.info("Templated URI " + urlStr);
+          }
           for (Entry<String, String> templateVar : templateVars) {
             urlStr = urlStr.replace(templateVar.getKey(), templateVar.getValue());
+          }
+          if (logger.isInfoEnabled()) {
+            logger.info("Final URI " + urlStr);
           }
           ResourceLink link = ClientUtil.createResourceLink(relValue, URI.create(urlStr), url.getType());
           return link;

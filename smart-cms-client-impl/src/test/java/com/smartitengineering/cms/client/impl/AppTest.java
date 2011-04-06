@@ -1295,6 +1295,7 @@ public class AppTest {
 
   @Test
   public void testUriTempaltes() throws URISyntaxException {
+    LOGGER.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TEST TEMPLATES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
     final String workspaceNS, workspaceId, typeNS, typeId;
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     WorkspaceFeedResource feedResource = resource.getWorkspaceFeeds().iterator().next();
@@ -1303,8 +1304,11 @@ public class AppTest {
     typeNS = "com.smartitengineering.smart-shopping.content";
     typeId = "Publisher";
     UriTemplateResource templateResource = resource.getTemplates();
+    LOGGER.info("Testing getting workspace");
     Assert.assertNotNull(templateResource.getWorkspaceResource(workspaceNS, workspaceId));
+    LOGGER.info("Testing getting content type");
     Assert.assertNotNull(templateResource.getContentTypeResource(workspaceNS, workspaceId, typeNS, typeId));
+    LOGGER.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END TEST TEMPLATES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
   }
 
   @Test

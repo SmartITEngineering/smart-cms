@@ -29,7 +29,7 @@ public interface UriTemplateResource extends Resource<OpenSearchDescriptor> {
 
   WorkspaceFeedResource getWorkspaceResource(String workspaceNS, String workspaceId);
 
-  ContentTypeResource getContentTypeResource(String workspaceNS, String workspaceId, String typeNS, String typeId);
+  ContentTypeFeedResource getContentTypeResource(String workspaceNS, String workspaceId, String typeNS, String typeId);
 
   ContentResource getContentResource(String workspaceNS, String workspaceId, String contentId);
 }
