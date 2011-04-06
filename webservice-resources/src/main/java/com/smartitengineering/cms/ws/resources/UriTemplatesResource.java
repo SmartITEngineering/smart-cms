@@ -26,7 +26,6 @@ import com.smartitengineering.util.opensearch.impl.OpenSearchDescriptorBuilder;
 import com.smartitengineering.util.opensearch.impl.UrlBuilder;
 import com.smartitengineering.util.opensearch.jaxrs.MediaType;
 import com.smartitengineering.util.rest.server.AbstractResource;
-import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.util.concurrent.locks.ReentrantLock;
@@ -54,8 +53,7 @@ public class UriTemplatesResource extends AbstractResource {
   private static OpenSearchDescriptor descriptor;
   private static final ReentrantLock lock = new ReentrantLock();
 
-  public UriTemplatesResource(ServerResourceInjectables injectables) {
-    super(injectables);
+  public UriTemplatesResource() {
   }
 
   @GET
