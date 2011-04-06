@@ -43,15 +43,16 @@ public class ContentEventListener implements EventListener<Content> {
 
   @Override
   public void notify(Event<Content> event) {
+    final Content source = event.getSource();
     switch (event.getEventType()) {
       case CREATE:
-        persistentDao.save(event.getSource());
+        persistentDao.save(source);
         break;
       case UPDATE:
-        persistentDao.update(event.getSource());
+        persistentDao.update(source);
         break;
       case DELETE:
-        persistentDao.delete(event.getSource());
+        persistentDao.delete(source);
         break;
     }
   }
