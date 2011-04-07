@@ -130,7 +130,7 @@ public class RootResource extends AbstractResource {
 
   @Path("/" + PATH_TO_TEMPLATES)
   public UriTemplatesResource templates() {
-    return new UriTemplatesResource(getInjectables());
+    return getResourceContext().getResource(UriTemplatesResource.class);
   }
 
   @Override
