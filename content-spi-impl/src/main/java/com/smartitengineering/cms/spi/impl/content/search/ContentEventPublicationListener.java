@@ -24,6 +24,7 @@ import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.event.Event;
 import com.smartitengineering.cms.api.event.Event.Type;
 import com.smartitengineering.cms.api.event.EventListener;
+import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.events.async.api.EventPublisher;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
@@ -37,25 +38,33 @@ import org.slf4j.LoggerFactory;
  * @author imyousuf
  */
 @Singleton
-public class ContentEventPublicationListener implements EventListener<Content> {
+public class ContentEventPublicationListener implements EventListener {
 
   @Inject
   private EventPublisher publisher;
   private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
-  public boolean accepts(Event<Content> event) {
-    return event.getEventSourceType().equals(Type.CONTENT);
+  public boolean accepts(Event event) {
+    return event.getEventSourceType().equals(Type.CONTENT) || event.getEventSourceType().equals(Type.CONTENT_TYPE);
   }
 
   @Override
-  public void notify(Event<Content> event) {
+  public void notify(Event event) {
     String hexedContentId;
     ObjectOutputStream stream = null;
     try {
       final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
       stream = new ObjectOutputStream(byteArrayOutputStream);
-      stream.writeObject(event.getSource().getContentId());
+      if (event.getEventSourceType().equals(Type.CONTENT)) {
+        stream.writeObject(((Content) event.getSource()).getContentId());
+      }
+      else if (event.getEventSourceType().equals(Type.CONTENT_TYPE)) {
+        stream.writeObject(((ContentType) event.getSource()).getContentTypeID());
+      }
+      else {
+        logger.warn("Unrecognized event source type!");
+      }
       hexedContentId = Base64.encodeBase64String(byteArrayOutputStream.toByteArray());
     }
     catch (Exception ex) {
@@ -71,7 +80,8 @@ public class ContentEventPublicationListener implements EventListener<Content> {
       }
     }
     if (StringUtils.isNotBlank(hexedContentId)) {
-      String message = new StringBuilder(event.getEventType().name()).append('\n').append(hexedContentId).toString();
+      String message = new StringBuilder(event.getEventSourceType().name()).append('\n').append(event.getEventType().
+          name()).append('\n').append(hexedContentId).toString();
       if (logger.isInfoEnabled()) {
         logger.info("Publishing message " + message);
       }

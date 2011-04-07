@@ -23,6 +23,7 @@ import com.google.inject.Singleton;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.event.Event.EventType;
+import com.smartitengineering.cms.api.event.Event.Type;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.common.dao.search.CommonFreeTextPersistentTxDao;
 import com.smartitengineering.events.async.api.EventConsumer;
@@ -54,7 +55,12 @@ public class ContentEventConsumerImpl implements EventConsumer {
     BufferedReader reader = null;
     try {
       reader = new BufferedReader(new StringReader(eventMessage));
+      Type sourceType = Type.valueOf(reader.readLine());
       EventType type = EventType.valueOf(reader.readLine());
+      if (logger.isInfoEnabled()) {
+        logger.info("Event source type " + sourceType);
+        logger.info("Event type " + type);
+      }
       final StringBuilder idStr = new StringBuilder("");
       String line;
       do {
@@ -64,32 +70,40 @@ public class ContentEventConsumerImpl implements EventConsumer {
         }
       }
       while (StringUtils.isNotBlank(line));
-      final ContentId contentId = (ContentId) new ObjectInputStream(new ByteArrayInputStream(Base64.decodeBase64(idStr.
-          toString()))).readObject();
-      Content content = SmartContentAPI.getInstance().getContentLoader().loadContent(contentId);
-      switch (type) {
-        case CREATE:
-          persistentDao.save(content);
-          break;
-        case UPDATE:
-          persistentDao.update(content);
-          break;
-        case DELETE:
-          if (content == null) {
-            content = (Content) Proxy.newProxyInstance(Content.class.getClassLoader(), new Class[]{Content.class},
-                                                       new InvocationHandler() {
+      final byte[] decodedIdString = Base64.decodeBase64(idStr.toString());
+      switch (sourceType) {
+        case CONTENT: {
+          final ContentId contentId = (ContentId) new ObjectInputStream(new ByteArrayInputStream(decodedIdString)).
+              readObject();
+          Content content = SmartContentAPI.getInstance().getContentLoader().loadContent(contentId);
+          switch (type) {
+            case CREATE:
+              persistentDao.save(content);
+              break;
+            case UPDATE:
+              persistentDao.update(content);
+              break;
+            case DELETE:
+              if (content == null) {
+                content = (Content) Proxy.newProxyInstance(Content.class.getClassLoader(), new Class[]{Content.class},
+                                                           new InvocationHandler() {
 
-              @Override
-              public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                if (method.getName().equals("getContentId")) {
-                  return contentId;
-                }
-                return null;
+                  @Override
+                  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                    if (method.getName().equals("getContentId")) {
+                      return contentId;
+                    }
+                    return null;
+                  }
+                });
               }
-            });
+              persistentDao.delete(content);
+              break;
           }
-          persistentDao.delete(content);
-          break;
+        }
+        break;
+        default:
+          logger.info("Ignoring event source type " + sourceType);
       }
     }
     catch (Exception ex) {
