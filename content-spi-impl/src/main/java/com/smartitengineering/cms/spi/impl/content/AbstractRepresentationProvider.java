@@ -24,6 +24,9 @@ import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import java.util.Collection;
+import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +48,21 @@ public class AbstractRepresentationProvider {
       logger.warn("External resource URI is not yet handled!");
       return null;
     }
+    final WorkspaceId workspaceId = content.getContentId().getWorkspaceId();
     RepresentationTemplate representationTemplate =
-                           SmartContentAPI.getInstance().getWorkspaceApi().getRepresentationTemplate(content.
-        getContentId().getWorkspaceId(), representationDef.getResourceUri().getValue());
+                           SmartContentAPI.getInstance().getWorkspaceApi().getRepresentationTemplate(workspaceId, representationDef.
+        getResourceUri().getValue());
+    if (representationTemplate == null) {
+      //Lookup friendlies
+      Collection<WorkspaceId> friends = SmartContentAPI.getInstance().getWorkspaceApi().getFriendlies(workspaceId);
+      if (friends != null && !friends.isEmpty()) {
+        Iterator<WorkspaceId> friendsIterator = friends.iterator();
+        while (representationTemplate == null && friendsIterator.hasNext()) {
+          representationTemplate = SmartContentAPI.getInstance().getWorkspaceApi().getRepresentationTemplate(friendsIterator.
+              next(), representationDef.getResourceUri().getValue());
+        }
+      }
+    }
     return representationTemplate;
   }
 }
