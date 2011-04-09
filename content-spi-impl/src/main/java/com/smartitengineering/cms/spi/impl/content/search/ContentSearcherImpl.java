@@ -33,6 +33,7 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.content.ContentSearcher;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
+import com.smartitengineering.cms.spi.impl.events.SolrFieldNames;
 import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.queryparam.BiOperandQueryParameter;
@@ -89,12 +90,12 @@ public class ContentSearcherImpl implements ContentSearcher {
     String seperator = filter.isDisjunction() ? disjunctionSeperator : conjunctionSeperator;
     int count = 0;
     Set<ContentTypeId> contentTypeIds = filter.getContentTypeFilters();
-    finalQuery.append(ContentHelper.TYPE).append(": ").append(ContentHelper.CONTENT);
+    finalQuery.append(SolrFieldNames.TYPE).append(": ").append(ContentHelper.CONTENT);
     final WorkspaceId workspaceId = filter.getWorkspaceId();
     if (workspaceId != null) {
       finalQuery.append(conjunctionSeperator);
       finalQuery.append((" ("));
-      finalQuery.append(ContentHelper.WORKSPACEID).append(": ").append(ClientUtils.escapeQueryChars(
+      finalQuery.append(SolrFieldNames.WORKSPACEID).append(": ").append(ClientUtils.escapeQueryChars(
           workspaceId.toString()));
       if (filter.isFriendliesIncluded()) {
         Collection<WorkspaceId> friendlies = workspaceId.getWorkspae().getFriendlies();
@@ -109,7 +110,7 @@ public class ContentSearcherImpl implements ContentSearcher {
               else {
                 finalQuery.append(disjunctionSeperator);
               }
-              finalQuery.append(ContentHelper.WORKSPACEID).append(": ").append(ClientUtils.escapeQueryChars(friendly.
+              finalQuery.append(SolrFieldNames.WORKSPACEID).append(": ").append(ClientUtils.escapeQueryChars(friendly.
                   toString()));
             }
           }
@@ -130,7 +131,7 @@ public class ContentSearcherImpl implements ContentSearcher {
         query.append(disjunctionSeperator);
       }
       if (contentTypeId != null) {
-        query.append(ContentHelper.INSTANCE_OF).append(": ").append(ClientUtils.escapeQueryChars(
+        query.append(SolrFieldNames.INSTANCE_OF).append(": ").append(ClientUtils.escapeQueryChars(
             contentTypeId.toString()));
       }
       count++;
@@ -143,7 +144,7 @@ public class ContentSearcherImpl implements ContentSearcher {
         query.append(seperator);
       }
       QueryParameter<Date> creationDateFilter = filter.getCreationDateFilter();
-      String queryStr = generateDateQuery(ContentHelper.CREATIONDATE, creationDateFilter);
+      String queryStr = generateDateQuery(SolrFieldNames.CREATIONDATE, creationDateFilter);
       query.append(queryStr);
     }
     if (filter.getLastModifiedDateFilter() != null) {
@@ -151,14 +152,14 @@ public class ContentSearcherImpl implements ContentSearcher {
         query.append(seperator);
       }
       QueryParameter<Date> lastModifiedDateFilter = filter.getLastModifiedDateFilter();
-      String queryStr = generateDateQuery(ContentHelper.LASTMODIFIEDDATE, lastModifiedDateFilter);
+      String queryStr = generateDateQuery(SolrFieldNames.LASTMODIFIEDDATE, lastModifiedDateFilter);
       query.append(queryStr);
     }
     if (StringUtils.isNotBlank(filter.getSearchTerms())) {
       if (query.length() > 0) {
         query.append(seperator);
       }
-      query.append(ContentHelper.ALL_TEXT).append(": ").append(ClientUtils.escapeQueryChars(filter.getSearchTerms()));
+      query.append(SolrFieldNames.ALL_TEXT).append(": ").append(ClientUtils.escapeQueryChars(filter.getSearchTerms()));
     }
     Set<ContentStatus> statuses = filter.getStatusFilters();
     for (ContentStatus contentStatus : statuses) {
@@ -166,7 +167,7 @@ public class ContentSearcherImpl implements ContentSearcher {
         query.append(seperator);
       }
       if (StringUtils.isNotBlank(contentStatus.getName())) {
-        query.append(ContentHelper.STATUS).append(": ").append(ClientUtils.escapeQueryChars(contentStatus.getName()));
+        query.append(SolrFieldNames.STATUS).append(": ").append(ClientUtils.escapeQueryChars(contentStatus.getName()));
       }
     }
     Collection<QueryParameter> fieldQuery = filter.getFieldFilters();
