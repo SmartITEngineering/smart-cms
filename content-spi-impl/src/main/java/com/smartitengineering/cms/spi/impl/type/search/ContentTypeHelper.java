@@ -49,26 +49,30 @@ public class ContentTypeHelper extends AbstractAdapterHelper<ContentType, Multiv
   }
 
   @Override
-  protected void mergeFromF2T(ContentType fromBean,
-                              MultivalueMap<String, Object> toBean) {
+  protected void mergeFromF2T(final ContentType contentType,
+                              final MultivalueMap<String, Object> toBean) {
     toBean.addValue(SolrFieldNames.TYPE, CONTENT_TYPE);
-    final ContentTypeId id = fromBean.getContentTypeID();
+    final ContentTypeId id = contentType.getContentTypeID();
     toBean.addValue(SolrFieldNames.ID, id.toString());
     toBean.addValue(SolrFieldNames.WORKSPACEID, id.getWorkspace().toString());
-    final ContentType contentType = fromBean;
     toBean.addValue(SolrFieldNames.CREATIONDATE, contentType.getCreationDate());
     toBean.addValue(SolrFieldNames.LASTMODIFIEDDATE, contentType.getLastModifiedDate());
     toBean.addValue(SolrFieldNames.STATUS, "published");
-    final String typeIdString = id.toString();
-    toBean.addValue(SolrFieldNames.CONTENTTYPEID, typeIdString);
     toBean.addValue(SolrFieldNames.PRIVATE, false);
-    toBean.addValue(SolrFieldNames.INSTANCE_OF, typeIdString);
-    //Content is a instance of all it parent types
     ContentTypeId parent = contentType.getParent();
-    while (parent != null) {
-      toBean.addValue(SolrFieldNames.INSTANCE_OF, parent.toString());
-      final ContentType partentType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(parent);
-      parent = partentType.getParent();
+    if (parent != null) {
+      toBean.addValue(SolrFieldNames.CONTENTTYPEID, parent);
+      do {
+        toBean.addValue(SolrFieldNames.INSTANCE_OF, parent.toString());
+        ContentType parentType = parent.getContentType();
+        if (parentType != null) {
+          parent = parentType.getParent();
+        }
+        else {
+          parent = null;
+        }
+      }
+      while (parent != null);
     }
   }
 
