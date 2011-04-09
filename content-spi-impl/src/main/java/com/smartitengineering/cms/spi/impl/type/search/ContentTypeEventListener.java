@@ -1,6 +1,6 @@
 /*
  *
- * This is a simple Content Management System (CMS)
+ * This is a simple ContentType Management System (CMS)
  * Copyright (C) 2011  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.impl.content.search;
+package com.smartitengineering.cms.spi.impl.type.search;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.event.Event;
 import com.smartitengineering.cms.api.event.Event.Type;
 import com.smartitengineering.cms.api.event.EventListener;
@@ -33,22 +33,22 @@ import org.slf4j.LoggerFactory;
  * @author imyousuf
  */
 @Singleton
-public class ContentEventListener implements EventListener<Content> {
+public class ContentTypeEventListener implements EventListener<ContentType> {
 
   @Inject
-  private CommonFreeTextPersistentDao<Content> persistentDao;
+  private CommonFreeTextPersistentDao<ContentType> persistentDao;
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
-  public boolean accepts(Event<Content> event) {
-    return event.getEventSourceType().equals(Type.CONTENT);
+  public boolean accepts(Event<ContentType> event) {
+    return event.getEventSourceType().equals(Type.CONTENT_TYPE);
   }
 
   @Override
-  public void notify(Event<Content> event) {
-    final Content source = event.getSource();
+  public void notify(Event<ContentType> event) {
+    final ContentType source = event.getSource();
     if (source == null) {
-      logger.warn("Content event ignored as source is null!");
+      logger.warn("Content type event ignored as source is null!");
       return;
     }
     switch (event.getEventType()) {

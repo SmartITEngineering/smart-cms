@@ -34,6 +34,7 @@ import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
+import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.spi.content.ContentSearcher;
 import com.smartitengineering.cms.spi.content.PersistentContentReader;
@@ -45,9 +46,9 @@ import com.smartitengineering.cms.spi.impl.content.ContentPersistentService;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentFilterConfigsProvider;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentSchemaBaseConfigProvider;
-import com.smartitengineering.cms.spi.impl.content.search.ContentEventConsumerImpl;
+import com.smartitengineering.cms.spi.impl.events.EventConsumerImpl;
 import com.smartitengineering.cms.spi.impl.content.search.ContentEventListener;
-import com.smartitengineering.cms.spi.impl.content.search.ContentEventPublicationListener;
+import com.smartitengineering.cms.spi.impl.events.EventPublicationListener;
 import com.smartitengineering.cms.spi.impl.content.search.ContentHelper;
 import com.smartitengineering.cms.spi.impl.content.search.ContentIdentifierQueryImpl;
 import com.smartitengineering.cms.spi.impl.content.search.ContentSearcherImpl;
@@ -59,6 +60,9 @@ import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeSchemaBaseConfi
 import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLSchemaBasedTypeValidator;
 import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeFilterConfigsProvider;
+import com.smartitengineering.cms.spi.impl.type.search.ContentTypeEventListener;
+import com.smartitengineering.cms.spi.impl.type.search.ContentTypeHelper;
+import com.smartitengineering.cms.spi.impl.type.search.ContentTypeIdentifierQueryImpl;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.impl.uri.UriProviderImpl;
 import com.smartitengineering.cms.spi.lock.LockHandler;
@@ -299,48 +303,16 @@ public class SPIModule extends PrivateModule {
     bind(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
     }).to(new TypeLiteral<CacheableDao<PersistentContent, ContentId, String>>() {
     }).in(Singleton.class);
-
-    if (enableAsyncEvent && enableEventConsumption) {
-      bind(SolrQueryDao.class).to(DefaultSolrDao.class).in(Scopes.SINGLETON);
-      bind(SolrWriteDao.class).to(DefaultSolrDao.class).in(Scopes.SINGLETON);
-      bind(new TypeLiteral<CommonFreeTextPersistentTxDao<Content>>() {
-      }).to(new TypeLiteral<SolrFreeTextPersistentTxDao<Content>>() {
-      }).in(Scopes.SINGLETON);
-      ConnectionConfig config = new ConnectionConfig();
-      config.setBasicUri(eventHubBaseUri);
-      config.setContextPath(eventHubContextPath);
-      URI hub = URI.create(this.hubUri);
-      config.setHost(hub.getHost());
-      config.setPort(hub.getPort());
-      bind(ConnectionConfig.class).toInstance(config);
-      bind(UriStorer.class).to(FileSystemUriStorer.class);
-      bind(String.class).annotatedWith(Names.named("pathToFolderOfUriStorer")).toInstance(uriStoreFolder);
-      bind(String.class).annotatedWith(Names.named("fileNameOfUriStorer")).toInstance(uriStoreFileName);
-      bind(EventSubscriber.class).to(EventSubscriberImpl.class);
-      Multibinder<EventConsumer> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventConsumer>() {
-      });
-      listenerBinder.addBinding().to(ContentEventConsumerImpl.class);
-      bind(new TypeLiteral<Collection<EventConsumer>>() {
-      }).to(new TypeLiteral<Set<EventConsumer>>() {
-      });
-    }
-    else {
-      bind(SolrQueryDao.class).to(SolrDao.class).in(Scopes.SINGLETON);
-      bind(SolrWriteDao.class).to(SolrDao.class).in(Scopes.SINGLETON);
-      TypeLiteral<CommonFreeTextPersistentDao<Content>> prodLit =
-                                                        new TypeLiteral<CommonFreeTextPersistentDao<Content>>() {
-      };
-      bind(prodLit).to(new TypeLiteral<CommonAsyncFreeTextPersistentDaoImpl<Content>>() {
-      }).in(Scopes.SINGLETON);
-      bind(prodLit).annotatedWith(Names.named("primaryFreeTextPersistentDao")).to(new TypeLiteral<SolrFreeTextPersistentDao<Content>>() {
-      }).in(Scopes.SINGLETON);
-    }
+    bind(new TypeLiteral<EventListener<Content>>() {
+    }).to(ContentEventListener.class).in(Singleton.class);
+    bind(new TypeLiteral<EventListener<ContentType>>() {
+    }).to(ContentTypeEventListener.class).in(Singleton.class);
     if (enableAsyncEvent) {
       Multibinder<EventListener> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventListener>() {
       });
-      listenerBinder.addBinding().to(ContentEventPublicationListener.class).in(Singleton.class);
+      listenerBinder.addBinding().to(EventPublicationListener.class).in(Singleton.class);
       bind(new TypeLiteral<EventListener>() {
-      }).annotatedWith(Names.named("reindexEventListener")).to(ContentEventPublicationListener.class).in(
+      }).annotatedWith(Names.named("reindexEventListener")).to(EventPublicationListener.class).in(
           Singleton.class);
       bind(new TypeLiteral<Collection<EventListener>>() {
       }).to(new TypeLiteral<Set<EventListener>>() {
@@ -355,7 +327,8 @@ public class SPIModule extends PrivateModule {
     else {
       Multibinder<EventListener> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventListener>() {
       });
-      listenerBinder.addBinding().to(ContentEventListener.class);
+      listenerBinder.addBinding().to(ContentEventListener.class).in(Singleton.class);
+      listenerBinder.addBinding().to(ContentTypeEventListener.class).in(Singleton.class);
       bind(new TypeLiteral<EventListener>() {
       }).annotatedWith(Names.named("reindexEventListener")).to(ContentEventListener.class).in(
           Singleton.class);
@@ -364,6 +337,52 @@ public class SPIModule extends PrivateModule {
       });
       binder().expose(new TypeLiteral<Collection<EventListener>>() {
       });
+    }
+    bind(SolrQueryDao.class).to(SolrDao.class).in(Scopes.SINGLETON);
+    bind(SolrWriteDao.class).to(SolrDao.class).in(Scopes.SINGLETON);
+    if (enableAsyncEvent && enableEventConsumption) {
+      bind(new TypeLiteral<CommonFreeTextPersistentDao<Content>>() {
+      }).to(new TypeLiteral<SolrFreeTextPersistentDao<Content>>() {
+      }).in(Scopes.SINGLETON);
+
+      bind(new TypeLiteral<CommonFreeTextPersistentDao<ContentType>>() {
+      }).to(new TypeLiteral<SolrFreeTextPersistentDao<ContentType>>() {
+      }).in(Scopes.SINGLETON);
+
+      ConnectionConfig config = new ConnectionConfig();
+      config.setBasicUri(eventHubBaseUri);
+      config.setContextPath(eventHubContextPath);
+      URI hub = URI.create(this.hubUri);
+      config.setHost(hub.getHost());
+      config.setPort(hub.getPort());
+      bind(ConnectionConfig.class).toInstance(config);
+      bind(UriStorer.class).to(FileSystemUriStorer.class);
+      bind(String.class).annotatedWith(Names.named("pathToFolderOfUriStorer")).toInstance(uriStoreFolder);
+      bind(String.class).annotatedWith(Names.named("fileNameOfUriStorer")).toInstance(uriStoreFileName);
+      bind(EventSubscriber.class).to(EventSubscriberImpl.class);
+      Multibinder<EventConsumer> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventConsumer>() {
+      });
+      listenerBinder.addBinding().to(EventConsumerImpl.class);
+      bind(new TypeLiteral<Collection<EventConsumer>>() {
+      }).to(new TypeLiteral<Set<EventConsumer>>() {
+      });
+    }
+    else {
+      TypeLiteral<CommonFreeTextPersistentDao<Content>> prodLit =
+                                                        new TypeLiteral<CommonFreeTextPersistentDao<Content>>() {
+      };
+      bind(prodLit).to(new TypeLiteral<CommonAsyncFreeTextPersistentDaoImpl<Content>>() {
+      }).in(Scopes.SINGLETON);
+      bind(prodLit).annotatedWith(Names.named("primaryFreeTextPersistentDao")).to(new TypeLiteral<SolrFreeTextPersistentDao<Content>>() {
+      }).in(Scopes.SINGLETON);
+
+      TypeLiteral<CommonFreeTextPersistentDao<ContentType>> typeLit =
+                                                            new TypeLiteral<CommonFreeTextPersistentDao<ContentType>>() {
+      };
+      bind(typeLit).to(new TypeLiteral<CommonAsyncFreeTextPersistentDaoImpl<ContentType>>() {
+      }).in(Scopes.SINGLETON);
+      bind(typeLit).annotatedWith(Names.named("primaryFreeTextPersistentDao")).to(new TypeLiteral<SolrFreeTextPersistentDao<ContentType>>() {
+      }).in(Scopes.SINGLETON);
     }
     bind(new TypeLiteral<ObjectIdentifierQuery<Content>>() {
     }).to(ContentIdentifierQueryImpl.class).in(Scopes.SINGLETON);
@@ -375,6 +394,18 @@ public class SPIModule extends PrivateModule {
     bind(new TypeLiteral<CommonFreeTextSearchDao<Content>>() {
     }).to(new TypeLiteral<SolrFreeTextSearchDao<Content>>() {
     }).in(Scopes.SINGLETON);
+
+    bind(new TypeLiteral<ObjectIdentifierQuery<ContentType>>() {
+    }).to(ContentTypeIdentifierQueryImpl.class).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<GenericAdapter<ContentType, MultivalueMap<String, Object>>>() {
+    }).to(new TypeLiteral<GenericAdapterImpl<ContentType, MultivalueMap<String, Object>>>() {
+    }).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<AbstractAdapterHelper<ContentType, MultivalueMap<String, Object>>>() {
+    }).to(ContentTypeHelper.class).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<CommonFreeTextSearchDao<ContentType>>() {
+    }).to(new TypeLiteral<SolrFreeTextSearchDao<ContentType>>() {
+    }).in(Scopes.SINGLETON);
+
     bind(ContentSearcher.class).to(ContentSearcherImpl.class).in(Scopes.SINGLETON);
     binder().expose(ContentSearcher.class);
 

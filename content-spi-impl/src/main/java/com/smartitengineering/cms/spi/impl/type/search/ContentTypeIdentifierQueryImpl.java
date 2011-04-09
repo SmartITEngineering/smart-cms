@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2011  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.impl.content.search;
+package com.smartitengineering.cms.spi.impl.type.search;
 
-import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.spi.impl.events.SolrFieldNames;
 import com.smartitengineering.common.dao.search.solr.spi.ObjectIdentifierQuery;
 
@@ -26,13 +26,13 @@ import com.smartitengineering.common.dao.search.solr.spi.ObjectIdentifierQuery;
  *
  * @author imyousuf
  */
-public class ContentIdentifierQueryImpl implements ObjectIdentifierQuery<Content> {
+public class ContentTypeIdentifierQueryImpl implements ObjectIdentifierQuery<ContentType> {
 
   private static final String TYPE_ID = new StringBuilder(SolrFieldNames.TYPE).append(": \"").append(
-      ContentHelper.CONTENT).append("\" AND id: \"").toString();
+      ContentTypeHelper.CONTENT_TYPE).append("\" AND id: \"").toString();
 
   @Override
-  public String getQuery(Content object) {
-    return new StringBuilder(TYPE_ID).append(object.getContentId().toString()).append('"').toString();
+  public String getQuery(ContentType object) {
+    return new StringBuilder(TYPE_ID).append(object.getContentTypeID().toString()).append('"').toString();
   }
 }

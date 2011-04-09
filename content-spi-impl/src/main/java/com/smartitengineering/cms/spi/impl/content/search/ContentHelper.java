@@ -34,6 +34,7 @@ import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
+import com.smartitengineering.cms.spi.impl.events.SolrFieldNames;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import com.smartitengineering.dao.solr.MultivalueMap;
 import com.smartitengineering.dao.solr.impl.MultivalueMapImpl;
@@ -53,17 +54,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<String, Object>> {
 
-  public static final String CONTENT = "content";
-  public static final String CONTENTTYPEID = "contentTypeId";
-  public static final String CREATIONDATE = "creationDate";
-  public static final String ID = "id";
-  public static final String INSTANCE_OF = "instanceOf";
-  public static final String LASTMODIFIEDDATE = "lastModifiedDate";
-  public static final String STATUS = "status";
-  public static final String TYPE = "type";
-  public static final String ALL_TEXT = "alltext";
-  public static final String WORKSPACEID = "workspaceId";
-  public static final String PRIVATE = "private";
+  protected static final String CONTENT = "content";
+  
   @Inject
   private SchemaInfoProvider<PersistentContent, ContentId> contentScehmaProvider;
   private final transient Logger logger = LoggerFactory.getLogger(getClass());
@@ -76,23 +68,23 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
   @Override
   protected void mergeFromF2T(Content fromBean,
                               MultivalueMap<String, Object> toBean) {
-    toBean.addValue(TYPE, CONTENT);
+    toBean.addValue(SolrFieldNames.TYPE, CONTENT);
     final ContentId id = fromBean.getContentId();
-    toBean.addValue(ID, id.toString());
-    toBean.addValue(WORKSPACEID, id.getWorkspaceId().toString());
+    toBean.addValue(SolrFieldNames.ID, id.toString());
+    toBean.addValue(SolrFieldNames.WORKSPACEID, id.getWorkspaceId().toString());
     final Content mutableContent = fromBean;
-    toBean.addValue(CREATIONDATE, mutableContent.getCreationDate());
-    toBean.addValue(LASTMODIFIEDDATE, mutableContent.getLastModifiedDate());
-    toBean.addValue(STATUS, mutableContent.getStatus().getName());
+    toBean.addValue(SolrFieldNames.CREATIONDATE, mutableContent.getCreationDate());
+    toBean.addValue(SolrFieldNames.LASTMODIFIEDDATE, mutableContent.getLastModifiedDate());
+    toBean.addValue(SolrFieldNames.STATUS, mutableContent.getStatus().getName());
     final String typeIdString = mutableContent.getContentDefinition().getContentTypeID().toString();
-    toBean.addValue(CONTENTTYPEID, typeIdString);
-    toBean.addValue(PRIVATE, mutableContent.isPrivate());
-    toBean.addValue(INSTANCE_OF, typeIdString);
+    toBean.addValue(SolrFieldNames.CONTENTTYPEID, typeIdString);
+    toBean.addValue(SolrFieldNames.PRIVATE, mutableContent.isPrivate());
+    toBean.addValue(SolrFieldNames.INSTANCE_OF, typeIdString);
     //Content is a instance of all it parent types
     ContentType contentType = mutableContent.getContentDefinition();
     ContentTypeId parent = contentType.getParent();
     while (parent != null) {
-      toBean.addValue(INSTANCE_OF, parent.toString());
+      toBean.addValue(SolrFieldNames.INSTANCE_OF, parent.toString());
       final ContentType partentType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(parent);
       parent = partentType.getParent();
     }
@@ -184,7 +176,7 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
   @Override
   protected Content convertFromT2F(MultivalueMap<String, Object> toBean) {
     try {
-      byte[] contentId = StringUtils.getBytesUtf8(toBean.getFirst(ID).toString());
+      byte[] contentId = StringUtils.getBytesUtf8(toBean.getFirst(SolrFieldNames.ID).toString());
       ContentId id = contentScehmaProvider.getIdFromRowId(contentId);
       return SmartContentAPI.getInstance().getContentLoader().loadContent(id);
     }
