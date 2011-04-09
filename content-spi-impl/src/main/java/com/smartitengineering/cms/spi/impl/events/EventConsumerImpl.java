@@ -22,10 +22,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.event.Event;
 import com.smartitengineering.cms.api.event.Event.EventType;
 import com.smartitengineering.cms.api.event.Event.Type;
+import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
-import com.smartitengineering.common.dao.search.CommonFreeTextPersistentTxDao;
+import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.events.async.api.EventConsumer;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -47,7 +50,9 @@ import org.slf4j.LoggerFactory;
 public class EventConsumerImpl implements EventConsumer {
 
   @Inject
-  private CommonFreeTextPersistentTxDao<Content> persistentDao;
+  private EventListener<Content> contentListener;
+  @Inject
+  private EventListener<ContentType> contentTypeListener;
   private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
@@ -55,8 +60,8 @@ public class EventConsumerImpl implements EventConsumer {
     BufferedReader reader = null;
     try {
       reader = new BufferedReader(new StringReader(eventMessage));
-      Type sourceType = Type.valueOf(reader.readLine());
-      EventType type = EventType.valueOf(reader.readLine());
+      final Type sourceType = Type.valueOf(reader.readLine());
+      final EventType type = EventType.valueOf(reader.readLine());
       if (logger.isInfoEnabled()) {
         logger.info("Event source type " + sourceType);
         logger.info("Event type " + type);
@@ -73,33 +78,52 @@ public class EventConsumerImpl implements EventConsumer {
       final byte[] decodedIdString = Base64.decodeBase64(idStr.toString());
       switch (sourceType) {
         case CONTENT: {
-          final ContentId contentId = (ContentId) new ObjectInputStream(new ByteArrayInputStream(decodedIdString)).
-              readObject();
-          Content content = SmartContentAPI.getInstance().getContentLoader().loadContent(contentId);
-          switch (type) {
-            case CREATE:
-              persistentDao.save(content);
-              break;
-            case UPDATE:
-              persistentDao.update(content);
-              break;
-            case DELETE:
-              if (content == null) {
-                content = (Content) Proxy.newProxyInstance(Content.class.getClassLoader(), new Class[]{Content.class},
-                                                           new InvocationHandler() {
+          final ContentId contentId =
+                          (ContentId) new ObjectInputStream(new ByteArrayInputStream(decodedIdString)).readObject();
+          Content content = contentId.getContent();
+          if (content == null && EventType.DELETE.equals(type)) {
+            content =
+            (Content) Proxy.newProxyInstance(Content.class.getClassLoader(), new Class[]{Content.class},
+                                             new InvocationHandler() {
 
-                  @Override
-                  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                    if (method.getName().equals("getContentId")) {
-                      return contentId;
-                    }
-                    return null;
-                  }
-                });
+              @Override
+              public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                if (method.getName().equals("getContentId")) {
+                  return contentId;
+                }
+                return null;
               }
-              persistentDao.delete(content);
-              break;
+            });
           }
+          final Event<Content> event = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(type,
+                                                                                                              sourceType,
+                                                                                                              content);
+          contentListener.notify(event);
+        }
+        break;
+        case CONTENT_TYPE: {
+          final ContentTypeId typeId =
+                              (ContentTypeId) new ObjectInputStream(new ByteArrayInputStream(decodedIdString)).
+              readObject();
+          ContentType contentType = typeId.getContentType();
+          if (contentType == null && EventType.DELETE.equals(type)) {
+            contentType = (ContentType) Proxy.newProxyInstance(ContentType.class.getClassLoader(), new Class[]{
+                  ContentType.class}, new InvocationHandler() {
+
+              @Override
+              public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                if (method.getName().equals("getContentTypeID")) {
+                  return typeId;
+                }
+                return null;
+              }
+            });
+          }
+          final Event<ContentType> event =
+                                   SmartContentAPI.getInstance().getEventRegistrar().<ContentType>createEvent(type,
+                                                                                                              sourceType,
+                                                                                                              contentType);
+          contentTypeListener.notify(event);
         }
         break;
         default:
@@ -126,16 +150,5 @@ public class EventConsumerImpl implements EventConsumer {
 
   @Override
   public void endConsumption(boolean prematureEnd) {
-    try {
-      if (prematureEnd) {
-        persistentDao.rollback();
-      }
-      else {
-        persistentDao.commit();
-      }
-    }
-    catch (Exception ex) {
-      logger.error("Could not commit/rollback for prematureEnd (" + prematureEnd + ")", ex);
-    }
   }
 }

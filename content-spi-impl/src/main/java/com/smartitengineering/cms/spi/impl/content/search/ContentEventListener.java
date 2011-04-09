@@ -25,6 +25,8 @@ import com.smartitengineering.cms.api.event.Event;
 import com.smartitengineering.cms.api.event.Event.Type;
 import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.common.dao.search.CommonFreeTextPersistentDao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -35,6 +37,7 @@ public class ContentEventListener implements EventListener<Content> {
 
   @Inject
   private CommonFreeTextPersistentDao<Content> persistentDao;
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
   public boolean accepts(Event<Content> event) {
@@ -45,6 +48,7 @@ public class ContentEventListener implements EventListener<Content> {
   public void notify(Event<Content> event) {
     final Content source = event.getSource();
     if (source == null) {
+      logger.warn("Content event ignored as source is null!");
       return;
     }
     switch (event.getEventType()) {
