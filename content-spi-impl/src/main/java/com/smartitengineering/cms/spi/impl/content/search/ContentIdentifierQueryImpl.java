@@ -29,6 +29,6 @@ public class ContentIdentifierQueryImpl implements ObjectIdentifierQuery<Content
 
   @Override
   public String getQuery(Content object) {
-    return new StringBuilder("id: \"").append(object.getContentId().toString()).append('"').toString();
+    return new StringBuilder("type: \"content\" AND id: \"").append(object.getContentId().toString()).append('"').toString();
   }
 }

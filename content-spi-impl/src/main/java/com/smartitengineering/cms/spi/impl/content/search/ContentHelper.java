@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<String, Object>> {
 
-  public static final String CONTENT = "content";
+  private static final String CONTENT = "content";
   public static final String CONTENTTYPEID = "contentTypeId";
   public static final String CREATIONDATE = "creationDate";
   public static final String ID = "id";
