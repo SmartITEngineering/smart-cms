@@ -75,7 +75,7 @@ public class ContentSearcherImpl implements ContentSearcher {
   private SchemaInfoProvider<PersistentContent, ContentId> schemaInfoProvider;
   @Inject
   @Named("reindexEventListener")
-  private EventListener<Content> reindexListener;
+  private EventListener reindexListener;
   @Inject(optional = true)
   private EventSubscriber subscriber;
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();

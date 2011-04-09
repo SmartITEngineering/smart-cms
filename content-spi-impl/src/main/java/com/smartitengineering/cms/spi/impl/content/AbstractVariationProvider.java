@@ -24,6 +24,9 @@ import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import java.util.Collection;
+import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +48,21 @@ public class AbstractVariationProvider {
       logger.warn("External resource URI is not yet handled!");
       return null;
     }
+    final WorkspaceId workspaceId = content.getContentId().getWorkspaceId();
     VariationTemplate variationTemplate =
-                      SmartContentAPI.getInstance().getWorkspaceApi().getVariationTemplate(content.getContentId().
-        getWorkspaceId(), variationDef.getResourceUri().getValue());
+                      SmartContentAPI.getInstance().getWorkspaceApi().getVariationTemplate(workspaceId, variationDef.
+        getResourceUri().getValue());
+    if (variationTemplate == null) {
+      //Lookup friendlies
+      Collection<WorkspaceId> friends = SmartContentAPI.getInstance().getWorkspaceApi().getFriendlies(workspaceId);
+      if (friends != null && !friends.isEmpty()) {
+        Iterator<WorkspaceId> friendsIterator = friends.iterator();
+        while (variationTemplate == null && friendsIterator.hasNext()) {
+          variationTemplate = SmartContentAPI.getInstance().getWorkspaceApi().getVariationTemplate(
+              friendsIterator.next(), variationDef.getResourceUri().getValue());
+        }
+      }
+    }
     return variationTemplate;
   }
 }

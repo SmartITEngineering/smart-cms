@@ -339,7 +339,7 @@ public class SPIModule extends PrivateModule {
       Multibinder<EventListener> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventListener>() {
       });
       listenerBinder.addBinding().to(ContentEventPublicationListener.class).in(Singleton.class);
-      bind(new TypeLiteral<EventListener<Content>>() {
+      bind(new TypeLiteral<EventListener>() {
       }).annotatedWith(Names.named("reindexEventListener")).to(ContentEventPublicationListener.class).in(
           Singleton.class);
       bind(new TypeLiteral<Collection<EventListener>>() {
@@ -356,6 +356,9 @@ public class SPIModule extends PrivateModule {
       Multibinder<EventListener> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventListener>() {
       });
       listenerBinder.addBinding().to(ContentEventListener.class);
+      bind(new TypeLiteral<EventListener>() {
+      }).annotatedWith(Names.named("reindexEventListener")).to(ContentEventListener.class).in(
+          Singleton.class);
       bind(new TypeLiteral<Collection<EventListener>>() {
       }).to(new TypeLiteral<Set<EventListener>>() {
       });
