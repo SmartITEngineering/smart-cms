@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.spi.impl.content.search;
 
 import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.spi.impl.events.SolrFieldNames;
 import com.smartitengineering.common.dao.search.solr.spi.ObjectIdentifierQuery;
 
 /**
@@ -27,8 +28,11 @@ import com.smartitengineering.common.dao.search.solr.spi.ObjectIdentifierQuery;
  */
 public class ContentIdentifierQueryImpl implements ObjectIdentifierQuery<Content> {
 
+  private static final String TYPE_ID = new StringBuilder(SolrFieldNames.TYPE).append(": \"").append(
+      ContentHelper.CONTENT).append("\" AND id: \"").toString();
+
   @Override
   public String getQuery(Content object) {
-    return new StringBuilder("type: \"content\" AND id: \"").append(object.getContentId().toString()).append('"').toString();
+    return new StringBuilder(TYPE_ID).append(object.getContentId().toString()).append('"').toString();
   }
 }
