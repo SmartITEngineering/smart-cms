@@ -45,9 +45,9 @@ import com.smartitengineering.cms.spi.impl.content.ContentPersistentService;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentFilterConfigsProvider;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentSchemaBaseConfigProvider;
-import com.smartitengineering.cms.spi.impl.content.search.ContentEventConsumerImpl;
+import com.smartitengineering.cms.spi.impl.events.EventConsumerImpl;
 import com.smartitengineering.cms.spi.impl.content.search.ContentEventListener;
-import com.smartitengineering.cms.spi.impl.content.search.ContentEventPublicationListener;
+import com.smartitengineering.cms.spi.impl.events.EventPublicationListener;
 import com.smartitengineering.cms.spi.impl.content.search.ContentHelper;
 import com.smartitengineering.cms.spi.impl.content.search.ContentIdentifierQueryImpl;
 import com.smartitengineering.cms.spi.impl.content.search.ContentSearcherImpl;
@@ -319,7 +319,7 @@ public class SPIModule extends PrivateModule {
       bind(EventSubscriber.class).to(EventSubscriberImpl.class);
       Multibinder<EventConsumer> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventConsumer>() {
       });
-      listenerBinder.addBinding().to(ContentEventConsumerImpl.class);
+      listenerBinder.addBinding().to(EventConsumerImpl.class);
       bind(new TypeLiteral<Collection<EventConsumer>>() {
       }).to(new TypeLiteral<Set<EventConsumer>>() {
       });
@@ -338,9 +338,9 @@ public class SPIModule extends PrivateModule {
     if (enableAsyncEvent) {
       Multibinder<EventListener> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventListener>() {
       });
-      listenerBinder.addBinding().to(ContentEventPublicationListener.class).in(Singleton.class);
+      listenerBinder.addBinding().to(EventPublicationListener.class).in(Singleton.class);
       bind(new TypeLiteral<EventListener>() {
-      }).annotatedWith(Names.named("reindexEventListener")).to(ContentEventPublicationListener.class).in(
+      }).annotatedWith(Names.named("reindexEventListener")).to(EventPublicationListener.class).in(
           Singleton.class);
       bind(new TypeLiteral<Collection<EventListener>>() {
       }).to(new TypeLiteral<Set<EventListener>>() {

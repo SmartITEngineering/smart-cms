@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.impl.content.search;
+package com.smartitengineering.cms.spi.impl.events;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author imyousuf
  */
 @Singleton
-public class ContentEventConsumerImpl implements EventConsumer {
+public class EventConsumerImpl implements EventConsumer {
 
   @Inject
   private CommonFreeTextPersistentTxDao<Content> persistentDao;
