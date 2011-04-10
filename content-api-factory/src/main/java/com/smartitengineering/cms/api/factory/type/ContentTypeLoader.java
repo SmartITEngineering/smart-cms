@@ -63,6 +63,18 @@ public interface ContentTypeLoader {
       throws NullPointerException;
 
   /**
+   * Re-Index the content types of the workspace
+   * @param workspaceId The workspace of which the content types are to be re-indexed
+   */
+  public void reIndexTypes(WorkspaceId workspaceId);
+
+  /**
+   * Re-Index a specific content type
+   * @param contentTypeId The content type to reindex.
+   */
+  public void reIndexType(ContentTypeId contentTypeId);
+
+  /**
    * Parse a {@link InputStream} to retrieve the content type definitions. The format
    * of the file should be specified by the implementor.
    * @param contentTypeDefinitionStream Stream to parse for content type definitions.

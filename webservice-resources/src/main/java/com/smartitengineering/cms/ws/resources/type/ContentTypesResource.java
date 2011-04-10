@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 @Path("/t/{" + WorkspaceResource.PARAM_NAMESPACE + "}/{" + WorkspaceResource.PARAM_NAME + "}")
 public class ContentTypesResource extends AbstractResource {
 
-  public static final String PATH_TO_CONTENT_TYPE = "{typeNS}/{typeName}";
+  public static final String PATH_TO_CONTENT_TYPE = "/d/{typeNS}/{typeName}";
   public static final String REL_CONTENT_TYPE = "contentType";
   public static final String REL_CONTENT_TYPE_FEED = "contentTypeFeed";
   public static final String PATH_TO_SEARCH = "search";

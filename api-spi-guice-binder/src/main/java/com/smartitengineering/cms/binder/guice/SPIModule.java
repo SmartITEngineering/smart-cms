@@ -63,6 +63,7 @@ import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeFilterConfigsPr
 import com.smartitengineering.cms.spi.impl.type.search.ContentTypeEventListener;
 import com.smartitengineering.cms.spi.impl.type.search.ContentTypeHelper;
 import com.smartitengineering.cms.spi.impl.type.search.ContentTypeIdentifierQueryImpl;
+import com.smartitengineering.cms.spi.impl.type.search.ContentTypeSearcherImpl;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.impl.uri.UriProviderImpl;
 import com.smartitengineering.cms.spi.lock.LockHandler;
@@ -71,16 +72,15 @@ import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParsers;
+import com.smartitengineering.cms.spi.type.ContentTypeSearcher;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.SearchFieldNameGenerator;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
 import com.smartitengineering.common.dao.search.CommonFreeTextPersistentDao;
-import com.smartitengineering.common.dao.search.CommonFreeTextPersistentTxDao;
 import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
 import com.smartitengineering.common.dao.search.impl.CommonAsyncFreeTextPersistentDaoImpl;
 import com.smartitengineering.common.dao.search.solr.SolrFreeTextPersistentDao;
-import com.smartitengineering.common.dao.search.solr.SolrFreeTextPersistentTxDao;
 import com.smartitengineering.common.dao.search.solr.SolrFreeTextSearchDao;
 import com.smartitengineering.common.dao.search.solr.spi.ObjectIdentifierQuery;
 import com.smartitengineering.dao.common.CommonReadDao;
@@ -106,7 +106,6 @@ import com.smartitengineering.dao.solr.ServerConfiguration;
 import com.smartitengineering.dao.solr.ServerFactory;
 import com.smartitengineering.dao.solr.SolrQueryDao;
 import com.smartitengineering.dao.solr.SolrWriteDao;
-import com.smartitengineering.dao.solr.impl.DefaultSolrDao;
 import com.smartitengineering.dao.solr.impl.ServerConfigurationImpl;
 import com.smartitengineering.dao.solr.impl.SingletonRemoteServerFactory;
 import com.smartitengineering.dao.solr.impl.SolrDao;
@@ -285,6 +284,8 @@ public class SPIModule extends PrivateModule {
     }).to(ContentTypeAdapterHelper.class).in(Scopes.SINGLETON);
     bind(PersistentContentTypeReader.class).to(ContentTypePersistentService.class);
     binder().expose(PersistentContentTypeReader.class);
+    bind(ContentTypeSearcher.class).to(ContentTypeSearcherImpl.class).in(Singleton.class);
+    binder().expose(ContentTypeSearcher.class);
     /*
      * End injection specific to common dao of content type
      */
@@ -312,7 +313,11 @@ public class SPIModule extends PrivateModule {
       });
       listenerBinder.addBinding().to(EventPublicationListener.class).in(Singleton.class);
       bind(new TypeLiteral<EventListener>() {
-      }).annotatedWith(Names.named("reindexEventListener")).to(EventPublicationListener.class).in(
+      }).annotatedWith(Names.named(ContentSearcherImpl.REINDEX_LISTENER_NAME)).to(EventPublicationListener.class).in(
+          Singleton.class);
+      bind(new TypeLiteral<EventListener>() {
+      }).annotatedWith(Names.named(ContentTypeSearcherImpl.REINDEX_LISTENER_NAME)).to(EventPublicationListener.class).
+          in(
           Singleton.class);
       bind(new TypeLiteral<Collection<EventListener>>() {
       }).to(new TypeLiteral<Set<EventListener>>() {
@@ -330,8 +335,11 @@ public class SPIModule extends PrivateModule {
       listenerBinder.addBinding().to(ContentEventListener.class).in(Singleton.class);
       listenerBinder.addBinding().to(ContentTypeEventListener.class).in(Singleton.class);
       bind(new TypeLiteral<EventListener>() {
-      }).annotatedWith(Names.named("reindexEventListener")).to(ContentEventListener.class).in(
+      }).annotatedWith(Names.named(ContentSearcherImpl.REINDEX_LISTENER_NAME)).to(ContentEventListener.class).in(
           Singleton.class);
+      bind(new TypeLiteral<EventListener>() {
+      }).annotatedWith(Names.named(ContentTypeSearcherImpl.REINDEX_LISTENER_NAME)).to(ContentTypeEventListener.class).
+          in(Singleton.class);
       bind(new TypeLiteral<Collection<EventListener>>() {
       }).to(new TypeLiteral<Set<EventListener>>() {
       });

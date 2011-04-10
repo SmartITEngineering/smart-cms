@@ -72,6 +72,7 @@ public class ContentTypeResource extends AbstractResource {
   private final EntityTag tag;
   private final Logger logger = LoggerFactory.getLogger(getClass());
   public static transient final String PATH_TO_SEARCH = "search";
+  public static final String PATH_TO_REINDEX = "reindex";
 
   public ContentTypeResource(ServerResourceInjectables injectables, ContentType type) {
     super(injectables);
@@ -104,6 +105,13 @@ public class ContentTypeResource extends AbstractResource {
     return resource;
   }
 
+  @Path(PATH_TO_REINDEX)
+  public ContentTypeReIndexResource reIndex() {
+    ContentTypeReIndexResource resource = new ContentTypeReIndexResource(getInjectables());
+    resource.setTypeId(type.getContentTypeID());
+    return resource;
+  }
+
   @GET
   @Produces(MediaType.APPLICATION_ATOM_XML)
   public Response getAtomFeed() {
@@ -120,6 +128,10 @@ public class ContentTypeResource extends AbstractResource {
           getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(), type.
           getContentTypeID().getName()), "search",
                            com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
+      feed.addLink(getLink(getRelativeURIBuilder().path(ContentTypesResource.class).path(
+          ContentTypesResource.PATH_TO_CONTENT_TYPE).path(PATH_TO_REINDEX).build(type.getContentTypeID().getWorkspace().
+          getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(), type.
+          getContentTypeID().getName()), PATH_TO_REINDEX, MediaType.TEXT_PLAIN));
       feed.addLink(getLink(getUriInfo().getRequestUri(), Link.REL_ALTERNATE, MediaType.APPLICATION_XML));
       builder = Response.ok(feed);
       builder.lastModified(lastModified);

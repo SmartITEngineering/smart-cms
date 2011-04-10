@@ -344,4 +344,14 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
         getLastModifiedDate())).append('~').append(contentType.getRepresentations().get(MediaType.APPLICATION_XML)).
         toString());
   }
+
+  @Override
+  public void reIndexTypes(WorkspaceId workspaceId) {
+    SmartContentSPI.getInstance().getContentTypeSearcher().reIndex(workspaceId);
+  }
+
+  @Override
+  public void reIndexType(ContentTypeId contentTypeId) {
+    SmartContentSPI.getInstance().getContentTypeSearcher().reIndex(contentTypeId);
+  }
 }

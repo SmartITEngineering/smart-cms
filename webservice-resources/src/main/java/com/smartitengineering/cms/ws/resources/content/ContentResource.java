@@ -142,8 +142,8 @@ public class ContentResource extends AbstractResource {
   }
 
   @Path(PATH_TO_REINDEX)
-  public ReIndexResource reindex() {
-    ReIndexResource resource = new ReIndexResource(getInjectables());
+  public ContentReIndexResource reindex() {
+    ContentReIndexResource resource = new ContentReIndexResource(getInjectables());
     resource.setContentId(contentId);
     return resource;
   }
