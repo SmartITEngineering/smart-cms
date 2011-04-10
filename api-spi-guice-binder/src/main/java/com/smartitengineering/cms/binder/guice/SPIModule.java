@@ -104,7 +104,6 @@ import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
 import com.smartitengineering.dao.solr.MultivalueMap;
 import com.smartitengineering.dao.solr.ServerConfiguration;
 import com.smartitengineering.dao.solr.ServerFactory;
-import com.smartitengineering.dao.solr.SolrQueryDao;
 import com.smartitengineering.dao.solr.SolrWriteDao;
 import com.smartitengineering.dao.solr.impl.ServerConfigurationImpl;
 import com.smartitengineering.dao.solr.impl.SingletonRemoteServerFactory;
@@ -346,7 +345,6 @@ public class SPIModule extends PrivateModule {
       binder().expose(new TypeLiteral<Collection<EventListener>>() {
       });
     }
-    bind(SolrQueryDao.class).to(SolrDao.class).in(Scopes.SINGLETON);
     bind(SolrWriteDao.class).to(SolrDao.class).in(Scopes.SINGLETON);
     if (enableAsyncEvent && enableEventConsumption) {
       bind(new TypeLiteral<CommonFreeTextPersistentDao<Content>>() {
