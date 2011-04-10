@@ -21,6 +21,7 @@ package com.smartitengineering.cms.client.impl;
 import com.smartitengineering.cms.client.api.ContentTypeFeedResource;
 import com.smartitengineering.cms.client.api.ContentTypeResource;
 import com.smartitengineering.cms.client.api.ContentTypesResource;
+import com.smartitengineering.cms.client.api.FriendlyContentTypesResource;
 import com.smartitengineering.util.rest.atom.AbstractFeedClientResource;
 import com.smartitengineering.util.rest.atom.AtomClientUtil;
 import com.smartitengineering.util.rest.client.Resource;
@@ -104,5 +105,12 @@ public class ContentTypesResourceImpl extends AbstractFeedClientResource<Content
   @Override
   public void createContentType(String contentType) {
     post(MediaType.APPLICATION_XML, contentType, ClientResponse.Status.ACCEPTED);
+  }
+
+  @Override
+  public FriendlyContentTypesResource getFriendlyContentTypesResource() {
+    FriendlyContentTypesResourceImpl resourceImpl = new FriendlyContentTypesResourceImpl(this, AtomClientUtil.
+        convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().getLink("friendlies")));
+    return resourceImpl;
   }
 }
