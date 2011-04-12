@@ -257,16 +257,18 @@ public class ContentTypeResource extends AbstractResource {
   @Path(PATH_TO_CHILDREN)
   public ContentTypeSearcherResource getChildren() {
     ContentTypeSearcherResource resource = getResourceContext().getResource(ContentTypeSearcherResource.class);
-    resource.setWorkspaceId(type.getContentTypeID().getWorkspace().getWorkspae().toString());
+    resource.setWorkspaceId(type.getContentTypeID().getWorkspace().toString());
     resource.setParentId(type.getContentTypeID().toString());
+    resource.setIncludeFriendlies(false);
     return resource;
   }
 
   @Path(PATH_TO_INSTANCES)
   public ContentTypeSearcherResource getInstances() {
     ContentTypeSearcherResource resource = getResourceContext().getResource(ContentTypeSearcherResource.class);
-    resource.setWorkspaceId(type.getContentTypeID().getWorkspace().getWorkspae().toString());
+    resource.setWorkspaceId(type.getContentTypeID().getWorkspace().toString());
     resource.setContentTypeId(Collections.singletonList(type.getContentTypeID().toString()));
+    resource.setIncludeFriendlies(false);
     return resource;
   }
 

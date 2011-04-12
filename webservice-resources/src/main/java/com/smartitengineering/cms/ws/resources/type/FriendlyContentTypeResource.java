@@ -143,8 +143,9 @@ public class FriendlyContentTypeResource extends AbstractResource {
   public ContentTypeSearcherResource getChildren() {
     ContentType type = validate();
     ContentTypeSearcherResource resource = getResourceContext().getResource(ContentTypeSearcherResource.class);
-    resource.setWorkspaceId(type.getContentTypeID().getWorkspace().getWorkspae().toString());
+    resource.setWorkspaceId(ownerWorkspace.getId().toString());
     resource.setParentId(type.getContentTypeID().toString());
+    resource.setIncludeFriendlies(false);
     return resource;
   }
 
@@ -152,8 +153,9 @@ public class FriendlyContentTypeResource extends AbstractResource {
   public ContentTypeSearcherResource getInstances() {
     ContentType type = validate();
     ContentTypeSearcherResource resource = getResourceContext().getResource(ContentTypeSearcherResource.class);
-    resource.setWorkspaceId(type.getContentTypeID().getWorkspace().getWorkspae().toString());
+    resource.setWorkspaceId(ownerWorkspace.getId().toString());
     resource.setContentTypeId(Collections.singletonList(type.getContentTypeID().toString()));
+    resource.setIncludeFriendlies(false);
     return resource;
   }
 
