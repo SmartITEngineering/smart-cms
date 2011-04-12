@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.common.SearchResult;
 import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
@@ -27,6 +28,7 @@ import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
+import com.smartitengineering.cms.api.impl.content.SearchResultImpl;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.Filter;
 import com.smartitengineering.cms.api.type.MutableCollectionDataType;
@@ -359,5 +361,18 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   @Override
   public Filter createFilter() {
     return new FilterImpl();
+  }
+
+  @Override
+  public SearchResult<ContentType> createSearchResult(Collection<ContentType> result, long totalResultsCount) {
+    SearchResultImpl<ContentType> resultImpl = new SearchResultImpl<ContentType>();
+    resultImpl.setResult(result);
+    resultImpl.setTotalResultsCount(totalResultsCount);
+    return resultImpl;
+  }
+
+  @Override
+  public SearchResult<ContentType> search(Filter filter) {
+    return SmartContentSPI.getInstance().getContentTypeSearcher().search(filter);
   }
 }

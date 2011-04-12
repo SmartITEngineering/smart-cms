@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.factory.type;
 
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.common.SearchResult;
 import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
@@ -71,6 +72,10 @@ public interface ContentTypeLoader {
 
   public Filter createFilter();
 
+  public SearchResult<ContentType> createSearchResult(Collection<ContentType> result, long totalResultsCount);
+
+  public SearchResult<ContentType> search(Filter filter);
+
   /**
    * Re-Index a specific content type
    * @param contentTypeId The content type to reindex.
@@ -87,7 +92,7 @@ public interface ContentTypeLoader {
    * @throws IOException If there is any error during parsing.
    */
   public Collection<WritableContentType> parseContentTypes(WorkspaceId workspaceId,
-                                                          InputStream contentTypeDefinitionStream, MediaType mediaType)
+                                                           InputStream contentTypeDefinitionStream, MediaType mediaType)
       throws NullPointerException, InvalidReferenceException, IOException;
 
   public MutableContentType getMutableContentType(ContentType contentType);

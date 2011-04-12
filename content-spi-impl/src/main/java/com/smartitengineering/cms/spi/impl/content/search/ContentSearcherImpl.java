@@ -209,7 +209,7 @@ public class ContentSearcherImpl implements ContentSearcher {
     return SmartContentAPI.getInstance().getContentLoader().createSearchResult(result, searchResult.getTotalResults());
   }
 
-  private String generateDateQuery(String fieldName, QueryParameter<Date> creationDateFilter) {
+  public static String generateDateQuery(String fieldName, QueryParameter<Date> creationDateFilter) {
     StringBuilder query = new StringBuilder(fieldName).append(": ");
     String dateQuery = "";
     switch (creationDateFilter.getParameterType()) {
