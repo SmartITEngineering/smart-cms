@@ -28,6 +28,7 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.type.Filter;
 import com.smartitengineering.cms.api.type.MutableCollectionDataType;
 import com.smartitengineering.cms.api.type.MutableContentDataType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
@@ -353,5 +354,10 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   @Override
   public void reIndexType(ContentTypeId contentTypeId) {
     SmartContentSPI.getInstance().getContentTypeSearcher().reIndex(contentTypeId);
+  }
+
+  @Override
+  public Filter createFilter() {
+    return new FilterImpl();
   }
 }

@@ -27,6 +27,7 @@ import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.type.Filter;
 import com.smartitengineering.cms.api.type.MutableCollectionDataType;
 import com.smartitengineering.cms.api.type.MutableContentDataType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
@@ -67,6 +68,8 @@ public interface ContentTypeLoader {
    * @param workspaceId The workspace of which the content types are to be re-indexed
    */
   public void reIndexTypes(WorkspaceId workspaceId);
+
+  public Filter createFilter();
 
   /**
    * Re-Index a specific content type
