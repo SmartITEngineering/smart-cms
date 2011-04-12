@@ -39,7 +39,7 @@ import com.smartitengineering.cms.api.content.MutableStringFieldValue;
 import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.content.NumberFieldValue;
 import com.smartitengineering.cms.api.content.OtherFieldValue;
-import com.smartitengineering.cms.api.content.SearchResult;
+import com.smartitengineering.cms.api.common.SearchResult;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.type.ContentType;
@@ -106,9 +106,9 @@ public interface ContentLoader {
 
   Filter craeteFilter();
 
-  SearchResult createSearchResult(Collection<Content> result, long totalResultsCount);
+  SearchResult<Content> createSearchResult(Collection<Content> result, long totalResultsCount);
 
-  SearchResult search(Filter filter);
+  SearchResult<Content> search(Filter filter);
 
   Variation getVariation(Content content, Field field, String name);
 

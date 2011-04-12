@@ -216,7 +216,7 @@ public class ContentSearcherResource extends AbstractResource {
                count, disJunction, includeFriendlies);
     ResponseBuilder responseBuilder;
     Filter filter = getFilter();
-    final com.smartitengineering.cms.api.content.SearchResult result = SmartContentAPI.getInstance().getContentLoader().
+    final com.smartitengineering.cms.api.common.SearchResult result = SmartContentAPI.getInstance().getContentLoader().
         search(filter);
     final Collection<Content> searchContent = result.getResult();
     Feed feed = getFeed("search", "Content Search Result", new Date());
@@ -271,7 +271,7 @@ public class ContentSearcherResource extends AbstractResource {
     Collection<Content> searchContent;
     ResponseBuilder responseBuilder;
     Filter filter = getFilter();
-    final com.smartitengineering.cms.api.content.SearchResult searchResult =
+    final com.smartitengineering.cms.api.common.SearchResult searchResult =
                                                               SmartContentAPI.getInstance().getContentLoader().
         search(filter);
     searchContent = searchResult.getResult();

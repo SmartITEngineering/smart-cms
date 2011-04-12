@@ -20,7 +20,8 @@ package com.smartitengineering.cms.spi.content;
 
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Filter;
-import com.smartitengineering.cms.api.content.SearchResult;
+import com.smartitengineering.cms.api.common.SearchResult;
+import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 
 /**
@@ -29,7 +30,7 @@ import com.smartitengineering.cms.api.workspace.WorkspaceId;
  */
 public interface ContentSearcher {
 
-  SearchResult search(Filter filter);
+  SearchResult<Content> search(Filter filter);
 
   void reIndex(ContentId contentId);
 
