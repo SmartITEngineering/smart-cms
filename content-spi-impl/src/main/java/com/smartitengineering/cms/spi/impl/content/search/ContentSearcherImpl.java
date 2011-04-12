@@ -76,7 +76,7 @@ public class ContentSearcherImpl implements ContentSearcher {
   @Inject
   private SchemaInfoProvider<PersistentContent, ContentId> schemaInfoProvider;
   // Injected so that the quartz service starts
-  @Inject
+  @Inject(optional=true)
   private EventSubscriber subscriber;
   @Inject
   @Named(REINDEX_LISTENER_NAME)
