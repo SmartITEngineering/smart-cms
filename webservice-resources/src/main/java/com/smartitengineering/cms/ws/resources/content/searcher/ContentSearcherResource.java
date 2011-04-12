@@ -373,10 +373,9 @@ public class ContentSearcherResource extends AbstractResource {
     return filter;
   }
 
-  private ContentTypeId[] parseCollectionContentTypeId(List<String> strCollectionContentTypeId) {
+  public static ContentTypeId[] parseCollectionContentTypeId(List<String> strCollectionContentTypeId) {
     Collection<ContentTypeId> contentTypeIds = new ArrayList<ContentTypeId>();
     for (String strContentTypeId : strCollectionContentTypeId) {
-      logger.info(":::CONTENT TYPE ID AS STRING : " + strContentTypeId);
       if (StringUtils.isBlank(strContentTypeId)) {
         continue;
       }
@@ -405,12 +404,11 @@ public class ContentSearcherResource extends AbstractResource {
     return retContentStatus;
   }
 
-  private WorkspaceId parseWorkspaceId(String strWorkspaceId) {
+  public static WorkspaceId parseWorkspaceId(String strWorkspaceId) {
     if (StringUtils.isBlank(strWorkspaceId)) {
       return null;
     }
-    logger.info(":::WORKSPACE ID : " + strWorkspaceId);
-    String[] workspaceParam = splitStr(strWorkspaceId, ",");
+    String[] workspaceParam = splitStr(strWorkspaceId.replace(':', ','), ",");
     if (workspaceParam.length < 2) {
       return null;
     }
@@ -436,8 +434,11 @@ public class ContentSearcherResource extends AbstractResource {
     return parsedQueryParameter;
   }
 
-  private ContentTypeId parseContentTypeId(String strContentTypeId) {
-    String[] contentTypeIdStr = splitStr(strContentTypeId, ",");
+  public static ContentTypeId parseContentTypeId(String strContentTypeId) {
+    if(StringUtils.isBlank(strContentTypeId)) {
+      return null;
+    }
+    String[] contentTypeIdStr = splitStr(strContentTypeId.replace(':', ','), ",");
     if (contentTypeIdStr.length < 4) {
       return null;
     }
@@ -449,13 +450,13 @@ public class ContentSearcherResource extends AbstractResource {
     return parsedContentTypeId;
   }
 
-  private String[] splitStr(String string, String splitChar) {
+  private static String[] splitStr(String string, String splitChar) {
     String[] retStr;
     retStr = string.split(splitChar);
     return retStr;
   }
 
-  private QueryParameter<Date> formatDate(String strDate) {
+  public static QueryParameter<Date> formatDate(String strDate) {
     if (StringUtils.isBlank(strDate)) {
       return null;
     }
