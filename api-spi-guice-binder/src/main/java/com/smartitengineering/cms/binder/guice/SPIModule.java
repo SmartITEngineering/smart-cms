@@ -78,9 +78,11 @@ import com.smartitengineering.cms.spi.type.SearchFieldNameGenerator;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
 import com.smartitengineering.common.dao.search.CommonFreeTextPersistentDao;
+import com.smartitengineering.common.dao.search.CommonFreeTextPersistentTxDao;
 import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
 import com.smartitengineering.common.dao.search.impl.CommonAsyncFreeTextPersistentDaoImpl;
 import com.smartitengineering.common.dao.search.solr.SolrFreeTextPersistentDao;
+import com.smartitengineering.common.dao.search.solr.SolrFreeTextPersistentTxDao;
 import com.smartitengineering.common.dao.search.solr.SolrFreeTextSearchDao;
 import com.smartitengineering.common.dao.search.solr.spi.ObjectIdentifierQuery;
 import com.smartitengineering.dao.common.CommonReadDao;
@@ -105,6 +107,7 @@ import com.smartitengineering.dao.solr.MultivalueMap;
 import com.smartitengineering.dao.solr.ServerConfiguration;
 import com.smartitengineering.dao.solr.ServerFactory;
 import com.smartitengineering.dao.solr.SolrWriteDao;
+import com.smartitengineering.dao.solr.impl.DefaultSolrDao;
 import com.smartitengineering.dao.solr.impl.ServerConfigurationImpl;
 import com.smartitengineering.dao.solr.impl.SingletonRemoteServerFactory;
 import com.smartitengineering.dao.solr.impl.SolrDao;
@@ -345,14 +348,21 @@ public class SPIModule extends PrivateModule {
       binder().expose(new TypeLiteral<Collection<EventListener>>() {
       });
     }
-    bind(SolrWriteDao.class).to(SolrDao.class).in(Scopes.SINGLETON);
     if (enableAsyncEvent && enableEventConsumption) {
+      bind(SolrWriteDao.class).to(DefaultSolrDao.class).in(Scopes.SINGLETON);
+
       bind(new TypeLiteral<CommonFreeTextPersistentDao<Content>>() {
-      }).to(new TypeLiteral<SolrFreeTextPersistentDao<Content>>() {
+      }).to(new TypeLiteral<CommonFreeTextPersistentTxDao<Content>>() {
+      }).in(Scopes.SINGLETON);
+      bind(new TypeLiteral<CommonFreeTextPersistentTxDao<Content>>() {
+      }).to(new TypeLiteral<SolrFreeTextPersistentTxDao<Content>>() {
       }).in(Scopes.SINGLETON);
 
       bind(new TypeLiteral<CommonFreeTextPersistentDao<ContentType>>() {
-      }).to(new TypeLiteral<SolrFreeTextPersistentDao<ContentType>>() {
+      }).to(new TypeLiteral<CommonFreeTextPersistentTxDao<ContentType>>() {
+      }).in(Scopes.SINGLETON);
+      bind(new TypeLiteral<CommonFreeTextPersistentTxDao<ContentType>>() {
+      }).to(new TypeLiteral<SolrFreeTextPersistentTxDao<ContentType>>() {
       }).in(Scopes.SINGLETON);
 
       ConnectionConfig config = new ConnectionConfig();
@@ -374,6 +384,7 @@ public class SPIModule extends PrivateModule {
       });
     }
     else {
+      bind(SolrWriteDao.class).to(SolrDao.class).in(Scopes.SINGLETON);
       TypeLiteral<CommonFreeTextPersistentDao<Content>> prodLit =
                                                         new TypeLiteral<CommonFreeTextPersistentDao<Content>>() {
       };
