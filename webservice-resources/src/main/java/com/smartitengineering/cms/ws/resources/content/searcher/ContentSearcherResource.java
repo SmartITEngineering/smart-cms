@@ -272,7 +272,7 @@ public class ContentSearcherResource extends AbstractResource {
     ResponseBuilder responseBuilder;
     Filter filter = getFilter();
     final com.smartitengineering.cms.api.common.SearchResult searchResult =
-                                                              SmartContentAPI.getInstance().getContentLoader().
+                                                             SmartContentAPI.getInstance().getContentLoader().
         search(filter);
     searchContent = searchResult.getResult();
     if (searchContent.isEmpty() || searchContent == null) {
@@ -298,7 +298,7 @@ public class ContentSearcherResource extends AbstractResource {
     if (contentTypeId != null && !contentTypeId.isEmpty()) {
       this.contentTypeId = contentTypeId;
     }
-    else {
+    else if (this.contentTypeId == null) {
       this.contentTypeId = Collections.emptyList();
     }
     this.statuses = statuses;
@@ -435,7 +435,7 @@ public class ContentSearcherResource extends AbstractResource {
   }
 
   public static ContentTypeId parseContentTypeId(String strContentTypeId) {
-    if(StringUtils.isBlank(strContentTypeId)) {
+    if (StringUtils.isBlank(strContentTypeId)) {
       return null;
     }
     String[] contentTypeIdStr = splitStr(strContentTypeId.replace(':', ','), ",");
@@ -471,7 +471,8 @@ public class ContentSearcherResource extends AbstractResource {
     }
     else if (strDate.startsWith(">=")) {
       String date = strDate.replaceAll(">=", "");
-      queryParameter = QueryParameterFactory.getGreaterThanEqualToPropertyParam("greaterOrEqual", new Date(Long.parseLong(
+      queryParameter = QueryParameterFactory.getGreaterThanEqualToPropertyParam("greaterOrEqual", new Date(Long.
+          parseLong(
           date)));
     }
     else if (strDate.startsWith("<=")) {

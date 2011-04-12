@@ -156,10 +156,12 @@ public class ContentTypeSearcherResource extends AbstractResource {
     if (contentTypeId != null && !contentTypeId.isEmpty()) {
       this.contentTypeId = contentTypeId;
     }
-    else {
+    else if (this.contentTypeId == null) {
       this.contentTypeId = Collections.emptyList();
     }
-    this.parentId = parentId;
+    if (StringUtils.isNotBlank(parentId)) {
+      this.parentId = parentId;
+    }
     if (StringUtils.isNotBlank(workspaceId)) {
       this.workspaceId = workspaceId;
     }
@@ -169,7 +171,9 @@ public class ContentTypeSearcherResource extends AbstractResource {
     this.count = count;
     this.disjunction = disJunction;
     this.searchTerms = searchTerms;
-    this.includeFriendlies = includeFriendlies;
+    if (this.includeFriendlies == null) {
+      this.includeFriendlies = includeFriendlies;
+    }
   }
 
   protected URI getNextPage() {
@@ -198,31 +202,38 @@ public class ContentTypeSearcherResource extends AbstractResource {
     if (StringUtils.isNotBlank(parentId)) {
       filter.setChildOf(ContentSearcherResource.parseContentTypeId(parentId));
     }
-    logger.info(":::WORKSPACE ID : " + workspaceId);
     if (StringUtils.isNotBlank(workspaceId)) {
       filter.setWorkspaceId(ContentSearcherResource.parseWorkspaceId(workspaceId));
     }
-    logger.info(":::START FROM : " + String.valueOf(start));
+
     filter.setStartFrom(start);
-    logger.info(":::NUMBER OF ITEM : " + String.valueOf(count));
     filter.setMaxContents(count);
-    logger.info(String.valueOf(":::VAULE OF DISJUNCTION : " + disjunction));
+
     filter.setDisjunction(disjunction);
     if (includeFriendlies != null) {
-      logger.info(String.valueOf(":::VAULE OF Inclue Friendlies : " + includeFriendlies));
       filter.setFriendliesIncluded(includeFriendlies);
     }
     else {
       logger.info(String.valueOf(":::VAULE OF Inclue Friendlies is true"));
       filter.setFriendliesIncluded(true);
     }
-    logger.info(":::CREATION DATE : " + creationDate);
     if (creationDate != null) {
       filter.setCreationDateFilter(ContentSearcherResource.formatDate(creationDate));
     }
-    logger.info(":::LAST MODIFIED DATE : " + lastModifiedDate);
     if (lastModifiedDate != null) {
       filter.setLastModifiedDateFilter(ContentSearcherResource.formatDate(lastModifiedDate));
+    }
+
+    if (logger.isInfoEnabled()) {
+      logger.info(":::Workspace ID : " + workspaceId + " " + filter.getWorkspaceId());
+      logger.info(":::Parent ID : " + parentId + " " + filter.getChildOf());
+      logger.info(":::START FROM : " + String.valueOf(start));
+      logger.info(":::NUMBER OF ITEM : " + String.valueOf(count));
+      logger.info(String.valueOf(":::VAULE OF DISJUNCTION : " + disjunction));
+      logger.info(":::CREATION DATE : " + creationDate + " " + filter.getCreationDateFilter());
+      logger.info(":::LAST MODIFIED DATE : " + lastModifiedDate + " " + filter.getLastModifiedDateFilter());
+      logger.info(String.valueOf(":::VAULE OF Inclue Friendlies : " + includeFriendlies));
+      logger.info("Instance of " + contentTypeId + " " + filter.getInstanceOfContentTypeFilters());
     }
     return filter;
   }
