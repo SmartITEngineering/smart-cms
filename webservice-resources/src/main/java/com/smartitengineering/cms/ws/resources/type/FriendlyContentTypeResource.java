@@ -74,14 +74,20 @@ public class FriendlyContentTypeResource extends AbstractResource {
     feed.addLink(getLink(uri, ContentTypesResource.REL_CONTENT_TYPE, MediaType.APPLICATION_XML));
     feed.addLink(getLink(uri, ContentTypesResource.REL_CONTENT_TYPE_FEED, MediaType.APPLICATION_ATOM_XML));
     final URI childrenUri = getRelativeURIBuilder().path(ContentTypesResource.class).path(
-        ContentTypesResource.PATH_TO_FRIENDLY_CONTENT_TYPE).path(PATH_TO_CHILDREN).build(contentType.getContentTypeID().
-        getWorkspace().getGlobalNamespace(), contentType.getContentTypeID().getWorkspace().getName(), contentType.
-        getContentTypeID().getNamespace(), contentType.getContentTypeID().getName());
+        ContentTypesResource.PATH_TO_FRIENDLY_CONTENT_TYPE).path(PATH_TO_CHILDREN).build(ownerWorkspaceNS,
+                                                                                         ownerWorkspaceName,
+                                                                                         friendlyWorkspaceNS,
+                                                                                         friendlyWorkspaceName,
+                                                                                         friendlyContentTypeNS,
+                                                                                         friendlyContentTypeName);
     feed.addLink(getLink(childrenUri, PATH_TO_CHILDREN, MediaType.APPLICATION_ATOM_XML));
     final URI instancesUri = getRelativeURIBuilder().path(ContentTypesResource.class).path(
-        ContentTypesResource.PATH_TO_FRIENDLY_CONTENT_TYPE).path(PATH_TO_INSTANCES).build(contentType.getContentTypeID().
-        getWorkspace().getGlobalNamespace(), contentType.getContentTypeID().getWorkspace().getName(), contentType.
-        getContentTypeID().getNamespace(), contentType.getContentTypeID().getName());
+        ContentTypesResource.PATH_TO_FRIENDLY_CONTENT_TYPE).path(PATH_TO_INSTANCES).build(ownerWorkspaceNS,
+                                                                                          ownerWorkspaceName,
+                                                                                          friendlyWorkspaceNS,
+                                                                                          friendlyWorkspaceName,
+                                                                                          friendlyContentTypeNS,
+                                                                                          friendlyContentTypeName);
     feed.addLink(getLink(instancesUri, PATH_TO_INSTANCES, MediaType.APPLICATION_ATOM_XML));
     feed.addLink(getLink(childrenUri, PATH_TO_CHILDREN,
                          com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
