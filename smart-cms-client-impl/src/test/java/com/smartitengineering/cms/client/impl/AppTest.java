@@ -118,7 +118,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AppTest {
 
-  public static final int SLEEP_DURATION = 1300;
+  public static final int SLEEP_DURATION = 3000;
   private static final int PORT = 10080;
   public static final String DEFAULT_NS = "com.smartitengineering";
   public static final String ROOT_URI_STRING = "http://localhost:" + PORT + "/cms/";
