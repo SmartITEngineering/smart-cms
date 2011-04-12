@@ -29,7 +29,7 @@ import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
-import com.smartitengineering.common.dao.search.CommonFreeTextPersistentTxDao;
+import com.smartitengineering.dao.solr.SolrWriteDao;
 import com.smartitengineering.events.async.api.EventConsumer;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -55,10 +55,7 @@ public class EventConsumerImpl implements EventConsumer {
   @Inject
   private EventListener<ContentType> contentTypeListener;
   @Inject
-  private CommonFreeTextPersistentTxDao<Content> contentTxDao;
-  @Inject
-  private CommonFreeTextPersistentTxDao<ContentType> contentTypeTxDao;
-  private ThreadLocal<Type> sourceTypeLocal = new ThreadLocal<Type>();
+  private SolrWriteDao solrWriteDao;
   private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
@@ -67,7 +64,6 @@ public class EventConsumerImpl implements EventConsumer {
     try {
       reader = new BufferedReader(new StringReader(eventMessage));
       final Type sourceType = Type.valueOf(reader.readLine());
-      sourceTypeLocal.set(sourceType);
       final EventType type = EventType.valueOf(reader.readLine());
       if (logger.isInfoEnabled()) {
         logger.info("Event source type " + sourceType);
@@ -157,27 +153,11 @@ public class EventConsumerImpl implements EventConsumer {
 
   @Override
   public void endConsumption(boolean prematureEnd) {
-    final Type sourceType = sourceTypeLocal.get();
-    if (sourceType != null) {
-      switch (sourceType) {
-        case CONTENT:
-          if (prematureEnd) {
-            contentTxDao.rollback();
-          }
-          else {
-            contentTxDao.commit();
-          }
-          break;
-        case CONTENT_TYPE:
-          if (prematureEnd) {
-            contentTypeTxDao.rollback();
-          }
-          else {
-            contentTypeTxDao.commit();
-          }
-          break;
-      }
+    if (prematureEnd) {
+      solrWriteDao.rollback();
     }
-
+    else {
+      solrWriteDao.commit();
+    }
   }
 }
