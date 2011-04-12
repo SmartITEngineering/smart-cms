@@ -150,6 +150,7 @@ public class SPIModule extends PrivateModule {
   private final String eventHubContextPath, eventHubBaseUri;
   private final String uriStoreFolder, uriStoreFileName;
   private final long waitTime, saveInterval, updateInterval, deleteInterval;
+  private final int solrSocketTimeout, solrConnectionTimeout;
   private final boolean enableAsyncEvent, enableEventConsumption;
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -168,6 +169,10 @@ public class SPIModule extends PrivateModule {
       toLong = NumberUtils.toLong(properties.getProperty("com.smartitengineering.cms.updateIntervalInSec"), 60L);
       updateInterval = toLong > 0 ? toLong : 60l;
       toLong = NumberUtils.toLong(properties.getProperty("com.smartitengineering.cms.deleteIntervalInSec"), 60L);
+      solrSocketTimeout = NumberUtils.toInt(properties.getProperty("com.smartitengineering.cms.solr.socketTimeout"),
+                                            1000);
+      solrConnectionTimeout = NumberUtils.toInt(properties.getProperty(
+          "com.smartitengineering.cms.solr.connectionTimeout"), 100);
       deleteInterval = toLong > 0 ? toLong : 60l;
       uriPrefix = properties.getProperty("com.smartitengineering.cms.uriPrefix", "/cms");
       cacheConfigRsrc = properties.getProperty("com.smartitengineering.cms.cache.resource",
@@ -203,6 +208,8 @@ public class SPIModule extends PrivateModule {
       eventHubBaseUri = "/api";
       uriStoreFolder = "./target/cms/";
       uriStoreFileName = "cmsPollUri.txt";
+      solrSocketTimeout = 1000;
+      solrConnectionTimeout = 100;
     }
     logger.debug("SCHEMA Location " + schemaLocationForContentType);
   }
@@ -238,6 +245,11 @@ public class SPIModule extends PrivateModule {
     bind(Long.class).annotatedWith(Names.named("updateInterval")).toInstance(updateInterval);
     bind(Long.class).annotatedWith(Names.named("deleteInterval")).toInstance(deleteInterval);
     bind(TimeUnit.class).annotatedWith(Names.named("intervalTimeUnit")).toInstance(TimeUnit.SECONDS);
+
+    bind(Integer.class).annotatedWith(Names.named("socketTimeout")).toInstance(solrSocketTimeout);
+    bind(Integer.class).annotatedWith(Names.named("connectionTimeout")).toInstance(solrConnectionTimeout);
+    binder().expose(Integer.class).annotatedWith(Names.named("socketTimeout"));
+    binder().expose(Integer.class).annotatedWith(Names.named("connectionTimeout"));
 
     /*
      * Start injection specific to common dao of content type
