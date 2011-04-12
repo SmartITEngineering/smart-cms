@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2011  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,23 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.client.api;
+package com.smartitengineering.cms.spi.type;
 
-import com.smartitengineering.util.rest.client.WritableResource;
-import java.util.Collection;
-import org.apache.abdera.model.Feed;
+import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 
 /**
  *
- * @author kaisar
+ * @author imyousuf
  */
-public interface ContentTypesResource extends WritableResource<Feed> {
+public interface ContentTypeSearcher {
 
-  public Collection<ContentTypeResource> getContentTypes();
+  void reIndex(ContentTypeId typeId);
 
-  public Collection<ContentTypeFeedResource> getContentTypeFeeds();
-
-  public FriendlyContentTypesResource getFriendlyContentTypesResource();
-
-  public void createContentType(String contentType);
+  void reIndex(WorkspaceId workspaceId);
 }

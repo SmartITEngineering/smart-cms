@@ -58,11 +58,22 @@ import org.slf4j.LoggerFactory;
 @Path("/t/{" + WorkspaceResource.PARAM_NAMESPACE + "}/{" + WorkspaceResource.PARAM_NAME + "}")
 public class ContentTypesResource extends AbstractResource {
 
-  public static final String PATH_TO_CONTENT_TYPE = "{typeNS}/{typeName}";
+  public static final String PARAM_CONTENT_TYPE_NS = "typeNS";
+  public static final String PARAM_CONTENT_TYPE_NAME = "typeName";
+  public static final String PATH_TO_CONTENT_TYPE = "/d/{" + PARAM_CONTENT_TYPE_NS + "}/{" + PARAM_CONTENT_TYPE_NAME +
+      "}";
+  public static final String PATH_TO_FRIENDLY_CONTENT_TYPES = "friendlies";
+  public static final String PARAM_FRIENDLY_WORKSPACE_NS = "fWorkspaceNS";
+  public static final String PARAM_FRIENDLY_WORKSPACE_NAME = "fWorkspaceName";
+  public static final String PARAM_FRIENDLY_CONTENT_TYPE_NS = "fTypeNS";
+  public static final String PARAM_FRIENDLY_CONTENT_TYPE_NAME = "fTypeName";
+  public static final String PATH_TO_FRIENDLY_CONTENT_TYPE = "/f/{" + PARAM_FRIENDLY_WORKSPACE_NS + "}/{" +
+      PARAM_FRIENDLY_WORKSPACE_NAME + "}/{" + PARAM_FRIENDLY_CONTENT_TYPE_NS + "}/{" + PARAM_FRIENDLY_CONTENT_TYPE_NAME +
+      "}";
   public static final String REL_CONTENT_TYPE = "contentType";
   public static final String REL_CONTENT_TYPE_FEED = "contentTypeFeed";
   public static final String PATH_TO_SEARCH = "search";
-  private static final Comparator<ContentType> CONTENT_TYPE_COMPRATOR = new Comparator<ContentType>() {
+  static final Comparator<ContentType> CONTENT_TYPE_COMPRATOR = new Comparator<ContentType>() {
 
     @Override
     public int compare(ContentType o1, ContentType o2) {
@@ -107,6 +118,10 @@ public class ContentTypesResource extends AbstractResource {
         getLink(getRelativeURIBuilder().path(ContentsResource.class).path(ContentsResource.PATH_TO_SEARCH).build(workspace.
         getId().getGlobalNamespace(), workspace.getId().getName()), "search",
                 com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
+    feed.addLink(
+        getLink(getRelativeURIBuilder().path(ContentTypesResource.class).path(PATH_TO_FRIENDLY_CONTENT_TYPES).build(workspace.
+        getId().getGlobalNamespace(), workspace.getId().getName()), PATH_TO_FRIENDLY_CONTENT_TYPES,
+                MediaType.APPLICATION_ATOM_XML));
     Response.ResponseBuilder builder = Response.ok(feed);
     CacheControl control = new CacheControl();
     control.setMaxAge(180);
@@ -115,10 +130,18 @@ public class ContentTypesResource extends AbstractResource {
   }
 
   @Path(PATH_TO_CONTENT_TYPE)
-  public ContentTypeResource getContentType(@PathParam("typeNS") String typeNS, @PathParam("typeName") String typeName) {
+  public ContentTypeResource getContentType(@PathParam(PARAM_CONTENT_TYPE_NS) String typeNS,
+                                            @PathParam(PARAM_CONTENT_TYPE_NAME) String typeName) {
     final ContentTypeLoader loader = SmartContentAPI.getInstance().getContentTypeLoader();
     ContentType type = loader.loadContentType(loader.createContentTypeId(workspace.getId(), typeNS, typeName));
     return new ContentTypeResource(getInjectables(), type);
+  }
+
+  @Path(PATH_TO_FRIENDLY_CONTENT_TYPES)
+  public FriendlyContentTypesResource getFriendlyContentTypes() {
+    final FriendlyContentTypesResource typesResource = new FriendlyContentTypesResource(getInjectables(), workspace.
+        getId());
+    return typesResource;
   }
 
   @POST
@@ -149,6 +172,16 @@ public class ContentTypesResource extends AbstractResource {
     final ContentSearcherResource contentSearcherResource = new ContentSearcherResource(getInjectables());
     contentSearcherResource.setWorkspaceId(workspace.getId().toString());
     return contentSearcherResource;
+  }
+
+  @Path(PATH_TO_FRIENDLY_CONTENT_TYPE)
+  public FriendlyContentTypeResource getFriendlyContentType() {
+    return getResourceContext().getResource(FriendlyContentTypeResource.class);
+  }
+
+  @Path(PATH_TO_FRIENDLY_CONTENT_TYPE + "/" + PATH_TO_SEARCH)
+  public ContentSearcherResource searchForFriendlyContentTypeInstance() {
+    return getResourceContext().getResource(FriendlyContentTypeResource.class).search();
   }
 
   @Override

@@ -67,6 +67,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ContentSearcherImpl implements ContentSearcher {
 
+  public static final String REINDEX_LISTENER_NAME = "contentReindexEventListener";
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
   @Inject
   private CommonFreeTextSearchDao<Content> textSearchDao;
@@ -74,11 +75,12 @@ public class ContentSearcherImpl implements ContentSearcher {
   private CommonReadDao<PersistentContent, ContentId> readDao;
   @Inject
   private SchemaInfoProvider<PersistentContent, ContentId> schemaInfoProvider;
+  // Injected so that the quartz service starts
   @Inject
-  @Named("reindexEventListener")
-  private EventListener reindexListener;
-  @Inject(optional = true)
   private EventSubscriber subscriber;
+  @Inject
+  @Named(REINDEX_LISTENER_NAME)
+  private EventListener reindexListener;
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
   private static final String SOLR_DATE_FORMAT = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern() + "'Z'";
 

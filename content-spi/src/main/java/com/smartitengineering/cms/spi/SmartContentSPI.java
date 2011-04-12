@@ -32,6 +32,7 @@ import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParsers;
+import com.smartitengineering.cms.spi.type.ContentTypeSearcher;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.SearchFieldNameGenerator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
@@ -92,6 +93,8 @@ public final class SmartContentSPI {
   @InjectableField
   private ContentSearcher contentSearcher;
   @InjectableField
+  private ContentTypeSearcher contentTypeSearcher;
+  @InjectableField
   private UriProvider uriProvider;
 
   public UriProvider getUriProvider() {
@@ -104,6 +107,10 @@ public final class SmartContentSPI {
 
   public ContentSearcher getContentSearcher() {
     return contentSearcher;
+  }
+
+  public ContentTypeSearcher getContentTypeSearcher() {
+    return contentTypeSearcher;
   }
 
   public String getSchemaLocationForContentTypeXml() {
