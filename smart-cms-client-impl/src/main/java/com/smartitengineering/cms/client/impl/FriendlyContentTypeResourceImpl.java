@@ -20,6 +20,7 @@ package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.ContentTypeFeedResource;
 import com.smartitengineering.cms.client.api.ContentTypeResource;
+import com.smartitengineering.cms.client.api.ContentTypeSearchResultResource;
 import com.smartitengineering.cms.client.api.FriendlyContentTypeResource;
 import com.smartitengineering.util.rest.atom.AbstractFeedClientResource;
 import com.smartitengineering.util.rest.atom.AtomClientUtil;
@@ -60,5 +61,17 @@ public class FriendlyContentTypeResourceImpl extends AbstractFeedClientResource<
   public ContentTypeFeedResource getContentTypeFeedResource() {
     return new ContentTypeFeedResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
         getLink("contentTypeFeed")));
+  }
+
+  @Override
+  public ContentTypeSearchResultResource getChildren() {
+    return new ContentTypeSearchResultResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+        getLink("children")));
+  }
+
+  @Override
+  public ContentTypeSearchResultResource getInstances() {
+    return new ContentTypeSearchResultResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+        getLink("instances")));
   }
 }

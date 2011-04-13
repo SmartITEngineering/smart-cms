@@ -32,4 +32,8 @@ public interface ContentTypeFeedResource extends Resource<Feed> {
   ContentTypeResource getContentTypeResource();
 
   List<FieldDef> getFieldDefs();
+
+  public ContentTypeSearchResultResource getChildren();
+
+  public ContentTypeSearchResultResource getInstances();
 }

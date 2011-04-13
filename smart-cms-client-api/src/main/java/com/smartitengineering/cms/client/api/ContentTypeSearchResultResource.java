@@ -18,20 +18,21 @@
  */
 package com.smartitengineering.cms.client.api;
 
+import com.smartitengineering.util.rest.client.PaginatedResource;
 import com.smartitengineering.util.rest.client.Resource;
+import java.util.Collection;
 import org.apache.abdera.model.Feed;
 
 /**
  *
  * @author imyousuf
  */
-public interface FriendlyContentTypeResource extends Resource<Feed> {
+public interface ContentTypeSearchResultResource extends Resource<Feed>,
+                                                         PaginatedResource<ContentTypeSearchResultResource> {
 
-  ContentTypeResource getContentTypeResource();
+  public int getTotalItemCount();
 
-  ContentTypeFeedResource getContentTypeFeedResource();
+  public Collection<ContentTypeResource> getContentTypes();
 
-  public ContentTypeSearchResultResource getChildren();
-
-  public ContentTypeSearchResultResource getInstances();
+  public Collection<ContentTypeFeedResource> getContentTypeFeeds();
 }
