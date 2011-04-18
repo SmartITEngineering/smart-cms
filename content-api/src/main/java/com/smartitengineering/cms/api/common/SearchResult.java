@@ -16,17 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.content;
+package com.smartitengineering.cms.api.common;
 
+import com.smartitengineering.cms.api.content.Content;
 import java.util.Collection;
 
 /**
  *
  * @author imyousuf
  */
-public interface SearchResult {
+public interface SearchResult<T> {
 
   long getTotalResultsCount();
 
-  Collection<Content> getResult();
+  Collection<T> getResult();
 }

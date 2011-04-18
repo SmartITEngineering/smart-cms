@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 public class ContentTypeHelper extends AbstractAdapterHelper<ContentType, MultivalueMap<String, Object>> {
 
   protected static final String CONTENT_TYPE = "contentType";
+  public static final String CONTENT_TYPE_DISPLAY_NAME = "displayName_STRING_i";
   @Inject
   private SchemaInfoProvider<PersistentContentType, ContentTypeId> contentTypeScehmaProvider;
   private final transient Logger logger = LoggerFactory.getLogger(getClass());
@@ -57,11 +58,17 @@ public class ContentTypeHelper extends AbstractAdapterHelper<ContentType, Multiv
     toBean.addValue(SolrFieldNames.WORKSPACEID, id.getWorkspace().toString());
     toBean.addValue(SolrFieldNames.CREATIONDATE, contentType.getCreationDate());
     toBean.addValue(SolrFieldNames.LASTMODIFIEDDATE, contentType.getLastModifiedDate());
+    if (org.apache.commons.lang.StringUtils.isNotBlank(contentType.getDisplayName())) {
+      toBean.addValue(CONTENT_TYPE_DISPLAY_NAME, contentType.getDisplayName());
+    }
     toBean.addValue(SolrFieldNames.STATUS, "published");
     toBean.addValue(SolrFieldNames.PRIVATE, false);
     ContentTypeId parent = contentType.getParent();
+    if (logger.isInfoEnabled()) {
+      logger.info("Parent " + parent);
+    }
     if (parent != null) {
-      toBean.addValue(SolrFieldNames.CONTENTTYPEID, parent);
+      toBean.addValue(SolrFieldNames.CONTENTTYPEID, parent.toString());
       do {
         toBean.addValue(SolrFieldNames.INSTANCE_OF, parent.toString());
         ContentType parentType = parent.getContentType();

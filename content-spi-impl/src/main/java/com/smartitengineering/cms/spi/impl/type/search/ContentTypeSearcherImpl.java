@@ -20,13 +20,17 @@ package com.smartitengineering.cms.spi.impl.type.search;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.smartitengineering.cms.api.common.SearchResult;
 import com.smartitengineering.cms.api.event.Event.EventType;
 import com.smartitengineering.cms.api.event.Event.Type;
 import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.type.Filter;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.spi.impl.content.search.ContentSearcherImpl;
+import com.smartitengineering.cms.spi.impl.events.SolrFieldNames;
 import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.cms.spi.type.ContentTypeSearcher;
 import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
@@ -36,10 +40,16 @@ import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,5 +134,122 @@ public class ContentTypeSearcherImpl implements ContentTypeSearcher {
         }
       }
     });
+  }
+
+  @Override
+  public SearchResult<ContentType> search(Filter filter) {
+    final StringBuilder finalQuery = new StringBuilder();
+    String disjunctionSeperator = " OR ";
+    String conjunctionSeperator = " AND ";
+    String seperator = filter.isDisjunction() ? disjunctionSeperator : conjunctionSeperator;
+    int count = 0;
+    finalQuery.append(SolrFieldNames.TYPE).append(": ").append(ContentTypeHelper.CONTENT_TYPE);
+
+    final WorkspaceId workspaceId = filter.getWorkspaceId();
+    if (workspaceId != null) {
+      finalQuery.append(conjunctionSeperator);
+      finalQuery.append((" ("));
+      finalQuery.append(SolrFieldNames.WORKSPACEID).append(": ").append(ClientUtils.escapeQueryChars(
+          workspaceId.toString()));
+      if (filter.isFriendliesIncluded()) {
+        Collection<WorkspaceId> friendlies = workspaceId.getWorkspae().getFriendlies();
+        if (friendlies != null && !friendlies.isEmpty()) {
+          finalQuery.append(disjunctionSeperator).append("(private: false AND (");
+          boolean first = true;
+          for (WorkspaceId friendly : friendlies) {
+            if (friendly != null) {
+              if (first) {
+                first = false;
+              }
+              else {
+                finalQuery.append(disjunctionSeperator);
+              }
+              finalQuery.append(SolrFieldNames.WORKSPACEID).append(": ").append(ClientUtils.escapeQueryChars(friendly.
+                  toString()));
+            }
+          }
+          finalQuery.append("))");
+        }
+      }
+      finalQuery.append((") "));
+    }
+    final StringBuilder query = new StringBuilder();
+    ContentTypeId parentId = filter.getChildOf();
+    if (parentId != null) {
+      if (query.length() > 0) {
+        query.append(seperator);
+      }
+      query.append(SolrFieldNames.CONTENTTYPEID).append(": ").append(ClientUtils.escapeQueryChars(parentId.toString()));
+    }
+
+    Set<ContentTypeId> contentTypeIds = filter.getInstanceOfContentTypeFilters();
+    if (contentTypeIds != null && !contentTypeIds.isEmpty()) {
+      if (query.length() > 0) {
+        query.append(seperator);
+      }
+      query.append("(");
+    }
+    for (ContentTypeId contentTypeId : contentTypeIds) {
+      if (count > 0) {
+        query.append(disjunctionSeperator);
+      }
+      if (contentTypeId != null) {
+        query.append(SolrFieldNames.INSTANCE_OF).append(": ").append(ClientUtils.escapeQueryChars(
+            contentTypeId.toString()));
+      }
+      count++;
+    }
+    if (contentTypeIds != null && !contentTypeIds.isEmpty()) {
+      query.append(")");
+    }
+
+    if (filter.getCreationDateFilter() != null) {
+      if (query.length() > 0) {
+        query.append(seperator);
+      }
+      QueryParameter<Date> creationDateFilter = filter.getCreationDateFilter();
+      String queryStr = ContentSearcherImpl.generateDateQuery(SolrFieldNames.CREATIONDATE, creationDateFilter);
+      query.append(queryStr);
+    }
+
+    if (filter.getLastModifiedDateFilter() != null) {
+      if (query.length() > 0) {
+        query.append(seperator);
+      }
+      QueryParameter<Date> lastModifiedDateFilter = filter.getLastModifiedDateFilter();
+      String queryStr = ContentSearcherImpl.generateDateQuery(SolrFieldNames.LASTMODIFIEDDATE, lastModifiedDateFilter);
+      query.append(queryStr);
+    }
+
+    if (StringUtils.isNotBlank(filter.getSearchTerms())) {
+      if (query.length() > 0) {
+        query.append(seperator);
+      }
+      query.append(SolrFieldNames.ALL_TEXT).append(": ").append(ClientUtils.escapeQueryChars(filter.getSearchTerms()));
+    }
+
+    if (query.length() > 0) {
+      finalQuery.append(conjunctionSeperator).append('(').append(query.toString()).append(')');
+    }
+    if (logger.isInfoEnabled()) {
+      logger.info("Query q = " + finalQuery.toString());
+    }
+    final com.smartitengineering.common.dao.search.SearchResult<ContentType> searchResult = textSearchDao.detailedSearch(QueryParameterFactory.
+        getStringLikePropertyParam("q", finalQuery.toString()), QueryParameterFactory.getFirstResultParam(filter.
+        getStartFrom()), QueryParameterFactory.getMaxResultsParam(filter.getMaxContents()));
+    final Collection<ContentType> result;
+    if (searchResult == null || searchResult.getResult() == null || searchResult.getResult().isEmpty()) {
+      result = Collections.emptyList();
+    }
+    else {
+      result = new ArrayList<ContentType>();
+      for (ContentType content : searchResult.getResult()) {
+        if (content != null) {
+          result.add(content);
+        }
+      }
+    }
+    return SmartContentAPI.getInstance().getContentTypeLoader().createSearchResult(result,
+                                                                                   searchResult.getTotalResults());
   }
 }

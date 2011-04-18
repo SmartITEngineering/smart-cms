@@ -20,8 +20,10 @@ package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.ContentTypeFeedResource;
 import com.smartitengineering.cms.client.api.ContentTypeResource;
+import com.smartitengineering.cms.client.api.ContentTypeSearchResultResource;
 import com.smartitengineering.cms.ws.common.domains.FieldDef;
 import com.smartitengineering.util.rest.atom.AbstractFeedClientResource;
+import com.smartitengineering.util.rest.atom.AtomClientUtil;
 import com.smartitengineering.util.rest.client.Resource;
 import com.smartitengineering.util.rest.client.ResourceLink;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -80,5 +82,17 @@ public class ContentTypeFeedResourceImpl extends AbstractFeedClientResource<Reso
       }
     }
     return defs;
+  }
+
+  @Override
+  public ContentTypeSearchResultResource getChildren() {
+    return new ContentTypeSearchResultResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+        getLink("children")));
+  }
+
+  @Override
+  public ContentTypeSearchResultResource getInstances() {
+    return new ContentTypeSearchResultResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+        getLink("instances")));
   }
 }

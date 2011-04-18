@@ -59,5 +59,4 @@ public class ContentTypeResourceImpl extends AbstractClientResource<String, Reso
   protected Resource instantiatePageableResource(ResourceLink link) {
     return null;
   }
-
 }

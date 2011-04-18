@@ -73,6 +73,8 @@ public class ContentTypeResource extends AbstractResource {
   private final Logger logger = LoggerFactory.getLogger(getClass());
   public static transient final String PATH_TO_SEARCH = "search";
   public static final String PATH_TO_REINDEX = "reindex";
+  public static final String PATH_TO_CHILDREN = "children";
+  public static final String PATH_TO_INSTANCES = "instances";
 
   public ContentTypeResource(ServerResourceInjectables injectables, ContentType type) {
     super(injectables);
@@ -132,6 +134,21 @@ public class ContentTypeResource extends AbstractResource {
           ContentTypesResource.PATH_TO_CONTENT_TYPE).path(PATH_TO_REINDEX).build(type.getContentTypeID().getWorkspace().
           getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(), type.
           getContentTypeID().getName()), PATH_TO_REINDEX, MediaType.TEXT_PLAIN));
+      final URI childrenUri = getRelativeURIBuilder().path(ContentTypesResource.class).path(
+          ContentTypesResource.PATH_TO_CONTENT_TYPE).path(PATH_TO_CHILDREN).build(type.getContentTypeID().getWorkspace().
+          getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(), type.
+          getContentTypeID().getName());
+      final URI instancesUri = getRelativeURIBuilder().path(ContentTypesResource.class).path(
+          ContentTypesResource.PATH_TO_CONTENT_TYPE).path(PATH_TO_INSTANCES).build(type.getContentTypeID().getWorkspace().
+          getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(),
+                                                                                   type.getContentTypeID().getName());
+
+      feed.addLink(getLink(childrenUri, PATH_TO_CHILDREN, MediaType.APPLICATION_ATOM_XML));
+      feed.addLink(getLink(instancesUri, PATH_TO_INSTANCES, MediaType.APPLICATION_ATOM_XML));
+      feed.addLink(getLink(childrenUri, PATH_TO_CHILDREN,
+                           com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
+      feed.addLink(getLink(instancesUri, PATH_TO_INSTANCES,
+                           com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
       feed.addLink(getLink(getUriInfo().getRequestUri(), Link.REL_ALTERNATE, MediaType.APPLICATION_XML));
       builder = Response.ok(feed);
       builder.lastModified(lastModified);
@@ -235,6 +252,24 @@ public class ContentTypeResource extends AbstractResource {
       logger.error(ex.getMessage(), ex);
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
+  }
+
+  @Path(PATH_TO_CHILDREN)
+  public ContentTypeSearcherResource getChildren() {
+    ContentTypeSearcherResource resource = getResourceContext().getResource(ContentTypeSearcherResource.class);
+    resource.setWorkspaceId(type.getContentTypeID().getWorkspace().toString());
+    resource.setParentId(type.getContentTypeID().toString());
+    resource.setIncludeFriendlies(false);
+    return resource;
+  }
+
+  @Path(PATH_TO_INSTANCES)
+  public ContentTypeSearcherResource getInstances() {
+    ContentTypeSearcherResource resource = getResourceContext().getResource(ContentTypeSearcherResource.class);
+    resource.setWorkspaceId(type.getContentTypeID().getWorkspace().toString());
+    resource.setContentTypeId(Collections.singletonList(type.getContentTypeID().toString()));
+    resource.setIncludeFriendlies(false);
+    return resource;
   }
 
   public static URI getContentTypeRelativeURI(UriInfo info, ContentTypeId typeId) {

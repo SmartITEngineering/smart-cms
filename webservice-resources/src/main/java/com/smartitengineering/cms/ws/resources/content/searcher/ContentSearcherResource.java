@@ -216,7 +216,7 @@ public class ContentSearcherResource extends AbstractResource {
                count, disJunction, includeFriendlies);
     ResponseBuilder responseBuilder;
     Filter filter = getFilter();
-    final com.smartitengineering.cms.api.content.SearchResult result = SmartContentAPI.getInstance().getContentLoader().
+    final com.smartitengineering.cms.api.common.SearchResult result = SmartContentAPI.getInstance().getContentLoader().
         search(filter);
     final Collection<Content> searchContent = result.getResult();
     Feed feed = getFeed("search", "Content Search Result", new Date());
@@ -271,8 +271,8 @@ public class ContentSearcherResource extends AbstractResource {
     Collection<Content> searchContent;
     ResponseBuilder responseBuilder;
     Filter filter = getFilter();
-    final com.smartitengineering.cms.api.content.SearchResult searchResult =
-                                                              SmartContentAPI.getInstance().getContentLoader().
+    final com.smartitengineering.cms.api.common.SearchResult searchResult =
+                                                             SmartContentAPI.getInstance().getContentLoader().
         search(filter);
     searchContent = searchResult.getResult();
     if (searchContent.isEmpty() || searchContent == null) {
@@ -298,7 +298,7 @@ public class ContentSearcherResource extends AbstractResource {
     if (contentTypeId != null && !contentTypeId.isEmpty()) {
       this.contentTypeId = contentTypeId;
     }
-    else {
+    else if (this.contentTypeId == null) {
       this.contentTypeId = Collections.emptyList();
     }
     this.statuses = statuses;
@@ -373,10 +373,9 @@ public class ContentSearcherResource extends AbstractResource {
     return filter;
   }
 
-  private ContentTypeId[] parseCollectionContentTypeId(List<String> strCollectionContentTypeId) {
+  public static ContentTypeId[] parseCollectionContentTypeId(List<String> strCollectionContentTypeId) {
     Collection<ContentTypeId> contentTypeIds = new ArrayList<ContentTypeId>();
     for (String strContentTypeId : strCollectionContentTypeId) {
-      logger.info(":::CONTENT TYPE ID AS STRING : " + strContentTypeId);
       if (StringUtils.isBlank(strContentTypeId)) {
         continue;
       }
@@ -405,12 +404,11 @@ public class ContentSearcherResource extends AbstractResource {
     return retContentStatus;
   }
 
-  private WorkspaceId parseWorkspaceId(String strWorkspaceId) {
+  public static WorkspaceId parseWorkspaceId(String strWorkspaceId) {
     if (StringUtils.isBlank(strWorkspaceId)) {
       return null;
     }
-    logger.info(":::WORKSPACE ID : " + strWorkspaceId);
-    String[] workspaceParam = splitStr(strWorkspaceId, ",");
+    String[] workspaceParam = splitStr(strWorkspaceId.replace(':', ','), ",");
     if (workspaceParam.length < 2) {
       return null;
     }
@@ -436,8 +434,11 @@ public class ContentSearcherResource extends AbstractResource {
     return parsedQueryParameter;
   }
 
-  private ContentTypeId parseContentTypeId(String strContentTypeId) {
-    String[] contentTypeIdStr = splitStr(strContentTypeId, ",");
+  public static ContentTypeId parseContentTypeId(String strContentTypeId) {
+    if (StringUtils.isBlank(strContentTypeId)) {
+      return null;
+    }
+    String[] contentTypeIdStr = splitStr(strContentTypeId.replace(':', ','), ",");
     if (contentTypeIdStr.length < 4) {
       return null;
     }
@@ -449,13 +450,13 @@ public class ContentSearcherResource extends AbstractResource {
     return parsedContentTypeId;
   }
 
-  private String[] splitStr(String string, String splitChar) {
+  private static String[] splitStr(String string, String splitChar) {
     String[] retStr;
     retStr = string.split(splitChar);
     return retStr;
   }
 
-  private QueryParameter<Date> formatDate(String strDate) {
+  public static QueryParameter<Date> formatDate(String strDate) {
     if (StringUtils.isBlank(strDate)) {
       return null;
     }
@@ -470,7 +471,8 @@ public class ContentSearcherResource extends AbstractResource {
     }
     else if (strDate.startsWith(">=")) {
       String date = strDate.replaceAll(">=", "");
-      queryParameter = QueryParameterFactory.getGreaterThanEqualToPropertyParam("greaterOrEqual", new Date(Long.parseLong(
+      queryParameter = QueryParameterFactory.getGreaterThanEqualToPropertyParam("greaterOrEqual", new Date(Long.
+          parseLong(
           date)));
     }
     else if (strDate.startsWith("<=")) {

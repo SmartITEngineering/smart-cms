@@ -18,18 +18,17 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
-import com.smartitengineering.cms.api.content.Content;
-import com.smartitengineering.cms.api.content.SearchResult;
+import com.smartitengineering.cms.api.common.SearchResult;
 import java.util.Collection;
 
 /**
  *
  * @author imyousuf
  */
-public class SearchResultImpl implements SearchResult {
+public class SearchResultImpl<T> implements SearchResult<T> {
 
   private long totalResultsCount;
-  private Collection<Content> result;
+  private Collection<T> result;
 
   @Override
   public long getTotalResultsCount() {
@@ -37,11 +36,11 @@ public class SearchResultImpl implements SearchResult {
   }
 
   @Override
-  public Collection<Content> getResult() {
+  public Collection<T> getResult() {
     return result;
   }
 
-  public void setResult(Collection<Content> result) {
+  public void setResult(Collection<T> result) {
     this.result = result;
   }
 

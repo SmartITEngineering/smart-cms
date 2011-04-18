@@ -18,7 +18,10 @@
  */
 package com.smartitengineering.cms.spi.type;
 
+import com.smartitengineering.cms.api.common.SearchResult;
+import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.type.Filter;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 
 /**
@@ -30,4 +33,6 @@ public interface ContentTypeSearcher {
   void reIndex(ContentTypeId typeId);
 
   void reIndex(WorkspaceId workspaceId);
+
+  public SearchResult<ContentType> search(Filter filter);
 }

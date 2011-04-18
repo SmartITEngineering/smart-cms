@@ -23,7 +23,7 @@ import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Filter;
-import com.smartitengineering.cms.api.content.SearchResult;
+import com.smartitengineering.cms.api.common.SearchResult;
 import com.smartitengineering.cms.api.event.Event.EventType;
 import com.smartitengineering.cms.api.event.Event.Type;
 import com.smartitengineering.cms.api.event.EventListener;
@@ -76,7 +76,7 @@ public class ContentSearcherImpl implements ContentSearcher {
   @Inject
   private SchemaInfoProvider<PersistentContent, ContentId> schemaInfoProvider;
   // Injected so that the quartz service starts
-  @Inject
+  @Inject(optional=true)
   private EventSubscriber subscriber;
   @Inject
   @Named(REINDEX_LISTENER_NAME)
@@ -85,7 +85,7 @@ public class ContentSearcherImpl implements ContentSearcher {
   private static final String SOLR_DATE_FORMAT = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern() + "'Z'";
 
   @Override
-  public SearchResult search(Filter filter) {
+  public SearchResult<Content> search(Filter filter) {
     final StringBuilder finalQuery = new StringBuilder();
     String disjunctionSeperator = " OR ";
     String conjunctionSeperator = " AND ";
@@ -209,7 +209,7 @@ public class ContentSearcherImpl implements ContentSearcher {
     return SmartContentAPI.getInstance().getContentLoader().createSearchResult(result, searchResult.getTotalResults());
   }
 
-  private String generateDateQuery(String fieldName, QueryParameter<Date> creationDateFilter) {
+  public static String generateDateQuery(String fieldName, QueryParameter<Date> creationDateFilter) {
     StringBuilder query = new StringBuilder(fieldName).append(": ");
     String dateQuery = "";
     switch (creationDateFilter.getParameterType()) {

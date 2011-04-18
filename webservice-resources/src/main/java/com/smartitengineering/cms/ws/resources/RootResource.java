@@ -22,8 +22,8 @@ import com.smartitengineering.cms.ws.resources.workspace.WorkspaceResource;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
-import com.smartitengineering.cms.ws.resources.content.ContentReIndexResource;
 import com.smartitengineering.cms.ws.resources.content.searcher.ContentSearcherResource;
+import com.smartitengineering.cms.ws.resources.workspace.ReIndexResource;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -124,8 +124,8 @@ public class RootResource extends AbstractResource {
   }
 
   @Path("/" + PATH_TO_REINDEX)
-  public ContentReIndexResource reIndex() {
-    return new ContentReIndexResource(getInjectables());
+  public ReIndexResource reIndex() {
+    return new ReIndexResource(getInjectables());
   }
 
   @Path("/" + PATH_TO_TEMPLATES)

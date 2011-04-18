@@ -41,7 +41,7 @@ import com.smartitengineering.cms.api.content.MutableOtherFieldValue;
 import com.smartitengineering.cms.api.content.MutableStringFieldValue;
 import com.smartitengineering.cms.api.content.NumberFieldValue;
 import com.smartitengineering.cms.api.content.OtherFieldValue;
-import com.smartitengineering.cms.api.content.SearchResult;
+import com.smartitengineering.cms.api.common.SearchResult;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.type.CollectionDataType;
@@ -217,7 +217,7 @@ public class ContentLoaderImpl implements ContentLoader {
   }
 
   @Override
-  public SearchResult search(Filter filter) {
+  public SearchResult<Content> search(Filter filter) {
     return SmartContentSPI.getInstance().getContentSearcher().search(filter);
   }
 
@@ -529,8 +529,8 @@ public class ContentLoaderImpl implements ContentLoader {
   }
 
   @Override
-  public SearchResult createSearchResult(Collection<Content> result, long totalResultsCount) {
-    SearchResultImpl resultImpl = new SearchResultImpl();
+  public SearchResult<Content> createSearchResult(Collection<Content> result, long totalResultsCount) {
+    SearchResultImpl<Content> resultImpl = new SearchResultImpl<Content>();
     resultImpl.setResult(result);
     resultImpl.setTotalResultsCount(totalResultsCount);
     return resultImpl;

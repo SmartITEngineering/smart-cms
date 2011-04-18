@@ -45,6 +45,8 @@ import org.apache.abdera.model.Feed;
 public class FriendlyContentTypeResource extends AbstractResource {
 
   public static final String SEARCH = "search";
+  public static final String PATH_TO_CHILDREN = "children";
+  public static final String PATH_TO_INSTANCES = "instances";
   @PathParam(WorkspaceResource.PARAM_NAMESPACE)
   private String ownerWorkspaceNS;
   @PathParam(WorkspaceResource.PARAM_NAME)
@@ -71,6 +73,26 @@ public class FriendlyContentTypeResource extends AbstractResource {
         build(friendlyWorkspaceNS, friendlyWorkspaceName, friendlyContentTypeNS, friendlyContentTypeName);
     feed.addLink(getLink(uri, ContentTypesResource.REL_CONTENT_TYPE, MediaType.APPLICATION_XML));
     feed.addLink(getLink(uri, ContentTypesResource.REL_CONTENT_TYPE_FEED, MediaType.APPLICATION_ATOM_XML));
+    final URI childrenUri = getRelativeURIBuilder().path(ContentTypesResource.class).path(
+        ContentTypesResource.PATH_TO_FRIENDLY_CONTENT_TYPE).path(PATH_TO_CHILDREN).build(ownerWorkspaceNS,
+                                                                                         ownerWorkspaceName,
+                                                                                         friendlyWorkspaceNS,
+                                                                                         friendlyWorkspaceName,
+                                                                                         friendlyContentTypeNS,
+                                                                                         friendlyContentTypeName);
+    feed.addLink(getLink(childrenUri, PATH_TO_CHILDREN, MediaType.APPLICATION_ATOM_XML));
+    final URI instancesUri = getRelativeURIBuilder().path(ContentTypesResource.class).path(
+        ContentTypesResource.PATH_TO_FRIENDLY_CONTENT_TYPE).path(PATH_TO_INSTANCES).build(ownerWorkspaceNS,
+                                                                                          ownerWorkspaceName,
+                                                                                          friendlyWorkspaceNS,
+                                                                                          friendlyWorkspaceName,
+                                                                                          friendlyContentTypeNS,
+                                                                                          friendlyContentTypeName);
+    feed.addLink(getLink(instancesUri, PATH_TO_INSTANCES, MediaType.APPLICATION_ATOM_XML));
+    feed.addLink(getLink(childrenUri, PATH_TO_CHILDREN,
+                         com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
+    feed.addLink(getLink(instancesUri, PATH_TO_INSTANCES,
+                         com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
     URI searchUri = getAbsoluteURIBuilder().path(ContentTypesResource.class).path(
         ContentTypesResource.PATH_TO_FRIENDLY_CONTENT_TYPE).path(SEARCH).build(ownerWorkspaceNS, ownerWorkspaceName,
                                                                                friendlyWorkspaceNS,
@@ -115,6 +137,26 @@ public class FriendlyContentTypeResource extends AbstractResource {
     contentSearcherResource.setWorkspaceId(ownerWorkspace.getId().toString());
     contentSearcherResource.setContentTypeId(Collections.singletonList(contentType.getContentTypeID().toString()));
     return contentSearcherResource;
+  }
+
+  @Path(PATH_TO_CHILDREN)
+  public ContentTypeSearcherResource getChildren() {
+    ContentType type = validate();
+    ContentTypeSearcherResource resource = getResourceContext().getResource(ContentTypeSearcherResource.class);
+    resource.setWorkspaceId(ownerWorkspace.getId().toString());
+    resource.setParentId(type.getContentTypeID().toString());
+    resource.setIncludeFriendlies(false);
+    return resource;
+  }
+
+  @Path(PATH_TO_INSTANCES)
+  public ContentTypeSearcherResource getInstances() {
+    ContentType type = validate();
+    ContentTypeSearcherResource resource = getResourceContext().getResource(ContentTypeSearcherResource.class);
+    resource.setWorkspaceId(ownerWorkspace.getId().toString());
+    resource.setContentTypeId(Collections.singletonList(type.getContentTypeID().toString()));
+    resource.setIncludeFriendlies(false);
+    return resource;
   }
 
   @Override
