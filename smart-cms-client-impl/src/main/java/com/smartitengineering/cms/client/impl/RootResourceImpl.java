@@ -76,6 +76,9 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
   private static final ConfigProcessor CONFIG_PROCESSOR = new CmsConfigProcessor();
 
   static {
+    if (LOGGER.isInfoEnabled()) {
+      System.setProperty("com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl.trace", "true");
+    }
     SMART_CMS_CONNECTION_CONFIG = new ConnectionConfig();
     String propFileName = "smart-cms-client-config.properties";
     PropertiesLocator locator = new PropertiesLocator();
@@ -227,7 +230,11 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
   @Override
   public UriTemplateResource getTemplates() {
     try {
-      return new UriTemplateResourceImpl(this, getRelatedResourceUris().getFirst(REL_TEMPLATES));
+      final ResourceLink first = getRelatedResourceUris().getFirst(REL_TEMPLATES);
+      if (logger.isInfoEnabled()) {
+        logger.info("Templates URI " + first);
+      }
+      return new UriTemplateResourceImpl(this, first);
     }
     catch (Exception ex) {
       throw new RuntimeException(ex);

@@ -66,6 +66,7 @@ public class UriTemplateResourceImpl extends AbstractClientResource<OpenSearchDe
     if (link != null) {
       return new WorkspaceFeedResourceImpl(this, link);
     }
+    logger.warn("Could not find link!");
     return null;
   }
 
@@ -80,6 +81,7 @@ public class UriTemplateResourceImpl extends AbstractClientResource<OpenSearchDe
     if (link != null) {
       return new ContentTypeFeedResourceImpl(this, link);
     }
+    logger.warn("Could not find link!");
     return null;
   }
 
@@ -92,6 +94,7 @@ public class UriTemplateResourceImpl extends AbstractClientResource<OpenSearchDe
     if (link != null) {
       return new ContentResourceImpl(this, link);
     }
+    logger.warn("Could not find link!");
     return null;
   }
 
@@ -100,7 +103,7 @@ public class UriTemplateResourceImpl extends AbstractClientResource<OpenSearchDe
                                                                     String friendlyWorkspaceNS,
                                                                     String friendlyWorkspaceId, String friendlyTypeNS,
                                                                     String friendlyTypeId) {
-    ResourceLink link = getResourceLink("friendlyContentType",
+    ResourceLink link = getResourceLink("friendlycontenttype",
                                         new SimpleImmutableEntry<String, String>(WORKSPACE_NS, workspaceNS),
                                         new SimpleImmutableEntry<String, String>(WORKSPACE_NAME, workspaceId),
                                         new SimpleImmutableEntry<String, String>(FRIENDLY_WORKSPACE_NS,
@@ -112,6 +115,7 @@ public class UriTemplateResourceImpl extends AbstractClientResource<OpenSearchDe
     if (link != null) {
       return new FriendlyContentTypeResourceImpl(this, link);
     }
+    logger.warn("Could not find link!");
     return null;
   }
 
