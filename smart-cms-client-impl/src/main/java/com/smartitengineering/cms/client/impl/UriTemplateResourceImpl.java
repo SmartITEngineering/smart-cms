@@ -20,7 +20,7 @@ package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.ContentResource;
 import com.smartitengineering.cms.client.api.ContentTypeFeedResource;
-import com.smartitengineering.cms.client.api.ContentTypeResource;
+import com.smartitengineering.cms.client.api.FriendlyContentTypeResource;
 import com.smartitengineering.cms.client.api.UriTemplateResource;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.util.opensearch.api.OpenSearchDescriptor;
@@ -47,6 +47,10 @@ public class UriTemplateResourceImpl extends AbstractClientResource<OpenSearchDe
   private static final String WORKSPACE_NS = "{ns}";
   private static final String TYPE_NAME = "{typeName}";
   private static final String TYPE_NS = "{typeNS}";
+  private static final String FRIENDLY_WORKSPACE_NAME = "{fWorkspaceName}";
+  private static final String FRIENDLY_WORKSPACE_NS = "{fWorkspaceNS}";
+  private static final String FRIENDLY_TYPE_NAME = "{fTypeName}";
+  private static final String FRIENDLY_TYPE_NS = "{fTypeNS}";
   private static final String CONTENT_ID = "{contentId}";
 
   public UriTemplateResourceImpl(Resource referrer, ResourceLink resouceLink) throws IllegalArgumentException,
@@ -87,6 +91,26 @@ public class UriTemplateResourceImpl extends AbstractClientResource<OpenSearchDe
                                         new SimpleImmutableEntry<String, String>(CONTENT_ID, contentId));
     if (link != null) {
       return new ContentResourceImpl(this, link);
+    }
+    return null;
+  }
+
+  @Override
+  public FriendlyContentTypeResource getFriendlyContentTypeResource(String workspaceNS, String workspaceId,
+                                                                    String friendlyWorkspaceNS,
+                                                                    String friendlyWorkspaceId, String friendlyTypeNS,
+                                                                    String friendlyTypeId) {
+    ResourceLink link = getResourceLink("friendlyContentType",
+                                        new SimpleImmutableEntry<String, String>(WORKSPACE_NS, workspaceNS),
+                                        new SimpleImmutableEntry<String, String>(WORKSPACE_NAME, workspaceId),
+                                        new SimpleImmutableEntry<String, String>(FRIENDLY_WORKSPACE_NS,
+                                                                                 friendlyWorkspaceNS),
+                                        new SimpleImmutableEntry<String, String>(FRIENDLY_WORKSPACE_NAME,
+                                                                                 friendlyWorkspaceId),
+                                        new SimpleImmutableEntry<String, String>(FRIENDLY_TYPE_NS, friendlyTypeNS),
+                                        new SimpleImmutableEntry<String, String>(FRIENDLY_TYPE_NAME, friendlyTypeId));
+    if (link != null) {
+      return new FriendlyContentTypeResourceImpl(this, link);
     }
     return null;
   }
