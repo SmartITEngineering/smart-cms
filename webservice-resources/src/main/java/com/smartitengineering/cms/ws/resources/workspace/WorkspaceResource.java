@@ -22,6 +22,7 @@ import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
+import com.smartitengineering.cms.ws.common.utils.SimpleFeedExtensions;
 import com.smartitengineering.cms.ws.common.utils.Utils;
 import com.smartitengineering.cms.ws.resources.content.ContentsResource;
 import com.smartitengineering.cms.ws.resources.content.searcher.ContentSearcherResource;
@@ -183,6 +184,8 @@ public class WorkspaceResource extends AbstractResource {
       feed.addLink(getLink(getAbsoluteURIBuilder().path(ContentsResource.class).build(namespace, workspaceName),
                            REL_CONTENTS, MediaType.APPLICATION_ATOM_XML));
       feed.addLink(getLink(getUriInfo().getRequestUri(), Link.REL_ALTERNATE, MediaType.APPLICATION_JSON));
+      feed.addSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME_SPACE, namespace);
+      feed.addSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME, workspaceName);
       ResponseBuilder builder = Response.ok(feed);
       builder.lastModified(creationDate);
       CacheControl control = new CacheControl();

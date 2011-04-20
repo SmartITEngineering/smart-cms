@@ -27,6 +27,7 @@ import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
 import com.smartitengineering.cms.client.api.WorkspaceRepresentationsResource;
 import com.smartitengineering.cms.client.api.WorkspaceValidatorsResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationsResource;
+import com.smartitengineering.cms.ws.common.utils.SimpleFeedExtensions;
 import com.smartitengineering.util.rest.atom.AbstractFeedClientResource;
 import com.smartitengineering.util.rest.atom.AtomClientUtil;
 import com.smartitengineering.util.rest.client.Resource;
@@ -122,5 +123,15 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
   public WorkspaceValidatorsResource getValidators() {
     return new WorkspaceValidatorsResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
         getLink("validators")));
+  }
+
+  @Override
+  public String getWorkspaceNamespace() {
+    return getLastReadStateOfEntity().getSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME_SPACE);
+  }
+
+  @Override
+  public String getWorkspaceName() {
+    return getLastReadStateOfEntity().getSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME);
   }
 }

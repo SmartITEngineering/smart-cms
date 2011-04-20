@@ -22,6 +22,7 @@ import com.smartitengineering.cms.client.api.ContentTypeFeedResource;
 import com.smartitengineering.cms.client.api.ContentTypeResource;
 import com.smartitengineering.cms.client.api.ContentTypeSearchResultResource;
 import com.smartitengineering.cms.ws.common.domains.FieldDef;
+import com.smartitengineering.cms.ws.common.utils.SimpleFeedExtensions;
 import com.smartitengineering.util.rest.atom.AbstractFeedClientResource;
 import com.smartitengineering.util.rest.atom.AtomClientUtil;
 import com.smartitengineering.util.rest.client.Resource;
@@ -99,5 +100,25 @@ public class ContentTypeFeedResourceImpl extends AbstractFeedClientResource<Reso
   @Override
   public String getDisplayName() {
     return getLastReadStateOfEntity().getTitle();
+  }
+
+  @Override
+  public String getWorkspaceNamespace() {
+    return getLastReadStateOfEntity().getSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME_SPACE);
+  }
+
+  @Override
+  public String getWorkspaceName() {
+    return getLastReadStateOfEntity().getSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME);
+  }
+
+  @Override
+  public String getContentTypeName() {
+    return getLastReadStateOfEntity().getSimpleExtension(SimpleFeedExtensions.CONTENT_TYPE_NAME);
+  }
+
+  @Override
+  public String getContentTypeNamespace() {
+    return getLastReadStateOfEntity().getSimpleExtension(SimpleFeedExtensions.CONTENT_TYPE_NAME_SPACE);
   }
 }

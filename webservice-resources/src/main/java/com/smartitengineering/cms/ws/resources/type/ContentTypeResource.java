@@ -31,6 +31,7 @@ import com.smartitengineering.cms.ws.common.domains.CollectionFieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.ContentFieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.OtherFieldDefImpl;
+import com.smartitengineering.cms.ws.common.utils.SimpleFeedExtensions;
 import com.smartitengineering.cms.ws.resources.content.searcher.ContentSearcherResource;
 import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
@@ -150,11 +151,12 @@ public class ContentTypeResource extends AbstractResource {
       feed.addLink(getLink(instancesUri, PATH_TO_INSTANCES,
                            com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
       feed.addLink(getLink(getUriInfo().getRequestUri(), Link.REL_ALTERNATE, MediaType.APPLICATION_XML));
-      builder = Response.ok(feed);
-      builder.lastModified(lastModified);
-      builder.tag(tag);
-      builder.header(HttpHeaders.VARY, HttpHeaders.ACCEPT);
       Map<String, FieldDef> fieldDefs = type.getFieldDefs();
+      feed.addSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME_SPACE, type.getContentTypeID().getWorkspace().
+          getGlobalNamespace());
+      feed.addSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME, type.getContentTypeID().getWorkspace().getName());
+      feed.addSimpleExtension(SimpleFeedExtensions.CONTENT_TYPE_NAME_SPACE, type.getContentTypeID().getNamespace());
+      feed.addSimpleExtension(SimpleFeedExtensions.CONTENT_TYPE_NAME, type.getContentTypeID().getName());
       if (fieldDefs != null && !fieldDefs.isEmpty()) {
         ObjectMapper objectMapper = new ObjectMapper();
         for (Entry<String, FieldDef> fieldDef : fieldDefs.entrySet()) {
@@ -226,6 +228,10 @@ public class ContentTypeResource extends AbstractResource {
           }
         }
       }
+      builder = Response.ok(feed);
+      builder.lastModified(lastModified);
+      builder.tag(tag);
+      builder.header(HttpHeaders.VARY, HttpHeaders.ACCEPT);
     }
     return builder.build();
   }
