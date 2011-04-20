@@ -58,9 +58,11 @@ import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.logging.Level;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -291,15 +293,26 @@ public class ContentLoaderImpl implements ContentLoader {
 
   @Override
   public WriteableContent createContent(ContentType contentType) {
-    PersistableContent content = SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContent();
+    return createContent(contentType, false);
+  }
+
+  @Override
+  public WriteableContent createContent(ContentType contentType, boolean supressChecking) {
+    PersistableContent content = SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContent(
+        supressChecking);
     content.setContentDefinition(contentType);
     return content;
   }
 
   @Override
   public WriteableContent getWritableContent(Content content) {
+    return getWritableContent(content, false);
+  }
+
+  @Override
+  public WriteableContent getWritableContent(Content content, boolean supressChecking) {
     PersistableContent mutableContent = SmartContentSPI.getInstance().getPersistableDomainFactory().
-        createPersistableContent();
+        createPersistableContent(supressChecking);
     mutableContent.setContentDefinition(content.getContentDefinition());
     mutableContent.setContentId(content.getContentId());
     mutableContent.setCreationDate(content.getCreationDate());
@@ -544,5 +557,20 @@ public class ContentLoaderImpl implements ContentLoader {
   @Override
   public void reIndex(WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getContentSearcher().reIndex(workspaceId);
+  }
+
+  @Override
+  public ContentId parseContentId(String contentIdStr) {
+    byte[] idBytes = org.apache.commons.codec.binary.StringUtils.getBytesUtf8(contentIdStr);
+    DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(idBytes));
+    ContentIdImpl idImpl = new ContentIdImpl();
+    try {
+      idImpl.readExternal(inputStream);
+    }
+    catch (Exception ex) {
+      logger.warn("Could not parse content id string " + contentIdStr, ex);
+      return null;
+    }
+    return idImpl;
   }
 }

@@ -58,6 +58,15 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   private Map<String, Field> cachedFieldMap;
   private String entityTagValue;
   private boolean privateContent;
+  private boolean supressChecking;
+
+  public boolean isSupressChecking() {
+    return supressChecking;
+  }
+
+  public void setSupressChecking(boolean supressChecking) {
+    this.supressChecking = supressChecking;
+  }
 
   @Override
   public void put() throws IOException {
@@ -284,7 +293,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
 
   @Override
   public boolean isValid() {
-    boolean validContent = SmartContentAPI.getInstance().getContentLoader().isValidContent(this);
+    boolean validContent = supressChecking || SmartContentAPI.getInstance().getContentLoader().isValidContent(this);
     if (logger.isDebugEnabled()) {
       logger.debug("!!! Checking Content" + validContent);
     }

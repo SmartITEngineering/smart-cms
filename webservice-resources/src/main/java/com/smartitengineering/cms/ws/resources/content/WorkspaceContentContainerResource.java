@@ -90,6 +90,10 @@ public class WorkspaceContentContainerResource extends AbstractResource {
         getLink(getRelativeURIBuilder().path(ContentsResource.class).path(ContentsResource.PATH_TO_SEARCH).build(workspace.
         getId().getGlobalNamespace(), workspace.getId().getName()), "search",
                 com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
+    feed.addLink(
+        getLink(getRelativeURIBuilder().path(ContentsResource.class).path(ContentsResource.PATH_TO_IMPORT).build(workspace.
+        getId().getGlobalNamespace(), workspace.getId().getName()), ContentsResource.PATH_TO_IMPORT,
+                MediaType.APPLICATION_JSON));
     builder.entity(feed);
     return builder.build();
   }

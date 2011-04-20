@@ -98,6 +98,12 @@ public interface ContentLoader {
 
   ContentId createContentId(WorkspaceId workspaceId, byte[] id);
 
+  ContentId parseContentId(String contentIdStr);
+
+  WriteableContent createContent(ContentType contentType, boolean supressChecking);
+
+  WriteableContent getWritableContent(Content content, boolean supressChecking);
+
   WriteableContent createContent(ContentType contentType);
 
   WriteableContent getWritableContent(Content content);

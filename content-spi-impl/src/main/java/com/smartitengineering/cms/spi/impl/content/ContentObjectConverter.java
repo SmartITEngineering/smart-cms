@@ -86,7 +86,7 @@ public class ContentObjectConverter extends AbstractObjectRowConverter<Persisten
 
   @Override
   public PersistentContent rowsToObject(Result startRow, ExecutorService executorService) {
-    PersistableContent content = SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContent();
+    PersistableContent content = SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContent(false);
     try {
       content.setContentId(getInfoProvider().getIdFromRowId(startRow.getRow()));
     }

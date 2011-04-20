@@ -33,7 +33,7 @@ public interface PersistableDomainFactory {
 
   PersistableContentType createPersistableContentType();
 
-  PersistableContent createPersistableContent();
+  PersistableContent createPersistableContent(boolean supressChecking);
 
   PersistableWorkspace createPersistentWorkspace();
 
