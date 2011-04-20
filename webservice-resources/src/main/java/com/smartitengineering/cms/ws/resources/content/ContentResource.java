@@ -42,17 +42,19 @@ import com.smartitengineering.cms.ws.common.domains.ContentImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldValueImpl;
 import com.smartitengineering.cms.ws.common.domains.OtherFieldValueImpl;
+import com.smartitengineering.cms.ws.common.utils.SimpleFeedExtensions;
 import com.smartitengineering.cms.ws.resources.type.ContentTypeResource;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
-import com.smartitengineering.util.rest.server.AbstractResource;
+import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import com.sun.jersey.api.container.ContainerException;
 import com.sun.jersey.api.core.ResourceContext;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,8 +79,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
+import org.apache.abdera.model.Feed;
+import org.apache.abdera.model.Link;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,9 +165,63 @@ public class ContentResource extends AbstractResource {
     if (content == null) {
       throw new WebApplicationException(Response.Status.NOT_FOUND);
     }
-    ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(tag);
+    ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), tag);
     if (builder == null) {
       builder = Response.ok(adapter.convert(getContent()));
+      builder.tag(tag);
+      builder.lastModified(getContent().getLastModifiedDate());
+      CacheControl control = new CacheControl();
+      control.setMaxAge(300);
+      builder.cacheControl(control);
+    }
+    return builder.build();
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_ATOM_XML)
+  public Response getAtomFeed() {
+    if (content == null) {
+      throw new WebApplicationException(Response.Status.NOT_FOUND);
+    }
+    ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), tag);
+    if (builder == null) {
+      final String idStr = content.getContentId().toString();
+      Feed feed = getFeed(idStr, idStr, content.getLastModifiedDate());
+      feed.addLink(getLink(getUriInfo().getRequestUri(), Link.REL_ALTERNATE, MediaType.APPLICATION_JSON));
+      feed.addSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME_SPACE, content.getContentId().getWorkspaceId().
+          getGlobalNamespace());
+      feed.addSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME, content.getContentId().getWorkspaceId().getName());
+      feed.addSimpleExtension(SimpleFeedExtensions.CONTENT_ID_IN_WORKSPACAE, org.apache.commons.codec.binary.StringUtils.
+          newStringUtf8(content.getContentId().getId()));
+      Map<String, Field> fields = content.getFields();
+      final String contentUri = ContentResource.getContentUri(getRelativeURIBuilder(), content.getContentId()).
+          toASCIIString();
+      final ContentType contentDefinition = content.getContentDefinition();
+      if (contentDefinition != null && fields != null && !fields.isEmpty()) {
+        final Map<String, FieldDef> fieldDefs = contentDefinition.getFieldDefs();
+        ObjectMapper objectMapper = new ObjectMapper();
+        for (Entry<String, Field> field : fields.entrySet()) {
+          final FieldDef def = fieldDefs.get(field.getKey());
+          if (def != null) {
+            final URI fieldURI = FieldResource.getFieldURI(getRelativeURIBuilder(), content, def);
+            org.apache.abdera.model.Entry entry = getEntry(field.getKey(), field.getKey(), content.getLastModifiedDate(),
+                                                           getLink(fieldURI, Link.REL_ALTERNATE,
+                                                                   MediaType.APPLICATION_JSON));
+            FieldImpl jsonField = new FieldImpl();
+            ContentResource.getDomainField(getRelativeURIBuilder(), field.getValue(), contentUri, jsonField);
+            StringWriter writer = new StringWriter();
+            try {
+              objectMapper.writeValue(writer, jsonField);
+              entry.setContent(writer.toString(), MediaType.APPLICATION_JSON);
+              feed.addEntry(entry);
+            }
+            catch (Exception ex) {
+              LOGGER.warn("Error adding content field json", ex);
+            }
+          }
+        }
+      }
+      builder = Response.ok(feed);
       builder.tag(tag);
       builder.lastModified(getContent().getLastModifiedDate());
       CacheControl control = new CacheControl();
@@ -394,6 +453,11 @@ public class ContentResource extends AbstractResource {
     builder.path(ContentsResource.class).path(ContentsResource.PATH_TO_CONTENT);
     return builder.build(contentId.getWorkspaceId().getGlobalNamespace(), contentId.getWorkspaceId().getName(),
                          StringUtils.newStringUtf8(contentId.getId()));
+  }
+
+  @Override
+  protected String getAuthor() {
+    return "Smart CMS";
   }
 
   public class ContentAdapterHelper extends AbstractAdapterHelper<Content, com.smartitengineering.cms.ws.common.domains.Content> {
