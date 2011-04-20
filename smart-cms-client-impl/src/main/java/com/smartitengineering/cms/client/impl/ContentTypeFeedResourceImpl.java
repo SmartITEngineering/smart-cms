@@ -95,4 +95,9 @@ public class ContentTypeFeedResourceImpl extends AbstractFeedClientResource<Reso
     return new ContentTypeSearchResultResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
         getLink("instances")));
   }
+
+  @Override
+  public String getDisplayName() {
+    return getLastReadStateOfEntity().getTitle();
+  }
 }

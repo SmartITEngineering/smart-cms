@@ -33,6 +33,8 @@ public interface ContentTypeFeedResource extends Resource<Feed> {
 
   List<FieldDef> getFieldDefs();
 
+  String getDisplayName();
+
   public ContentTypeSearchResultResource getChildren();
 
   public ContentTypeSearchResultResource getInstances();
