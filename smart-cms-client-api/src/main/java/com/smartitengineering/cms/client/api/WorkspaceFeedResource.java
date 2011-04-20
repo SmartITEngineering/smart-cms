@@ -43,5 +43,9 @@ public interface WorkspaceFeedResource extends Resource<Feed> {
 
   String getSearchUri();
 
+  String getWorkspaceNamespace();
+
+  String getWorkspaceName();
+
   ContentSearcherResource searchContent(String query);
 }
