@@ -94,7 +94,7 @@ public class XMLContentTypeDefinitionParser implements ContentTypeDefinitionPars
   protected Element createRootNodeAndAddChild(Node childNode) {
     Element root = new Element(XmlConstants.CONTENT_TYPES, XmlConstants.NAMESPACE);
     Attribute attr = new Attribute("xsi:schemaLocation", XmlConstants.XSI_NAMESPACE, new StringBuilder(
-        XmlConstants.XSI_NAMESPACE).append(' ').append(
+        XmlConstants.NAMESPACE).append(' ').append(
         SmartContentSPI.getInstance().getSchemaLocationForContentTypeXml()).toString());
     root.addAttribute(attr);
     root.appendChild(childNode);
