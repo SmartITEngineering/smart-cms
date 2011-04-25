@@ -42,17 +42,19 @@ import com.smartitengineering.cms.ws.common.domains.ContentImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldValueImpl;
 import com.smartitengineering.cms.ws.common.domains.OtherFieldValueImpl;
+import com.smartitengineering.cms.ws.common.utils.SimpleFeedExtensions;
 import com.smartitengineering.cms.ws.resources.type.ContentTypeResource;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
-import com.smartitengineering.util.rest.server.AbstractResource;
+import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import com.sun.jersey.api.container.ContainerException;
 import com.sun.jersey.api.core.ResourceContext;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,8 +79,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
+import org.apache.abdera.model.Feed;
+import org.apache.abdera.model.Link;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +96,7 @@ public class ContentResource extends AbstractResource {
   private final Content content;
   private final ContentId contentId;
   private final EntityTag tag;
+  private final boolean importMode;
   private final static transient Logger LOGGER = LoggerFactory.getLogger(ContentResource.class);
   protected final GenericAdapter<Content, com.smartitengineering.cms.ws.common.domains.Content> adapter;
   public static final String PATH_TO_REP = "r/{repName}";
@@ -98,7 +104,12 @@ public class ContentResource extends AbstractResource {
   public static final String PATH_TO_REINDEX = "reindex";
 
   public ContentResource(ServerResourceInjectables injectables, ContentId contentId) {
+    this(injectables, contentId, false);
+  }
+
+  public ContentResource(ServerResourceInjectables injectables, ContentId contentId, boolean importMode) {
     super(injectables);
+    this.importMode = importMode;
     if (contentId == null) {
       throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
@@ -154,9 +165,63 @@ public class ContentResource extends AbstractResource {
     if (content == null) {
       throw new WebApplicationException(Response.Status.NOT_FOUND);
     }
-    ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(tag);
+    ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), tag);
     if (builder == null) {
       builder = Response.ok(adapter.convert(getContent()));
+      builder.tag(tag);
+      builder.lastModified(getContent().getLastModifiedDate());
+      CacheControl control = new CacheControl();
+      control.setMaxAge(300);
+      builder.cacheControl(control);
+    }
+    return builder.build();
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_ATOM_XML)
+  public Response getAtomFeed() {
+    if (content == null) {
+      throw new WebApplicationException(Response.Status.NOT_FOUND);
+    }
+    ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), tag);
+    if (builder == null) {
+      final String idStr = content.getContentId().toString();
+      Feed feed = getFeed(idStr, idStr, content.getLastModifiedDate());
+      feed.addLink(getLink(getUriInfo().getRequestUri(), Link.REL_ALTERNATE, MediaType.APPLICATION_JSON));
+      feed.addSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME_SPACE, content.getContentId().getWorkspaceId().
+          getGlobalNamespace());
+      feed.addSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME, content.getContentId().getWorkspaceId().getName());
+      feed.addSimpleExtension(SimpleFeedExtensions.CONTENT_ID_IN_WORKSPACAE, org.apache.commons.codec.binary.StringUtils.
+          newStringUtf8(content.getContentId().getId()));
+      Map<String, Field> fields = content.getFields();
+      final String contentUri = ContentResource.getContentUri(getRelativeURIBuilder(), content.getContentId()).
+          toASCIIString();
+      final ContentType contentDefinition = content.getContentDefinition();
+      if (contentDefinition != null && fields != null && !fields.isEmpty()) {
+        final Map<String, FieldDef> fieldDefs = contentDefinition.getFieldDefs();
+        ObjectMapper objectMapper = new ObjectMapper();
+        for (Entry<String, Field> field : fields.entrySet()) {
+          final FieldDef def = fieldDefs.get(field.getKey());
+          if (def != null) {
+            final URI fieldURI = FieldResource.getFieldURI(getRelativeURIBuilder(), content, def);
+            org.apache.abdera.model.Entry entry = getEntry(field.getKey(), field.getKey(), content.getLastModifiedDate(),
+                                                           getLink(fieldURI, Link.REL_ALTERNATE,
+                                                                   MediaType.APPLICATION_JSON));
+            FieldImpl jsonField = new FieldImpl();
+            ContentResource.getDomainField(getRelativeURIBuilder(), field.getValue(), contentUri, jsonField);
+            StringWriter writer = new StringWriter();
+            try {
+              objectMapper.writeValue(writer, jsonField);
+              entry.setContent(writer.toString(), MediaType.APPLICATION_JSON);
+              feed.addEntry(entry);
+            }
+            catch (Exception ex) {
+              LOGGER.warn("Error adding content field json", ex);
+            }
+          }
+        }
+      }
+      builder = Response.ok(feed);
       builder.tag(tag);
       builder.lastModified(getContent().getLastModifiedDate());
       CacheControl control = new CacheControl();
@@ -309,7 +374,7 @@ public class ContentResource extends AbstractResource {
     final WriteableContent writeableContent;
     if (this.content == null) {
       //Create new content
-      writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(newContent);
+      writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(newContent, importMode);
     }
     else {
       //Update new content with etag checking
@@ -321,7 +386,7 @@ public class ContentResource extends AbstractResource {
         return builder.build();
       }
       //Merge new contents into the old one in case of update
-      writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(this.content);
+      writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(this.content, importMode);
       writeableContent.setContentDefinition(newContent.getContentDefinition());
       writeableContent.setStatus(newContent.getStatus());
       writeableContent.setParentId(newContent.getParentId());
@@ -388,6 +453,11 @@ public class ContentResource extends AbstractResource {
     builder.path(ContentsResource.class).path(ContentsResource.PATH_TO_CONTENT);
     return builder.build(contentId.getWorkspaceId().getGlobalNamespace(), contentId.getWorkspaceId().getName(),
                          StringUtils.newStringUtf8(contentId.getId()));
+  }
+
+  @Override
+  protected String getAuthor() {
+    return "Smart CMS";
   }
 
   public class ContentAdapterHelper extends AbstractAdapterHelper<Content, com.smartitengineering.cms.ws.common.domains.Content> {
@@ -476,25 +546,28 @@ public class ContentResource extends AbstractResource {
       }
       writeableContent.setStatus(status);
       writeableContent.setPrivate(toBean.isPrivateContent());
-      Content parentContent;
+      ContentId parentContentId;
       final String parentContentUri = toBean.getParentContentUri();
       if (org.apache.commons.lang.StringUtils.isNotBlank(parentContentUri)) {
         try {
           final ContentResource resource = getContentResource(parentContentUri, getAbsoluteURIBuilder(),
                                                               getResourceContext());
           if (resource == null) {
-            throw new NullPointerException("No such content type!");
+            throw new NullPointerException("No such parent content!");
           }
-          parentContent = resource.getContent();
+          if (!importMode && resource.getContent() == null) {
+            throw new NullPointerException("No such parent content!");
+          }
+          parentContentId = resource.getContentId();
         }
         catch (Exception ex) {
           throw new RuntimeException(ex.getMessage(), ex);
         }
-        writeableContent.setParentId(parentContent.getContentId());
+        writeableContent.setParentId(parentContentId);
       }
       for (com.smartitengineering.cms.ws.common.domains.Field field : toBean.getFields()) {
         MutableField mutableField = getField(writeableContent.getContentId(), contentType.getFieldDefs().get(field.
-            getName()), field, getResourceContext(), getAbsoluteURIBuilder());
+            getName()), field, getResourceContext(), getAbsoluteURIBuilder(), importMode);
         writeableContent.setField(mutableField);
       }
       return writeableContent;
@@ -503,7 +576,7 @@ public class ContentResource extends AbstractResource {
 
   protected static FieldValue getFieldValue(final DataType dataType,
                                             com.smartitengineering.cms.ws.common.domains.FieldValue value,
-                                            ResourceContext context, UriBuilder absBuilder) {
+                                            ResourceContext context, UriBuilder absBuilder, boolean importMode) {
     FieldValue fieldValue;
     switch (dataType.getType()) {
       case COLLECTION:
@@ -514,7 +587,7 @@ public class ContentResource extends AbstractResource {
                                                                           (com.smartitengineering.cms.ws.common.domains.CollectionFieldValue) value;
         ArrayList<FieldValue> list = new ArrayList<FieldValue>(cFieldValue.getValues().size());
         for (com.smartitengineering.cms.ws.common.domains.FieldValue v : cFieldValue.getValues()) {
-          list.add(getFieldValue(collectionDataType.getItemDataType(), v, context, absBuilder));
+          list.add(getFieldValue(collectionDataType.getItemDataType(), v, context, absBuilder, importMode));
         }
         collectionFieldValue.setValue(list);
         fieldValue = collectionFieldValue;
@@ -536,9 +609,12 @@ public class ContentResource extends AbstractResource {
             throw new NullPointerException();
           }
           if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Content ID " + resource.getContent().getContentId());
+            LOGGER.info("Content ID " + resource.getContentId());
           }
-          contentFieldValue.setValue(resource.getContent().getContentId());
+          if (!importMode && resource.getContent() == null) {
+            throw new NullPointerException("No such content! " + resource.getContentId());
+          }
+          contentFieldValue.setValue(resource.getContentId());
         }
         catch (Exception ex) {
           LOGGER.warn("Error getting content!", ex);
@@ -554,7 +630,13 @@ public class ContentResource extends AbstractResource {
 
   protected static MutableField getField(final ContentId contentId, final FieldDef fieldDef,
                                          com.smartitengineering.cms.ws.common.domains.Field field,
-                                         ResourceContext context, UriBuilder absBuilder) throws
+                                         ResourceContext context, UriBuilder absBuilder) {
+    return getField(contentId, fieldDef, field, context, absBuilder, false);
+  }
+
+  protected static MutableField getField(final ContentId contentId, final FieldDef fieldDef,
+                                         com.smartitengineering.cms.ws.common.domains.Field field,
+                                         ResourceContext context, UriBuilder absBuilder, boolean importMode) throws
       IllegalArgumentException {
     if (fieldDef == null) {
       throw new IllegalArgumentException("No field in content type with name " + field.getName());
@@ -569,7 +651,7 @@ public class ContentResource extends AbstractResource {
     final MutableField mutableField =
                        SmartContentAPI.getInstance().getContentLoader().createMutableField(contentId, fieldDef);
     final FieldValue fieldValue;
-    fieldValue = getFieldValue(dataType, field.getValue(), context, absBuilder);
+    fieldValue = getFieldValue(dataType, field.getValue(), context, absBuilder, importMode);
     mutableField.setValue(fieldValue);
     return mutableField;
   }
@@ -655,5 +737,9 @@ public class ContentResource extends AbstractResource {
     }
     value.setType(contentFieldValue.getDataType().name());
     return value;
+  }
+
+  protected ContentId getContentId() {
+    return contentId;
   }
 }

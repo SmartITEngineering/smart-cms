@@ -438,18 +438,18 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
     if (index < 0) {
       index = index * - 1;
     }
-    if (index >= list.size() && count > 0 && StringUtils.isNotBlank(startPoint)) {
+    if (count > 0 && index + 1 >= list.size() && StringUtils.isNotBlank(startPoint)) {
       logger.debug("Index is equal to size and count is greater than 0");
       return Collections.emptyList();
     }
-    if (index <= 0 && count < 0) {
+    if (count < 0 && index <= 0) {
       logger.debug("Index is zero to size and count is smaller than 0");
       return Collections.emptyList();
     }
     final int fromIndex;
     final int toIndex;
     if (count > 0) {
-      fromIndex = StringUtils.isBlank(startPoint) ? 0 : index;
+      fromIndex = StringUtils.isBlank(startPoint) ? 0 : index + 1;
       toIndex = (fromIndex + count >= list.size()) ? list.size() : fromIndex + count;
     }
     else {

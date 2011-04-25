@@ -100,6 +100,9 @@ public class ContentIdImpl implements ContentId {
       throw new IOException("No content!");
     }
     String[] params = idString.split(":");
+    if (logger.isInfoEnabled()) {
+      logger.info("Params " + Arrays.toString(params));
+    }
     if (params == null || params.length != 3) {
       throw new IOException(
           "Object should have been in the format globalNamespace:workspace-name:type-name!");

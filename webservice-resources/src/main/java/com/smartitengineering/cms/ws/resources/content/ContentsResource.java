@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.ws.resources.content;
 
+import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
@@ -29,10 +30,13 @@ import com.sun.jersey.multipart.FormDataMultiPart;
 import java.io.UnsupportedEncodingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -50,6 +54,7 @@ public class ContentsResource extends AbstractResource {
   public static final String PATH_TO_CONTENT = "i/{" + PARAM_CONTENT + "}";
   public static final String PATH_TO_CONTAINER = "container";
   public static final String PATH_TO_SEARCH = "search";
+  public static final String PATH_TO_IMPORT = "import";
 
   public ContentsResource(@PathParam("wsNS") String namespace, @PathParam("wsName") String name) {
     final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
@@ -88,6 +93,19 @@ public class ContentsResource extends AbstractResource {
     ContentResource r = new ContentResource(getInjectables(), contentLoader.createContentId(workspace.getId(),
                                                                                             new byte[0]));
     return r.put(content, null);
+  }
+
+  @POST
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Path(PATH_TO_IMPORT)
+  public Response importContent(Content content, @HeaderParam(HttpHeaders.IF_MATCH) EntityTag etag) {
+    final ContentLoader contentLoader = SmartContentAPI.getInstance().getContentLoader();
+    ContentId contentId = contentLoader.parseContentId(content.getContentId());
+    if (contentId == null) {
+      throw new WebApplicationException(new NullPointerException("Content ID string not valid"), Status.BAD_REQUEST);
+    }
+    ContentResource r = new ContentResource(getInjectables(), contentId, true);
+    return r.put(content, etag);
   }
 
   @GET

@@ -71,7 +71,7 @@ public class ContentPersistentService implements PersistentService<WriteableCont
       content = (PersistableContent) bean;
     }
     else {
-      content = SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContent();
+      content = SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContent(false);
       copy(bean, content);
     }
     Date date = new Date();
@@ -88,7 +88,7 @@ public class ContentPersistentService implements PersistentService<WriteableCont
       content = (PersistableContent) bean;
     }
     else {
-      content = SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContent();
+      content = SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContent(false);
       copy(bean, content);
     }
     content.setLastModifiedDate(new Date());

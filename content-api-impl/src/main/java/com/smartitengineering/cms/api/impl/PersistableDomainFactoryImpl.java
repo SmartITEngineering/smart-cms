@@ -59,8 +59,10 @@ public class PersistableDomainFactoryImpl implements PersistableDomainFactory {
   }
 
   @Override
-  public PersistableContent createPersistableContent() {
-    return new ContentImpl();
+  public PersistableContent createPersistableContent(boolean supressChecking) {
+    final ContentImpl contentImpl = new ContentImpl();
+    contentImpl.setSupressChecking(supressChecking);
+    return contentImpl;
   }
 
   @Override
