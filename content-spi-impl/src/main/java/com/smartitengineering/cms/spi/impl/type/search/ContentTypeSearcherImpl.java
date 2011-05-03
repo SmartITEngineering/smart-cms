@@ -122,14 +122,15 @@ public class ContentTypeSearcherImpl implements ContentTypeSearcher {
             hasMore = false;
           }
           else {
-            final ContentType[] contents = new ContentType[list.size()];
+            final PersistentContentType[] contents = new PersistentContentType[list.size()];
             int index = 0;
             for (PersistentContentType content : list) {
               reindexListener.notify(SmartContentAPI.getInstance().getEventRegistrar().<ContentType>createEvent(
                   EventType.UPDATE, Type.CONTENT_TYPE, content.getMutableContentType()));
+              contents[index++] = content;
             }
 
-            lastId = contents[contents.length - 1].getContentTypeID();
+            lastId = contents[contents.length - 1].getId();
           }
         }
       }
