@@ -471,6 +471,10 @@ public class ContentLoaderImpl implements ContentLoader {
         }
       }
     }
+    if (logger.isWarnEnabled() && !(content != null && content.getContentId() != null && content.getContentDefinition() !=
+                                    null)) {
+      logger.warn("Content or its ID or content definition is missing!");
+    }
     return content != null && content.getContentId() != null && content.getContentDefinition() != null && isMandatoryFieldsPresent(
         content);
   }
@@ -484,6 +488,9 @@ public class ContentLoaderImpl implements ContentLoader {
         logger.debug(def.getName() + ": " + content.getField(def.getName()));
       }
       if (def.isRequired() && content.getField(def.getName()) == null) {
+        if (logger.isWarnEnabled()) {
+          logger.warn("Required field not present " + def.getName());
+        }
         valid = valid && false;
       }
     }
@@ -493,7 +500,11 @@ public class ContentLoaderImpl implements ContentLoader {
   protected boolean isValidByCustomValidator(Content content) {
     boolean valid = true;
     for (Field field : content.getFields().values()) {
-      valid = valid && SmartContentSPI.getInstance().getValidatorProvider().isValidField(content, field);
+      final boolean validField = SmartContentSPI.getInstance().getValidatorProvider().isValidField(content, field);
+      if (!validField && logger.isWarnEnabled()) {
+        logger.warn("Custom field validation failed for " + field.getName());
+      }
+      valid = valid && validField;
     }
     return valid;
   }
@@ -515,13 +526,22 @@ public class ContentLoaderImpl implements ContentLoader {
             if (((CollectionDataType) def.getValueDef()).getItemDataType().getType().equals(FieldValueType.CONTENT)) {
               DataType contentDataType = ((CollectionDataType) def.getValueDef()).getItemDataType();
               for (FieldValue val : ((CollectionFieldValue) field.getValue()).getValue()) {
-                valid = valid && checkContentTypeValidity(val, contentDataType);
+                final boolean checkContentTypeValidity = checkContentTypeValidity(val, contentDataType);
+                if (!checkContentTypeValidity && logger.isWarnEnabled()) {
+                  logger.warn("Content relation failed in " + field.getName());
+                }
+                valid = valid && checkContentTypeValidity;
               }
             }
             break;
-          case CONTENT:
-            valid = valid && checkContentTypeValidity(field.getValue(), def.getValueDef());
-            break;
+          case CONTENT: {
+            final boolean checkContentTypeValidity = checkContentTypeValidity(field.getValue(), def.getValueDef());
+            if (!checkContentTypeValidity && logger.isWarnEnabled()) {
+              logger.warn("Content relation failed in " + field.getName());
+            }
+            valid = valid && checkContentTypeValidity;
+          }
+          break;
           default:
             break;
         }
