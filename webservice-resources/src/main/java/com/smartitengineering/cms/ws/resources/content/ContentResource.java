@@ -236,7 +236,10 @@ public class ContentResource extends AbstractResource {
   public Response post(FormDataMultiPart multiPart) {
     ContentImpl contentImpl = new ContentImpl();
     contentImpl.setContentTypeUri(multiPart.getField("contentTypeUri").getValue());
-    contentImpl.setParentContentUri(multiPart.getField("parentContentUri").getValue());
+    final FormDataBodyPart field = multiPart.getField("parentContentUri");
+    if (field != null) {
+      contentImpl.setParentContentUri(field.getValue());
+    }
     contentImpl.setStatus(multiPart.getField("status").getValue());
     final FormDataBodyPart part = multiPart.getField("private");
     contentImpl.setPrivateContent(part == null || org.apache.commons.lang.StringUtils.isBlank(part.getValue()) ?
