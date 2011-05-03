@@ -112,7 +112,7 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
           CONNECTION_CONFIGURED ? ApplicationWideClientFactoryImpl.getClientFactory(SMART_CMS_CONNECTION_CONFIG,
                                                                                     CONFIG_PROCESSOR) : null);
     if (logger.isDebugEnabled()) {
-      logger.debug("Root resource URI for Smart CMS " + uri.toString());
+      logger.debug("Root resource URI for Smart CMS " + uri);
     }
   }
 
