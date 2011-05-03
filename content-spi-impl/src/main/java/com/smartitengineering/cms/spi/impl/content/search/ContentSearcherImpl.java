@@ -76,7 +76,7 @@ public class ContentSearcherImpl implements ContentSearcher {
   @Inject
   private SchemaInfoProvider<PersistentContent, ContentId> schemaInfoProvider;
   // Injected so that the quartz service starts
-  @Inject(optional=true)
+  @Inject(optional = true)
   private EventSubscriber subscriber;
   @Inject
   @Named(REINDEX_LISTENER_NAME)
@@ -277,51 +277,76 @@ public class ContentSearcherImpl implements ContentSearcher {
 
   @Override
   public void reIndex(final WorkspaceId workspaceId) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Re-Indexing " + workspaceId);
+    }
     executorService.submit(new Runnable() {
 
       @Override
       public void run() {
-        final QueryParameter param;
-        if (workspaceId == null) {
-          param = null;
-        }
-        else {
-          param = QueryParameterFactory.getStringLikePropertyParam("id", new StringBuilder(workspaceId.toString()).
-              append(':').toString(), MatchMode.START);
-        }
-        final QueryParameter<Integer> maxResultsParam = QueryParameterFactory.getMaxResultsParam(100);
-        boolean hasMore = true;
-        ContentId lastId = null;
-        List<QueryParameter> params = new ArrayList<QueryParameter>();
-        while (hasMore) {
-          params.clear();
-          if (param != null) {
-            params.add(param);
-          }
-          params.add(maxResultsParam);
-          if (lastId != null) {
-            try {
-              params.add(QueryParameterFactory.getGreaterThanPropertyParam("id", schemaInfoProvider.getRowIdFromId(
-                  lastId)));
-            }
-            catch (Exception ex) {
-              logger.warn("Could not add last id clause " + lastId.toString(), ex);
-            }
-          }
-          List<PersistentContent> list = readDao.getList(params);
-          if (list == null || list.isEmpty()) {
-            hasMore = false;
+        try {
+          final QueryParameter param;
+          if (workspaceId == null) {
+            param = null;
           }
           else {
-            final Content[] contents = new Content[list.size()];
-            int index = 0;
-            for (PersistentContent content : list) {
-              reindexListener.notify(SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(
-                  EventType.CREATE, Type.CONTENT, content.getMutableContent()));
-            }
-
-            lastId = contents[contents.length - 1].getContentId();
+            param = QueryParameterFactory.getStringLikePropertyParam("id", new StringBuilder(workspaceId.toString()).
+                append(':').toString(), MatchMode.START);
           }
+          final QueryParameter<Integer> maxResultsParam = QueryParameterFactory.getMaxResultsParam(100);
+          boolean hasMore = true;
+          ContentId lastId = null;
+          List<QueryParameter> params = new ArrayList<QueryParameter>();
+          logger.info("Beginning iteration over contents");
+          while (hasMore) {
+            if (logger.isInfoEnabled()) {
+              logger.info("Trying with Last ID " + lastId);
+            }
+            params.clear();
+            if (param != null) {
+              params.add(param);
+            }
+            params.add(maxResultsParam);
+            if (lastId != null) {
+              try {
+                params.add(QueryParameterFactory.getGreaterThanPropertyParam("id", schemaInfoProvider.getRowIdFromId(
+                    lastId)));
+              }
+              catch (Exception ex) {
+                logger.warn("Could not add last id clause " + lastId.toString(), ex);
+              }
+            }
+            List<PersistentContent> list = readDao.getList(params);
+            if (logger.isInfoEnabled()) {
+              logger.info("Has More " + hasMore);
+              logger.info("Content numbers in current iteration " + (list != null ? list.size() : -1));
+            }
+            if (list == null || list.isEmpty()) {
+              hasMore = false;
+            }
+            else {
+              final PersistentContent[] contents = new PersistentContent[list.size()];
+              int index = 0;
+              for (PersistentContent content : list) {
+                if (logger.isInfoEnabled()) {
+                  logger.info("Attempting to index " + content.getId());
+                }
+                reindexListener.notify(SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(
+                    EventType.UPDATE, Type.CONTENT, content.getMutableContent()));
+                contents[index++] = content;
+              }
+              lastId = contents[contents.length - 1].getId();
+            }
+            if (logger.isInfoEnabled()) {
+              logger.info("Has More " + hasMore);
+              logger.info("Content numbers in current iteration " + (list != null ? list.size() : -1));
+              logger.info("Last ID " + lastId);
+              logger.info("Going for next iteration " + hasMore);
+            }
+          }
+        }
+        catch (Exception ex) {
+          logger.error("Error reindexing", ex);
         }
       }
     });
