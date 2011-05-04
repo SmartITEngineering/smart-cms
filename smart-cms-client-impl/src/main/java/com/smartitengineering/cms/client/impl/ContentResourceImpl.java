@@ -19,10 +19,12 @@
 package com.smartitengineering.cms.client.impl;
 
 import com.smartitengineering.cms.client.api.ContentResource;
+import com.smartitengineering.cms.client.api.ContentTypeFeedResource;
 import com.smartitengineering.cms.client.api.FieldResource;
 import com.smartitengineering.cms.ws.common.domains.Content;
 import com.smartitengineering.cms.ws.common.domains.Field;
 import com.smartitengineering.util.rest.client.AbstractClientResource;
+import com.smartitengineering.util.rest.client.ClientUtil;
 import com.smartitengineering.util.rest.client.Resource;
 import com.smartitengineering.util.rest.client.ResourceLink;
 import com.sun.jersey.api.client.ClientResponse;
@@ -76,7 +78,7 @@ public class ContentResourceImpl extends AbstractClientResource<Content, Resourc
 
   @Override
   public Collection<FieldResource> getFields() {
-    Collection<Field> fields = get().getFields();
+    Collection<Field> fields = getLastReadStateOfEntity().getFields();
     if (fields == null) {
       return Collections.emptyList();
     }
@@ -95,7 +97,7 @@ public class ContentResourceImpl extends AbstractClientResource<Content, Resourc
   @Override
   public Collection<String> getRepresentationUrls() {
     Collection<String> representationUrl = new ArrayList<String>();
-    Map<String, String> representationMap = get().getRepresentations();
+    Map<String, String> representationMap = getLastReadStateOfEntity().getRepresentations();
     Set keys = representationMap.keySet();
     if (keys == null || keys.isEmpty()) {
       return Collections.emptyList();
@@ -106,6 +108,20 @@ public class ContentResourceImpl extends AbstractClientResource<Content, Resourc
 
   @Override
   public String getRepresentation(String url) {
-    return get().getRepresentations().get(url);
+    return getLastReadStateOfEntity().getRepresentations().get(url);
+  }
+
+  @Override
+  public ContentTypeFeedResource getContentType() {
+    String contentTypeUri = getLastReadStateOfEntity().getContentTypeUri();
+    try {
+      ResourceLink contentTypeLink = ClientUtil.createResourceLink("contentType", URI.create(contentTypeUri),
+                                                                   MediaType.APPLICATION_ATOM_XML);
+      return new ContentTypeFeedResourceImpl(this, contentTypeLink);
+    }
+    catch (Exception ex) {
+      logger.error("Could not create resource link!", ex);
+    }
+    return null;
   }
 }

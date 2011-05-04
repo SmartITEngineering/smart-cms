@@ -35,4 +35,6 @@ public interface ContentResource extends WritableResource<Content> {
   public Collection<String> getRepresentationUrls();
 
   public String getRepresentation(String url);
+
+  public ContentTypeFeedResource getContentType();
 }
