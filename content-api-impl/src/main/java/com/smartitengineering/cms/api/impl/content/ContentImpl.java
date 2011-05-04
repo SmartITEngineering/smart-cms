@@ -295,7 +295,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   public boolean isValid() {
     boolean validContent = supressChecking || SmartContentAPI.getInstance().getContentLoader().isValidContent(this);
     if (logger.isDebugEnabled()) {
-      logger.debug("!!! Checking Content" + validContent);
+      logger.debug("!!! Checking Content " + validContent);
     }
     return validContent;
   }
