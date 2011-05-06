@@ -20,10 +20,13 @@ package com.smartitengineering.cms.ws.common.domains;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
@@ -139,5 +142,15 @@ public class ContentImpl implements Content {
 
   public void setPrivateContent(boolean privateContent) {
     this.privateContent = privateContent;
+  }
+
+  @Override
+  @JsonIgnore
+  public Map<String, Field> getFieldsMap() {
+    Map<String, Field> fieldsMap = new HashMap<String, Field>();
+    for (Field field : getFields()) {
+      fieldsMap.put(field.getName(), field);
+    }
+    return Collections.unmodifiableMap(fieldsMap);
   }
 }

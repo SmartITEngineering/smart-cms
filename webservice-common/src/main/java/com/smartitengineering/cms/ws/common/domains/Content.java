@@ -50,6 +50,8 @@ public interface Content {
 
   Collection<Field> getFields();
 
+  Map<String, Field> getFieldsMap();
+
   Map<String, String> getRepresentations();
 
   Map<String, String> getRepresentationsByName();
