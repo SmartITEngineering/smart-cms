@@ -65,7 +65,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
   <xs:element name="integer" />
   <xs:element name="double" />
   <xs:element name="boolean" />
-  <xs:element name="datetime" type="smartDate" />
+  <xs:element name="datetime" />
   <xs:element name="encoding" type="xs:string" />
   <xs:element name="string">
     <xs:complexType>
