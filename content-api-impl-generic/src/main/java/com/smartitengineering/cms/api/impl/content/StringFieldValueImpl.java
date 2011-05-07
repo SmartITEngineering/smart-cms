@@ -19,10 +19,15 @@
 package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.content.MutableStringFieldValue;
+import com.smartitengineering.cms.api.type.FieldValueType;
 
 /**
  *
  * @author kaisar
  */
 public class StringFieldValueImpl extends FieldValueImpl<String> implements MutableStringFieldValue {
+
+  public StringFieldValueImpl() {
+    setFieldValueType(FieldValueType.STRING);
+  }
 }

@@ -19,10 +19,15 @@
 package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.content.MutableBooleanFieldValue;
+import com.smartitengineering.cms.api.type.FieldValueType;
 
 /**
  *
  * @author kaisar
  */
 public class BooleanFieldValueImpl extends FieldValueImpl<Boolean> implements MutableBooleanFieldValue {
+
+  public BooleanFieldValueImpl() {
+    setFieldValueType(FieldValueType.BOOLEAN);
+  }
 }

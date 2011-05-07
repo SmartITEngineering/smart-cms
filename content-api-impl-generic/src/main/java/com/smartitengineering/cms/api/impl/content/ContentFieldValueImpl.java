@@ -20,10 +20,15 @@ package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.MutableContentFieldValue;
+import com.smartitengineering.cms.api.type.FieldValueType;
 
 /**
  *
  * @author kaisar
  */
-public class ContentFieldValueImpl extends FieldValueImpl<ContentId> implements MutableContentFieldValue{
+public class ContentFieldValueImpl extends FieldValueImpl<ContentId> implements MutableContentFieldValue {
+
+  public ContentFieldValueImpl() {
+    setFieldValueType(FieldValueType.CONTENT);
+  }
 }

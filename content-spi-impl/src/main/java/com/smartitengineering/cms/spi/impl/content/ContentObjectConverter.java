@@ -221,6 +221,14 @@ public class ContentObjectConverter extends AbstractObjectRowConverter<Persisten
 
   private void putFields(WriteableContent content, Put put) {
     for (Field field : content.getOwnFields().values()) {
+      if(field == null) {
+        logger.warn("Null field in content's own field");
+        continue;
+      }
+      if(field.getValue() == null) {
+        logger.warn("Null value for field " + field.getName());
+        continue;
+      }
       switch (field.getValue().getDataType()) {
         case COLLECTION:
           putField(field, put, FAMILY_COLLECTION);

@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.content.MutableOtherFieldValue;
+import com.smartitengineering.cms.api.type.FieldValueType;
 import org.apache.commons.codec.binary.Base64;
 
 /**
@@ -26,6 +27,11 @@ import org.apache.commons.codec.binary.Base64;
  * @author kaisar
  */
 public class OtherFieldValueImpl extends FieldValueImpl<byte[]> implements MutableOtherFieldValue {
+
+  public OtherFieldValueImpl() {
+    setFieldValueType(FieldValueType.OTHER);
+  }
+
   @Override
   protected String getValueAsString() {
     byte[] data = getValue();

@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.MutableCollectionFieldValue;
+import com.smartitengineering.cms.api.type.FieldValueType;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,6 +40,10 @@ public class CollectionFieldValueImpl extends FieldValueImpl<Collection<FieldVal
     MutableCollectionFieldValue {
 
   static final ObjectMapper MAPPER = new ObjectMapper();
+
+  public CollectionFieldValueImpl() {
+    setFieldValueType(FieldValueType.COLLECTION);
+  }
 
   @Override
   protected String getValueAsString() {

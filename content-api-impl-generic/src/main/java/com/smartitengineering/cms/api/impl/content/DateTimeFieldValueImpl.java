@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.content.MutableDateTimeFieldValue;
+import com.smartitengineering.cms.api.type.FieldValueType;
 import java.text.ParseException;
 import java.util.Date;
 import org.apache.commons.lang.time.DateFormatUtils;
@@ -31,10 +32,14 @@ import org.apache.commons.lang.time.DateUtils;
 public class DateTimeFieldValueImpl extends FieldValueImpl<Date> implements MutableDateTimeFieldValue {
 
   static MutableDateTimeFieldValue valueOf(String value) throws ParseException {
-    MutableDateTimeFieldValue fieldValue = new DateTimeFieldValueImpl();
+    DateTimeFieldValueImpl fieldValue = new DateTimeFieldValueImpl();
     fieldValue.setValue(DateUtils.parseDate(value, new String[]{
           DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()}));
     return fieldValue;
+  }
+
+  public DateTimeFieldValueImpl() {
+    setFieldValueType(FieldValueType.DATE_TIME);
   }
 
   @Override

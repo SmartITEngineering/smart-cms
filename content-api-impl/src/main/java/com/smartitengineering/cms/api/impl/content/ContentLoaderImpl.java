@@ -156,6 +156,7 @@ public class ContentLoaderImpl implements ContentLoader {
     if (fieldValue.getValue() != null) {
       NumberFieldValueImpl fieldValueImpl = new NumberFieldValueImpl();
       fieldValueImpl.setValue(fieldValue.getValue());
+      fieldValueImpl.setFieldValueType(fieldValue.getDataType());
       return fieldValueImpl;
     }
     else {
