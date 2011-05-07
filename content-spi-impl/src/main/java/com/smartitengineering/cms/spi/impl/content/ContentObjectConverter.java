@@ -19,11 +19,13 @@
 package com.smartitengineering.cms.spi.impl.content;
 
 import com.google.inject.Inject;
+import com.smartitengineering.cms.api.content.CollectionFieldValue;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
+import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
@@ -86,7 +88,8 @@ public class ContentObjectConverter extends AbstractObjectRowConverter<Persisten
 
   @Override
   public PersistentContent rowsToObject(Result startRow, ExecutorService executorService) {
-    PersistableContent content = SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContent(false);
+    PersistableContent content = SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableContent(
+        false);
     try {
       content.setContentId(getInfoProvider().getIdFromRowId(startRow.getRow()));
     }
@@ -221,11 +224,11 @@ public class ContentObjectConverter extends AbstractObjectRowConverter<Persisten
 
   private void putFields(WriteableContent content, Put put) {
     for (Field field : content.getOwnFields().values()) {
-      if(field == null) {
+      if (field == null) {
         logger.warn("Null field in content's own field");
         continue;
       }
-      if(field.getValue() == null) {
+      if (field.getValue() == null) {
         logger.warn("Null value for field " + field.getName());
         continue;
       }
@@ -247,8 +250,8 @@ public class ContentObjectConverter extends AbstractObjectRowConverter<Persisten
 
   private void putField(Field field, Put put, byte[] family) {
     final byte[] toBytes = Bytes.toBytes(field.getName());
-    final String name = field.getValue().getDataType().name();
-    put.add(FAMILY_FIELD_TYPE, toBytes, Bytes.toBytes(name.toString()));
+    final String fieldType = field.getValue().getDataType().name();
+    put.add(FAMILY_FIELD_TYPE, toBytes, Bytes.toBytes(fieldType.toString()));
     put.add(family, toBytes, Bytes.toBytes(field.getValue().toString()));
   }
 }

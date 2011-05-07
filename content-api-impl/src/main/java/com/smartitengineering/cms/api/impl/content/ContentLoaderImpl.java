@@ -328,8 +328,12 @@ public class ContentLoaderImpl implements ContentLoader {
   public FieldValue getValueFor(String value, DataType dataType) {
     final FieldValue result;
     final FieldValueType type = dataType.getType();
+    if(logger.isInfoEnabled()) {
+      logger.info("Getting field value as " + type.name());
+    }
     switch (type) {
       case COLLECTION:
+        logger.info("Getting as collection");
         MutableCollectionFieldValue collectionFieldValue = createCollectionFieldValue();
         try {
           JsonNode node = CollectionFieldValueImpl.MAPPER.readTree(value);
@@ -354,6 +358,7 @@ public class ContentLoaderImpl implements ContentLoader {
         result = collectionFieldValue;
         break;
       default:
+        logger.info("Getting as all other than collection");
         result = getSimpleValueFor(value, type);
     }
     return result;
@@ -363,11 +368,13 @@ public class ContentLoaderImpl implements ContentLoader {
     final FieldValue result;
     switch (type) {
       case BOOLEAN:
+        logger.info("Getting as boolean");
         MutableBooleanFieldValue booleanFieldValue = createBooleanFieldValue();
         result = booleanFieldValue;
         booleanFieldValue.setValue(Boolean.parseBoolean(value));
         break;
       case CONTENT:
+        logger.info("Getting as content");
         MutableContentFieldValue contentFieldValue = createContentFieldValue();
         if (logger.isInfoEnabled()) {
           logger.info("Content value: " + value);
@@ -384,21 +391,25 @@ public class ContentLoaderImpl implements ContentLoader {
         result = contentFieldValue;
         break;
       case INTEGER:
+        logger.info("Getting as integer");
         MutableNumberFieldValue integerFieldValue = createIntegerFieldValue();
         integerFieldValue.setValue(NumberUtils.toInt(value, Integer.MIN_VALUE));
         result = integerFieldValue;
         break;
       case DOUBLE:
+        logger.info("Getting as double");
         MutableNumberFieldValue doubleFieldValue = createDoubleFieldValue();
         doubleFieldValue.setValue(NumberUtils.toDouble(value, Double.MIN_VALUE));
         result = doubleFieldValue;
         break;
       case LONG:
+        logger.info("Getting as long");
         MutableNumberFieldValue longFieldValue = createLongFieldValue();
         longFieldValue.setValue(NumberUtils.toLong(value, Long.MIN_VALUE));
         result = longFieldValue;
         break;
       case DATE_TIME:
+        logger.info("Getting as date time");
         MutableDateTimeFieldValue valueOf;
         try {
           valueOf = DateTimeFieldValueImpl.valueOf(value);
@@ -409,12 +420,14 @@ public class ContentLoaderImpl implements ContentLoader {
         result = valueOf;
         break;
       case OTHER:
+        logger.info("Getting as other");
         MutableOtherFieldValue otherFieldValue = createOtherFieldValue();
         otherFieldValue.setValue(Base64.decodeBase64(value));
         result = otherFieldValue;
         break;
       case STRING:
       default:
+        logger.info("Getting as else or string");
         MutableStringFieldValue fieldValue = createStringFieldValue();
         fieldValue.setValue(value);
         result = fieldValue;

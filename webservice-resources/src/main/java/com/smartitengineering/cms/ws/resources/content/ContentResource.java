@@ -299,6 +299,15 @@ public class ContentResource extends AbstractResource {
         }
       }
     }
+    if (LOGGER.isInfoEnabled()) {
+      try {
+        ObjectMapper mapper = new ObjectMapper();
+        LOGGER.info("Serialized content impl is " + mapper.writeValueAsString(contentImpl));
+      }
+      catch (Exception ex) {
+        LOGGER.warn("Could not output info log ", ex);
+      }
+    }
     return put(contentImpl, this.content == null ? null : new EntityTag("*"));
   }
 
@@ -581,8 +590,12 @@ public class ContentResource extends AbstractResource {
                                             com.smartitengineering.cms.ws.common.domains.FieldValue value,
                                             ResourceContext context, UriBuilder absBuilder, boolean importMode) {
     FieldValue fieldValue;
+    if(LOGGER.isInfoEnabled()) {
+      LOGGER.info("Parsing value as " +dataType.getType().name());
+    }
     switch (dataType.getType()) {
       case COLLECTION:
+        LOGGER.info("Parsing as collection");
         MutableCollectionFieldValue collectionFieldValue = SmartContentAPI.getInstance().getContentLoader().
             createCollectionFieldValue();
         CollectionDataType collectionDataType = (CollectionDataType) dataType;
@@ -626,6 +639,7 @@ public class ContentResource extends AbstractResource {
         fieldValue = contentFieldValue;
         break;
       default:
+        LOGGER.info("Parsing as default or all other than content and collection");
         fieldValue = SmartContentAPI.getInstance().getContentLoader().getValueFor(value.getValue(), dataType);
     }
     return fieldValue;
@@ -645,7 +659,7 @@ public class ContentResource extends AbstractResource {
       throw new IllegalArgumentException("No field in content type with name " + field.getName());
     }
     final DataType dataType = fieldDef.getValueDef();
-    LOGGER.info("Working with field " + field.getName() + " of value " + field.getValue());
+    LOGGER.info("Working with field " + field.getName() + " of type " + dataType.getType().name() + " with value " + field.getValue());
     if (org.apache.commons.lang.StringUtils.isNotBlank(field.getValue().getType()) && !org.apache.commons.lang.StringUtils.
         equalsIgnoreCase(dataType.getType().name(), field.getValue().getType())) {
       throw new IllegalArgumentException("Type mismatch! NOTE: type of values in field is optional in this case. " +
@@ -738,7 +752,7 @@ public class ContentResource extends AbstractResource {
         value = valueImpl;
       }
     }
-    value.setType(contentFieldValue.getDataType().name());
+    value.setType(valueDef.getType().toString());
     return value;
   }
 
