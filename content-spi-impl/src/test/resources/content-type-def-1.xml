@@ -81,14 +81,15 @@
           </collection>
         </value>
         <required>true</required>
-        <validator>
-          <validatorType>javascript</validatorType>
-          <uri>
-            <internal>
-              <name>internalvar</name>
-            </internal>
-          </uri>
-        </validator>
+        <validators>
+          <validator>
+            <uri>
+              <internal>
+                <name>internalvar</name>
+              </internal>
+            </uri>
+          </validator>
+        </validators>
       </field>
       <field>
         <name>fieldC</name>
@@ -106,12 +107,13 @@
             <minSize>2</minSize>
           </collection>
         </value>
-        <validator>
-          <validatorType>groovy</validatorType>
-          <uri>
-            <external>http://some/uri</external>
-          </uri>
-        </validator>
+        <validators>
+          <validator>
+            <uri>
+              <external>http://some/uri</external>
+            </uri>
+          </validator>
+        </validators>
       </field>
       <field>
         <name>fieldD</name>
@@ -128,14 +130,15 @@
           </collection>
         </value>
         <required>true</required>
-        <validator>
-          <validatorType>javascript</validatorType>
-          <uri>
-            <internal>
-              <name>internalvar</name>
-            </internal>
-          </uri>
-        </validator>
+        <validators>
+          <validator>
+            <uri>
+              <internal>
+                <name>internalvar</name>
+              </internal>
+            </uri>
+          </validator>
+        </validators>
       </field>
     </fields>
     <status>

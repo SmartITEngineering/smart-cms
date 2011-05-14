@@ -57,6 +57,7 @@ public interface XmlConstants {
   public String URI = "uri";
   public String TEMPLATE_TYPE = "templateType";
   public String VALIDATOR_TYPE = "validatorType";
+  public String VALIDATORS = "validators";
   public String VALIDATOR = "validator";
   public String RESOURCE = "resource";
   public String VARIATION = "variation";

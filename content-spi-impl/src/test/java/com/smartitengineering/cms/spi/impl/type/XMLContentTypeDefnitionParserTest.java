@@ -45,7 +45,6 @@ import com.smartitengineering.cms.api.type.MutableRepresentationDef;
 import com.smartitengineering.cms.api.type.MutableResourceUri;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceUri.Type;
-import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.impl.PersistentServiceRegistrar;
@@ -273,12 +272,15 @@ public class XMLContentTypeDefnitionParserTest {
     if (logger.isInfoEnabled()) {
       logger.debug(new StringBuffer("First ContentType's 2nd field's validition name is ").append(
           fieldDef.getName()).toString());
-      logger.debug(new StringBuffer("First ContentType's 2nd field's validition Type is ").append(
-          fieldDef.getCustomValidator().geType()).toString());
-      logger.debug(new StringBuffer("First ContentType's 2nd field's validition ResourceUri's type is ").append(
-          fieldDef.getCustomValidator().getUri().getType()).toString());
-      logger.debug(new StringBuffer("First ContentType's 2nd field's validition ResourceUri's value is ").append(
-          fieldDef.getCustomValidator().getUri().getValue()).toString());
+      if (fieldDef.getCustomValidators().size() > 0) {
+        logger.debug(new StringBuffer("First ContentType's 2nd field's validition ResourceUri's type is ").append(
+            fieldDef.getCustomValidators().iterator().next().getUri().getType()).toString());
+        logger.debug(new StringBuffer("First ContentType's 2nd field's validition ResourceUri's value is ").append(
+            fieldDef.getCustomValidators().iterator().next().getUri().getValue()).toString());
+      }
+      else {
+        logger.debug("No custom validator");
+      }
       logger.debug(new StringBuffer("First ContentType's 2nd field's validition Require value is ").append(fieldDef.
           isRequired()).toString());
     }
@@ -290,22 +292,25 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals(FieldValueType.INTEGER.name(), collectionDataType.getItemDataType().getType().name());
 
     Assert.assertEquals("fieldB", fieldDef.getName());
-    Assert.assertEquals(ValidatorType.JAVASCRIPT, fieldDef.getCustomValidator().geType());
-    Assert.assertEquals(Type.INTERNAL, fieldDef.getCustomValidator().getUri().getType());
-    Assert.assertEquals("internalvar", fieldDef.getCustomValidator().getUri().getValue());
+    Assert.assertEquals(1, fieldDef.getCustomValidators().size());
+    Assert.assertEquals(Type.INTERNAL, fieldDef.getCustomValidators().iterator().next().getUri().getType());
+    Assert.assertEquals("internalvar", fieldDef.getCustomValidators().iterator().next().getUri().getValue());
     Assert.assertEquals(Boolean.TRUE, fieldDef.isRequired());
 
     fieldDef = fieldIterator.next();
 
     if (logger.isInfoEnabled()) {
-      logger.debug(new StringBuffer("First ContentType's 3rdd field's validition name is ").append(
+      logger.debug(new StringBuffer("First ContentType's 3rd field's validition name is ").append(
           fieldDef.getName()).toString());
-      logger.debug(new StringBuffer("First ContentType's 3rdd field's validition Type is ").append(
-          fieldDef.getCustomValidator().geType()).toString());
-      logger.debug(new StringBuffer("First ContentType's 3rdd field's validition ResourceUri's type is ").append(
-          fieldDef.getCustomValidator().getUri().getType()).toString());
-      logger.debug(new StringBuffer("First ContentType's 3rdd field's validition ResourceUri's value is ").append(
-          fieldDef.getCustomValidator().getUri().getValue()).toString());
+      if (fieldDef.getCustomValidators().size() > 0) {
+        logger.debug(new StringBuffer("First ContentType's 3rd field's validition ResourceUri's type is ").append(
+            fieldDef.getCustomValidators().iterator().next().getUri().getType()).toString());
+        logger.debug(new StringBuffer("First ContentType's 3rd field's validition ResourceUri's value is ").append(
+            fieldDef.getCustomValidators().iterator().next().getUri().getValue()).toString());
+      }
+      else {
+        logger.debug("No custom validator");
+      }
     }
     Assert.assertEquals(FieldValueType.COLLECTION.name(), fieldDef.getValueDef().getType().name());
 
@@ -324,9 +329,8 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals("test", contentDataType1.getTypeDef().getWorkspace().getName());
 
     Assert.assertEquals("fieldC", fieldDef.getName());
-    Assert.assertEquals(ValidatorType.GROOVY, fieldDef.getCustomValidator().geType());
-    Assert.assertEquals(Type.EXTERNAL, fieldDef.getCustomValidator().getUri().getType());
-    Assert.assertEquals("http://some/uri", fieldDef.getCustomValidator().getUri().getValue());
+    Assert.assertEquals(Type.EXTERNAL, fieldDef.getCustomValidators().iterator().next().getUri().getType());
+    Assert.assertEquals("http://some/uri", fieldDef.getCustomValidators().iterator().next().getUri().getValue());
     fieldDefs.clear();
     fieldDefs = iterator.next().getMutableFieldDefs();
     Assert.assertEquals(2, fieldDefs.size());

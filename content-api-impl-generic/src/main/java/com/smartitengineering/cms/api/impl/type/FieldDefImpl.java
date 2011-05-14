@@ -24,10 +24,12 @@ import com.smartitengineering.cms.api.type.MutableFieldDef;
 import com.smartitengineering.cms.api.type.SearchDef;
 import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.VariationDef;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.lang.StringUtils;
@@ -43,7 +45,7 @@ public class FieldDefImpl implements MutableFieldDef {
   private boolean required = false;
   private DataType dataType;
   private Collection<VariationDef> variationDefs = new LinkedHashSet<VariationDef>();
-  private ValidatorDef validatorDef;
+  private final List<ValidatorDef> validatorDefs = new ArrayList<ValidatorDef>();
   private SearchDef searchDef;
   private boolean standaloneUpdateAble = false;
 
@@ -74,8 +76,11 @@ public class FieldDefImpl implements MutableFieldDef {
   }
 
   @Override
-  public void setCustomValidator(ValidatorDef validatorDef) {
-    this.validatorDef = validatorDef;
+  public void setCustomValidators(Collection<? extends ValidatorDef> validatorDefs) {
+    this.validatorDefs.clear();
+    if (validatorDefs != null && !validatorDefs.isEmpty()) {
+      this.validatorDefs.addAll(validatorDefs);
+    }
   }
 
   @Override
@@ -113,8 +118,8 @@ public class FieldDefImpl implements MutableFieldDef {
   }
 
   @Override
-  public ValidatorDef getCustomValidator() {
-    return this.validatorDef;
+  public Collection<ValidatorDef> getCustomValidators() {
+    return Collections.unmodifiableList(this.validatorDefs);
   }
 
   @Override
@@ -152,7 +157,7 @@ public class FieldDefImpl implements MutableFieldDef {
   @Override
   public String toString() {
     return "FieldDefImpl{" + "newFieldName=" + newFieldName + "; required=" + required + "; dataType=" + dataType +
-        "; variationDefs=" + variationDefs + "; validatorDef=" + validatorDef + "; searchDef=" + searchDef +
+        "; variationDefs=" + variationDefs + "; validatorDef=" + validatorDefs + "; searchDef=" + searchDef +
         "; standaloneUpdateAble=" + standaloneUpdateAble + '}';
   }
 

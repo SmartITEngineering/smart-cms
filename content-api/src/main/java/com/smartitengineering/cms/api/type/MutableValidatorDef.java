@@ -24,7 +24,5 @@ package com.smartitengineering.cms.api.type;
  */
 public interface MutableValidatorDef extends ValidatorDef {
 
-  public void seType(ValidatorType validatorType);
-
   public void setUri(ResourceUri uri);
 }

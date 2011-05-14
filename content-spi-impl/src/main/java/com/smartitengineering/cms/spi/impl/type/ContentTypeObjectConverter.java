@@ -46,7 +46,6 @@ import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.type.SearchDef;
 import com.smartitengineering.cms.api.type.StringDataType;
 import com.smartitengineering.cms.api.type.ValidatorDef;
-import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.impl.Utils;
@@ -104,7 +103,6 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   public final static byte[] CELL_FIELD_REQUIRED = Bytes.toBytes("fieldRequired");
   public final static String CELL_FIELD_VAR_DEF = "fieldVariations";
   public final static String CELL_FIELD_VALIDATOR = "fieldValidator";
-  public final static String CELL_FIELD_VALIDATOR_TYPE = "validatorType";
   public final static String CELL_FIELD_SEARCHDEF = "searchDef";
   public final static byte[] CELL_FIELD_SEARCHDEF_INDEXED = Bytes.toBytes(CELL_FIELD_SEARCHDEF + ":indexed");
   public final static byte[] CELL_FIELD_SEARCHDEF_STORED = Bytes.toBytes(CELL_FIELD_SEARCHDEF + ":stored");
@@ -240,13 +238,17 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         /*
          * Validator def
          */
-        ValidatorDef validatorDef = value.getCustomValidator();
-        if (validatorDef != null) {
-          logger.debug("Put custom validator for field");
-          put.add(FAMILY_FIELDS, Bytes.add(toBytes, Bytes.toBytes(new StringBuilder(CELL_FIELD_VALIDATOR).append(
-              ':').append(CELL_FIELD_VALIDATOR_TYPE).toString())), Bytes.toBytes(validatorDef.geType().name()));
-          putResourceUri(put, FAMILY_FIELDS, Bytes.add(toBytes, Bytes.toBytes(new StringBuilder(CELL_FIELD_VALIDATOR).
-              append(':').toString())), validatorDef.getUri());
+        Collection<ValidatorDef> validatorDefs = value.getCustomValidators();
+        if (validatorDefs != null && !validatorDefs.isEmpty()) {
+          int index = 0;
+          for (ValidatorDef validatorDef : validatorDefs) {
+            if (validatorDef != null) {
+              logger.debug("Put custom validator for field");
+              final byte[] prefix = Bytes.add(toBytes, Bytes.toBytes(new StringBuilder(CELL_FIELD_VALIDATOR).append(':').
+                  append(index++).append(':').toString()));
+              putResourceUri(put, FAMILY_FIELDS, prefix, validatorDef.getUri());
+            }
+          }
         }
         /*
          * Search def
@@ -460,13 +462,11 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         final Map<Integer, MutableVariationDef> fieldVariations = new TreeMap<Integer, MutableVariationDef>();
         final MutableSearchDef searchDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableSearchDef();
         final MutableFieldDef fieldDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableFieldDef();
-        final MutableValidatorDef validatorDef = SmartContentAPI.getInstance().getContentTypeLoader().
-            createMutableValidatorDef();
+        final Map<Integer, MutableValidatorDef> validatorDefs = new TreeMap<Integer, MutableValidatorDef>();
         DataType mutableDataType = null;
         fieldDef.setName(fieldName);
         final String validatorPatternString = new StringBuilder(fieldName).append(':').append(CELL_FIELD_VALIDATOR).
-            append(':').append(
-            "(.*)").toString();
+            append(":([\\d]+):(.*)").toString();
         if (logger.isDebugEnabled()) {
           logger.debug(new StringBuilder("Using following pattern to identify validator: ").append(
               validatorPatternString).toString());
@@ -532,35 +532,42 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
            */
           else if (validatorMatcher.matches()) {
             logger.debug("Matched validator pattern");
-            String validatorCell = validatorMatcher.group(1);
-            byte[] validatorCellBytes = Bytes.toBytes(validatorCell);
-            if (validatorCell.equals(CELL_FIELD_VALIDATOR_TYPE)) {
-              logger.debug("Matched validator type");
-              validatorDef.seType(ValidatorType.valueOf(Bytes.toString(value)));
-            }
-            else if (Arrays.equals(validatorCellBytes, CELL_RSRC_URI_TYPE)) {
-              logger.debug("Matched Resource URI Type");
-              final ResourceUri.Type valueOf = ResourceUri.Type.valueOf(Bytes.toString(value));
-              MutableResourceUri uri =
-                                 SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
-              uri.setType(valueOf);
-              final ResourceUri resourceUri = validatorDef.getUri();
-              if (resourceUri != null) {
-                logger.debug("Set value from old resource uri");
-                uri.setValue(resourceUri.getValue());
+            Integer indexInt = NumberUtils.toInt(variationsDefMatcher.group(1), -1);
+            MutableValidatorDef validatorDef = null;
+            if (indexInt > -1) {
+              validatorDef = validatorDefs.get(indexInt);
+              if (validatorDef == null) {
+                validatorDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableValidatorDef();
+                validatorDefs.put(indexInt, validatorDef);
               }
-              validatorDef.setUri(uri);
             }
-            else if (Arrays.equals(validatorCellBytes, CELL_RSRC_URI_VAL)) {
-              logger.debug("Matched Resource URI Value");
-              MutableResourceUri uri = SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
-              final ResourceUri resourceUri = validatorDef.getUri();
-              if (resourceUri != null) {
-                logger.debug("Set type from old resource uri");
-                uri.setType(resourceUri.getType());
+            if (validatorDef != null) {
+              String validatorCell = validatorMatcher.group(2);
+              byte[] validatorCellBytes = Bytes.toBytes(validatorCell);
+              if (Arrays.equals(validatorCellBytes, CELL_RSRC_URI_TYPE)) {
+                logger.debug("Matched Resource URI Type");
+                final ResourceUri.Type valueOf = ResourceUri.Type.valueOf(Bytes.toString(value));
+                MutableResourceUri uri =
+                                   SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
+                uri.setType(valueOf);
+                final ResourceUri resourceUri = validatorDef.getUri();
+                if (resourceUri != null) {
+                  logger.debug("Set value from old resource uri");
+                  uri.setValue(resourceUri.getValue());
+                }
+                validatorDef.setUri(uri);
               }
-              uri.setValue(Bytes.toString(value));
-              validatorDef.setUri(uri);
+              else if (Arrays.equals(validatorCellBytes, CELL_RSRC_URI_VAL)) {
+                logger.debug("Matched Resource URI Value");
+                MutableResourceUri uri = SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
+                final ResourceUri resourceUri = validatorDef.getUri();
+                if (resourceUri != null) {
+                  logger.debug("Set type from old resource uri");
+                  uri.setType(resourceUri.getType());
+                }
+                uri.setValue(Bytes.toString(value));
+                validatorDef.setUri(uri);
+              }
             }
           }
           /*
@@ -611,8 +618,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
           throw new RuntimeException(msg);
         }
         logger.info("Set all fields into the field definition!");
-        if (validatorDef.geType() != null && validatorDef.getUri() != null) {
-          fieldDef.setCustomValidator(validatorDef);
+        if (!validatorDefs.isEmpty()) {
+          fieldDef.setCustomValidators(validatorDefs.values());
         }
         if (searchDef.isIndexed() || searchDef.isStored() || StringUtils.isNotBlank(searchDef.getBoostConfig())) {
           fieldDef.setSearchDefinition(searchDef);

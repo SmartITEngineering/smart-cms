@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -56,7 +57,7 @@ public interface FieldDef {
 
   public VariationDef getVariationDefForMimeType(String mimeType);
 
-  public ValidatorDef getCustomValidator();
+  public Collection<ValidatorDef> getCustomValidators();
 
   public SearchDef getSearchDefinition();
 

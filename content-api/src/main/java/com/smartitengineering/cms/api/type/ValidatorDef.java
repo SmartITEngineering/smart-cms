@@ -24,7 +24,5 @@ package com.smartitengineering.cms.api.type;
  */
 public interface ValidatorDef {
 
-  public ValidatorType geType();
-
   public ResourceUri getUri();
 }

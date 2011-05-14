@@ -737,7 +737,8 @@ public class AppTest {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Content Type ID Global Name : " + getContentType.getContentTypeID().getWorkspace().getName());
       }
-      Assert.assertEquals(servedContentType.getContentTypeID().getWorkspace().getName(), getContentType.getContentTypeID().
+      Assert.assertEquals(servedContentType.getContentTypeID().getWorkspace().getName(),
+                          getContentType.getContentTypeID().
           getWorkspace().getName());
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Content Type Display Name : " + getContentType.getDisplayName());
@@ -752,7 +753,8 @@ public class AppTest {
           LOGGER.debug("Content Type Parent's Namespace : " + getContentType.getParent().getNamespace());
         }
         Assert.assertEquals(servedContentType.getParent().getNamespace(), getContentType.getParent().getNamespace());
-        Assert.assertEquals(servedContentType.getParent().getWorkspace().getGlobalNamespace(), getContentType.getParent().
+        Assert.assertEquals(servedContentType.getParent().getWorkspace().getGlobalNamespace(),
+                            getContentType.getParent().
             getWorkspace().getGlobalNamespace());
         Assert.assertEquals(servedContentType.getParent().getWorkspace().getName(), getContentType.getParent().
             getWorkspace().getName());
@@ -825,17 +827,12 @@ public class AppTest {
         }
 
         Assert.assertEquals(servedFieldDef.getName(), getFieldDef.getName());
-        if (servedFieldDef.getCustomValidator() != null) {
-          if (servedFieldDef.getCustomValidator().geType() != null) {
-            Assert.assertEquals(servedFieldDef.getCustomValidator().geType().name(), getFieldDef.getCustomValidator().
-                geType().
-                name());
-          }
-          if (servedFieldDef.getCustomValidator().getUri() != null) {
-            Assert.assertEquals(servedFieldDef.getCustomValidator().getUri().getType().name(), getFieldDef.
-                getCustomValidator().getUri().getType().name());
-            Assert.assertEquals(servedFieldDef.getCustomValidator().getUri().getValue(), getFieldDef.getCustomValidator().
-                getUri().getValue());
+        if (servedFieldDef.getCustomValidators() != null && !servedFieldDef.getCustomValidators().isEmpty()) {
+          if (servedFieldDef.getCustomValidators().iterator().next().getUri() != null) {
+            Assert.assertEquals(servedFieldDef.getCustomValidators().iterator().next().getUri().getType().name(),
+                                getFieldDef.getCustomValidators().iterator().next().getUri().getType().name());
+            Assert.assertEquals(servedFieldDef.getCustomValidators().iterator().next().getUri().getValue(), getFieldDef.
+                getCustomValidators().iterator().next().getUri().getValue());
           }
         }
 
@@ -982,7 +979,8 @@ public class AppTest {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Content Type ID Global Name : " + getContentType.getContentTypeID().getWorkspace().getName());
       }
-      Assert.assertEquals(servedContentType.getContentTypeID().getWorkspace().getName(), getContentType.getContentTypeID().
+      Assert.assertEquals(servedContentType.getContentTypeID().getWorkspace().getName(),
+                          getContentType.getContentTypeID().
           getWorkspace().getName());
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Content Type Display Name : " + getContentType.getDisplayName());
@@ -997,7 +995,8 @@ public class AppTest {
           LOGGER.debug("Content Type Parent's Namespace : " + getContentType.getParent().getNamespace());
         }
         Assert.assertEquals(servedContentType.getParent().getNamespace(), getContentType.getParent().getNamespace());
-        Assert.assertEquals(servedContentType.getParent().getWorkspace().getGlobalNamespace(), getContentType.getParent().
+        Assert.assertEquals(servedContentType.getParent().getWorkspace().getGlobalNamespace(),
+                            getContentType.getParent().
             getWorkspace().getGlobalNamespace());
         Assert.assertEquals(servedContentType.getParent().getWorkspace().getName(), getContentType.getParent().
             getWorkspace().getName());
@@ -1069,17 +1068,12 @@ public class AppTest {
           LOGGER.debug("Field Name : " + getFieldDef.getName());
         }
         Assert.assertEquals(servedFieldDef.getName(), getFieldDef.getName());
-        if (servedFieldDef.getCustomValidator() != null) {
-          if (servedFieldDef.getCustomValidator().geType() != null) {
-            Assert.assertEquals(servedFieldDef.getCustomValidator().geType().name(), getFieldDef.getCustomValidator().
-                geType().
-                name());
-          }
-          if (servedFieldDef.getCustomValidator().getUri() != null) {
-            Assert.assertEquals(servedFieldDef.getCustomValidator().getUri().getType().name(), getFieldDef.
-                getCustomValidator().getUri().getType().name());
-            Assert.assertEquals(servedFieldDef.getCustomValidator().getUri().getValue(), getFieldDef.getCustomValidator().
-                getUri().getValue());
+        if (servedFieldDef.getCustomValidators() != null && !servedFieldDef.getCustomValidators().isEmpty()) {
+          if (servedFieldDef.getCustomValidators().iterator().next().getUri() != null) {
+            Assert.assertEquals(servedFieldDef.getCustomValidators().iterator().next().getUri().getType().name(),
+                                getFieldDef.getCustomValidators().iterator().next().getUri().getType().name());
+            Assert.assertEquals(servedFieldDef.getCustomValidators().iterator().next().getUri().getValue(), getFieldDef.
+                getCustomValidators().iterator().next().getUri().getValue());
           }
         }
 

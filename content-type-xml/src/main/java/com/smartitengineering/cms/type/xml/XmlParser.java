@@ -53,7 +53,6 @@ import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.type.SearchDef;
 import com.smartitengineering.cms.api.type.ValidatorDef;
-import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import java.io.InputStream;
@@ -269,7 +268,7 @@ public class XmlParser implements XmlConstants {
     if (elems.size() > 0) {
       final Element contentTypeElement = elems.get(0);
       final WorkspaceId parsedWorkspaceId = parseWorkspaeId(contentTypeElement, WORKSPACE);
-      if(logger.isInfoEnabled()){
+      if (logger.isInfoEnabled()) {
         logger.info(parsedWorkspaceId == null ? "Parsed Workspace is NULL" : "Parsed Workspace is NOT NULL");
       }
       ContentTypeId contentTypeId = getContentTypeId(parsedWorkspaceId == null ? workspaceId : parsedWorkspaceId,
@@ -386,7 +385,7 @@ public class XmlParser implements XmlConstants {
 
   protected FieldDef parseFieldDef(Element rootElement) {
     MutableFieldDef fieldDef = new FieldDefImpl();
-    fieldDef.setCustomValidator(parseValidator(rootElement, VALIDATOR));
+    fieldDef.setCustomValidators(parseValidators(rootElement, VALIDATORS));
     fieldDef.setFieldStandaloneUpdateAble(Boolean.parseBoolean(
         parseOptionalStringElement(rootElement, UPDATE_STANDALONE)));
     fieldDef.setName(parseMandatoryStringElement(rootElement, NAME));
@@ -432,29 +431,33 @@ public class XmlParser implements XmlConstants {
     }
   }
 
-  protected ValidatorDef parseValidator(Element rootElement, String elementName) throws IllegalStateException {
-    MutableValidatorDef validatorDef = new ValidatorDefImpl();
+  protected Collection<ValidatorDef> parseValidators(Element rootElement, String elementName) throws
+      IllegalStateException {
+    Collection<ValidatorDef> validatorDefs = new ArrayList<ValidatorDef>();
     Elements elems = rootElement.getChildElements(elementName, NAMESPACE);
     if (elems.size() > 1) {
-      throw new IllegalStateException("More than one " + elementName);
+      throw new IllegalStateException("more than one element");
     }
     if (elems.size() > 0) {
-      String validatorType = parseMandatoryStringElement(elems.get(0), VALIDATOR_TYPE);
-      if (StringUtils.equalsIgnoreCase(validatorType, "groovy")) {
-        validatorDef.seType(ValidatorType.GROOVY);
+      for (int i = 0; i < elems.get(0).getChildElements().size(); i++) {
+        validatorDefs.add(parseValidatorDef(elems.get(0).getChildElements().get(i)));
       }
-
-      if (StringUtils.equalsIgnoreCase(validatorType, "javascript")) {
-        validatorDef.seType(ValidatorType.JAVASCRIPT);
-      }
-      if (StringUtils.equalsIgnoreCase(validatorType, "ruby")) {
-        validatorDef.seType(ValidatorType.RUBY);
-      }
-      validatorDef.setUri(parseUri(elems.get(0), URI));
-      return validatorDef;
+      return validatorDefs;
     }
     else {
-      return null;
+      return Collections.emptyList();
+    }
+  }
+
+  protected ValidatorDef parseValidatorDef(Element rootElement) throws IllegalStateException {
+    MutableValidatorDef validatorDef = new ValidatorDefImpl();
+    Elements elems = rootElement.getChildElements();
+    if (elems.size() < 1) {
+      throw new IllegalStateException("Min no. of validators should be 1");
+    }
+    else {
+      validatorDef.setUri(parseUri(rootElement, URI));
+      return validatorDef;
     }
   }
 

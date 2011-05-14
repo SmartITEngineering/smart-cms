@@ -29,6 +29,7 @@ import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.spi.content.ValidatorProvider;
 import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
+import java.util.Collection;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,28 +50,32 @@ public class ValidatorProviderImpl implements ValidatorProvider {
       logger.info("Content or field is null or blank! Returning true");
       return true;
     }
-    ValidatorDef validatorDef = field.getFieldDef().getCustomValidator();
-    if (validatorDef == null) {
-      logger.info("Validator def is null, returning true!");
-      return true;
+    Collection<ValidatorDef> validatorDefs = field.getFieldDef().getCustomValidators();
+    boolean valid = true;
+    for (ValidatorDef validatorDef : validatorDefs) {
+      if (validatorDef == null) {
+        logger.info("Validator def is null, returning true!");
+        continue;
+      }
+      if (validatorDef.getUri().getType().equals(ResourceUri.Type.EXTERNAL)) {
+        logger.warn("External resource URI is not yet handled! Returning true");
+        continue;
+      }
+      ValidatorTemplate variationTemplate =
+                        SmartContentAPI.getInstance().getWorkspaceApi().getValidatorTemplate(content.getContentId().
+          getWorkspaceId(), validatorDef.getUri().getValue());
+      if (variationTemplate == null) {
+        logger.info("Validator template is null, returning true!");
+        continue;
+      }
+      TypeFieldValidator generator = generators.get(variationTemplate.getTemplateType());
+      if (generator == null) {
+        logger.info("Validator generator is null, returning true!");
+        continue;
+      }
+      valid = valid && generator.isValid(variationTemplate, field);
     }
-    if (validatorDef.getUri().getType().equals(ResourceUri.Type.EXTERNAL)) {
-      logger.warn("External resource URI is not yet handled! Returning true");
-      return true;
-    }
-    ValidatorTemplate variationTemplate =
-                      SmartContentAPI.getInstance().getWorkspaceApi().getValidatorTemplate(content.getContentId().
-        getWorkspaceId(), validatorDef.getUri().getValue());
-    if (variationTemplate == null) {
-      logger.info("Validator template is null, returning true!");
-      return true;
-    }
-    TypeFieldValidator generator = generators.get(variationTemplate.getTemplateType());
-    if (generator == null) {
-      logger.info("Validator generator is null, returning true!");
-      return true;
-    }
-    return generator.isValid(variationTemplate, field);
+    return valid;
   }
 
   @Override
