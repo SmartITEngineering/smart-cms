@@ -18,11 +18,15 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.util.Map;
+
 /**
  *
  * @author imyousuf
  */
 public interface ResourceDef {
+
+  Map<String, String> getParameters();
 
   public String getMIMEType();
 

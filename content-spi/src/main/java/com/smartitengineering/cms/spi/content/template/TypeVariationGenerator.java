@@ -23,6 +23,7 @@ import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
+import java.util.Map;
 
 /**
  *
@@ -30,7 +31,8 @@ import com.smartitengineering.cms.api.workspace.VariationTemplate;
  */
 public interface TypeVariationGenerator {
 
-  MutableVariation getVariation(VariationTemplate template, Content content, Field field, String variationName);
+  MutableVariation getVariation(VariationTemplate template, Content content, Field field, String variationName,
+                                Map<String, String> params);
 
   VariationGenerator getGenerator(VariationTemplate template) throws InvalidTemplateException;
 }

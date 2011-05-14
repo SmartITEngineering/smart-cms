@@ -22,7 +22,7 @@
  * @author imyousuf
  */
 class GroovyTestRepresentationGenerator implements com.smartitengineering.cms.spi.content.template.RepresentationGenerator {
-	public String getRepresentationForContent(com.smartitengineering.cms.api.content.Content content) {
+	public String getRepresentationForContent(com.smartitengineering.cms.api.content.Content content, Map<String, String> params) {
     return content.getField("test").value.value.toString();
   }
 }

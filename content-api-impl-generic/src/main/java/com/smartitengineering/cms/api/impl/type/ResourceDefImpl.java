@@ -18,10 +18,12 @@
  */
 package com.smartitengineering.cms.api.impl.type;
 
-import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.type.MutableResourceDef;
 import com.smartitengineering.cms.api.type.ResourceDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  *
@@ -32,6 +34,7 @@ public class ResourceDefImpl implements MutableResourceDef {
   private String mimeType;
   private String name;
   private ResourceUri resourceUri;
+  private final Map<String, String> params = new LinkedHashMap<String, String>();
 
   @Override
   public void setMIMEType(String mimeType) {
@@ -78,6 +81,17 @@ public class ResourceDefImpl implements MutableResourceDef {
     return true;
   }
 
+  public void setParameters(Map<String, String> params) {
+    this.params.clear();
+    if (params != null && !params.isEmpty()) {
+      this.params.putAll(params);
+    }
+  }
+
+  public Map<String, String> getParameters() {
+    return Collections.unmodifiableMap(params);
+  }
+
   @Override
   public int hashCode() {
     int hash = 5;
@@ -87,7 +101,7 @@ public class ResourceDefImpl implements MutableResourceDef {
 
   @Override
   public String toString() {
-    return "ResourceDefImpl{" + "; mimeType=" + mimeType + "; name=" + name
-        + "; resourceUri=" + resourceUri + '}';
+    return "ResourceDefImpl{" + "; mimeType=" + mimeType + "; name=" + name + "; resourceUri=" + resourceUri +
+        "; params=" + params + '}';
   }
 }

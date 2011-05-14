@@ -18,11 +18,15 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.util.Map;
+
 /**
  *
  * @author imyousuf
  */
 public interface ValidatorDef {
+
+  Map<String, String> getParameters();
 
   public ResourceUri getUri();
 }

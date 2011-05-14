@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.spi.content.template;
 
 import com.smartitengineering.cms.api.content.Content;
+import java.util.Map;
 
 /**
  *
@@ -26,5 +27,5 @@ import com.smartitengineering.cms.api.content.Content;
  */
 public interface RepresentationGenerator {
 
-  String getRepresentationForContent(Content content);
+  String getRepresentationForContent(Content content, Map<String, String> params);
 }

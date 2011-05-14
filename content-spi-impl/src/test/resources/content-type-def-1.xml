@@ -67,6 +67,16 @@
                 <name>internalvar</name>
               </internal>
             </uri>
+            <params>
+              <param>
+                <key>someKey</key>
+                <val>someVal</val>
+              </param>
+              <param>
+                <key>anotherKey</key>
+                <val>anotherVal</val>
+              </param>
+            </params>
           </variation>
         </variations>
       </field>
@@ -137,6 +147,16 @@
                 <name>internalvar</name>
               </internal>
             </uri>
+            <params>
+              <param>
+                <key>someKey</key>
+                <val>someVal</val>
+              </param>
+              <param>
+                <key>anotherKey</key>
+                <val>anotherVal</val>
+              </param>
+            </params>
           </validator>
         </validators>
       </field>
@@ -187,6 +207,16 @@
         <uri>
           <external>http://some/uri</external>
         </uri>
+        <params>
+          <param>
+            <key>someKey</key>
+            <val>someVal</val>
+          </param>
+          <param>
+            <key>anotherKey</key>
+            <val>anotherVal</val>
+          </param>
+        </params>
       </representation>
       <representation>
         <name>anotherrep</name>

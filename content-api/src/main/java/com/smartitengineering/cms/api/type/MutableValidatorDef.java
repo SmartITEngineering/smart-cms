@@ -18,6 +18,8 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.util.Map;
+
 /**
  *
  * @author kaisar
@@ -25,4 +27,6 @@ package com.smartitengineering.cms.api.type;
 public interface MutableValidatorDef extends ValidatorDef {
 
   public void setUri(ResourceUri uri);
+
+  public void setParameters(Map<String, String> params);
 }

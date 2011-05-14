@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.spi.content.template;
 
 import com.smartitengineering.cms.api.content.Field;
+import java.util.Map;
 
 /**
  *
@@ -26,5 +27,5 @@ import com.smartitengineering.cms.api.content.Field;
  */
 public interface VariationGenerator {
 
-  String getVariationForField(Field field);
+  String getVariationForField(Field field, Map<String, String> params);
 }

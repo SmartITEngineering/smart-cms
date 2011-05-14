@@ -27,6 +27,7 @@ import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
 import com.smartitengineering.cms.spi.content.template.VariationGenerator;
+import java.util.Map;
 import org.apache.commons.codec.binary.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,8 @@ public abstract class AbstractTypeVariationGenerator implements TypeVariationGen
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
-  public MutableVariation getVariation(VariationTemplate template, Content content, Field field, String variationName) {
+  public MutableVariation getVariation(VariationTemplate template, Content content, Field field, String variationName,
+                                       Map<String, String> params) {
     if (logger.isInfoEnabled()) {
       logger.info("Parameters: " + content + " " + field + " " + variationName);
     }
@@ -58,7 +60,7 @@ public abstract class AbstractTypeVariationGenerator implements TypeVariationGen
       }
       return null;
     }
-    final String representationForContent = generator.getVariationForField(field);
+    final String representationForContent = generator.getVariationForField(field, params);
     final FieldDef fieldDef = field.getFieldDef();
     MutableVariation variation = SmartContentAPI.getInstance().getContentLoader().createMutableVariation(content.
         getContentId(), fieldDef);

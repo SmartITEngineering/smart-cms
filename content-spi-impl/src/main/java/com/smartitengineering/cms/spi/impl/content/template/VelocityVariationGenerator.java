@@ -26,6 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.util.Map;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.runtime.RuntimeSingleton;
 import org.apache.velocity.runtime.parser.node.SimpleNode;
@@ -61,9 +62,12 @@ public class VelocityVariationGenerator extends AbstractTypeVariationGenerator {
     }
 
     @Override
-    public String getVariationForField(Field field) {
+    public String getVariationForField(Field field, Map<String, String> params) {
       StringWriter writer = new StringWriter();
       ctx.put("field", field);
+      if(params != null) {
+        ctx.put("params", params);
+      }
       try {
         RuntimeSingleton.getRuntimeInstance().render(ctx, writer, "some.vm", simpleNode);
       }

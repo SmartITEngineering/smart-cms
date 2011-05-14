@@ -28,6 +28,7 @@ import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.spi.content.RepresentationProvider;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
@@ -63,6 +64,7 @@ public class RepresentationProviderImpl extends AbstractRepresentationProvider i
       logger.info("Representation name or content type or content is null or blank!");
       return null;
     }
+    RepresentationDef def = contentType.getRepresentationDefs().get(repName);
     RepresentationTemplate representationTemplate = getTemplate(repName, contentType, content);
     if (representationTemplate == null) {
       logger.info("Representation template is null!");
@@ -73,7 +75,8 @@ public class RepresentationProviderImpl extends AbstractRepresentationProvider i
       logger.info("Representation generator is null!");
       return null;
     }
-    final MutableRepresentation representation = generator.getRepresentation(representationTemplate, content, repName);
+    final MutableRepresentation representation = generator.getRepresentation(representationTemplate, content, repName,
+                                                                             def.getParameters());
     final Date cLastModifiedDate = content.getLastModifiedDate();
     final Date tLastModifiedDate = representationTemplate.getLastModifiedDate();
     if (cLastModifiedDate.before(tLastModifiedDate)) {

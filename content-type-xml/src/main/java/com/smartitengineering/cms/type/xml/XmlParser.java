@@ -59,7 +59,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
@@ -235,6 +237,7 @@ public class XmlParser implements XmlConstants {
         representationDef.setMIMEType(childElements.get(i).getValue());
       }
       representationDef.setResourceUri(parseUri(rootElement, URI));
+      representationDef.setParameters(parseParams(rootElement, PARAMS));
     }
     return representationDef;
   }
@@ -427,6 +430,7 @@ public class XmlParser implements XmlConstants {
       variationDef.setName(parseMandatoryStringElement(rootElement, NAME));
       variationDef.setMIMEType(parseMandatoryStringElement(rootElement, MIME_TYPE));
       variationDef.setResourceUri(parseUri(rootElement, URI));
+      variationDef.setParameters(parseParams(rootElement, PARAMS));
       return variationDef;
     }
   }
@@ -457,6 +461,7 @@ public class XmlParser implements XmlConstants {
     }
     else {
       validatorDef.setUri(parseUri(rootElement, URI));
+      validatorDef.setParameters(parseParams(rootElement, PARAMS));
       return validatorDef;
     }
   }
@@ -476,6 +481,25 @@ public class XmlParser implements XmlConstants {
     else {
       return null;
     }
+  }
+
+  protected Map<String, String> parseParams(Element enclosingElement, String elementName) {
+    final Map<String, String> params = new LinkedHashMap<String, String>();
+    final Elements elems = enclosingElement.getChildElements(elementName, NAMESPACE);
+    if (elems.size() > 1) {
+      throw new IllegalStateException("More than one " + elementName);
+    }
+    if (elems.size() > 0) {
+      final Element paramsElem = elems.get(0);
+      final Elements allParams = paramsElem.getChildElements();
+      for (int i = 0; i < allParams.size(); ++i) {
+        final Element paramElem = allParams.get(i);
+        final String key = parseMandatoryStringElement(paramElem, KEY);
+        final String val = parseMandatoryStringElement(paramElem, VAL);
+        params.put(key, val);
+      }
+    }
+    return params;
   }
 
   protected Collection<ContentStatus> parseContentStatuses(Element rootElement, String elementName) throws

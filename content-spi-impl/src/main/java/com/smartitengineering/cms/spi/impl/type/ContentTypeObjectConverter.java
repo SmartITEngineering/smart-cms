@@ -247,6 +247,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
               final byte[] prefix = Bytes.add(toBytes, Bytes.toBytes(new StringBuilder(CELL_FIELD_VALIDATOR).append(':').
                   append(index++).append(':').toString()));
               putResourceUri(put, FAMILY_FIELDS, prefix, validatorDef.getUri());
+              putParams(put, repFamily, prefix, validatorDef.getParameters());
             }
           }
         }
@@ -347,11 +348,21 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
     put.add(family, Bytes.add(prefix, CELL_RSRC_MIME_TYPE), Bytes.toBytes(value.getMIMEType()));
     final ResourceUri resourceUri = value.getResourceUri();
     putResourceUri(put, family, prefix, resourceUri);
+    putParams(put, family, prefix, value.getParameters());
   }
 
   protected void putResourceUri(Put put, final byte[] family, final byte[] prefix, final ResourceUri resourceUri) {
     put.add(family, Bytes.add(prefix, CELL_RSRC_URI_TYPE), Bytes.toBytes(resourceUri.getType().name()));
     put.add(family, Bytes.add(prefix, CELL_RSRC_URI_VAL), Bytes.toBytes(resourceUri.getValue()));
+  }
+
+  protected void putParams(Put put, final byte[] family, final byte[] prefix, final Map<String, String> params) {
+    final byte[] paramsPrefix = Bytes.add(prefix, Bytes.toBytes("params:"));
+    if (params != null && !params.isEmpty()) {
+      for (Entry<String, String> param : params.entrySet()) {
+        put.add(family, Bytes.add(paramsPrefix, Bytes.toBytes(param.getKey())), Bytes.toBytes(param.getValue()));
+      }
+    }
   }
 
   @Override
@@ -568,6 +579,14 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
                 uri.setValue(Bytes.toString(value));
                 validatorDef.setUri(uri);
               }
+              else if (StringUtils.isNotBlank(validatorCell) && validatorCell.startsWith("params") && validatorCell.
+                  indexOf(':') > -1) {
+                String paramKey = validatorCell.split(":")[1];
+                String paramVal = Bytes.toString(value);
+                Map<String, String> params = new LinkedHashMap<String, String>(validatorDef.getParameters());
+                params.put(paramKey, paramVal);
+                validatorDef.setParameters(params);
+              }
             }
           }
           /*
@@ -783,6 +802,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   }
 
   protected void fillResourceDef(final byte[] qualifier, final MutableResourceDef resourceDef, final byte[] value) {
+    String qualifierStr = Bytes.toString(qualifier);
     logger.debug("Filling resource!");
     if (Arrays.equals(qualifier, CELL_RSRC_NAME)) {
       logger.debug("Filling resource name");
@@ -814,6 +834,14 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       }
       uri.setValue(Bytes.toString(value));
       resourceDef.setResourceUri(uri);
+    }
+    else if (StringUtils.isNotBlank(qualifierStr) && qualifierStr.startsWith("params") && qualifierStr.indexOf(':') >
+        -1) {
+      String paramKey = qualifierStr.split(":")[1];
+      String paramVal = Bytes.toString(value);
+      Map<String, String> params = new LinkedHashMap<String, String>(resourceDef.getParameters());
+      params.put(paramKey, paramVal);
+      resourceDef.setParameters(params);
     }
   }
 }

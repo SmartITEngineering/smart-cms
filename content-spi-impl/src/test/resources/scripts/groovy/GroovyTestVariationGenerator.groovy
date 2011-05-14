@@ -22,7 +22,7 @@
  * @author imyousuf
  */
 class GroovyTestVariationGenerator implements com.smartitengineering.cms.spi.content.template.VariationGenerator {
-	public String getVariationForField(com.smartitengineering.cms.api.content.Field field) {
+	public String getVariationForField(com.smartitengineering.cms.api.content.Field field, Map<String, String> params) {
     return field.value.value.toString();
   }
 }

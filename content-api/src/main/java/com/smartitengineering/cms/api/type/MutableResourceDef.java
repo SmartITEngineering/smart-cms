@@ -18,13 +18,15 @@
  */
 package com.smartitengineering.cms.api.type;
 
-import com.smartitengineering.cms.api.common.TemplateType;
+import java.util.Map;
 
 /**
  *
  * @author kaisar
  */
 public interface MutableResourceDef extends ResourceDef {
+
+  public void setParameters(Map<String, String> params);
 
   public void setMIMEType(String mimeType);
 

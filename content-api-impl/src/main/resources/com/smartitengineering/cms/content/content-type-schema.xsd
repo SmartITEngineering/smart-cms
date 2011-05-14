@@ -168,6 +168,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
   <xs:complexType name="validator">
     <xs:sequence>
       <xs:element ref="uri" minOccurs="1" maxOccurs="1" />
+      <xs:element ref="params" minOccurs="0" maxOccurs="1" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="validator" type="validator" />
@@ -183,9 +184,26 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
       <xs:element ref="name" minOccurs="1" maxOccurs="1" />
       <xs:element ref="mimeType" minOccurs="1" maxOccurs="1" />
       <xs:element ref="uri" minOccurs="1" maxOccurs="1" />
+      <xs:element ref="params" minOccurs="0" maxOccurs="1" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="variation" type="resource" />
+  <xs:element name="key" type="xs:string" />
+  <xs:element name="val" type="xs:string" />
+  <xs:complexType name="param">
+    <xs:sequence>
+      <xs:element ref="key" minOccurs="1" maxOccurs="1" />
+      <xs:element ref="val" minOccurs="1" maxOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="param" type="param" />
+  <xs:element name="params">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="param" minOccurs="1" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
   <xs:element name="representation" type="resource" />
   <xs:element name="representations">
     <xs:complexType>

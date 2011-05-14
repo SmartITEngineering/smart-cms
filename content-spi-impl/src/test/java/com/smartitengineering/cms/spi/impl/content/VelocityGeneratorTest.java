@@ -117,7 +117,7 @@ public class VelocityGeneratorTest {
         will(returnValue(GroovyGeneratorTest.MIME_TYPE));
       }
     });
-    Representation representation = generator.getRepresentation(template, content, REP_NAME);
+    Representation representation = generator.getRepresentation(template, content, REP_NAME, Collections.<String, String>emptyMap());
     Assert.assertNotNull(representation);
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getRepresentation()));
@@ -158,7 +158,7 @@ public class VelocityGeneratorTest {
         will(returnValue(GroovyGeneratorTest.MIME_TYPE));
       }
     });
-    Variation representation = generator.getVariation(template, content, field, REP_NAME);
+    Variation representation = generator.getVariation(template, content, field, REP_NAME, Collections.<String, String>emptyMap());
     Assert.assertNotNull(representation);
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());

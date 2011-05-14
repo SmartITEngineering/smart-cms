@@ -61,19 +61,19 @@ public class ValidatorProviderImpl implements ValidatorProvider {
         logger.warn("External resource URI is not yet handled! Returning true");
         continue;
       }
-      ValidatorTemplate variationTemplate =
+      ValidatorTemplate validatorTemplate =
                         SmartContentAPI.getInstance().getWorkspaceApi().getValidatorTemplate(content.getContentId().
           getWorkspaceId(), validatorDef.getUri().getValue());
-      if (variationTemplate == null) {
+      if (validatorTemplate == null) {
         logger.info("Validator template is null, returning true!");
         continue;
       }
-      TypeFieldValidator generator = generators.get(variationTemplate.getTemplateType());
+      TypeFieldValidator generator = generators.get(validatorTemplate.getTemplateType());
       if (generator == null) {
         logger.info("Validator generator is null, returning true!");
         continue;
       }
-      valid = valid && generator.isValid(variationTemplate, field);
+      valid = valid && generator.isValid(validatorTemplate, field, validatorDef.getParameters());
     }
     return valid;
   }

@@ -23,6 +23,7 @@ import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.spi.content.template.FieldValidator;
 import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,7 @@ public abstract class AbstractTypeFieldValidator implements TypeFieldValidator {
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
-  public boolean isValid(ValidatorTemplate template, Field field) {
+  public boolean isValid(ValidatorTemplate template, Field field, Map<String, String> params) {
     FieldValidator validator;
     try {
       validator = getValidator(template);
@@ -50,6 +51,6 @@ public abstract class AbstractTypeFieldValidator implements TypeFieldValidator {
       }
       return true;
     }
-    return validator.isValidFieldValue(field);
+    return validator.isValidFieldValue(field, params);
   }
 }

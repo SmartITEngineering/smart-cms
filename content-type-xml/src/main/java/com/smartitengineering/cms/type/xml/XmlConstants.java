@@ -55,6 +55,10 @@ public interface XmlConstants {
   public String INTERNAL = "internal";
   public String EXTERNAL = "external";
   public String URI = "uri";
+  public String PARAMS = "params";
+  public String PARAM = "param";
+  public String KEY = "key";
+  public String VAL = "val";
   public String TEMPLATE_TYPE = "templateType";
   public String VALIDATOR_TYPE = "validatorType";
   public String VALIDATORS = "validators";

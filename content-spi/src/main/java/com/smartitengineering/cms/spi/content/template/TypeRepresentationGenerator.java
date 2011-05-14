@@ -22,6 +22,7 @@ import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.MutableRepresentation;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import java.util.Map;
 
 /**
  *
@@ -29,7 +30,8 @@ import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
  */
 public interface TypeRepresentationGenerator {
 
-  MutableRepresentation getRepresentation(RepresentationTemplate template, Content content, String representationName);
+  MutableRepresentation getRepresentation(RepresentationTemplate template, Content content, String representationName,
+                                          Map<String, String> params);
 
   RepresentationGenerator getGenerator(RepresentationTemplate template) throws InvalidTemplateException;
 }

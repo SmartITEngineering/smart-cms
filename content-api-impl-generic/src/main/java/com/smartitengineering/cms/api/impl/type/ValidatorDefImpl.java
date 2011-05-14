@@ -21,6 +21,9 @@ package com.smartitengineering.cms.api.impl.type;
 import com.smartitengineering.cms.api.type.MutableValidatorDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.type.ValidatorDef;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  *
@@ -29,6 +32,18 @@ import com.smartitengineering.cms.api.type.ValidatorDef;
 public class ValidatorDefImpl implements MutableValidatorDef {
 
   private ResourceUri uri;
+  private final Map<String, String> params = new LinkedHashMap<String, String>();
+
+  public void setParameters(Map<String, String> params) {
+    this.params.clear();
+    if (params != null && !params.isEmpty()) {
+      this.params.putAll(params);
+    }
+  }
+
+  public Map<String, String> getParameters() {
+    return Collections.unmodifiableMap(params);
+  }
 
   @Override
   public void setUri(ResourceUri uri) {

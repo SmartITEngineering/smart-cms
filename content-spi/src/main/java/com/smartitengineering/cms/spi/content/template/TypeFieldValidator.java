@@ -21,6 +21,7 @@ package com.smartitengineering.cms.spi.content.template;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
+import java.util.Map;
 
 /**
  *
@@ -28,7 +29,7 @@ import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
  */
 public interface TypeFieldValidator {
 
-  boolean isValid(ValidatorTemplate template, Field field);
+  boolean isValid(ValidatorTemplate template, Field field, Map<String, String> params);
 
   FieldValidator getValidator(ValidatorTemplate template) throws InvalidTemplateException;
 }
