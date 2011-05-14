@@ -390,6 +390,7 @@ public class XmlParser implements XmlConstants {
     fieldDef.setFieldStandaloneUpdateAble(Boolean.parseBoolean(
         parseOptionalStringElement(rootElement, UPDATE_STANDALONE)));
     fieldDef.setName(parseMandatoryStringElement(rootElement, NAME));
+    fieldDef.setDisplayName(parseOptionalStringElement(rootElement, DISPLAY_NAME));
     fieldDef.setRequired(Boolean.parseBoolean(parseOptionalStringElement(rootElement, REQUIRED)));
     fieldDef.setSearchDefinition(parseSearchDef(rootElement, SEARCH));
     fieldDef.setValueDef(parseValueDef(rootElement, VALUE));

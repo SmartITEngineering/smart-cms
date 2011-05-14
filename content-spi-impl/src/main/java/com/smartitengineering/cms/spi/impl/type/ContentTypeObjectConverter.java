@@ -98,6 +98,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   public final static byte[] CELL_RSRC_URI_VAL = Bytes.toBytes("resourceUri.value");
   public final static byte[] CELL_FIELD_VAL_TYPE = Bytes.toBytes("fieldValType");
   public final static byte[] CELL_FIELD_STANDALONE = Bytes.toBytes("fieldStandalone");
+  public final static byte[] CELL_FIELD_DISPLAY_NAME = Bytes.toBytes("fieldDisplayName");
   public final static byte[] CELL_FIELD_TYPE_CONTENT_AVAILABLE_FOR_SEARCH = Bytes.toBytes(
       "contentTypeFieldAvailableForSearch");
   public final static byte[] CELL_FIELD_REQUIRED = Bytes.toBytes("fieldRequired");
@@ -117,8 +118,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   public final static byte[] CELL_FIELD_STRING_ENCODING = Bytes.toBytes("encoding");
   public final static byte[] CELL_FIELD_OTHER_MIME_TYPE = Bytes.toBytes("mimeType");
   public final static byte[] COLON = Bytes.toBytes(":");
-  public static final String SPCL_FIELD_DATA_TYPE_PATTERN = ":(" + FieldValueType.COLLECTION.name() + "|" + FieldValueType.CONTENT.
-      name() + "|" + FieldValueType.OTHER.name() + "|" + FieldValueType.STRING.name() + "):(.+)";
+  public static final String SPCL_FIELD_DATA_TYPE_PATTERN = ":(" + FieldValueType.COLLECTION.name() + "|" +
+      FieldValueType.CONTENT.name() + "|" + FieldValueType.OTHER.name() + "|" + FieldValueType.STRING.name() + "):(.+)";
   public static final String COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX = ":COLLECTION:" + Bytes.toString(
       CELL_FIELD_COLLECTION_ITEM);
 
@@ -219,6 +220,9 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_STANDALONE), Bytes.toBytes(value.
             isFieldStandaloneUpdateAble()));
         put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_REQUIRED), Bytes.toBytes(value.isRequired()));
+        if (StringUtils.isNotBlank(value.getDisplayName())) {
+          put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_DISPLAY_NAME), Bytes.toBytes(value.getDisplayName()));
+        }
         /*
          * Variations
          */
@@ -393,8 +397,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         final FastDateFormat formatter = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT;
         logger.debug(String.format("Creation date is %s and last modified date is %s", formatter.format(contentType.
             getCreationDate()), formatter.format(contentType.getLastModifiedDate())));
-        logger.debug(String.format("Id is %s and parent id is %s", contentType.getContentTypeID().toString(), ObjectUtils.
-            toString(contentType.getParent())));
+        logger.debug(String.format("Id is %s and parent id is %s", contentType.getContentTypeID().toString(),
+                                   ObjectUtils.toString(contentType.getParent())));
       }
       /*
        * Content status
@@ -568,6 +572,10 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
             if (Arrays.equals(CELL_FIELD_STANDALONE, qualifier)) {
               logger.debug("Its the basic standalone key");
               fieldDef.setFieldStandaloneUpdateAble(Bytes.toBoolean(value));
+            }
+            if (Arrays.equals(CELL_FIELD_DISPLAY_NAME, qualifier)) {
+              logger.debug("Its the field's display name");
+              fieldDef.setDisplayName(Bytes.toString(value));
             }
             else if (Arrays.equals(CELL_FIELD_REQUIRED, qualifier)) {
               logger.debug("Its the basic required key");

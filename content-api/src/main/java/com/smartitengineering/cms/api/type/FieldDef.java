@@ -32,6 +32,13 @@ public interface FieldDef {
    * @return the name
    */
   public String getName();
+  
+  /**
+   * Return the display label for this field. If it is not set then it would be mean identical to invoking 
+   * {@link FieldDef#getName()}
+   * @return The display label if set, else the field's name
+   */
+  public String getDisplayName();
 
   /**
    * Retrieve the definition of the data type of this field

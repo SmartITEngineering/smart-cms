@@ -160,7 +160,8 @@ public class ContentTypeResource extends AbstractResource {
       if (fieldDefs != null && !fieldDefs.isEmpty()) {
         ObjectMapper objectMapper = new ObjectMapper();
         for (Entry<String, FieldDef> fieldDef : fieldDefs.entrySet()) {
-          org.apache.abdera.model.Entry entry = getEntry(fieldDef.getKey(), fieldDef.getKey(), lastModified);
+          org.apache.abdera.model.Entry entry = getEntry(fieldDef.getKey(), fieldDef.getValue().getDisplayName(),
+                                                         lastModified);
           StringWriter writer = new StringWriter();
           final FieldDefImpl def;
           final DataType dataType = fieldDef.getValue().getValueDef();

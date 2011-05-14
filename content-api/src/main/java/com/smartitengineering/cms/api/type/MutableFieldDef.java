@@ -35,6 +35,12 @@ public interface MutableFieldDef
    */
   public void setName(String newFieldName)
       throws IllegalArgumentException;
+  
+  /**
+   * Sets the display name for this field.
+   * @param newDisplayNameForField 
+   */
+  public void setDisplayName(String newDisplayNameForField);
 
   /**
    * Sets whether the field is required or not

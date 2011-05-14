@@ -36,6 +36,7 @@
     <fields>
       <field>
         <name>fieldA</name>
+        <displayName>Field A</displayName>
         <value>
           <content>
             <definition>

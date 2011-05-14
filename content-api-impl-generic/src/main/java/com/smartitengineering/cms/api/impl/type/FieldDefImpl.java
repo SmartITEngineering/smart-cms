@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.TreeMap;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -38,6 +39,7 @@ import java.util.TreeMap;
 public class FieldDefImpl implements MutableFieldDef {
 
   private String newFieldName;
+  private String displayName;
   private boolean required = false;
   private DataType dataType;
   private Collection<VariationDef> variationDefs = new LinkedHashSet<VariationDef>();
@@ -168,5 +170,13 @@ public class FieldDefImpl implements MutableFieldDef {
     else {
       return map.firstEntry().getValue();
     }
+  }
+
+  public void setDisplayName(String newDisplayNameForField) {
+    this.displayName = newDisplayNameForField;
+  }
+
+  public String getDisplayName() {
+    return StringUtils.isNotBlank(displayName) ? displayName : getName();
   }
 }
