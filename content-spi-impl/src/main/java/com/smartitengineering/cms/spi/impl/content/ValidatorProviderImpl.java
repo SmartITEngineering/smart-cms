@@ -51,6 +51,9 @@ public class ValidatorProviderImpl implements ValidatorProvider {
       return true;
     }
     Collection<ValidatorDef> validatorDefs = field.getFieldDef().getCustomValidators();
+    if (logger.isInfoEnabled()) {
+      logger.info("Number of validator definitions " + validatorDefs.size());
+    }
     boolean valid = true;
     for (ValidatorDef validatorDef : validatorDefs) {
       if (validatorDef == null) {
@@ -72,6 +75,9 @@ public class ValidatorProviderImpl implements ValidatorProvider {
       if (generator == null) {
         logger.info("Validator generator is null, returning true!");
         continue;
+      }
+      if (logger.isInfoEnabled()) {
+        logger.info("Using custom validators with parameters " + validatorDef.getParameters());
       }
       valid = valid && generator.isValid(validatorTemplate, field, validatorDef.getParameters());
     }

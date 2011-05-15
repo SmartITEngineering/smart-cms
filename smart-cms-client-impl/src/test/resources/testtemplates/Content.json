@@ -1,0 +1,14 @@
+{
+  "fields":[
+    {
+      "name":"fieldA",
+      "value": {
+        "@valueType":"string",
+        "value":"Nothing Interesting",
+        "type":"string"
+      }
+    }
+  ],
+  "contentTypeUri":"/cms/t/test/templates/d/test/TypeA",
+  "status":"published"
+}

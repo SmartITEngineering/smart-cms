@@ -247,7 +247,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
               final byte[] prefix = Bytes.add(toBytes, Bytes.toBytes(new StringBuilder(CELL_FIELD_VALIDATOR).append(':').
                   append(index++).append(':').toString()));
               putResourceUri(put, FAMILY_FIELDS, prefix, validatorDef.getUri());
-              putParams(put, repFamily, prefix, validatorDef.getParameters());
+              putParams(put, FAMILY_FIELDS, prefix, validatorDef.getParameters());
             }
           }
         }
@@ -360,7 +360,11 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
     final byte[] paramsPrefix = Bytes.add(prefix, Bytes.toBytes("params:"));
     if (params != null && !params.isEmpty()) {
       for (Entry<String, String> param : params.entrySet()) {
-        put.add(family, Bytes.add(paramsPrefix, Bytes.toBytes(param.getKey())), Bytes.toBytes(param.getValue()));
+        final byte[] qualifier = Bytes.add(paramsPrefix, Bytes.toBytes(param.getKey()));
+        if (logger.isInfoEnabled()) {
+          logger.info("Putting params " + Bytes.toString(qualifier) + " - " + param.getValue());
+        }
+        put.add(family, qualifier, Bytes.toBytes(param.getValue()));
       }
     }
   }
@@ -543,7 +547,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
            */
           else if (validatorMatcher.matches()) {
             logger.debug("Matched validator pattern");
-            Integer indexInt = NumberUtils.toInt(variationsDefMatcher.group(1), -1);
+            Integer indexInt = NumberUtils.toInt(validatorMatcher.group(1), -1);
             MutableValidatorDef validatorDef = null;
             if (indexInt > -1) {
               validatorDef = validatorDefs.get(indexInt);
@@ -554,6 +558,9 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
             }
             if (validatorDef != null) {
               String validatorCell = validatorMatcher.group(2);
+              if (logger.isInfoEnabled()) {
+                logger.info("Validator Cell " + validatorCell);
+              }
               byte[] validatorCellBytes = Bytes.toBytes(validatorCell);
               if (Arrays.equals(validatorCellBytes, CELL_RSRC_URI_TYPE)) {
                 logger.debug("Matched Resource URI Type");
@@ -581,11 +588,20 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
               }
               else if (StringUtils.isNotBlank(validatorCell) && validatorCell.startsWith("params") && validatorCell.
                   indexOf(':') > -1) {
+                logger.info("Match params");
                 String paramKey = validatorCell.split(":")[1];
                 String paramVal = Bytes.toString(value);
                 Map<String, String> params = new LinkedHashMap<String, String>(validatorDef.getParameters());
                 params.put(paramKey, paramVal);
+                if (logger.isInfoEnabled()) {
+                  logger.info("Key " + paramKey);
+                  logger.info("Val " + paramVal);
+                  logger.info("Setting params " + params);
+                }
                 validatorDef.setParameters(params);
+              }
+              else {
+                logger.warn("Found validator key not matching anything!");
               }
             }
           }

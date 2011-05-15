@@ -60,6 +60,7 @@ import com.smartitengineering.cms.ws.common.domains.FieldImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldValue;
 import com.smartitengineering.cms.ws.common.domains.FieldValueImpl;
 import com.smartitengineering.cms.ws.common.domains.OtherFieldValueImpl;
+import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
 import com.smartitengineering.cms.ws.common.domains.ResourceTemplateImpl;
 import com.smartitengineering.cms.ws.common.domains.Workspace;
 import com.smartitengineering.cms.ws.common.domains.WorkspaceImpl.WorkspaceIdImpl;
@@ -2004,6 +2005,75 @@ public class AppTest {
     method.addRequestHeader(ifDate);
     client.executeMethod(method);
     Assert.assertEquals(304, method.getStatusCode());
+  }
+
+  @Test
+  public void testMultiValidatorWithParams() throws Exception {
+    WorkspaceFeedResource feedResource = setupMultiValidatorAndParamTest();
+    ObjectMapper mapper1 = new ObjectMapper();
+    Content contentTest = mapper1.readValue(
+        getClass().getClassLoader().getResourceAsStream("testtemplates/Content.json"), Content.class);
+    feedResource.getContents().createContentResource(contentTest);
+    try {
+      contentTest = mapper1.readValue(getClass().getClassLoader().getResourceAsStream(
+          "testtemplates/Content_invalid_max.json"), Content.class);
+      feedResource.getContents().createContentResource(contentTest);
+      Assert.fail("Should not be able to create content!");
+    }
+    catch (Exception ex) {
+    }
+    try {
+      contentTest = mapper1.readValue(getClass().getClassLoader().getResourceAsStream(
+          "testtemplates/Content_invalid_min.json"), Content.class);
+      feedResource.getContents().createContentResource(contentTest);
+      Assert.fail("Should not be able to create content!");
+    }
+    catch (Exception ex) {
+    }
+  }
+
+  private WorkspaceFeedResource setupMultiValidatorAndParamTest() {
+    RootResource resource = RootResourceImpl.getRoot(URI.create(ROOT_URI_STRING));
+    resource.get();
+    WorkspaceFeedResource feedResource;
+    try {
+      feedResource = resource.getTemplates().getWorkspaceResource("test", "templates");
+    }
+    catch (Exception ex) {
+      feedResource = null;
+      LOGGER.info("Exception getting feed resoruce", ex);
+    }
+    boolean valid = false;
+    if (feedResource == null) {
+      try {
+        Workspace workspace = resource.createWorkspace(new WorkspaceIdImpl("test", "templates"));
+        feedResource = resource.getTemplates().getWorkspaceResource(workspace.getId().getGlobalNamespace(), workspace.
+            getId().getName());
+        String contentTypeXml = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(
+            "testtemplates/content-type-templates.xml"));
+        feedResource.getContentTypes().createContentType(contentTypeXml);
+        ResourceTemplateImpl template = new ResourceTemplateImpl();
+        template.setName("internalval");
+        template.setTemplate(IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
+            "testtemplates/validator.groovy")));
+        template.setTemplateType("GROOVY");
+        template.setWorkspaceId(workspace.getId());
+        feedResource.getValidators().createValidator(template);
+        template = new ResourceTemplateImpl();
+        template.setName("internalvar");
+        template.setTemplate(IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
+            "testtemplates/variation.groovy")));
+        template.setTemplateType("GROOVY");
+        template.setWorkspaceId(workspace.getId());
+        feedResource.getVariations().createVariation(template);
+        valid = true;
+      }
+      catch (Exception ex) {
+        LOGGER.error("Error creating test workspace for templates", ex);
+      }
+    }
+    Assert.assertTrue(valid);
+    return feedResource;
   }
 
   public static class ConfigurationModule extends AbstractModule {
