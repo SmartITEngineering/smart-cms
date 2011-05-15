@@ -75,6 +75,7 @@ import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
+import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.File;
 import java.io.IOException;
@@ -2013,7 +2014,7 @@ public class AppTest {
     ObjectMapper mapper1 = new ObjectMapper();
     Content contentTest = mapper1.readValue(
         getClass().getClassLoader().getResourceAsStream("testtemplates/Content.json"), Content.class);
-    feedResource.getContents().createContentResource(contentTest);
+    ContentResource contentResource = feedResource.getContents().createContentResource(contentTest);
     try {
       contentTest = mapper1.readValue(getClass().getClassLoader().getResourceAsStream(
           "testtemplates/Content_invalid_max.json"), Content.class);
@@ -2030,6 +2031,22 @@ public class AppTest {
     }
     catch (Exception ex) {
     }
+    contentResource.delete(ClientResponse.Status.ACCEPTED, ClientResponse.Status.OK);
+  }
+
+  @Test
+  public void testVariationWithParams() throws Exception {
+    WorkspaceFeedResource feedResource = setupMultiValidatorAndParamTest();
+    ObjectMapper mapper1 = new ObjectMapper();
+    Content contentTest = mapper1.readValue(
+        getClass().getClassLoader().getResourceAsStream("testtemplates/Content.json"), Content.class);
+    ContentResource contentResource = feedResource.getContents().createContentResource(contentTest);
+    String variationUri = contentResource.getLastReadStateOfEntity().getFieldsMap().get("fieldA").getVariationsByNames().
+        get("avar");
+    com.smartitengineering.util.rest.client.HttpClient client = contentResource.getClientFactory().getHttpClient();
+    WebResource varResource = client.getWebResource(URI.create(variationUri));
+    String variation = varResource.get(String.class);
+    Assert.assertEquals("Nothing ", variation);
   }
 
   private WorkspaceFeedResource setupMultiValidatorAndParamTest() {
@@ -2071,6 +2088,9 @@ public class AppTest {
       catch (Exception ex) {
         LOGGER.error("Error creating test workspace for templates", ex);
       }
+    }
+    else {
+      valid = true;
     }
     Assert.assertTrue(valid);
     return feedResource;
