@@ -2047,6 +2047,26 @@ public class AppTest {
     WebResource varResource = client.getWebResource(URI.create(variationUri));
     String variation = varResource.get(String.class);
     Assert.assertEquals("Nothing ", variation);
+    contentResource.delete(ClientResponse.Status.ACCEPTED, ClientResponse.Status.OK);
+  }
+
+  @Test
+  public void testRepresentationWithParams() throws Exception {
+    WorkspaceFeedResource feedResource = setupMultiValidatorAndParamTest();
+    ObjectMapper mapper1 = new ObjectMapper();
+    Content contentTest = mapper1.readValue(
+        getClass().getClassLoader().getResourceAsStream("testtemplates/Content.json"), Content.class);
+    ContentResource contentResource = feedResource.getContents().createContentResource(contentTest);
+    String representationUri = contentResource.getLastReadStateOfEntity().getRepresentationsByName().get("arep");
+    com.smartitengineering.util.rest.client.HttpClient client = contentResource.getClientFactory().getHttpClient();
+    WebResource repResource = client.getWebResource(URI.create(representationUri));
+    String representation = repResource.get(String.class);
+    Assert.assertEquals("Nothing", representation);
+    representationUri = contentResource.getLastReadStateOfEntity().getRepresentationsByName().get("arep2");
+    repResource = client.getWebResource(URI.create(representationUri));
+     representation = repResource.get(String.class);
+    Assert.assertEquals("Nothing I", representation);
+    contentResource.delete(ClientResponse.Status.ACCEPTED, ClientResponse.Status.OK);
   }
 
   private WorkspaceFeedResource setupMultiValidatorAndParamTest() {
@@ -2083,6 +2103,20 @@ public class AppTest {
         template.setTemplateType("GROOVY");
         template.setWorkspaceId(workspace.getId());
         feedResource.getVariations().createVariation(template);
+        template = new ResourceTemplateImpl();
+        template.setName("internalrep");
+        template.setTemplate(IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
+            "testtemplates/representation.groovy")));
+        template.setTemplateType("GROOVY");
+        template.setWorkspaceId(workspace.getId());
+        feedResource.getRepresentations().createRepresentations(template);
+        template = new ResourceTemplateImpl();
+        template.setName("vmrep");
+        template.setTemplate(IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
+            "testtemplates/anotherrep.vm")));
+        template.setTemplateType("VELOCITY");
+        template.setWorkspaceId(workspace.getId());
+        feedResource.getRepresentations().createRepresentations(template);
         valid = true;
       }
       catch (Exception ex) {

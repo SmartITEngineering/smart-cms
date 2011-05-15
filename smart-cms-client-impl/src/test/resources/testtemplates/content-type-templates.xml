@@ -89,5 +89,37 @@
     <status>
       <statusName>published</statusName>
     </status>
+    <representations>
+      <representation>
+        <name>arep</name>
+        <mimeType>text/plain</mimeType>
+        <uri>
+          <internal>
+            <name>internalrep</name>
+          </internal>
+        </uri>
+        <params>
+          <param>
+            <key>max</key>
+            <val>7</val>
+          </param>
+        </params>
+      </representation>
+      <representation>
+        <name>arep2</name>
+        <mimeType>text/plain</mimeType>
+        <uri>
+          <internal>
+            <name>vmrep</name>
+          </internal>
+        </uri>
+        <params>
+          <param>
+            <key>max</key>
+            <val>9</val>
+          </param>
+        </params>
+      </representation>
+    </representations>
   </contentType>
 </contentTypes>

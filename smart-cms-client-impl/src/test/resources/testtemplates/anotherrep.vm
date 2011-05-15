@@ -1,0 +1,2 @@
+#set($Integer = 0)
+$content.fields.fieldA.value.value.substring(0, $Integer.parseInt($params.max))
