@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.event.Event.EventType;
 import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
+import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
@@ -2064,9 +2065,66 @@ public class AppTest {
     Assert.assertEquals("Nothing", representation);
     representationUri = contentResource.getLastReadStateOfEntity().getRepresentationsByName().get("arep2");
     repResource = client.getWebResource(URI.create(representationUri));
-     representation = repResource.get(String.class);
+    representation = repResource.get(String.class);
     Assert.assertEquals("Nothing I", representation);
     contentResource.delete(ClientResponse.Status.ACCEPTED, ClientResponse.Status.OK);
+  }
+
+  @Test
+  public void testContentTypeExtension() throws Exception {
+    WorkspaceFeedResource feedResource = setupMultiValidatorAndParamTest();
+    String contentTypeXml = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(
+        "testtemplates/content-type-extension.xml"));
+    feedResource.getContentTypes().createContentType(contentTypeXml);
+    com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl id =
+                                                                  new com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl();
+    id.setGlobalNamespace("test");
+    id.setName("templates");
+    ContentTypeIdImpl idImpl = new ContentTypeIdImpl();
+    idImpl.setWorkspace(id);
+    idImpl.setNamespace("test");
+    idImpl.setName("TypeB");
+    ContentType type = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(idImpl);
+    Assert.assertFalse(type.getStatuses().isEmpty());
+    Assert.assertFalse(type.getRepresentationDefs().isEmpty());
+    Assert.assertEquals(1, type.getStatuses().size());
+    Assert.assertEquals(2, type.getRepresentationDefs().size());
+    idImpl = new ContentTypeIdImpl();
+    idImpl.setWorkspace(id);
+    idImpl.setNamespace("test");
+    idImpl.setName("TypeC");
+    type = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(idImpl);
+    Assert.assertFalse(type.getStatuses().isEmpty());
+    Assert.assertFalse(type.getRepresentationDefs().isEmpty());
+    Assert.assertEquals(1, type.getStatuses().size());
+    Assert.assertEquals(2, type.getRepresentationDefs().size());
+    idImpl = new ContentTypeIdImpl();
+    idImpl.setWorkspace(id);
+    idImpl.setNamespace("test");
+    idImpl.setName("TypeD");
+    type = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(idImpl);
+    Assert.assertFalse(type.getStatuses().isEmpty());
+    Assert.assertFalse(type.getRepresentationDefs().isEmpty());
+    Assert.assertEquals(1, type.getStatuses().size());
+    Assert.assertEquals(3, type.getRepresentationDefs().size());
+    idImpl = new ContentTypeIdImpl();
+    idImpl.setWorkspace(id);
+    idImpl.setNamespace("test");
+    idImpl.setName("TypeE");
+    type = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(idImpl);
+    Assert.assertFalse(type.getStatuses().isEmpty());
+    Assert.assertFalse(type.getRepresentationDefs().isEmpty());
+    Assert.assertEquals(2, type.getStatuses().size());
+    Assert.assertEquals(2, type.getRepresentationDefs().size());
+    idImpl = new ContentTypeIdImpl();
+    idImpl.setWorkspace(id);
+    idImpl.setNamespace("test");
+    idImpl.setName("TypeF");
+    type = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(idImpl);
+    Assert.assertFalse(type.getStatuses().isEmpty());
+    Assert.assertTrue(type.getRepresentationDefs().isEmpty());
+    Assert.assertEquals(1, type.getStatuses().size());
+    Assert.assertEquals(0, type.getRepresentationDefs().size());
   }
 
   private WorkspaceFeedResource setupMultiValidatorAndParamTest() {

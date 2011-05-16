@@ -98,11 +98,40 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
 
   @Override
   public Map<String, ContentStatus> getStatuses() {
-    Map<String, ContentStatus> statusMap = new LinkedHashMap<String, ContentStatus>(contentStatus.size());
-    for (ContentStatus status : contentStatus) {
-      statusMap.put(status.getName(), status);
+    final Map<String, ContentStatus> statusMap = new LinkedHashMap<String, ContentStatus>();
+    if (contentStatus.isEmpty() && getParent() != null) {
+      ContentType parentContentType = getParent().getContentType();
+      if (parentContentType != null) {
+        return parentContentType.getStatuses();
+      }
+      else {
+        return Collections.emptyMap();
+      }
     }
-    return Collections.unmodifiableMap(statusMap);
+    else if (!contentStatus.isEmpty()) {
+      for (ContentStatus status : contentStatus) {
+        statusMap.put(status.getName(), status);
+      }
+      return Collections.unmodifiableMap(statusMap);
+    }
+    else {
+      final ContentStatus status = new ContentStatus() {
+
+        public int getId() {
+          return 1;
+        }
+
+        public ContentTypeId getContentType() {
+          return getContentTypeID();
+        }
+
+        public String getName() {
+          return "default";
+        }
+      };
+      statusMap.put(status.getName(), status);
+      return Collections.unmodifiableMap(statusMap);
+    }
   }
 
   @Override
@@ -129,12 +158,18 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
 
   @Override
   public Map<String, RepresentationDef> getRepresentationDefs() {
-    Map<String, RepresentationDef> representationDefMap = new LinkedHashMap<String, RepresentationDef>(representationDefs.
-        size());
+    Map<String, RepresentationDef> representationDefMap = new LinkedHashMap<String, RepresentationDef>();
+    if (getParent() != null) {
+      ContentType parentContentType = getParent().getContentType();
+      if (parentContentType != null) {
+        representationDefMap.putAll(parentContentType.getRepresentationDefs());
+      }
+    }
     for (RepresentationDef representationDef : representationDefs) {
       representationDefMap.put(representationDef.getName(), representationDef);
     }
     return Collections.unmodifiableMap(representationDefMap);
+
   }
 
   @Override
@@ -221,8 +256,8 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
       return false;
     }
     final ContentType other = (ContentType) obj;
-    if (this.contentTypeId != other.getContentTypeID() && (this.contentTypeId == null || !this.contentTypeId.equals(other.
-                                                           getContentTypeID()))) {
+    if (this.contentTypeId != other.getContentTypeID() && (this.contentTypeId == null ||
+                                                           !this.contentTypeId.equals(other.getContentTypeID()))) {
       return false;
     }
     return true;
@@ -312,7 +347,7 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
       logger.info("Primary Field Def present: " + primaryFieldName + " " + (getPrimaryFieldDef() != null));
       logger.info("Primary Field Def: " + getPrimaryFieldDef());
     }
-    return getPrimaryFieldDef() != null;
+    return getPrimaryFieldDef() != null && !getStatuses().isEmpty();
   }
 
   @Override
