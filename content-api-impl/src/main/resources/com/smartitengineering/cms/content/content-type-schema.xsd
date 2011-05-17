@@ -94,6 +94,17 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+  <xs:element name="composition">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:element ref="field" minOccurs="1" maxOccurs="1" />
+          <xs:element ref="content" minOccurs="1" maxOccurs="1" />
+        </xs:choice>
+        <xs:element ref="field" minOccurs="0" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
   <xs:element name="value">
     <xs:complexType>
       <xs:sequence>
@@ -107,6 +118,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
           <xs:element ref="string" minOccurs="1" maxOccurs="1" />
           <xs:element ref="other" minOccurs="1" maxOccurs="1" />
           <xs:element ref="collection" minOccurs="1" maxOccurs="1" />
+          <xs:element ref="composition" minOccurs="1" maxOccurs="1" />
         </xs:choice>
       </xs:sequence>
     </xs:complexType>
@@ -123,6 +135,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
           <xs:element ref="datetime" minOccurs="1" maxOccurs="1" />
           <xs:element ref="string" minOccurs="1" maxOccurs="1" />
           <xs:element ref="other" minOccurs="1" maxOccurs="1" />
+          <xs:element ref="composition" minOccurs="1" maxOccurs="1" />
         </xs:choice>
       </xs:sequence>
     </xs:complexType>

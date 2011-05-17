@@ -22,6 +22,7 @@ import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.common.SearchResult;
 import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
@@ -32,6 +33,7 @@ import com.smartitengineering.cms.api.impl.content.SearchResultImpl;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.Filter;
 import com.smartitengineering.cms.api.type.MutableCollectionDataType;
+import com.smartitengineering.cms.api.type.MutableCompositeDataType;
 import com.smartitengineering.cms.api.type.MutableContentDataType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
@@ -282,8 +284,8 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
     typeImpl.setCreationDate(contentType.getCreationDate());
     typeImpl.setPrimaryFieldName(contentType.getPrimaryFieldName());
     typeImpl.setDisplayName(contentType.getDisplayName());
-    typeImpl.setFromPersistentStorage(contentType instanceof PersistableContentType ? ((PersistableContentType) contentType).
-        isFromPersistentStorage() : false);
+    typeImpl.setFromPersistentStorage(contentType instanceof PersistableContentType ?
+        ((PersistableContentType) contentType).isFromPersistentStorage() : false);
     typeImpl.setLastModifiedDate(contentType.getLastModifiedDate());
     typeImpl.setEntityTagValue(contentType.getEntityTagValue());
     typeImpl.setParent(contentType.getParent());
@@ -374,5 +376,18 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   @Override
   public SearchResult<ContentType> search(Filter filter) {
     return SmartContentSPI.getInstance().getContentTypeSearcher().search(filter);
+  }
+
+  public MutableCompositeDataType getMutableCompositeDataType() {
+    return new CompositionDataTypeImpl();
+  }
+
+  public MutableCompositeDataType getMutableCompositeDataType(CompositeDataType dataType) {
+    CompositionDataTypeImpl dataTypeImpl = new CompositionDataTypeImpl();
+    if (dataType != null) {
+      dataTypeImpl.setEmbeddedContentType(dataType.getEmbeddedContentType());
+      dataTypeImpl.getOwnMutableComposition().addAll(dataType.getOwnComposition());
+    }
+    return dataTypeImpl;
   }
 }

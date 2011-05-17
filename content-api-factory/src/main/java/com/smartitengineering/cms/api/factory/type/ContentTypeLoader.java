@@ -23,6 +23,7 @@ import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.common.SearchResult;
 import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
@@ -30,6 +31,7 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.Filter;
 import com.smartitengineering.cms.api.type.MutableCollectionDataType;
+import com.smartitengineering.cms.api.type.MutableCompositeDataType;
 import com.smartitengineering.cms.api.type.MutableContentDataType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
@@ -122,6 +124,19 @@ public interface ContentTypeLoader {
    */
   public MutableContentStatus getMutableContentStatus(
       ContentStatus contentStatus);
+
+  /**
+   * Creates a new mutable composite data type
+   * @return new mutable composite data type
+   */
+  public MutableCompositeDataType getMutableCompositeDataType();
+
+  /**
+   * Converts the read-only composite data type to a mutable composite data type
+   * @param dataType The immutable data type intended to edit
+   * @return Mutable composite data type version of the intended composite data type
+   */
+  public MutableCompositeDataType getMutableCompositeDataType(CompositeDataType dataType);
 
   /**
    * Get the mutable version of the content type ID
