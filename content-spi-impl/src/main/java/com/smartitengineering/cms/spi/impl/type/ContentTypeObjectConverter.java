@@ -21,6 +21,7 @@ package com.smartitengineering.cms.spi.impl.type;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
@@ -28,6 +29,7 @@ import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableCollectionDataType;
+import com.smartitengineering.cms.api.type.MutableCompositeDataType;
 import com.smartitengineering.cms.api.type.MutableContentDataType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
@@ -57,6 +59,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -69,6 +72,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.FastDateFormat;
+import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -80,6 +84,10 @@ import org.apache.hadoop.hbase.util.Bytes;
  */
 public class ContentTypeObjectConverter extends AbstractObjectRowConverter<PersistentContentType, ContentTypeId> {
 
+  public static final String COMPOSITE_EMBED_SEPARATOR_STR = "embed";
+  public static final String COMPOSITE_FIELDS_SEPARATOR_STR = "fields";
+  public static final byte[] COMPOSITE_EMBED_SEPARATOR = Bytes.toBytes(COMPOSITE_EMBED_SEPARATOR_STR);
+  public static final byte[] COMPOSITE_FIELDS_SEPARATOR = Bytes.toBytes(COMPOSITE_FIELDS_SEPARATOR_STR);
   public final static byte[] FAMILY_SIMPLE = Bytes.toBytes("simple");
   public final static byte[] FAMILY_FIELDS = Bytes.toBytes("fields");
   public final static byte[] FAMILY_REPRESENTATIONS = Bytes.toBytes("representations");
@@ -117,7 +125,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   public final static byte[] CELL_FIELD_OTHER_MIME_TYPE = Bytes.toBytes("mimeType");
   public final static byte[] COLON = Bytes.toBytes(":");
   public static final String SPCL_FIELD_DATA_TYPE_PATTERN = ":(" + FieldValueType.COLLECTION.name() + "|" +
-      FieldValueType.CONTENT.name() + "|" + FieldValueType.OTHER.name() + "|" + FieldValueType.STRING.name() + "):(.+)";
+      FieldValueType.CONTENT.name() + "|" + FieldValueType.OTHER.name() + "|" + FieldValueType.STRING.name() + "|" +
+      FieldValueType.COMPOSITE.name() + "):(.+)";
   public static final String COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX = ":COLLECTION:" + Bytes.toString(
       CELL_FIELD_COLLECTION_ITEM);
 
@@ -204,80 +213,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       /*
        * Fields
        */
-      for (Entry<String, FieldDef> entry : instance.getMutableContentType().getOwnFieldDefs().entrySet()) {
-        if (logger.isDebugEnabled()) {
-          logger.debug(new StringBuilder("Putting field with name ").append(entry.getKey()).append(" and value ").append(entry.
-              getValue().toString()).toString());
-        }
-        final FieldDef value = entry.getValue();
-        final byte[] toBytes = Bytes.add(Bytes.toBytes(entry.getKey()), COLON);
-        /*
-         * Simple field values
-         */
-        logger.debug("Putting simple field values");
-        put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_STANDALONE), Bytes.toBytes(value.
-            isFieldStandaloneUpdateAble()));
-        put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_REQUIRED), Bytes.toBytes(value.isRequired()));
-        if (StringUtils.isNotBlank(value.getDisplayName())) {
-          put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_DISPLAY_NAME), Bytes.toBytes(value.getDisplayName()));
-        }
-        /*
-         * Variations
-         */
-        Collection<VariationDef> varDefs = value.getVariations().values();
-        if (varDefs != null && !varDefs.isEmpty()) {
-          int index = 0;
-          for (VariationDef def : varDefs) {
-            if (logger.isDebugEnabled()) {
-              logger.debug(new StringBuilder("Putting variation with name ").append(def.getName()).toString());
-            }
-            putResourceDef(put, FAMILY_FIELDS, Bytes.add(toBytes, Bytes.toBytes(new StringBuilder(CELL_FIELD_VAR_DEF).
-                append(':').append(index++).append(':').toString())), def);
-          }
-        }
-        /*
-         * Validator def
-         */
-        Collection<ValidatorDef> validatorDefs = value.getCustomValidators();
-        if (validatorDefs != null && !validatorDefs.isEmpty()) {
-          int index = 0;
-          for (ValidatorDef validatorDef : validatorDefs) {
-            if (validatorDef != null) {
-              logger.debug("Put custom validator for field");
-              final byte[] prefix = Bytes.add(toBytes, Bytes.toBytes(new StringBuilder(CELL_FIELD_VALIDATOR).append(':').
-                  append(index++).append(':').toString()));
-              putResourceUri(put, FAMILY_FIELDS, prefix, validatorDef.getUri());
-              putParams(put, FAMILY_FIELDS, prefix, validatorDef.getParameters());
-            }
-          }
-        }
-        /*
-         * Search def
-         */
-        SearchDef searchDef = value.getSearchDefinition();
-        if (searchDef != null) {
-          logger.debug("Putting search definition for field");
-          put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_SEARCHDEF_INDEXED), Bytes.toBytes(searchDef.isIndexed()));
-          put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_SEARCHDEF_STORED), Bytes.toBytes(searchDef.isStored()));
-          if (StringUtils.isNotBlank(searchDef.getBoostConfig())) {
-            put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_SEARCHDEF_BOOST_CONFIG), Bytes.toBytes(searchDef.
-                getBoostConfig()));
-          }
-        }
-        /*
-         * Data type
-         */
-        final DataType valueDef = value.getValueDef();
-        if (valueDef != null) {
-          logger.debug("Work with field data type");
-          final byte[] fieldValType = Bytes.add(toBytes, CELL_FIELD_VAL_TYPE);
-          put.add(FAMILY_FIELDS, fieldValType, Bytes.toBytes(valueDef.getType().name()));
-          handleSpecialDataTypes(put, Bytes.add(fieldValType, COLON), valueDef);
-        }
-        if (logger.isDebugEnabled()) {
-          logger.debug(new StringBuilder("Finished putting field with name ").append(entry.getKey()).toString());
-        }
-      }
+      final Map<String, FieldDef> ownFieldDefs = instance.getMutableContentType().getOwnFieldDefs();
+      putFields(ownFieldDefs, put);
       /*
        * Variants of content type
        */
@@ -296,6 +233,84 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
     catch (Exception ex) {
       logger.warn("Error converting content type to Put throwing exception...", ex);
       throw new RuntimeException(ex);
+    }
+  }
+
+  protected void putFields(final Map<String, FieldDef> ownFieldDefs, Put put, byte... prefix) throws IOException {
+    for (Entry<String, FieldDef> entry : ownFieldDefs.entrySet()) {
+      if (logger.isDebugEnabled()) {
+        logger.debug(new StringBuilder("Putting field with name ").append(entry.getKey()).append(" and value ").append(entry.
+            getValue().toString()).toString());
+      }
+      final FieldDef value = entry.getValue();
+      final byte[] toBytes = Bytes.add(((prefix == null) ? HConstants.EMPTY_BYTE_ARRAY : prefix), Bytes.toBytes(entry.
+          getKey()), COLON);
+      /*
+       * Simple field values
+       */
+      logger.debug("Putting simple field values");
+      put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_STANDALONE), Bytes.toBytes(
+          value.isFieldStandaloneUpdateAble()));
+      put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_REQUIRED), Bytes.toBytes(value.isRequired()));
+      if (StringUtils.isNotBlank(value.getDisplayName())) {
+        put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_DISPLAY_NAME), Bytes.toBytes(value.getDisplayName()));
+      }
+      /*
+       * Variations
+       */
+      Collection<VariationDef> varDefs = value.getVariations().values();
+      if (varDefs != null && !varDefs.isEmpty()) {
+        int index = 0;
+        for (VariationDef def : varDefs) {
+          if (logger.isDebugEnabled()) {
+            logger.debug(new StringBuilder("Putting variation with name ").append(def.getName()).toString());
+          }
+          putResourceDef(put, FAMILY_FIELDS, Bytes.add(toBytes, Bytes.toBytes(new StringBuilder(CELL_FIELD_VAR_DEF).
+              append(':').append(index++).append(':').toString())), def);
+        }
+      }
+      /*
+       * Validator def
+       */
+      Collection<ValidatorDef> validatorDefs = value.getCustomValidators();
+      if (validatorDefs != null && !validatorDefs.isEmpty()) {
+        int index = 0;
+        for (ValidatorDef validatorDef : validatorDefs) {
+          if (validatorDef != null) {
+            logger.debug("Put custom validator for field");
+            final byte[] validatorPrefix = Bytes.add(toBytes, Bytes.toBytes(new StringBuilder(CELL_FIELD_VALIDATOR).
+                append(':').append(index++).append(':').toString()));
+            putResourceUri(put, FAMILY_FIELDS, validatorPrefix, validatorDef.getUri());
+            putParams(put, FAMILY_FIELDS, validatorPrefix, validatorDef.getParameters());
+          }
+        }
+      }
+      /*
+       * Search def
+       */
+      SearchDef searchDef = value.getSearchDefinition();
+      if (searchDef != null) {
+        logger.debug("Putting search definition for field");
+        put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_SEARCHDEF_INDEXED), Bytes.toBytes(searchDef.isIndexed()));
+        put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_SEARCHDEF_STORED), Bytes.toBytes(searchDef.isStored()));
+        if (StringUtils.isNotBlank(searchDef.getBoostConfig())) {
+          put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_SEARCHDEF_BOOST_CONFIG), Bytes.toBytes(searchDef.
+              getBoostConfig()));
+        }
+      }
+      /*
+       * Data type
+       */
+      final DataType valueDef = value.getValueDef();
+      if (valueDef != null) {
+        logger.debug("Work with field data type");
+        final byte[] fieldValType = Bytes.add(toBytes, CELL_FIELD_VAL_TYPE);
+        put.add(FAMILY_FIELDS, fieldValType, Bytes.toBytes(valueDef.getType().name()));
+        handleSpecialDataTypes(put, Bytes.add(fieldValType, COLON), valueDef);
+      }
+      if (logger.isDebugEnabled()) {
+        logger.debug(new StringBuilder("Finished putting field with name ").append(entry.getKey()).toString());
+      }
     }
   }
 
@@ -327,6 +342,24 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_CONTENT_TYPE_ID),
                 getInfoProvider().getRowIdFromId(contentDataType.getTypeDef()));
         break;
+      case COMPOSITE: {
+        CompositeDataType compositeDataType = (CompositeDataType) valueDef;
+        contentDataType = compositeDataType.getEmbeddedContentType();
+        if (contentDataType != null) {
+          byte[] contentPrefix = Bytes.add(prefix, COMPOSITE_EMBED_SEPARATOR, COLON);
+          handleSpecialDataTypes(put, contentPrefix, contentDataType);
+        }
+        Collection<FieldDef> defs = compositeDataType.getOwnComposition();
+        if (defs != null && !defs.isEmpty()) {
+          LinkedHashMap<String, FieldDef> defMap = new LinkedHashMap<String, FieldDef>(defs.size());
+          for (FieldDef def : defs) {
+            defMap.put(def.getName(), def);
+          }
+          byte[] fieldPrefix = Bytes.add(prefix, COMPOSITE_FIELDS_SEPARATOR, COLON);
+          putFields(defMap, put, fieldPrefix);
+        }
+        break;
+      }
       case STRING:
         logger.debug("Working with STRING Special data type");
         StringDataType stringDataType = (StringDataType) valueDef;
@@ -473,195 +506,9 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       Map<String, Map<String, byte[]>> fieldsByName = new LinkedHashMap<String, Map<String, byte[]>>();
       Utils.organizeByPrefix(fieldMap, fieldsByName, ':');
       for (String fieldName : fieldsByName.keySet()) {
-        final Map<String, byte[]> fieldCells = fieldsByName.get(fieldName);
-        final Map<Integer, MutableVariationDef> fieldVariations = new TreeMap<Integer, MutableVariationDef>();
-        final MutableSearchDef searchDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableSearchDef();
         final MutableFieldDef fieldDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableFieldDef();
-        final Map<Integer, MutableValidatorDef> validatorDefs = new TreeMap<Integer, MutableValidatorDef>();
-        DataType mutableDataType = null;
-        fieldDef.setName(fieldName);
-        final String validatorPatternString = new StringBuilder(fieldName).append(':').append(CELL_FIELD_VALIDATOR).
-            append(":([\\d]+):(.*)").toString();
-        if (logger.isDebugEnabled()) {
-          logger.debug(new StringBuilder("Using following pattern to identify validator: ").append(
-              validatorPatternString).toString());
-        }
-        Pattern validatorPattern = Pattern.compile(validatorPatternString);
-        final String searchDefPatternString = new StringBuilder(fieldName).append(":(").append(CELL_FIELD_SEARCHDEF).
-            append(':').append(".*)").toString();
-        if (logger.isDebugEnabled()) {
-          logger.debug(new StringBuilder("Using following pattern to identify search definition: ").append(
-              searchDefPatternString).toString());
-        }
-        Pattern searchDefPattern = Pattern.compile(searchDefPatternString);
-        final String variationPatternString = new StringBuilder(fieldName).append(':').append(CELL_FIELD_VAR_DEF).append(
-            ":([\\d]+):(.*)").toString();
-        if (logger.isDebugEnabled()) {
-          logger.debug(new StringBuilder("Using following pattern to identify variation: ").append(
-              variationPatternString).toString());
-        }
-        Pattern variationsDefPattern = Pattern.compile(variationPatternString);
-        for (Entry<String, byte[]> cell : fieldCells.entrySet()) {
-          final String key = cell.getKey();
-          final byte[] value = cell.getValue();
-          if (logger.isDebugEnabled()) {
-            logger.debug(new StringBuilder("Matching following key against the patterns: ").append(key).toString());
-            logger.debug(new StringBuilder("Cell value: ").append(Bytes.toString(value)).toString());
-          }
-          final Matcher searchDefMatcher = searchDefPattern.matcher(key);
-          final Matcher variationsDefMatcher = variationsDefPattern.matcher(key);
-          final Matcher validatorMatcher = validatorPattern.matcher(key);
-          /*
-           * Search Def
-           */
-          if (searchDefMatcher.matches()) {
-            logger.debug("Matched search definition pattern");
-            byte[] searchDefCell = Bytes.toBytes(searchDefMatcher.group(1));
-            if (Arrays.equals(CELL_FIELD_SEARCHDEF_INDEXED, searchDefCell)) {
-              searchDef.setIndexed(Bytes.toBoolean(value));
-            }
-            else if (Arrays.equals(CELL_FIELD_SEARCHDEF_STORED, searchDefCell)) {
-              searchDef.setStored(Bytes.toBoolean(value));
-            }
-            else if (Arrays.equals(CELL_FIELD_SEARCHDEF_BOOST_CONFIG, searchDefCell)) {
-              searchDef.setBoostConfig(Bytes.toString(value));
-            }
-          }
-          /*
-           * Variations
-           */
-          else if (variationsDefMatcher.matches()) {
-            logger.debug("Matched variation pattern");
-            Integer indexInt = NumberUtils.toInt(variationsDefMatcher.group(1), -1);
-            if (indexInt > -1) {
-              MutableVariationDef variationDef = fieldVariations.get(indexInt);
-              if (variationDef == null) {
-                variationDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableVariationDef();
-                fieldVariations.put(indexInt, variationDef);
-              }
-              fillResourceDef(Bytes.toBytes(variationsDefMatcher.group(2)), variationDef, value);
-            }
-          }
-          /*
-           * Validator
-           */
-          else if (validatorMatcher.matches()) {
-            logger.debug("Matched validator pattern");
-            Integer indexInt = NumberUtils.toInt(validatorMatcher.group(1), -1);
-            MutableValidatorDef validatorDef = null;
-            if (indexInt > -1) {
-              validatorDef = validatorDefs.get(indexInt);
-              if (validatorDef == null) {
-                validatorDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableValidatorDef();
-                validatorDefs.put(indexInt, validatorDef);
-              }
-            }
-            if (validatorDef != null) {
-              String validatorCell = validatorMatcher.group(2);
-              if (logger.isInfoEnabled()) {
-                logger.info("Validator Cell " + validatorCell);
-              }
-              byte[] validatorCellBytes = Bytes.toBytes(validatorCell);
-              if (Arrays.equals(validatorCellBytes, CELL_RSRC_URI_TYPE)) {
-                logger.debug("Matched Resource URI Type");
-                final ResourceUri.Type valueOf = ResourceUri.Type.valueOf(Bytes.toString(value));
-                MutableResourceUri uri =
-                                   SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
-                uri.setType(valueOf);
-                final ResourceUri resourceUri = validatorDef.getUri();
-                if (resourceUri != null) {
-                  logger.debug("Set value from old resource uri");
-                  uri.setValue(resourceUri.getValue());
-                }
-                validatorDef.setUri(uri);
-              }
-              else if (Arrays.equals(validatorCellBytes, CELL_RSRC_URI_VAL)) {
-                logger.debug("Matched Resource URI Value");
-                MutableResourceUri uri = SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
-                final ResourceUri resourceUri = validatorDef.getUri();
-                if (resourceUri != null) {
-                  logger.debug("Set type from old resource uri");
-                  uri.setType(resourceUri.getType());
-                }
-                uri.setValue(Bytes.toString(value));
-                validatorDef.setUri(uri);
-              }
-              else if (StringUtils.isNotBlank(validatorCell) && validatorCell.startsWith("params") && validatorCell.
-                  indexOf(':') > -1) {
-                logger.info("Match params");
-                String paramKey = validatorCell.split(":")[1];
-                String paramVal = Bytes.toString(value);
-                Map<String, String> params = new LinkedHashMap<String, String>(validatorDef.getParameters());
-                params.put(paramKey, paramVal);
-                if (logger.isInfoEnabled()) {
-                  logger.info("Key " + paramKey);
-                  logger.info("Val " + paramVal);
-                  logger.info("Setting params " + params);
-                }
-                validatorDef.setParameters(params);
-              }
-              else {
-                logger.warn("Found validator key not matching anything!");
-              }
-            }
-          }
-          /*
-           * Simple and data type
-           */
-          else {
-            logger.debug("Did not match any pattern");
-            byte[] qualifier = Bytes.toBytes(key.substring(fieldName.length() + 1));
-            if (Arrays.equals(CELL_FIELD_STANDALONE, qualifier)) {
-              logger.debug("Its the basic standalone key");
-              fieldDef.setFieldStandaloneUpdateAble(Bytes.toBoolean(value));
-            }
-            if (Arrays.equals(CELL_FIELD_DISPLAY_NAME, qualifier)) {
-              logger.debug("Its the field's display name");
-              fieldDef.setDisplayName(Bytes.toString(value));
-            }
-            else if (Arrays.equals(CELL_FIELD_REQUIRED, qualifier)) {
-              logger.debug("Its the basic required key");
-              fieldDef.setRequired(Bytes.toBoolean(value));
-            }
-            /*
-             * Data type
-             */
-            else {
-              logger.debug("Its nothing but a data type cell key");
-              if (Arrays.equals(CELL_FIELD_VAL_TYPE, qualifier) && mutableDataType == null) {
-                final FieldValueType valueType = FieldValueType.valueOf(Bytes.toString(value));
-                mutableDataType = createDataType(valueType);
-              }
-              /*
-               * Handle special fields
-               */
-              else {
-                logger.debug("Its a special data type cell!");
-                final String specialFieldPatternPrefix = new StringBuilder(fieldName).append(':').append(
-                    Bytes.toString(CELL_FIELD_VAL_TYPE)).toString();
-                mutableDataType = fillSpecialFields(specialFieldPatternPrefix, key, mutableDataType, value);
-              }
-            }
-          }
-        }
-        if (mutableDataType != null) {
-          fieldDef.setValueDef(mutableDataType);
-        }
-        else {
-          final String msg = "Field value type can not be null!";
-          logger.error(msg);
-          throw new RuntimeException(msg);
-        }
-        logger.info("Set all fields into the field definition!");
-        if (!validatorDefs.isEmpty()) {
-          fieldDef.setCustomValidators(validatorDefs.values());
-        }
-        if (searchDef.isIndexed() || searchDef.isStored() || StringUtils.isNotBlank(searchDef.getBoostConfig())) {
-          fieldDef.setSearchDefinition(searchDef);
-        }
-        if (!fieldVariations.isEmpty()) {
-          fieldDef.setVariations(fieldVariations.values());
-        }
+        final Map<String, byte[]> fieldCells = fieldsByName.get(fieldName);
+        populateFieldDef(fieldDef, fieldName, fieldCells);
         contentType.getMutableFieldDefs().add(fieldDef);
       }
       /*
@@ -681,6 +528,267 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
     catch (Exception ex) {
       logger.warn("Error converting result to content type, throwing exception...", ex);
       throw new RuntimeException(ex);
+    }
+  }
+
+  private CompositeStatus distinguishCompositeFields(Map<String, byte[]> fieldCells,
+                                                     final Map<String, byte[]> compositeFields,
+                                                     final String fieldName) {
+    final String directCompositeFieldPrefix = new StringBuilder(fieldName).append(':').append(Bytes.toString(
+        CELL_FIELD_VAL_TYPE)).append(':').append(FieldValueType.COMPOSITE).append(':').toString();
+    final String collectionCompositeFieldPrefix = new StringBuilder(fieldName).append(':').append(Bytes.toString(
+        CELL_FIELD_VAL_TYPE)).append(COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX).append(':').append(FieldValueType.COMPOSITE).
+        append(':').toString();
+
+    CompositeStatus status = CompositeStatus.NOT_COMPOSITE;
+    Iterator<Entry<String, byte[]>> cells = fieldCells.entrySet().iterator();
+    while (cells.hasNext()) {
+      Entry<String, byte[]> cell = cells.next();
+      boolean isCompositeCell = false;
+      String cutStr = "";
+      if (cell.getKey().startsWith(directCompositeFieldPrefix)) {
+        status = CompositeStatus.DIRECT_COMPOSITE;
+        cutStr = directCompositeFieldPrefix;
+        isCompositeCell = true;
+      }
+      if (cell.getKey().startsWith(collectionCompositeFieldPrefix)) {
+        status = CompositeStatus.COMPOSITE_AS_COLLECTION_ITEM;
+        cutStr = collectionCompositeFieldPrefix;
+        isCompositeCell = true;
+      }
+      if (isCompositeCell) {
+        compositeFields.put(cell.getKey().substring(cutStr.length()), cell.getValue());
+        cells.remove();
+      }
+    }
+    return status;
+  }
+
+  private enum CompositeStatus {
+
+    NOT_COMPOSITE,
+    DIRECT_COMPOSITE,
+    COMPOSITE_AS_COLLECTION_ITEM
+  }
+
+  protected void populateFieldDef(final MutableFieldDef fieldDef, String fieldName,
+                                  final Map<String, byte[]> fieldCells) throws ClassNotFoundException,
+                                                                               IllegalArgumentException,
+                                                                               RuntimeException, IOException {
+    final Map<Integer, MutableVariationDef> fieldVariations = new TreeMap<Integer, MutableVariationDef>();
+    final MutableSearchDef searchDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableSearchDef();
+    final Map<Integer, MutableValidatorDef> validatorDefs = new TreeMap<Integer, MutableValidatorDef>();
+    DataType mutableDataType = null;
+    fieldDef.setName(fieldName);
+    final Map<String, byte[]> compositeFields = new LinkedHashMap<String, byte[]>();
+    CompositeStatus compositeStatus = distinguishCompositeFields(fieldCells, compositeFields, fieldName);
+    final String validatorPatternString = new StringBuilder(fieldName).append(':').append(CELL_FIELD_VALIDATOR).
+        append(":([\\d]+):(.*)").toString();
+    if (logger.isDebugEnabled()) {
+      logger.debug(new StringBuilder("Using following pattern to identify validator: ").append(
+          validatorPatternString).toString());
+    }
+    Pattern validatorPattern = Pattern.compile(validatorPatternString);
+    final String searchDefPatternString = new StringBuilder(fieldName).append(":(").append(CELL_FIELD_SEARCHDEF).
+        append(':').append(".*)").toString();
+    if (logger.isDebugEnabled()) {
+      logger.debug(new StringBuilder("Using following pattern to identify search definition: ").append(
+          searchDefPatternString).toString());
+    }
+    Pattern searchDefPattern = Pattern.compile(searchDefPatternString);
+    final String variationPatternString = new StringBuilder(fieldName).append(':').append(CELL_FIELD_VAR_DEF).append(
+        ":([\\d]+):(.*)").toString();
+    if (logger.isDebugEnabled()) {
+      logger.debug(new StringBuilder("Using following pattern to identify variation: ").append(
+          variationPatternString).toString());
+    }
+    Pattern variationsDefPattern = Pattern.compile(variationPatternString);
+    for (Entry<String, byte[]> cell : fieldCells.entrySet()) {
+      final String key = cell.getKey();
+      final byte[] value = cell.getValue();
+      if (logger.isDebugEnabled()) {
+        logger.debug(new StringBuilder("Matching following key against the patterns: ").append(key).toString());
+        logger.debug(new StringBuilder("Cell value: ").append(Bytes.toString(value)).toString());
+      }
+      final Matcher searchDefMatcher = searchDefPattern.matcher(key);
+      final Matcher variationsDefMatcher = variationsDefPattern.matcher(key);
+      final Matcher validatorMatcher = validatorPattern.matcher(key);
+      /*
+       * Search Def
+       */
+      if (searchDefMatcher.matches()) {
+        logger.debug("Matched search definition pattern");
+        byte[] searchDefCell = Bytes.toBytes(searchDefMatcher.group(1));
+        if (Arrays.equals(CELL_FIELD_SEARCHDEF_INDEXED, searchDefCell)) {
+          searchDef.setIndexed(Bytes.toBoolean(value));
+        }
+        else if (Arrays.equals(CELL_FIELD_SEARCHDEF_STORED, searchDefCell)) {
+          searchDef.setStored(Bytes.toBoolean(value));
+        }
+        else if (Arrays.equals(CELL_FIELD_SEARCHDEF_BOOST_CONFIG, searchDefCell)) {
+          searchDef.setBoostConfig(Bytes.toString(value));
+        }
+      }
+      /*
+       * Variations
+       */
+      else if (variationsDefMatcher.matches()) {
+        logger.debug("Matched variation pattern");
+        Integer indexInt = NumberUtils.toInt(variationsDefMatcher.group(1), -1);
+        if (indexInt > -1) {
+          MutableVariationDef variationDef = fieldVariations.get(indexInt);
+          if (variationDef == null) {
+            variationDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableVariationDef();
+            fieldVariations.put(indexInt, variationDef);
+          }
+          fillResourceDef(Bytes.toBytes(variationsDefMatcher.group(2)), variationDef, value);
+        }
+      }
+      /*
+       * Validator
+       */
+      else if (validatorMatcher.matches()) {
+        logger.debug("Matched validator pattern");
+        Integer indexInt = NumberUtils.toInt(validatorMatcher.group(1), -1);
+        MutableValidatorDef validatorDef = null;
+        if (indexInt > -1) {
+          validatorDef = validatorDefs.get(indexInt);
+          if (validatorDef == null) {
+            validatorDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableValidatorDef();
+            validatorDefs.put(indexInt, validatorDef);
+          }
+        }
+        if (validatorDef != null) {
+          String validatorCell = validatorMatcher.group(2);
+          if (logger.isInfoEnabled()) {
+            logger.info("Validator Cell " + validatorCell);
+          }
+          byte[] validatorCellBytes = Bytes.toBytes(validatorCell);
+          if (Arrays.equals(validatorCellBytes, CELL_RSRC_URI_TYPE)) {
+            logger.debug("Matched Resource URI Type");
+            final ResourceUri.Type valueOf = ResourceUri.Type.valueOf(Bytes.toString(value));
+            MutableResourceUri uri =
+                               SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
+            uri.setType(valueOf);
+            final ResourceUri resourceUri = validatorDef.getUri();
+            if (resourceUri != null) {
+              logger.debug("Set value from old resource uri");
+              uri.setValue(resourceUri.getValue());
+            }
+            validatorDef.setUri(uri);
+          }
+          else if (Arrays.equals(validatorCellBytes, CELL_RSRC_URI_VAL)) {
+            logger.debug("Matched Resource URI Value");
+            MutableResourceUri uri = SmartContentAPI.getInstance().getContentTypeLoader().createMutableResourceUri();
+            final ResourceUri resourceUri = validatorDef.getUri();
+            if (resourceUri != null) {
+              logger.debug("Set type from old resource uri");
+              uri.setType(resourceUri.getType());
+            }
+            uri.setValue(Bytes.toString(value));
+            validatorDef.setUri(uri);
+          }
+          else if (StringUtils.isNotBlank(validatorCell) && validatorCell.startsWith("params") && validatorCell.indexOf(
+              ':') > -1) {
+            logger.info("Match params");
+            String paramKey = validatorCell.split(":")[1];
+            String paramVal = Bytes.toString(value);
+            Map<String, String> params = new LinkedHashMap<String, String>(validatorDef.getParameters());
+            params.put(paramKey, paramVal);
+            if (logger.isInfoEnabled()) {
+              logger.info("Key " + paramKey);
+              logger.info("Val " + paramVal);
+              logger.info("Setting params " + params);
+            }
+            validatorDef.setParameters(params);
+          }
+          else {
+            logger.warn("Found validator key not matching anything!");
+          }
+        }
+      }
+      /*
+       * Simple and data type
+       */
+      else {
+        logger.debug("Did not match any pattern");
+        byte[] qualifier = Bytes.toBytes(key.substring(fieldName.length() + 1));
+        if (Arrays.equals(CELL_FIELD_STANDALONE, qualifier)) {
+          logger.debug("Its the basic standalone key");
+          fieldDef.setFieldStandaloneUpdateAble(Bytes.toBoolean(value));
+        }
+        if (Arrays.equals(CELL_FIELD_DISPLAY_NAME, qualifier)) {
+          logger.debug("Its the field's display name");
+          fieldDef.setDisplayName(Bytes.toString(value));
+        }
+        else if (Arrays.equals(CELL_FIELD_REQUIRED, qualifier)) {
+          logger.debug("Its the basic required key");
+          fieldDef.setRequired(Bytes.toBoolean(value));
+        }
+        /*
+         * Data type
+         */
+        else {
+          logger.debug("Its nothing but a data type cell key");
+          if (Arrays.equals(CELL_FIELD_VAL_TYPE, qualifier) && mutableDataType == null) {
+            final FieldValueType valueType = FieldValueType.valueOf(Bytes.toString(value));
+            mutableDataType = createDataType(valueType);
+          }
+          /*
+           * Handle special fields
+           */
+          else {
+            logger.debug("Its a special data type cell!");
+            final String specialFieldPatternPrefix = new StringBuilder(fieldName).append(':').append(
+                Bytes.toString(CELL_FIELD_VAL_TYPE)).toString();
+            mutableDataType = fillSpecialFields(specialFieldPatternPrefix, key, mutableDataType, value);
+          }
+        }
+      }
+    }
+    if (mutableDataType != null) {
+      fieldDef.setValueDef(mutableDataType);
+    }
+    else {
+      final String msg = "Field value type can not be null!";
+      logger.error(msg);
+      throw new RuntimeException(msg);
+    }
+    /**
+     * Work with composed fields
+     */
+    MutableCompositeDataType compositeDataType = null;
+    switch (compositeStatus) {
+      case NOT_COMPOSITE:
+        // Do nothing
+        break;
+      case DIRECT_COMPOSITE:
+        compositeDataType = (MutableCompositeDataType) mutableDataType;
+        break;
+      case COMPOSITE_AS_COLLECTION_ITEM:
+        compositeDataType = (MutableCompositeDataType) ((CollectionDataType) mutableDataType).getItemDataType();
+        break;
+    }
+    if (compositeDataType != null) {
+      Map<String, Map<String, byte[]>> compositeFieldsMap = new LinkedHashMap<String, Map<String, byte[]>>();
+      Utils.organizeByPrefixOnString(compositeFields, compositeFieldsMap, ':');
+      for (String composedFieldName : compositeFieldsMap.keySet()) {
+        final MutableFieldDef composedFieldDef = SmartContentAPI.getInstance().getContentTypeLoader().
+            createMutableFieldDef();
+        final Map<String, byte[]> composedFieldCells = compositeFieldsMap.get(composedFieldName);
+        populateFieldDef(composedFieldDef, composedFieldName, composedFieldCells);
+        compositeDataType.getOwnMutableComposition().add(fieldDef);
+      }
+    }
+    logger.info("Set all fields into the field definition!");
+    if (!validatorDefs.isEmpty()) {
+      fieldDef.setCustomValidators(validatorDefs.values());
+    }
+    if (searchDef.isIndexed() || searchDef.isStored() || StringUtils.isNotBlank(searchDef.getBoostConfig())) {
+      fieldDef.setSearchDefinition(searchDef);
+    }
+    if (!fieldVariations.isEmpty()) {
+      fieldDef.setVariations(fieldVariations.values());
     }
   }
 
@@ -714,6 +822,9 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         mutableDataType =
         SmartContentAPI.getInstance().getContentTypeLoader().createMutableStringDataType();
         break;
+      case COMPOSITE:
+        mutableDataType = SmartContentAPI.getInstance().getContentTypeLoader().createMutableCompositeDataType();
+        break;
       case OTHER:
       default:
         mutableDataType =
@@ -723,18 +834,16 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
     return mutableDataType;
   }
 
-  protected DataType fillSpecialFields(final String patternPrefix, final String key, DataType mutableDataType,
-                                       final byte[] value) throws ClassNotFoundException, IOException {
-    final String specialFieldPatternString = new StringBuilder(patternPrefix).append(SPCL_FIELD_DATA_TYPE_PATTERN).
+  protected DataType fillSpecialFields(final String specialFieldPatternPrefix, final String key,
+                                       DataType mutableDataType, final byte[] value) throws ClassNotFoundException,
+                                                                                            IOException {
+    final String specialFieldPatternString = new StringBuilder(specialFieldPatternPrefix).append(
+        SPCL_FIELD_DATA_TYPE_PATTERN).
         toString();
-    if (logger.isDebugEnabled()) {
-      logger.debug(new StringBuilder("Using the following pattern to test valid special field ").append(
-          specialFieldPatternString).toString());
-    }
     Pattern pattern = Pattern.compile(specialFieldPatternString);
     Matcher matcher = pattern.matcher(key);
     if (matcher.matches()) {
-      logger.debug("Verified special field");
+
       FieldValueType type = FieldValueType.valueOf(matcher.group(1));
       String specialFieldValueTypeInfoKey = matcher.group(2);
       if (logger.isDebugEnabled()) {
@@ -748,71 +857,106 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         logger.debug("Created mutable data type for special field");
       }
       switch (type) {
-        case COLLECTION:
-          logger.debug("Parsing collection");
-          MutableCollectionDataType collectionDataType =
-                                    (MutableCollectionDataType) mutableDataType;
-          if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_MAX_SIZE)) {
-            final int toInt = Bytes.toInt(value);
-            logger.debug("Parsing collection's max size " + toInt);
-            collectionDataType.setMaxSize(toInt);
-          }
-          else if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_MIN_SIZE)) {
-            final int toInt = Bytes.toInt(value);
-            logger.debug("Parsing collection's min size " + toInt);
-            collectionDataType.setMinSize(toInt);
-          }
-          else if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_ITEM_TYPE)) {
-            logger.debug("Parsing collection's item data type");
-            if (collectionDataType.getItemDataType() == null) {
-              collectionDataType.setItemDataType(createDataType(FieldValueType.valueOf(Bytes.toString(value))));
+        case COMPOSITE:
+          MutableCompositeDataType compositeDataType = (MutableCompositeDataType) mutableDataType;
+
+          if (specialFieldValueTypeInfoKey.startsWith(COMPOSITE_EMBED_SEPARATOR_STR)) {
+            MutableContentDataType contentDataType = (MutableContentDataType) compositeDataType.getEmbeddedContentType();
+            if (contentDataType == null) {
+              contentDataType = (MutableContentDataType) createDataType(FieldValueType.CONTENT);
+              compositeDataType.setEmbeddedContentType(contentDataType);
+            }
+            final String prefix = "test";
+            String dummyKey = new StringBuilder(prefix).append(':').append(FieldValueType.CONTENT.name()).append(':').
+                append(specialFieldValueTypeInfoKey.substring(COMPOSITE_EMBED_SEPARATOR_STR.length() + 1)).toString();
+            MutableContentDataType returnedContentDataType = (MutableContentDataType) fillSpecialFields(prefix, dummyKey,
+                                                                                                        contentDataType,
+                                                                                                        value);
+            if (contentDataType != returnedContentDataType) {
+              compositeDataType.setEmbeddedContentType(returnedContentDataType);
             }
           }
-          else if (Bytes.startsWith(infoKey, CELL_FIELD_COLLECTION_ITEM)) {
-            logger.debug("Parsing collection's item data type info");
-            final String prefix = new StringBuilder(patternPrefix).append(COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX).
-                toString();
-            collectionDataType.setItemDataType(fillSpecialFields(prefix, key, collectionDataType.getItemDataType(),
-                                                                 value));
-          }
           break;
-        case CONTENT:
-          logger.debug("Parsing content");
-          MutableContentDataType contentDataType =
-                                 (MutableContentDataType) mutableDataType;
-          if (Arrays.equals(infoKey, CELL_FIELD_CONTENT_TYPE_ID)) {
-            logger.debug("Parsing content's item content id");
-            contentDataType.setTypeDef(getInfoProvider().getIdFromRowId(value));
-          }
-          else if (Arrays.equals(infoKey, CELL_FIELD_CONTENT_BIDIRECTIONAL)) {
-            logger.debug("Parsing content's bi-directional field name");
-            contentDataType.setBiBidirectionalFieldName(Bytes.toString(value));
-          }
-          else if (Arrays.equals(infoKey, CELL_FIELD_TYPE_CONTENT_AVAILABLE_FOR_SEARCH)) {
-            logger.debug("Parsing content's available for search");
-            contentDataType.setAvailableForSearch(Boolean.valueOf(Bytes.toString(value)));
-          }
-          break;
-        case STRING:
-          logger.debug("Parsing string");
-          MutableStringDataType stringDataType =
-                                (MutableStringDataType) mutableDataType;
-          if (Arrays.equals(infoKey, CELL_FIELD_STRING_ENCODING)) {
-            logger.debug("Parsing String's encoding");
-            stringDataType.setEncoding(Bytes.toString(value));
-          }
-        case OTHER:
-          logger.debug("Parsing other");
-          MutableOtherDataType otherDataType = (MutableOtherDataType) mutableDataType;
-          if (Arrays.equals(infoKey, CELL_FIELD_OTHER_MIME_TYPE)) {
-            logger.debug("Parsing other's mime type");
-            otherDataType.setMIMEType(Bytes.toString(value));
-          }
-          break;
+        default:
+          mutableDataType = fillSpecialFields(type, specialFieldValueTypeInfoKey, specialFieldPatternPrefix, key,
+                                              mutableDataType, value);
       }
     }
     else {
       logger.warn("Could not match field to any known field format! ");
+    }
+    return mutableDataType;
+  }
+
+  protected DataType fillSpecialFields(final FieldValueType type, final String specialFieldValueTypeInfoKey,
+                                       final String patternPrefix, final String key, DataType mutableDataType,
+                                       final byte[] value) throws ClassNotFoundException, IOException {
+    byte[] infoKey = Bytes.toBytes(specialFieldValueTypeInfoKey);
+    if (mutableDataType == null) {
+      mutableDataType = createDataType(type);
+      logger.debug("Created mutable data type for special field");
+    }
+    switch (type) {
+      case COLLECTION:
+        logger.debug("Parsing collection");
+        MutableCollectionDataType collectionDataType = (MutableCollectionDataType) mutableDataType;
+        if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_MAX_SIZE)) {
+          final int toInt = Bytes.toInt(value);
+          logger.debug("Parsing collection's max size " + toInt);
+          collectionDataType.setMaxSize(toInt);
+        }
+        else if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_MIN_SIZE)) {
+          final int toInt = Bytes.toInt(value);
+          logger.debug("Parsing collection's min size " + toInt);
+          collectionDataType.setMinSize(toInt);
+        }
+        else if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_ITEM_TYPE)) {
+          logger.debug("Parsing collection's item data type");
+          if (collectionDataType.getItemDataType() == null) {
+            collectionDataType.setItemDataType(createDataType(FieldValueType.valueOf(Bytes.toString(value))));
+          }
+        }
+        else if (Bytes.startsWith(infoKey, CELL_FIELD_COLLECTION_ITEM)) {
+          logger.debug("Parsing collection's item data type info");
+          final String prefix = new StringBuilder(patternPrefix).append(COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX).
+              toString();
+          collectionDataType.setItemDataType(fillSpecialFields(prefix, key, collectionDataType.getItemDataType(),
+                                                               value));
+        }
+        break;
+      case CONTENT:
+        logger.debug("Parsing content");
+        MutableContentDataType contentDataType =
+                               (MutableContentDataType) mutableDataType;
+        if (Arrays.equals(infoKey, CELL_FIELD_CONTENT_TYPE_ID)) {
+          logger.debug("Parsing content's item content id");
+          contentDataType.setTypeDef(getInfoProvider().getIdFromRowId(value));
+        }
+        else if (Arrays.equals(infoKey, CELL_FIELD_CONTENT_BIDIRECTIONAL)) {
+          logger.debug("Parsing content's bi-directional field name");
+          contentDataType.setBiBidirectionalFieldName(Bytes.toString(value));
+        }
+        else if (Arrays.equals(infoKey, CELL_FIELD_TYPE_CONTENT_AVAILABLE_FOR_SEARCH)) {
+          logger.debug("Parsing content's available for search");
+          contentDataType.setAvailableForSearch(Boolean.valueOf(Bytes.toString(value)));
+        }
+        break;
+      case STRING:
+        logger.debug("Parsing string");
+        MutableStringDataType stringDataType =
+                              (MutableStringDataType) mutableDataType;
+        if (Arrays.equals(infoKey, CELL_FIELD_STRING_ENCODING)) {
+          logger.debug("Parsing String's encoding");
+          stringDataType.setEncoding(Bytes.toString(value));
+        }
+      case OTHER:
+        logger.debug("Parsing other");
+        MutableOtherDataType otherDataType = (MutableOtherDataType) mutableDataType;
+        if (Arrays.equals(infoKey, CELL_FIELD_OTHER_MIME_TYPE)) {
+          logger.debug("Parsing other's mime type");
+          otherDataType.setMIMEType(Bytes.toString(value));
+        }
+        break;
     }
     return mutableDataType;
   }
