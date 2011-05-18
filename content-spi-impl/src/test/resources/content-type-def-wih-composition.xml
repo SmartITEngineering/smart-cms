@@ -163,6 +163,48 @@
           </composition>
         </value>
       </field>
+      <field>
+        <name>billingAddress</name>
+        <displayName>Billing Address</displayName>
+        <value>
+          <composition>
+            <content>
+              <definition>
+                <typeNS>test</typeNS>
+                <typeName>Address</typeName>
+              </definition>
+            </content>
+          </composition>
+        </value>
+      </field>
+      <field>
+        <name>comments</name>
+        <displayName>Comments</displayName>
+        <value>
+          <collection>
+            <simple-value>
+              <composition>
+                <field>
+                  <name>By</name>
+                  <value>
+                    <string>
+                      <mimeType>text/plain</mimeType>
+                    </string>
+                  </value>
+                </field>
+                <field>
+                  <name>Comment</name>
+                  <value>
+                    <string>
+                      <mimeType>text/plain</mimeType>
+                    </string>
+                  </value>
+                </field>
+              </composition>
+            </simple-value>
+          </collection>
+        </value>
+      </field>
     </fields>
   </contentType>
 </contentTypes>

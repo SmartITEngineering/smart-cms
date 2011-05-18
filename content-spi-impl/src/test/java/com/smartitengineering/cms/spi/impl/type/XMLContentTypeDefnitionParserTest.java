@@ -497,10 +497,11 @@ public class XMLContentTypeDefnitionParserTest {
     Collection<FieldDef> fieldDefs = iterator.next().getMutableFieldDefs();
     Assert.assertEquals(7, fieldDefs.size());
     Collection<FieldDef> compositeFieldDefs = iterator.next().getMutableFieldDefs();
-    Assert.assertEquals(1, compositeFieldDefs.size());
-    FieldDef loneField = compositeFieldDefs.iterator().next();
-    Assert.assertEquals(FieldValueType.COMPOSITE, loneField.getValueDef().getType());
-    CompositeDataType compositeDataType = (CompositeDataType) loneField.getValueDef();
+    Assert.assertEquals(3, compositeFieldDefs.size());
+    final Iterator<FieldDef> mainIterator = compositeFieldDefs.iterator();
+    FieldDef field = mainIterator.next();
+    Assert.assertEquals(FieldValueType.COMPOSITE, field.getValueDef().getType());
+    CompositeDataType compositeDataType = (CompositeDataType) field.getValueDef();
     Assert.assertNotNull(compositeDataType.getEmbeddedContentType());
     Assert.assertEquals(2, compositeDataType.getOwnComposition().size());
     Iterator<FieldDef> compositionIterator = compositeDataType.getOwnComposition().iterator();
@@ -514,6 +515,18 @@ public class XMLContentTypeDefnitionParserTest {
     final Iterator<FieldDef> ownComposition = compositeDataType.getOwnComposition().iterator();
     Assert.assertEquals("Number", ownComposition.next().getName());
     Assert.assertEquals("availability", ownComposition.next().getName());
+    field = mainIterator.next();
+    Assert.assertEquals(FieldValueType.COMPOSITE, field.getValueDef().getType());
+    compositeDataType = (CompositeDataType) field.getValueDef();
+    Assert.assertNotNull(compositeDataType.getEmbeddedContentType());
+    Assert.assertEquals(0, compositeDataType.getOwnComposition().size());
+    field = mainIterator.next();
+    Assert.assertEquals(FieldValueType.COLLECTION, field.getValueDef().getType());
+    collectionDataType = (CollectionDataType) field.getValueDef();
+    Assert.assertEquals(FieldValueType.COMPOSITE, collectionDataType.getItemDataType().getType());
+    compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
+    Assert.assertNull(compositeDataType.getEmbeddedContentType());
+    Assert.assertEquals(2, compositeDataType.getOwnComposition().size());
   }
 
   protected Collection<WritableContentType> init() throws Exception {
