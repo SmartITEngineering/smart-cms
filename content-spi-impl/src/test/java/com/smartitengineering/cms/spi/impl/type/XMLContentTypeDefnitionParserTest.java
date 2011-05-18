@@ -37,6 +37,7 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.content.ContentLoaderImpl;
+import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
@@ -488,8 +489,39 @@ public class XMLContentTypeDefnitionParserTest {
     Assert.assertEquals("test", contentDataType.getTypeDef().getWorkspace().getName());
   }
 
+  @Test
+  public void testParsingCompositeFields() throws Exception {
+    Collection<WritableContentType> collection = init("content-type-def-wih-composition.xml");
+    Assert.assertEquals(2, collection.size());
+    Iterator<WritableContentType> iterator = collection.iterator();
+    Collection<FieldDef> fieldDefs = iterator.next().getMutableFieldDefs();
+    Assert.assertEquals(7, fieldDefs.size());
+    Collection<FieldDef> compositeFieldDefs = iterator.next().getMutableFieldDefs();
+    Assert.assertEquals(1, compositeFieldDefs.size());
+    FieldDef loneField = compositeFieldDefs.iterator().next();
+    Assert.assertEquals(FieldValueType.COMPOSITE, loneField.getValueDef().getType());
+    CompositeDataType compositeDataType = (CompositeDataType) loneField.getValueDef();
+    Assert.assertNotNull(compositeDataType.getEmbeddedContentType());
+    Assert.assertEquals(2, compositeDataType.getOwnComposition().size());
+    Iterator<FieldDef> compositionIterator = compositeDataType.getOwnComposition().iterator();
+    compositionIterator.next();
+    FieldDef collectionFieldDef = compositionIterator.next();
+    Assert.assertEquals(FieldValueType.COLLECTION, collectionFieldDef.getValueDef().getType());
+    CollectionDataType collectionDataType = (CollectionDataType) collectionFieldDef.getValueDef();
+    Assert.assertEquals(FieldValueType.COMPOSITE, collectionDataType.getItemDataType().getType());
+    compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
+    Assert.assertEquals(2, compositeDataType.getOwnComposition().size());
+    final Iterator<FieldDef> ownComposition = compositeDataType.getOwnComposition().iterator();
+    Assert.assertEquals("Number", ownComposition.next().getName());
+    Assert.assertEquals("availability", ownComposition.next().getName());
+  }
+
   protected Collection<WritableContentType> init() throws Exception {
-    InputStream inputStream = getClass().getClassLoader().getResourceAsStream("content-type-def-1.xml");
+    return init("content-type-def-1.xml");
+  }
+
+  protected Collection<WritableContentType> init(String classpathResource) throws Exception {
+    InputStream inputStream = getClass().getClassLoader().getResourceAsStream(classpathResource);
     Assert.assertNotNull(inputStream);
     Collection<WritableContentType> collection;
     collection = SmartContentAPI.getInstance().getContentTypeLoader().parseContentTypes(TEST_WS_ID, inputStream,

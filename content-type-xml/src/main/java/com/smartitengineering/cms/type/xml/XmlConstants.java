@@ -41,6 +41,7 @@ public interface XmlConstants {
   public String INTEGER = "integer";
   public String DOUBLE = "double";
   public String BOOLEAN = "boolean";
+  public String COMPOSITE = "composition";
   public String DATE_TIME = "datetime";
   public String ENCODING = "encoding";
   public String STRING = "string";

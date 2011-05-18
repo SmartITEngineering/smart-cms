@@ -55,6 +55,10 @@ public class XMLSchemaBasedTypeValidatorTest
         "content-type-def-shopping.xml");
     file = new File(shopping.toURI());
     assertTrue(validator.isValid(file));
+    URL composite = getClass().getClassLoader().getResource(
+        "content-type-def-wih-composition.xml");
+    file = new File(composite.toURI());
+    assertTrue(validator.isValid(file));
     assertFalse(validator.isValid((File) null));
   }
 }
