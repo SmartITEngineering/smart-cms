@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableCompositeDataType;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -71,5 +72,17 @@ public class CompositionDataTypeImpl implements MutableCompositeDataType {
 
   public FieldValueType getType() {
     return FieldValueType.COMPOSITE;
+  }
+
+  public Map<String, FieldDef> getComposedFieldDefs() {
+    Collection<FieldDef> allFields = getComposition();
+    if (allFields == null || allFields.isEmpty()) {
+      return Collections.emptyMap();
+    }
+    LinkedHashMap<String, FieldDef> fields = new LinkedHashMap<String, FieldDef>(allFields.size());
+    for (FieldDef def : allFields) {
+      fields.put(def.getName(), def);
+    }
+    return Collections.unmodifiableMap(fields);
   }
 }

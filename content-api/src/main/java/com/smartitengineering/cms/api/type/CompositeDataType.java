@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.type;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  *
@@ -31,4 +32,6 @@ public interface CompositeDataType extends DataType {
   Collection<FieldDef> getOwnComposition();
 
   Collection<FieldDef> getComposition();
+  
+  Map<String, FieldDef> getComposedFieldDefs();
 }
