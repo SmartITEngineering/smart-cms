@@ -378,11 +378,11 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
     return SmartContentSPI.getInstance().getContentTypeSearcher().search(filter);
   }
 
-  public MutableCompositeDataType getMutableCompositeDataType() {
+  public MutableCompositeDataType createMutableCompositeDataType() {
     return new CompositionDataTypeImpl();
   }
 
-  public MutableCompositeDataType getMutableCompositeDataType(CompositeDataType dataType) {
+  public MutableCompositeDataType createMutableCompositeDataType(CompositeDataType dataType) {
     CompositionDataTypeImpl dataTypeImpl = new CompositionDataTypeImpl();
     if (dataType != null) {
       dataTypeImpl.setEmbeddedContentType(dataType.getEmbeddedContentType());

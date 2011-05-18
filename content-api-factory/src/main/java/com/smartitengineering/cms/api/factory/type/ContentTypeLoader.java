@@ -129,14 +129,14 @@ public interface ContentTypeLoader {
    * Creates a new mutable composite data type
    * @return new mutable composite data type
    */
-  public MutableCompositeDataType getMutableCompositeDataType();
+  public MutableCompositeDataType createMutableCompositeDataType();
 
   /**
    * Converts the read-only composite data type to a mutable composite data type
    * @param dataType The immutable data type intended to edit
    * @return Mutable composite data type version of the intended composite data type
    */
-  public MutableCompositeDataType getMutableCompositeDataType(CompositeDataType dataType);
+  public MutableCompositeDataType createMutableCompositeDataType(CompositeDataType dataType);
 
   /**
    * Get the mutable version of the content type ID
