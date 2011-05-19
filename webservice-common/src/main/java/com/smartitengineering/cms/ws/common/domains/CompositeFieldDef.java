@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2011  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,14 +18,14 @@
  */
 package com.smartitengineering.cms.ws.common.domains;
 
+import java.util.Map;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 /**
  *
  * @author imyousuf
  */
-@JsonDeserialize(as = ContentFieldDefImpl.class)
-public interface ContentFieldDef extends FieldDef {
-
-  String getInstanceOfId();
+@JsonDeserialize(as = CompositeFieldDefImpl.class)
+public interface CompositeFieldDef extends FieldDef {
+  Map<String, FieldDef> getComposedFields();
 }

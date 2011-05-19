@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.ws.common.jackson;
 
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldDef;
+import com.smartitengineering.cms.ws.common.domains.CompositeFieldDef;
 import com.smartitengineering.cms.ws.common.domains.ContentFieldDef;
 import com.smartitengineering.cms.ws.common.domains.FieldDef;
 import com.smartitengineering.cms.ws.common.domains.OtherFieldDef;
@@ -56,6 +57,9 @@ public class FieldDefTypeIdResolver implements TypeIdResolver {
     }
     else if (StringUtils.equalsIgnoreCase(id, "content")) {
       return SimpleType.construct(ContentFieldDef.class);
+    }
+    else if (StringUtils.equalsIgnoreCase(id, "composite")) {
+      return SimpleType.construct(CompositeFieldDef.class);
     }
     else if (StringUtils.equalsIgnoreCase(id, "string") || StringUtils.equalsIgnoreCase(id, "other")) {
       return SimpleType.construct(OtherFieldDef.class);

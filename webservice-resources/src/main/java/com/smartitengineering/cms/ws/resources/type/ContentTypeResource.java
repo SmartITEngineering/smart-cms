@@ -21,6 +21,7 @@ package com.smartitengineering.cms.ws.resources.type;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
@@ -28,6 +29,7 @@ import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.OtherDataType;
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldDefImpl;
+import com.smartitengineering.cms.ws.common.domains.CompositeFieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.ContentFieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.OtherFieldDefImpl;
@@ -37,8 +39,11 @@ import com.smartitengineering.util.rest.atom.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import java.io.StringWriter;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.ws.rs.DELETE;
@@ -128,17 +133,19 @@ public class ContentTypeResource extends AbstractResource {
       }
       feed.addLink(getLink(getRelativeURIBuilder().path(ContentTypesResource.class).path(
           ContentTypesResource.PATH_TO_CONTENT_TYPE).path(PATH_TO_SEARCH).build(type.getContentTypeID().getWorkspace().
-          getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(), type.
-          getContentTypeID().getName()), "search",
+          getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(),
+                                                                                type.getContentTypeID().getName()),
+                           "search",
                            com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
       feed.addLink(getLink(getRelativeURIBuilder().path(ContentTypesResource.class).path(
           ContentTypesResource.PATH_TO_CONTENT_TYPE).path(PATH_TO_REINDEX).build(type.getContentTypeID().getWorkspace().
-          getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(), type.
-          getContentTypeID().getName()), PATH_TO_REINDEX, MediaType.TEXT_PLAIN));
+          getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(),
+                                                                                 type.getContentTypeID().getName()),
+                           PATH_TO_REINDEX, MediaType.TEXT_PLAIN));
       final URI childrenUri = getRelativeURIBuilder().path(ContentTypesResource.class).path(
           ContentTypesResource.PATH_TO_CONTENT_TYPE).path(PATH_TO_CHILDREN).build(type.getContentTypeID().getWorkspace().
-          getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(), type.
-          getContentTypeID().getName());
+          getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(),
+                                                                                  type.getContentTypeID().getName());
       final URI instancesUri = getRelativeURIBuilder().path(ContentTypesResource.class).path(
           ContentTypesResource.PATH_TO_CONTENT_TYPE).path(PATH_TO_INSTANCES).build(type.getContentTypeID().getWorkspace().
           getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(),
@@ -164,61 +171,7 @@ public class ContentTypeResource extends AbstractResource {
                                                          lastModified);
           StringWriter writer = new StringWriter();
           final FieldDefImpl def;
-          final DataType dataType = fieldDef.getValue().getValueDef();
-          switch (dataType.getType()) {
-            case OTHER:
-            case STRING:
-              def = new OtherFieldDefImpl();
-              ((OtherFieldDefImpl) def).setMimeType(((OtherDataType) fieldDef.getValue().getValueDef()).getMIMEType());
-              break;
-            case COLLECTION:
-              def = new CollectionFieldDefImpl();
-              CollectionDataType collectionDataType = ((CollectionDataType) fieldDef.getValue().getValueDef());
-              FieldDefImpl itemFieldDef;
-              switch (collectionDataType.getItemDataType().getType()) {
-                case OTHER:
-                case STRING:
-                  itemFieldDef = new OtherFieldDefImpl();
-                  ((OtherFieldDefImpl) itemFieldDef).setMimeType(((OtherDataType) collectionDataType.getItemDataType()).
-                      getMIMEType());
-                  break;
-                case CONTENT:
-                  itemFieldDef = new ContentFieldDefImpl();
-                  if (logger.isInfoEnabled()) {
-                    logger.info("Content inner data type (" + fieldDef.getKey() + "): " + collectionDataType.
-                        getItemDataType());
-                    if (collectionDataType.getItemDataType() != null) {
-                      logger.info("Content inner data type type def (" + fieldDef.getKey() + "): " + ((ContentDataType) collectionDataType.
-                                                                                                      getItemDataType()).
-                          getTypeDef());
-                    }
-                  }
-                  ((ContentFieldDefImpl) itemFieldDef).setInstanceOfId(((ContentDataType) collectionDataType.
-                                                                        getItemDataType()).getTypeDef().toString());
-                  break;
-                default:
-                  itemFieldDef = new FieldDefImpl();
-                  break;
-              }
-              itemFieldDef.setType(collectionDataType.getItemDataType().getType().name());
-              itemFieldDef.setName(fieldDef.getKey());
-              itemFieldDef.setRequired(fieldDef.getValue().isRequired());
-              ((CollectionFieldDefImpl) def).setItemDef(itemFieldDef);
-              ((CollectionFieldDefImpl) def).setMaxSize(collectionDataType.getMaxSize());
-              ((CollectionFieldDefImpl) def).setMinSize(collectionDataType.getMinSize());
-              break;
-            case CONTENT:
-              def = new ContentFieldDefImpl();
-              ((ContentFieldDefImpl) def).setInstanceOfId(((ContentDataType) fieldDef.getValue().getValueDef()).
-                  getTypeDef().toString());
-              break;
-            default:
-              def = new FieldDefImpl();
-              break;
-          }
-          def.setName(fieldDef.getKey());
-          def.setRequired(fieldDef.getValue().isRequired());
-          def.setType(fieldDef.getValue().getValueDef().getType().name());
+          def = convertFieldDef(fieldDef.getValue());
           try {
             objectMapper.writeValue(writer, def);
             entry.setContent(writer.toString(), MediaType.APPLICATION_JSON);
@@ -235,6 +188,81 @@ public class ContentTypeResource extends AbstractResource {
       builder.header(HttpHeaders.VARY, HttpHeaders.ACCEPT);
     }
     return builder.build();
+  }
+
+  protected FieldDefImpl convertFieldDef(FieldDef fieldDef) {
+    final FieldDefImpl def;
+    final DataType dataType = fieldDef.getValueDef();
+    switch (dataType.getType()) {
+      case OTHER:
+      case STRING:
+        def = new OtherFieldDefImpl();
+        ((OtherFieldDefImpl) def).setMimeType(((OtherDataType) fieldDef.getValueDef()).getMIMEType());
+        break;
+      case COLLECTION:
+        def = new CollectionFieldDefImpl();
+        CollectionDataType collectionDataType = ((CollectionDataType) fieldDef.getValueDef());
+        FieldDefImpl itemFieldDef;
+        switch (collectionDataType.getItemDataType().getType()) {
+          case OTHER:
+          case STRING:
+            itemFieldDef = new OtherFieldDefImpl();
+            ((OtherFieldDefImpl) itemFieldDef).setMimeType(((OtherDataType) collectionDataType.getItemDataType()).
+                getMIMEType());
+            break;
+          case CONTENT:
+            itemFieldDef = new ContentFieldDefImpl();
+            if (logger.isInfoEnabled()) {
+              logger.info("Content inner data type (" + fieldDef.getName() + "): " +
+                  collectionDataType.getItemDataType());
+              if (collectionDataType.getItemDataType() != null) {
+                logger.info("Content inner data type type def (" + fieldDef.getName() + "): " +
+                    ((ContentDataType) collectionDataType.getItemDataType()).getTypeDef());
+              }
+            }
+            ((ContentFieldDefImpl) itemFieldDef).setInstanceOfId(((ContentDataType) collectionDataType.getItemDataType()).
+                getTypeDef().toString());
+            break;
+          default:
+            itemFieldDef = new FieldDefImpl();
+            break;
+        }
+        itemFieldDef.setType(collectionDataType.getItemDataType().getType().name());
+        itemFieldDef.setName(fieldDef.getName());
+        itemFieldDef.setRequired(fieldDef.isRequired());
+        ((CollectionFieldDefImpl) def).setItemDef(itemFieldDef);
+        ((CollectionFieldDefImpl) def).setMaxSize(collectionDataType.getMaxSize());
+        ((CollectionFieldDefImpl) def).setMinSize(collectionDataType.getMinSize());
+        break;
+      case CONTENT:
+        def = new ContentFieldDefImpl();
+        ((ContentFieldDefImpl) def).setInstanceOfId(((ContentDataType) fieldDef.getValueDef()).getTypeDef().
+            toString());
+        break;
+      case COMPOSITE: {
+        def = new CompositeFieldDefImpl();
+        CompositeFieldDefImpl defImpl = (CompositeFieldDefImpl) def;
+        CompositeDataType compositeDataType = (CompositeDataType) dataType;
+        final Collection<FieldDef> composition = compositeDataType.getComposition();
+        if (composition != null && !composition.isEmpty()) {
+          List<com.smartitengineering.cms.ws.common.domains.FieldDef> composedFields =
+                                                                      new ArrayList<com.smartitengineering.cms.ws.common.domains.FieldDef>(composition.
+              size());
+          for (FieldDef composedField : composition) {
+            composedFields.add(convertFieldDef(composedField));
+          }
+          defImpl.setComposedFields(composedFields);
+        }
+        break;
+      }
+      default:
+        def = new FieldDefImpl();
+        break;
+    }
+    def.setName(fieldDef.getName());
+    def.setRequired(fieldDef.isRequired());
+    def.setType(fieldDef.getValueDef().getType().name());
+    return def;
   }
 
   @DELETE
