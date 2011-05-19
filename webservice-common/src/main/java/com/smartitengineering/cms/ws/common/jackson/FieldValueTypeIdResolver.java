@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.ws.common.jackson;
 
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldValue;
+import com.smartitengineering.cms.ws.common.domains.CompositeFieldValue;
 import com.smartitengineering.cms.ws.common.domains.FieldValue;
 import com.smartitengineering.cms.ws.common.domains.OtherFieldValue;
 import org.apache.commons.lang.StringUtils;
@@ -52,6 +53,9 @@ public class FieldValueTypeIdResolver implements TypeIdResolver {
   public JavaType typeFromId(String id) {
     if (StringUtils.equalsIgnoreCase(id, "collection")) {
       return SimpleType.construct(CollectionFieldValue.class);
+    }
+    else if (StringUtils.equalsIgnoreCase(id, "composite")) {
+      return SimpleType.construct(CompositeFieldValue.class);
     }
     else if (StringUtils.equalsIgnoreCase(id, "string") || StringUtils.equalsIgnoreCase(id, "other")) {
       return SimpleType.construct(OtherFieldValue.class);
