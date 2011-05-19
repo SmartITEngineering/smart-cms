@@ -54,7 +54,7 @@ public final class SmartContentAPI {
    * have all its beans injected before returning itself.
    * @return The API entry point
    */
-  public static final SmartContentAPI getInstance() {
+  public static SmartContentAPI getInstance() {
     if (api == null) {
       api = new SmartContentAPI();
       BeanFactoryRegistrar.aggregate(api);

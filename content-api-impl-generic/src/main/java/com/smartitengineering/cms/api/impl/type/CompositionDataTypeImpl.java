@@ -29,6 +29,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -38,6 +40,7 @@ public class CompositionDataTypeImpl implements MutableCompositeDataType {
 
   private final Set<FieldDef> ownedCompositeFields = new LinkedHashSet<FieldDef>();
   private ContentDataType embeddedContentType;
+  protected transient final Logger logger = LoggerFactory.getLogger(getClass());
 
   public void setEmbeddedContentType(ContentDataType contentDataType) {
     this.embeddedContentType = contentDataType;
@@ -57,10 +60,19 @@ public class CompositionDataTypeImpl implements MutableCompositeDataType {
 
   public Collection<FieldDef> getComposition() {
     Set<FieldDef> compositeFields = new LinkedHashSet<FieldDef>();
+    if (logger.isDebugEnabled()) {
+      logger.debug("Embedded content type id " + embeddedContentType);
+    }
     if (embeddedContentType != null && embeddedContentType.getTypeDef() != null) {
       ContentType type = embeddedContentType.getTypeDef().getContentType();
+      if (logger.isDebugEnabled()) {
+        logger.debug("Embedded content type " + type);
+      }
       if (type != null) {
         final Map<String, FieldDef> fieldDefs = type.getFieldDefs();
+        if (logger.isDebugEnabled()) {
+          logger.debug("Embedded fields " + fieldDefs);
+        }
         if (fieldDefs != null && !fieldDefs.isEmpty()) {
           compositeFields.addAll(fieldDefs.values());
         }

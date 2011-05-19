@@ -419,8 +419,11 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
        */
       persistentContentType.setMutableContentType(contentType);
       persistentContentType.setVersion(0l);
-      logger.debug("Converting rowId to ContentTypeId");
+      logger.info("::::::::::::::::::::: Converting rowId to ContentTypeId :::::::::::::::::::::");
       contentType.setContentTypeID(getInfoProvider().getIdFromRowId(startRow.getRow()));
+      if (logger.isInfoEnabled()) {
+        logger.info("ContentTypeId " + contentType.getContentTypeID());
+      }
       byte[] displayName = startRow.getValue(FAMILY_SIMPLE, CELL_DISPLAY_NAME);
       if (displayName != null) {
         logger.debug("Set display name of the content type!");
@@ -448,7 +451,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         logger.debug(String.format("Creation date is %s and last modified date is %s", formatter.format(contentType.
             getCreationDate()), formatter.format(contentType.getLastModifiedDate())));
         logger.debug(String.format("Id is %s and parent id is %s", contentType.getContentTypeID().toString(),
-                                   ObjectUtils.toString(contentType.getParent())));
+                                  ObjectUtils.toString(contentType.getParent())));
       }
       /*
        * Content status
@@ -535,11 +538,14 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
                                                      final Map<String, byte[]> compositeFields,
                                                      final String fieldName) {
     final String directCompositeFieldPrefix = new StringBuilder(fieldName).append(':').append(Bytes.toString(
-        CELL_FIELD_VAL_TYPE)).append(':').append(FieldValueType.COMPOSITE).append(':').toString();
+        CELL_FIELD_VAL_TYPE)).append(':').append(FieldValueType.COMPOSITE).append(':').append(
+        COMPOSITE_FIELDS_SEPARATOR_STR).append(':').toString();
     final String collectionCompositeFieldPrefix = new StringBuilder(fieldName).append(':').append(Bytes.toString(
         CELL_FIELD_VAL_TYPE)).append(COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX).append(':').append(FieldValueType.COMPOSITE).
-        append(':').toString();
-
+        append(':').append(COMPOSITE_FIELDS_SEPARATOR_STR).append(':').toString();
+    if (logger.isInfoEnabled()) {
+      logger.info("Prefixes being checked " + directCompositeFieldPrefix + " and " + collectionCompositeFieldPrefix);
+    }
     CompositeStatus status = CompositeStatus.NOT_COMPOSITE;
     Iterator<Entry<String, byte[]>> cells = fieldCells.entrySet().iterator();
     while (cells.hasNext()) {
@@ -556,8 +562,15 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         cutStr = collectionCompositeFieldPrefix;
         isCompositeCell = true;
       }
+      final String substring = cell.getKey().substring(cutStr.length());
+      if (logger.isInfoEnabled()) {
+        logger.info("Key " + cell.getKey());
+        logger.info("Cut Str " + cutStr);
+        logger.info("Is Composite " + isCompositeCell);
+        logger.info("Composite field key " + substring);
+      }
       if (isCompositeCell) {
-        compositeFields.put(cell.getKey().substring(cutStr.length()), cell.getValue());
+        compositeFields.put(substring, cell.getValue());
         cells.remove();
       }
     }
@@ -575,6 +588,9 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
                                   final Map<String, byte[]> fieldCells) throws ClassNotFoundException,
                                                                                IllegalArgumentException,
                                                                                RuntimeException, IOException {
+    if (logger.isInfoEnabled()) {
+      logger.info("::::::::::::::::::::: POPULATING FIELD " + fieldName + " :::::::::::::::::::::");
+    }
     final Map<Integer, MutableVariationDef> fieldVariations = new TreeMap<Integer, MutableVariationDef>();
     final MutableSearchDef searchDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableSearchDef();
     final Map<Integer, MutableValidatorDef> validatorDefs = new TreeMap<Integer, MutableValidatorDef>();
@@ -582,6 +598,10 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
     fieldDef.setName(fieldName);
     final Map<String, byte[]> compositeFields = new LinkedHashMap<String, byte[]>();
     CompositeStatus compositeStatus = distinguishCompositeFields(fieldCells, compositeFields, fieldName);
+    if (logger.isInfoEnabled()) {
+      logger.info("Composition status " + compositeStatus.name());
+      logger.info("Composed fields " + compositeFields);
+    }
     final String validatorPatternString = new StringBuilder(fieldName).append(':').append(CELL_FIELD_VALIDATOR).
         append(":([\\d]+):(.*)").toString();
     if (logger.isDebugEnabled()) {
@@ -776,8 +796,12 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         final MutableFieldDef composedFieldDef = SmartContentAPI.getInstance().getContentTypeLoader().
             createMutableFieldDef();
         final Map<String, byte[]> composedFieldCells = compositeFieldsMap.get(composedFieldName);
+        if (logger.isInfoEnabled()) {
+          logger.info("::::::::::::::::::::: Nested composite field from " + fieldName + " for " + composedFieldName +
+              " :::::::::::::::::::::");
+        }
         populateFieldDef(composedFieldDef, composedFieldName, composedFieldCells);
-        compositeDataType.getOwnMutableComposition().add(fieldDef);
+        compositeDataType.getOwnMutableComposition().add(composedFieldDef);
       }
     }
     logger.info("Set all fields into the field definition!");
@@ -867,7 +891,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
               compositeDataType.setEmbeddedContentType(contentDataType);
             }
             final String prefix = "test";
-            String dummyKey = new StringBuilder(prefix).append(':').append(FieldValueType.CONTENT.name()).append(':').
+            String dummyKey = new StringBuilder(prefix).append(':').
                 append(specialFieldValueTypeInfoKey.substring(COMPOSITE_EMBED_SEPARATOR_STR.length() + 1)).toString();
             MutableContentDataType returnedContentDataType = (MutableContentDataType) fillSpecialFields(prefix, dummyKey,
                                                                                                         contentDataType,

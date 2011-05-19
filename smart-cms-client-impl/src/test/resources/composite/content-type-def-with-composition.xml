@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *
+ * This is a simple Content Management System (CMS)
+ * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!--
+    Document   : content-type-def-1.xml
+    Created on : September 25, 2009, 1:10 PM
+    Author     : imyousuf
+    Description:
+        Test content type definition.
+-->
+<contentTypes  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+               xmlns='http://www.smartitengineering.com/smart-cms/content/content-type-schema'
+               xsi:schemaLocation='http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../../../../content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd'>
+  <contentType namespace="test">
+    <name>Address</name>
+    <primaryField>zipCode</primaryField>
+    <fields>
+      <field>
+        <name>astreet1</name>
+        <displayName>Stree (Line 1)</displayName>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+      </field>
+      <field>
+        <name>astreet2</name>
+        <displayName>Stree (Line 2)</displayName>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+      </field>
+      <field>
+        <name>barea</name>
+        <displayName>Area/Thana</displayName>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+      </field>
+      <field>
+        <name>city</name>
+        <displayName>City</displayName>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+      </field>
+      <field>
+        <name>district</name>
+        <displayName>State/District</displayName>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+      </field>
+      <field>
+        <name>zipCode</name>
+        <displayName>Postal Code/Zip Code</displayName>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+      </field>
+      <field>
+        <name>zzcountry</name>
+        <displayName>Country</displayName>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+      </field>
+    </fields>
+  </contentType>               
+  <contentType namespace="test">
+    <name>Order</name>
+    <primaryField>aShippingAddress</primaryField>
+    <fields>
+      <field>
+        <name>aShippingAddress</name>
+        <displayName>Shipping Address</displayName>
+        <value>
+          <composition>
+            <content>
+              <definition>
+                <typeNS>test</typeNS>
+                <typeName>Address</typeName>
+              </definition>
+            </content>
+            <field>
+              <name>authorizedPersonnel</name>
+              <displayName>Authorized Personnel</displayName>
+              <value>
+                <string>
+                  <mimeType>text/plain</mimeType>
+                </string>
+              </value>
+            </field>
+            <field>
+              <name>phones</name>
+              <displayName>Phone No.</displayName>
+              <value>
+                <collection>
+                  <simple-value>
+                    <composition>
+                      <field>
+                        <name>anumber</name>
+                        <displayName>Number</displayName>
+                        <value>
+                          <string>
+                            <mimeType>text/plain</mimeType>
+                          </string>
+                        </value>
+                      </field>
+                      <field>
+                        <name>availability</name>
+                        <displayName>Availability</displayName>
+                        <value>
+                          <composition>
+                            <field>
+                              <name>from</name>
+                              <displayName>Available From</displayName>
+                              <value>
+                                <datetime></datetime>
+                              </value>
+                            </field>
+                            <field>
+                              <name>to</name>
+                              <displayName>Available Until</displayName>
+                              <value>
+                                <datetime></datetime>
+                              </value>
+                            </field>
+                          </composition>
+                        </value>
+                      </field>
+                    </composition>
+                  </simple-value>
+                </collection>
+              </value>
+            </field>
+          </composition>
+        </value>
+      </field>
+      <field>
+        <name>billingAddress</name>
+        <displayName>Billing Address</displayName>
+        <value>
+          <composition>
+            <content>
+              <definition>
+                <typeNS>test</typeNS>
+                <typeName>Address</typeName>
+              </definition>
+            </content>
+          </composition>
+        </value>
+      </field>
+      <field>
+        <name>comments</name>
+        <displayName>Comments</displayName>
+        <value>
+          <collection>
+            <simple-value>
+              <composition>
+                <field>
+                  <name>By</name>
+                  <value>
+                    <string>
+                      <mimeType>text/plain</mimeType>
+                    </string>
+                  </value>
+                </field>
+                <field>
+                  <name>Comment</name>
+                  <value>
+                    <string>
+                      <mimeType>text/plain</mimeType>
+                    </string>
+                  </value>
+                </field>
+              </composition>
+            </simple-value>
+          </collection>
+        </value>
+      </field>
+    </fields>
+  </contentType>
+</contentTypes>

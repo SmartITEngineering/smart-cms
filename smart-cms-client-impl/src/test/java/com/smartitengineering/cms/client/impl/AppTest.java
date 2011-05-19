@@ -26,10 +26,13 @@ import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
+import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.type.VariationDef;
@@ -61,7 +64,6 @@ import com.smartitengineering.cms.ws.common.domains.FieldImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldValue;
 import com.smartitengineering.cms.ws.common.domains.FieldValueImpl;
 import com.smartitengineering.cms.ws.common.domains.OtherFieldValueImpl;
-import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
 import com.smartitengineering.cms.ws.common.domains.ResourceTemplateImpl;
 import com.smartitengineering.cms.ws.common.domains.Workspace;
 import com.smartitengineering.cms.ws.common.domains.WorkspaceImpl.WorkspaceIdImpl;
@@ -2186,6 +2188,92 @@ public class AppTest {
     }
     Assert.assertTrue(valid);
     return feedResource;
+  }
+
+  private WorkspaceFeedResource setupCompositeWorkspace() {
+    RootResource resource = RootResourceImpl.getRoot(URI.create(ROOT_URI_STRING));
+    resource.get();
+    WorkspaceFeedResource feedResource;
+    try {
+      feedResource = resource.getTemplates().getWorkspaceResource("test", "composites");
+    }
+    catch (Exception ex) {
+      feedResource = null;
+      LOGGER.info("Exception getting feed resoruce", ex);
+    }
+    boolean valid = false;
+    if (feedResource == null) {
+      try {
+        Workspace workspace = resource.createWorkspace(new WorkspaceIdImpl("test", "composites"));
+        feedResource = resource.getTemplates().getWorkspaceResource(workspace.getId().getGlobalNamespace(), workspace.
+            getId().getName());
+        valid = true;
+      }
+      catch (Exception ex) {
+        LOGGER.error("Error creating test workspace for templates", ex);
+      }
+    }
+    else {
+      valid = true;
+    }
+    Assert.assertTrue(valid);
+    return feedResource;
+  }
+
+  @Test
+  public void testCreateCompositeContentType() throws Exception {
+    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ COMPOSITE CONTENT TYPE CREATION ~~~~~~~~~~~~~~~~~~~~~~~~~");
+    WorkspaceFeedResource feedResource = setupCompositeWorkspace();
+    String contentTypeXml = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(
+        "composite/content-type-def-with-composition.xml"));
+    feedResource.getContentTypes().createContentType(contentTypeXml);
+    com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl id =
+                                                                  new com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl();
+    id.setGlobalNamespace("test");
+    id.setName("composites");
+    ContentTypeIdImpl idImpl = new ContentTypeIdImpl();
+    idImpl.setWorkspace(id);
+    idImpl.setNamespace("test");
+    idImpl.setName("Order");
+    ContentType type = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(idImpl);
+    Assert.assertNotNull(type);
+    Collection<FieldDef> compositeFieldDefs = type.getFieldDefs().values();
+    Assert.assertEquals(3, compositeFieldDefs.size());
+    final Iterator<FieldDef> mainIterator = compositeFieldDefs.iterator();
+    FieldDef field = mainIterator.next();
+    Assert.assertEquals(FieldValueType.COMPOSITE, field.getValueDef().getType());
+    CompositeDataType compositeDataType = (CompositeDataType) field.getValueDef();
+    Assert.assertNotNull(compositeDataType.getEmbeddedContentType());
+    Assert.assertEquals(2, compositeDataType.getOwnComposition().size());
+    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ TEST COMPOSITION ~~~~~~~~~~~~~~~~~~~~~~~~~");
+    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ TEST COMPOSITION ~~~~~~~~~~~~~~~~~~~~~~~~~");
+    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ TEST COMPOSITION ~~~~~~~~~~~~~~~~~~~~~~~~~");
+    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ TEST COMPOSITION ~~~~~~~~~~~~~~~~~~~~~~~~~");
+    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ TEST COMPOSITION ~~~~~~~~~~~~~~~~~~~~~~~~~");
+    Assert.assertEquals(9, compositeDataType.getComposition().size());
+    Iterator<FieldDef> compositionIterator = compositeDataType.getOwnComposition().iterator();
+    compositionIterator.next();
+    FieldDef collectionFieldDef = compositionIterator.next();
+    Assert.assertEquals(FieldValueType.COLLECTION, collectionFieldDef.getValueDef().getType());
+    CollectionDataType collectionDataType = (CollectionDataType) collectionFieldDef.getValueDef();
+    Assert.assertEquals(FieldValueType.COMPOSITE, collectionDataType.getItemDataType().getType());
+    compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
+    Assert.assertEquals(2, compositeDataType.getOwnComposition().size());
+    final Iterator<FieldDef> ownComposition = compositeDataType.getOwnComposition().iterator();
+    Assert.assertEquals("anumber", ownComposition.next().getName());
+    Assert.assertEquals("availability", ownComposition.next().getName());
+    field = mainIterator.next();
+    Assert.assertEquals(FieldValueType.COMPOSITE, field.getValueDef().getType());
+    compositeDataType = (CompositeDataType) field.getValueDef();
+    Assert.assertNotNull(compositeDataType.getEmbeddedContentType());
+    Assert.assertEquals(0, compositeDataType.getOwnComposition().size());
+    field = mainIterator.next();
+    Assert.assertEquals(FieldValueType.COLLECTION, field.getValueDef().getType());
+    collectionDataType = (CollectionDataType) field.getValueDef();
+    Assert.assertEquals(FieldValueType.COMPOSITE, collectionDataType.getItemDataType().getType());
+    compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
+    Assert.assertNull(compositeDataType.getEmbeddedContentType());
+    Assert.assertEquals(2, compositeDataType.getOwnComposition().size());
   }
 
   public static class ConfigurationModule extends AbstractModule {
