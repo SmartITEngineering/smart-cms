@@ -451,7 +451,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         logger.debug(String.format("Creation date is %s and last modified date is %s", formatter.format(contentType.
             getCreationDate()), formatter.format(contentType.getLastModifiedDate())));
         logger.debug(String.format("Id is %s and parent id is %s", contentType.getContentTypeID().toString(),
-                                  ObjectUtils.toString(contentType.getParent())));
+                                   ObjectUtils.toString(contentType.getParent())));
       }
       /*
        * Content status
@@ -858,10 +858,9 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
     return mutableDataType;
   }
 
-  protected DataType fillSpecialFields(final String specialFieldPatternPrefix, final String key,
-                                       DataType mutableDataType, final byte[] value) throws ClassNotFoundException,
-                                                                                            IOException {
-    final String specialFieldPatternString = new StringBuilder(specialFieldPatternPrefix).append(
+  protected DataType fillSpecialFields(final String patternPrefix, final String key, DataType mutableDataType,
+                                       final byte[] value) throws ClassNotFoundException, IOException {
+    final String specialFieldPatternString = new StringBuilder(patternPrefix).append(
         SPCL_FIELD_DATA_TYPE_PATTERN).
         toString();
     Pattern pattern = Pattern.compile(specialFieldPatternString);
@@ -874,6 +873,10 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         logger.debug(new StringBuilder("Identified type as ").append(type).toString());
         logger.debug(new StringBuilder("The field value type's info key ").append(specialFieldValueTypeInfoKey).
             toString());
+      }
+      if (mutableDataType == null) {
+        mutableDataType = createDataType(type);
+        logger.debug("Created mutable data type for special field");
       }
       byte[] infoKey = Bytes.toBytes(specialFieldValueTypeInfoKey);
       if (mutableDataType == null) {
@@ -901,86 +904,70 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
             }
           }
           break;
-        default:
-          mutableDataType = fillSpecialFields(type, specialFieldValueTypeInfoKey, specialFieldPatternPrefix, key,
-                                              mutableDataType, value);
+        case COLLECTION:
+          logger.debug("Parsing collection");
+          MutableCollectionDataType collectionDataType = (MutableCollectionDataType) mutableDataType;
+          if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_MAX_SIZE)) {
+            final int toInt = Bytes.toInt(value);
+            logger.debug("Parsing collection's max size " + toInt);
+            collectionDataType.setMaxSize(toInt);
+          }
+          else if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_MIN_SIZE)) {
+            final int toInt = Bytes.toInt(value);
+            logger.debug("Parsing collection's min size " + toInt);
+            collectionDataType.setMinSize(toInt);
+          }
+          else if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_ITEM_TYPE)) {
+            logger.debug("Parsing collection's item data type");
+            if (collectionDataType.getItemDataType() == null) {
+              collectionDataType.setItemDataType(createDataType(FieldValueType.valueOf(Bytes.toString(value))));
+            }
+          }
+          else if (Bytes.startsWith(infoKey, CELL_FIELD_COLLECTION_ITEM)) {
+            logger.debug("Parsing collection's item data type info");
+            final String prefix = new StringBuilder(patternPrefix).append(COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX).
+                toString();
+            collectionDataType.setItemDataType(fillSpecialFields(prefix, key, collectionDataType.getItemDataType(),
+                                                                 value));
+          }
+          break;
+        case CONTENT:
+          logger.debug("Parsing content");
+          MutableContentDataType contentDataType =
+                                 (MutableContentDataType) mutableDataType;
+          if (Arrays.equals(infoKey, CELL_FIELD_CONTENT_TYPE_ID)) {
+            logger.debug("Parsing content's item content id");
+            contentDataType.setTypeDef(getInfoProvider().getIdFromRowId(value));
+          }
+          else if (Arrays.equals(infoKey, CELL_FIELD_CONTENT_BIDIRECTIONAL)) {
+            logger.debug("Parsing content's bi-directional field name");
+            contentDataType.setBiBidirectionalFieldName(Bytes.toString(value));
+          }
+          else if (Arrays.equals(infoKey, CELL_FIELD_TYPE_CONTENT_AVAILABLE_FOR_SEARCH)) {
+            logger.debug("Parsing content's available for search");
+            contentDataType.setAvailableForSearch(Boolean.valueOf(Bytes.toString(value)));
+          }
+          break;
+        case STRING:
+          logger.debug("Parsing string");
+          MutableStringDataType stringDataType =
+                                (MutableStringDataType) mutableDataType;
+          if (Arrays.equals(infoKey, CELL_FIELD_STRING_ENCODING)) {
+            logger.debug("Parsing String's encoding");
+            stringDataType.setEncoding(Bytes.toString(value));
+          }
+        case OTHER:
+          logger.debug("Parsing other");
+          MutableOtherDataType otherDataType = (MutableOtherDataType) mutableDataType;
+          if (Arrays.equals(infoKey, CELL_FIELD_OTHER_MIME_TYPE)) {
+            logger.debug("Parsing other's mime type");
+            otherDataType.setMIMEType(Bytes.toString(value));
+          }
+          break;
       }
     }
     else {
       logger.warn("Could not match field to any known field format! ");
-    }
-    return mutableDataType;
-  }
-
-  protected DataType fillSpecialFields(final FieldValueType type, final String specialFieldValueTypeInfoKey,
-                                       final String patternPrefix, final String key, DataType mutableDataType,
-                                       final byte[] value) throws ClassNotFoundException, IOException {
-    byte[] infoKey = Bytes.toBytes(specialFieldValueTypeInfoKey);
-    if (mutableDataType == null) {
-      mutableDataType = createDataType(type);
-      logger.debug("Created mutable data type for special field");
-    }
-    switch (type) {
-      case COLLECTION:
-        logger.debug("Parsing collection");
-        MutableCollectionDataType collectionDataType = (MutableCollectionDataType) mutableDataType;
-        if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_MAX_SIZE)) {
-          final int toInt = Bytes.toInt(value);
-          logger.debug("Parsing collection's max size " + toInt);
-          collectionDataType.setMaxSize(toInt);
-        }
-        else if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_MIN_SIZE)) {
-          final int toInt = Bytes.toInt(value);
-          logger.debug("Parsing collection's min size " + toInt);
-          collectionDataType.setMinSize(toInt);
-        }
-        else if (Arrays.equals(infoKey, CELL_FIELD_COLLECTION_ITEM_TYPE)) {
-          logger.debug("Parsing collection's item data type");
-          if (collectionDataType.getItemDataType() == null) {
-            collectionDataType.setItemDataType(createDataType(FieldValueType.valueOf(Bytes.toString(value))));
-          }
-        }
-        else if (Bytes.startsWith(infoKey, CELL_FIELD_COLLECTION_ITEM)) {
-          logger.debug("Parsing collection's item data type info");
-          final String prefix = new StringBuilder(patternPrefix).append(COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX).
-              toString();
-          collectionDataType.setItemDataType(fillSpecialFields(prefix, key, collectionDataType.getItemDataType(),
-                                                               value));
-        }
-        break;
-      case CONTENT:
-        logger.debug("Parsing content");
-        MutableContentDataType contentDataType =
-                               (MutableContentDataType) mutableDataType;
-        if (Arrays.equals(infoKey, CELL_FIELD_CONTENT_TYPE_ID)) {
-          logger.debug("Parsing content's item content id");
-          contentDataType.setTypeDef(getInfoProvider().getIdFromRowId(value));
-        }
-        else if (Arrays.equals(infoKey, CELL_FIELD_CONTENT_BIDIRECTIONAL)) {
-          logger.debug("Parsing content's bi-directional field name");
-          contentDataType.setBiBidirectionalFieldName(Bytes.toString(value));
-        }
-        else if (Arrays.equals(infoKey, CELL_FIELD_TYPE_CONTENT_AVAILABLE_FOR_SEARCH)) {
-          logger.debug("Parsing content's available for search");
-          contentDataType.setAvailableForSearch(Boolean.valueOf(Bytes.toString(value)));
-        }
-        break;
-      case STRING:
-        logger.debug("Parsing string");
-        MutableStringDataType stringDataType =
-                              (MutableStringDataType) mutableDataType;
-        if (Arrays.equals(infoKey, CELL_FIELD_STRING_ENCODING)) {
-          logger.debug("Parsing String's encoding");
-          stringDataType.setEncoding(Bytes.toString(value));
-        }
-      case OTHER:
-        logger.debug("Parsing other");
-        MutableOtherDataType otherDataType = (MutableOtherDataType) mutableDataType;
-        if (Arrays.equals(infoKey, CELL_FIELD_OTHER_MIME_TYPE)) {
-          logger.debug("Parsing other's mime type");
-          otherDataType.setMIMEType(Bytes.toString(value));
-        }
-        break;
     }
     return mutableDataType;
   }
