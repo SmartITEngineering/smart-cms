@@ -20,10 +20,12 @@ package com.smartitengineering.cms.api.impl.content;
 
 import com.smartitengineering.cms.api.content.BooleanFieldValue;
 import com.smartitengineering.cms.api.content.CollectionFieldValue;
+import com.smartitengineering.cms.api.content.CompositeFieldValue;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentFieldValue;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.FieldValue;
+import com.smartitengineering.cms.api.content.MutableCompositeFieldValue;
 import com.smartitengineering.cms.api.content.MutableRepresentation;
 import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.content.Variation;
@@ -45,6 +47,7 @@ import com.smartitengineering.cms.api.common.SearchResult;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
@@ -60,6 +63,8 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
@@ -68,6 +73,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,6 +139,19 @@ public class ContentLoaderImpl implements ContentLoader {
       CollectionFieldValueImpl collectionFieldValueImpl = new CollectionFieldValueImpl();
       collectionFieldValueImpl.setValue(fieldValue.getValue());
       return collectionFieldValueImpl;
+    }
+    else {
+      throw new IllegalArgumentException("Argument can not be null.");
+    }
+  }
+
+  public MutableCompositeFieldValue createCompositeFieldValue(CompositeFieldValue fieldValue) {
+    if (fieldValue != null) {
+      CompositeFieldValueImpl valueImpl = new CompositeFieldValueImpl();
+      if (fieldValue.getValue() != null) {
+        valueImpl.setValue(fieldValue.getValue());
+      }
+      return valueImpl;
     }
     else {
       throw new IllegalArgumentException("Argument can not be null.");
@@ -243,6 +262,10 @@ public class ContentLoaderImpl implements ContentLoader {
     return collectionFieldValueImpl;
   }
 
+  public MutableCompositeFieldValue createCompositeFieldValue() {
+    return new CompositeFieldValueImpl();
+  }
+
   @Override
   public MutableContentFieldValue createContentFieldValue() {
     final ContentFieldValueImpl contentFieldValueImpl = new ContentFieldValueImpl();
@@ -328,10 +351,34 @@ public class ContentLoaderImpl implements ContentLoader {
   public FieldValue getValueFor(String value, DataType dataType) {
     final FieldValue result;
     final FieldValueType type = dataType.getType();
-    if(logger.isInfoEnabled()) {
+    if (logger.isInfoEnabled()) {
       logger.info("Getting field value as " + type.name());
     }
     switch (type) {
+      case COMPOSITE:
+        logger.info("Getting as composite");
+        MutableCompositeFieldValue compositeFieldValue = createCompositeFieldValue();
+        try {
+          JsonNode node = CollectionFieldValueImpl.MAPPER.readTree(value);
+          if (node instanceof ObjectNode) {
+            ObjectNode objectNode = (ObjectNode) node;
+            CompositeDataType compositeDataType = (CompositeDataType) dataType;
+            Map<String, FieldDef> defs = compositeDataType.getComposedFieldDefs();
+            Collection<FieldValue> compositeValues = new ArrayList<FieldValue>(defs.size());
+            for (Entry<String, FieldDef> def : defs.entrySet()) {
+              JsonNode fNode = objectNode.get(def.getKey());
+              compositeValues.add(getValueFor(fNode.toString(), def.getValue().getValueDef()));
+            }
+          }
+          else {
+            throw new IllegalStateException("Collection must be of array of strings!");
+          }
+        }
+        catch (Exception ex) {
+          throw new RuntimeException(ex);
+        }
+        result = compositeFieldValue;
+        break;
       case COLLECTION:
         logger.info("Getting as collection");
         MutableCollectionFieldValue collectionFieldValue = createCollectionFieldValue();

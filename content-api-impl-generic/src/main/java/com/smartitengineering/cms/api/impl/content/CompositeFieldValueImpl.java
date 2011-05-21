@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2011  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,10 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
+import com.smartitengineering.cms.api.content.CollectionFieldValue;
 import com.smartitengineering.cms.api.content.CompositeFieldValue;
-import com.smartitengineering.cms.api.content.FieldValue;
-import com.smartitengineering.cms.api.content.MutableCollectionFieldValue;
+import com.smartitengineering.cms.api.content.Field;
+import com.smartitengineering.cms.api.content.MutableCompositeFieldValue;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import java.io.StringWriter;
 import java.util.Arrays;
@@ -28,7 +29,6 @@ import java.util.Collection;
 import org.codehaus.jackson.JsonGenerator.Feature;
 import org.codehaus.jackson.impl.WriterBasedGenerator;
 import org.codehaus.jackson.io.IOContext;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
@@ -36,27 +36,24 @@ import org.codehaus.jackson.util.BufferRecycler;
 
 /**
  *
- * @author kaisar
+ * @author imyousuf
  */
-public class CollectionFieldValueImpl extends FieldValueImpl<Collection<FieldValue>> implements
-    MutableCollectionFieldValue {
+public class CompositeFieldValueImpl extends FieldValueImpl<Collection<Field>> implements
+    MutableCompositeFieldValue {
 
-  static final ObjectMapper MAPPER = new ObjectMapper();
-
-  public CollectionFieldValueImpl() {
-    setFieldValueType(FieldValueType.COLLECTION);
+  public CompositeFieldValueImpl() {
+    setFieldValueType(FieldValueType.COMPOSITE);
   }
 
   @Override
   protected String getValueAsString() {
-
-    ArrayNode arrayNode = getAsJsonNode();
-    if (arrayNode != null) {
+    ObjectNode objectNode = getAsJsonNode();
+    if (objectNode != null) {
       final StringWriter stringWriter = new StringWriter();
       String toString;
       try {
         new WriterBasedGenerator(new IOContext(new BufferRecycler(), new Object(), true), Feature.collectDefaults(),
-                                 MAPPER, stringWriter).writeTree(arrayNode);
+                                 CollectionFieldValueImpl.MAPPER, stringWriter).writeTree(objectNode);
         toString = stringWriter.toString();
         return toString;
       }
@@ -67,20 +64,24 @@ public class CollectionFieldValueImpl extends FieldValueImpl<Collection<FieldVal
     return getValue() != null ? Arrays.toString(getValue().toArray()) : super.getValueAsString();
   }
 
-  public ArrayNode getAsJsonNode() {
-    Collection<FieldValue> fieldValues = getValue();
-    if (fieldValues != null) {
-      JsonNodeFactory factory = MAPPER.getNodeFactory();
-      ArrayNode arrayNode = new ArrayNode(factory);
-      for (FieldValue fieldValue : fieldValues) {
-        if (fieldValue.getDataType().equals(FieldValueType.COMPOSITE)) {
-          arrayNode.add((ObjectNode)((CompositeFieldValue) fieldValue).getAsJsonNode());
-        }
-        else {
-          arrayNode.add(fieldValue.toString());
+  public ObjectNode getAsJsonNode() {
+    Collection<Field> fields = getValue();
+    if (fields != null) {
+      JsonNodeFactory factory = CollectionFieldValueImpl.MAPPER.getNodeFactory();
+      ObjectNode objectNode = new ObjectNode(factory);
+      for (Field field : fields) {
+        switch (field.getFieldDef().getValueDef().getType()) {
+          case COLLECTION:
+            objectNode.put(field.getName(), (ArrayNode) ((CollectionFieldValue) field.getValue()).getAsJsonNode());
+            break;
+          case COMPOSITE:
+            objectNode.put(field.getName(), (ObjectNode) ((CompositeFieldValue) field.getValue()).getAsJsonNode());
+            break;
+          default:
+            objectNode.put(field.getName(), field.toString());
         }
       }
-      return arrayNode;
+      return objectNode;
     }
     return null;
   }

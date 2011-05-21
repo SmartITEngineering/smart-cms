@@ -40,6 +40,8 @@ import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.content.NumberFieldValue;
 import com.smartitengineering.cms.api.content.OtherFieldValue;
 import com.smartitengineering.cms.api.common.SearchResult;
+import com.smartitengineering.cms.api.content.CompositeFieldValue;
+import com.smartitengineering.cms.api.content.MutableCompositeFieldValue;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.type.ContentType;
@@ -73,6 +75,10 @@ public interface ContentLoader {
   MutableContentFieldValue createContentFieldValue();
 
   MutableContentFieldValue createContentFieldValue(ContentFieldValue fieldValue);
+
+  MutableCompositeFieldValue createCompositeFieldValue();
+
+  MutableCompositeFieldValue createCompositeFieldValue(CompositeFieldValue fieldValue);
 
   MutableNumberFieldValue createIntegerFieldValue();
 

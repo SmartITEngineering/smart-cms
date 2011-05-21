@@ -25,7 +25,5 @@ import java.util.Collection;
  * @author imyousuf
  * @since 0.1
  */
-public interface MutableCollectionFieldValue
-    extends MutableFieldValue<Collection<FieldValue>>,
-            CollectionFieldValue {
+public interface MutableCollectionFieldValue extends MutableFieldValue<Collection<FieldValue>>, CollectionFieldValue {
 }

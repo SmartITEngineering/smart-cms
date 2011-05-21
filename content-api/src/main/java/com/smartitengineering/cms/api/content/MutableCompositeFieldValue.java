@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2011  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,6 @@ import java.util.Collection;
 /**
  *
  * @author imyousuf
- * @since 0.1
  */
-public interface CollectionFieldValue extends FieldValue<Collection<FieldValue>> {
-  
-  Object getAsJsonNode();
+public interface MutableCompositeFieldValue extends MutableFieldValue<Collection<Field>>, CompositeFieldValue {
 }
