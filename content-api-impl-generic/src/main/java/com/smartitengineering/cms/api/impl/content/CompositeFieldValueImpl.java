@@ -26,6 +26,8 @@ import com.smartitengineering.cms.api.type.FieldValueType;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.codehaus.jackson.JsonGenerator.Feature;
 import org.codehaus.jackson.impl.WriterBasedGenerator;
 import org.codehaus.jackson.io.IOContext;
@@ -84,5 +86,14 @@ public class CompositeFieldValueImpl extends FieldValueImpl<Collection<Field>> i
       return objectNode;
     }
     return null;
+  }
+
+  public Map<String, Field> getValueAsMap() {
+    Collection<Field> fields = getValue();
+    LinkedHashMap<String, Field> fieldMap = new LinkedHashMap<String, Field>();
+    for (Field field : fields) {
+      fieldMap.put(field.getName(), field);
+    }
+    return fieldMap;
   }
 }

@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.content;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  *
@@ -27,4 +28,6 @@ import java.util.Collection;
 public interface CompositeFieldValue extends FieldValue<Collection<Field>> {
 
   Object getAsJsonNode();
+  
+  Map<String, Field> getValueAsMap();
 }

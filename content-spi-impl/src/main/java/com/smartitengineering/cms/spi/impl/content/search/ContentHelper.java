@@ -20,6 +20,7 @@ package com.smartitengineering.cms.spi.impl.content.search;
 
 import com.google.inject.Inject;
 import com.smartitengineering.cms.api.content.CollectionFieldValue;
+import com.smartitengineering.cms.api.content.CompositeFieldValue;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
@@ -55,7 +56,6 @@ import org.slf4j.LoggerFactory;
 public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<String, Object>> {
 
   protected static final String CONTENT = "content";
-  
   @Inject
   private SchemaInfoProvider<PersistentContent, ContentId> contentScehmaProvider;
   private final transient Logger logger = LoggerFactory.getLogger(getClass());
@@ -89,16 +89,21 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
       parent = partentType.getParent();
     }
     Set<ContentId> indexedContents = new HashSet<ContentId>();
-    indexFields(mutableContent, toBean, "", indexedContents);
+    indexFields(mutableContent, toBean, "", indexedContents, '_');
   }
 
   protected void indexFields(final Content mutableContent, MultivalueMap<String, Object> toBean, String prefix,
-                             Set<ContentId> indexedContents) {
+                             Set<ContentId> indexedContents, final char separator) {
     if (indexedContents.contains(mutableContent.getContentId())) {
       return;
     }
     indexedContents.add(mutableContent.getContentId());
     Map<String, Field> fields = mutableContent.getFields();
+    indexFields(fields, prefix, separator, toBean, indexedContents);
+  }
+
+  protected void indexFields(Map<String, Field> fields, String prefix, final char separator,
+                             MultivalueMap<String, Object> toBean, Set<ContentId> indexedContents) {
     for (Entry<String, Field> entry : fields.entrySet()) {
       FieldDef def = entry.getValue().getFieldDef();
       if (logger.isDebugEnabled()) {
@@ -110,10 +115,10 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
       Field field = entry.getValue();
       StringBuilder builder = new StringBuilder();
       if (org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
-        builder.append(prefix).append('_');
+        builder.append(prefix).append(separator);
       }
-      String defName = SmartContentSPI.getInstance().getSearchFieldNameGenerator().getSearchFieldName(def, org.apache.commons.lang.StringUtils.
-          isNotBlank(prefix));
+      String defName = SmartContentSPI.getInstance().getSearchFieldNameGenerator().
+          getSearchFieldName(def, org.apache.commons.lang.StringUtils.isNotBlank(prefix));
       if (org.apache.commons.lang.StringUtils.isBlank(defName)) {
         continue;
       }
@@ -122,48 +127,58 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
         logger.debug("Search field name " + searchFieldName);
       }
       if (org.apache.commons.lang.StringUtils.isNotBlank(searchFieldName)) {
-        addFieldValue(toBean, searchFieldName, field, prefix, indexedContents);
+        addFieldValue(toBean, searchFieldName, field, prefix, indexedContents, '_');
       }
     }
   }
 
   protected void addFieldValue(MultivalueMap<String, Object> toBean, String indexFieldName, Field field, String prefix,
-                               Set<ContentId> indexedContents) {
+                               Set<ContentId> indexedContents, final char separator) {
     final Object value = field.getValue().getValue();
     StringBuilder builder = new StringBuilder();
     if (org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
-      builder.append(prefix).append('_');
+      builder.append(prefix).append(separator);
     }
     final String name = builder.append(field.getName()).toString();
-    addSimpleValue(field.getValue(), field.getFieldDef().getValueDef(), toBean, name, indexFieldName, value,
-                   indexedContents);
+    addSimpleValue(field.getValue(), field.getFieldDef().getValueDef(), toBean, name, indexFieldName, value, prefix,
+                   '_', indexedContents);
 
   }
 
   protected void addSimpleValue(final FieldValue def, DataType fieldDataType, MultivalueMap<String, Object> toBean,
-                                String fieldName, String indexFieldName, final Object value,
-                                Set<ContentId> indexedContents) {
+                                String fieldName, String indexFieldName, final Object value, String prefix,
+                                final char separator, Set<ContentId> indexedContents) {
     final FieldValueType valueDef = def.getDataType();
     switch (valueDef) {
+      case COMPOSITE: {
+        StringBuilder builder = new StringBuilder();
+        if (org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
+          builder.append(prefix).append(separator);
+        }
+        builder.append(fieldName);
+        CompositeFieldValue compositeFieldValue = (CompositeFieldValue) def;
+        indexFields(compositeFieldValue.getValueAsMap(), builder.toString(), '.', toBean, indexedContents);
+        break;
+      }
       case COLLECTION:
         CollectionFieldValue fieldValue = (CollectionFieldValue) def;
         Collection<FieldValue> values = fieldValue.getValue();
         for (FieldValue val : values) {
-          addSimpleValue(val, ((CollectionDataType) fieldDataType).getItemDataType(), toBean, fieldName, indexFieldName, val.
-              getValue(), indexedContents);
+          addSimpleValue(val, ((CollectionDataType) fieldDataType).getItemDataType(), toBean, fieldName, indexFieldName,
+                         val.getValue(), prefix, '_', indexedContents);
         }
         break;
       case CONTENT:
         toBean.addValue(indexFieldName, value.toString());
         final ContentDataType contentDataType = (ContentDataType) fieldDataType;
         if (logger.isDebugEnabled()) {
-          logger.debug("Nested Content " + contentDataType.getTypeDef().toString() + " available for search: " + contentDataType.
-              isAvaialbleForSearch());
+          logger.debug("Nested Content " + contentDataType.getTypeDef().toString() + " available for search: " +
+              contentDataType.isAvaialbleForSearch());
         }
         if (contentDataType.isAvaialbleForSearch()) {
           Content content = SmartContentAPI.getInstance().getContentLoader().loadContent((ContentId) value);
           if (content != null) {
-            indexFields(content, toBean, fieldName, indexedContents);
+            indexFields(content, toBean, fieldName, indexedContents, '_');
           }
         }
         break;
