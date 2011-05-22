@@ -30,6 +30,7 @@ import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.DataType;
@@ -38,6 +39,7 @@ import com.smartitengineering.cms.api.type.OtherDataType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldValueImpl;
+import com.smartitengineering.cms.ws.common.domains.CompositeFieldValueImpl;
 import com.smartitengineering.cms.ws.common.domains.ContentImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldValueImpl;
@@ -58,9 +60,13 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -191,8 +197,8 @@ public class ContentResource extends AbstractResource {
       feed.addSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME_SPACE, content.getContentId().getWorkspaceId().
           getGlobalNamespace());
       feed.addSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME, content.getContentId().getWorkspaceId().getName());
-      feed.addSimpleExtension(SimpleFeedExtensions.CONTENT_ID_IN_WORKSPACAE, org.apache.commons.codec.binary.StringUtils.
-          newStringUtf8(content.getContentId().getId()));
+      feed.addSimpleExtension(SimpleFeedExtensions.CONTENT_ID_IN_WORKSPACAE,
+                              org.apache.commons.codec.binary.StringUtils.newStringUtf8(content.getContentId().getId()));
       Map<String, Field> fields = content.getFields();
       final String contentUri = ContentResource.getContentUri(getRelativeURIBuilder(), content.getContentId()).
           toASCIIString();
@@ -253,51 +259,11 @@ public class ContentResource extends AbstractResource {
         LOGGER.warn("Count not extract content type info!", ex);
         return Response.status(Response.Status.BAD_REQUEST).build();
       }
-      for (Entry<String, FieldDef> fieldDef : contentType.getFieldDefs().entrySet()) {
-        List<FormDataBodyPart> bodyParts = multiPart.getFields(fieldDef.getKey());
-        if (bodyParts != null && !bodyParts.isEmpty()) {
-          if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Creating field for " + fieldDef.getKey() + " with type " + fieldDef.getValue().getValueDef().
-                getType());
-          }
-          FieldImpl fieldImpl = new FieldImpl();
-          fieldImpl.setName(fieldDef.getKey());
-          final FormDataBodyPart singleBodyPart = bodyParts.get(0);
-          switch (fieldDef.getValue().getValueDef().getType()) {
-            case COLLECTION:
-              CollectionDataType collectionFieldDef = (CollectionDataType) fieldDef.getValue().getValueDef();
-              CollectionFieldValueImpl fieldValueImpl = new CollectionFieldValueImpl();
-              for (FormDataBodyPart bodyPart : bodyParts) {
-                if (bodyPart == null || org.apache.commons.lang.StringUtils.isBlank(bodyPart.getValue())) {
-                  continue;
-                }
-                FieldValueImpl valueImpl = addFieldFromBodyPart(bodyPart, collectionFieldDef.getItemDataType());
-                if (valueImpl != null) {
-                  fieldValueImpl.getValues().add(valueImpl);
-                }
-              }
-              if (fieldValueImpl.getValues().isEmpty()) {
-                continue;
-              }
-              fieldImpl.setValue(fieldValueImpl);
-              break;
-            case OTHER: {
-              FieldValueImpl valueImpl = addFieldFromBodyPart(singleBodyPart, fieldDef.getValue().getValueDef());
-              fieldImpl.setValue(valueImpl);
-              break;
-            }
-            default: {
-              if (singleBodyPart == null || org.apache.commons.lang.StringUtils.isBlank(singleBodyPart.getValue())) {
-                continue;
-              }
-              FieldValueImpl valueImpl = addFieldFromBodyPart(singleBodyPart, fieldDef.getValue().getValueDef());
-              fieldImpl.setValue(valueImpl);
-              break;
-            }
-          }
-          contentImpl.getFields().add(fieldImpl);
-        }
-      }
+      final Map<String, FieldDef> allDefs = contentType.getFieldDefs();
+      final Collection<com.smartitengineering.cms.ws.common.domains.Field> fields = new ArrayList();
+      final Map<String, List<FormDataBodyPart>> bodyParts = multiPart.getFields();
+      formFields(allDefs, bodyParts, fields);
+      contentImpl.getFields().addAll(fields);
     }
     if (LOGGER.isInfoEnabled()) {
       try {
@@ -309,6 +275,125 @@ public class ContentResource extends AbstractResource {
       }
     }
     return put(contentImpl, this.content == null ? null : new EntityTag("*"));
+  }
+
+  protected void formFields(final Map<String, FieldDef> allDefs,
+                            final Map<String, List<FormDataBodyPart>> bodyParts,
+                            final Collection<com.smartitengineering.cms.ws.common.domains.Field> fields) {
+    for (Entry<String, FieldDef> fieldDef : allDefs.entrySet()) {
+      if (bodyParts != null && !bodyParts.isEmpty()) {
+        if (LOGGER.isInfoEnabled()) {
+          LOGGER.info("Creating field for " + fieldDef.getKey() + " with type " + fieldDef.getValue().getValueDef().
+              getType());
+        }
+        FieldImpl fieldImpl = new FieldImpl();
+        fieldImpl.setName(fieldDef.getKey());
+        final boolean containsKey = bodyParts.containsKey(fieldDef.getKey());
+        switch (fieldDef.getValue().getValueDef().getType()) {
+          case COMPOSITE: {
+            boolean hasCompositeValue = false;
+            Map<String, List<FormDataBodyPart>> composites = new LinkedHashMap<String, List<FormDataBodyPart>>();
+            final String prefix = new StringBuilder(fieldDef.getKey()).append('.').toString();
+            for (String key : bodyParts.keySet()) {
+              if (key.startsWith(prefix)) {
+                hasCompositeValue = true;
+                composites.put(key.substring(prefix.length()), bodyParts.get(key));
+              }
+            }
+            if (hasCompositeValue) {
+              Collection<com.smartitengineering.cms.ws.common.domains.Field> composedFields =
+                                                                             new ArrayList<com.smartitengineering.cms.ws.common.domains.Field>();
+              CompositeDataType compositeDataType = (CompositeDataType) fieldDef.getValue().getValueDef();
+              formFields(compositeDataType.getComposedFieldDefs(), composites, composedFields);
+              CompositeFieldValueImpl valueImpl = new CompositeFieldValueImpl();
+              valueImpl.setValues(composedFields);
+              fieldImpl.setValue(valueImpl);
+            }
+            break;
+          }
+          case COLLECTION: {
+            if (containsKey) {
+              CollectionDataType collectionFieldDef = (CollectionDataType) fieldDef.getValue().getValueDef();
+              CollectionFieldValueImpl fieldValueImpl = new CollectionFieldValueImpl();
+              switch (collectionFieldDef.getItemDataType().getType()) {
+                case COMPOSITE: {
+                  boolean hasCompositeValue = false;
+                  Map<String, Map<String, List<FormDataBodyPart>>> compositesCollection =
+                                                                   new HashMap<String, Map<String, List<FormDataBodyPart>>>();
+                  final String prefixPattern = new StringBuilder(fieldDef.getKey()).append("\\.([a-z0-9]+)\\..+").
+                      toString();
+                  Pattern pattern = Pattern.compile(prefixPattern);
+                  for (String key : bodyParts.keySet()) {
+                    Matcher matcher = pattern.matcher(key);
+                    if (matcher.matches()) {
+                      hasCompositeValue = true;
+                      final Map<String, List<FormDataBodyPart>> composites;
+                      String groupKey = matcher.group(1);
+                      if (compositesCollection.containsKey(groupKey)) {
+                        composites = compositesCollection.get(groupKey);
+                      }
+                      else {
+                        composites = new LinkedHashMap<String, List<FormDataBodyPart>>();
+                        compositesCollection.put(groupKey, composites);
+                      }
+                      composites.put(key.substring(matcher.end(1) + 1), bodyParts.get(key));
+                    }
+                  }
+                  if (hasCompositeValue) {
+                    CompositeDataType compositeDataType = (CompositeDataType) collectionFieldDef.getItemDataType();
+                    for (Entry<String, Map<String, List<FormDataBodyPart>>> cols : compositesCollection.entrySet()) {
+                      Collection<com.smartitengineering.cms.ws.common.domains.Field> composedFields =
+                                                                                     new ArrayList<com.smartitengineering.cms.ws.common.domains.Field>();
+                      formFields(compositeDataType.getComposedFieldDefs(), cols.getValue(), composedFields);
+                      CompositeFieldValueImpl valueImpl = new CompositeFieldValueImpl();
+                      valueImpl.setValues(composedFields);
+                      fieldValueImpl.getValues().add(valueImpl);
+                    }
+                  }
+                  break;
+                }
+                default:
+                  for (FormDataBodyPart bodyPart : bodyParts.get(fieldDef.getKey())) {
+                    if (bodyPart == null || org.apache.commons.lang.StringUtils.isBlank(bodyPart.getValue())) {
+                      continue;
+                    }
+                    FieldValueImpl valueImpl = addFieldFromBodyPart(bodyPart, collectionFieldDef.getItemDataType());
+                    if (valueImpl != null) {
+                      fieldValueImpl.getValues().add(valueImpl);
+                    }
+                  }
+              }
+              if (fieldValueImpl.getValues().isEmpty()) {
+                continue;
+              }
+              fieldImpl.setValue(fieldValueImpl);
+            }
+            break;
+          }
+
+          case OTHER: {
+            if (containsKey) {
+              final FormDataBodyPart singleBodyPart = bodyParts.get(fieldDef.getKey()).get(0);
+              FieldValueImpl valueImpl = addFieldFromBodyPart(singleBodyPart, fieldDef.getValue().getValueDef());
+              fieldImpl.setValue(valueImpl);
+            }
+            break;
+          }
+          default: {
+            if (containsKey) {
+              final FormDataBodyPart singleBodyPart = bodyParts.get(fieldDef.getKey()).get(0);
+              if (singleBodyPart == null || org.apache.commons.lang.StringUtils.isBlank(singleBodyPart.getValue())) {
+                continue;
+              }
+              FieldValueImpl valueImpl = addFieldFromBodyPart(singleBodyPart, fieldDef.getValue().getValueDef());
+              fieldImpl.setValue(valueImpl);
+            }
+            break;
+          }
+        }
+        fields.add(fieldImpl);
+      }
+    }
   }
 
   protected ContentTypeResource getContentTypeResource(String uri) throws ClassCastException,
@@ -578,8 +663,8 @@ public class ContentResource extends AbstractResource {
         writeableContent.setParentId(parentContentId);
       }
       for (com.smartitengineering.cms.ws.common.domains.Field field : toBean.getFields()) {
-        MutableField mutableField = getField(writeableContent.getContentId(), contentType.getFieldDefs().get(field.
-            getName()), field, getResourceContext(), getAbsoluteURIBuilder(), importMode);
+        MutableField mutableField = getField(writeableContent.getContentId(), contentType.getFieldDefs().get(
+            field.getName()), field, getResourceContext(), getAbsoluteURIBuilder(), importMode);
         writeableContent.setField(mutableField);
       }
       return writeableContent;
@@ -590,8 +675,8 @@ public class ContentResource extends AbstractResource {
                                             com.smartitengineering.cms.ws.common.domains.FieldValue value,
                                             ResourceContext context, UriBuilder absBuilder, boolean importMode) {
     FieldValue fieldValue;
-    if(LOGGER.isInfoEnabled()) {
-      LOGGER.info("Parsing value as " +dataType.getType().name());
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("Parsing value as " + dataType.getType().name());
     }
     switch (dataType.getType()) {
       case COLLECTION:
@@ -659,9 +744,10 @@ public class ContentResource extends AbstractResource {
       throw new IllegalArgumentException("No field in content type with name " + field.getName());
     }
     final DataType dataType = fieldDef.getValueDef();
-    LOGGER.info("Working with field " + field.getName() + " of type " + dataType.getType().name() + " with value " + field.getValue());
-    if (org.apache.commons.lang.StringUtils.isNotBlank(field.getValue().getType()) && !org.apache.commons.lang.StringUtils.
-        equalsIgnoreCase(dataType.getType().name(), field.getValue().getType())) {
+    LOGGER.info("Working with field " + field.getName() + " of type " + dataType.getType().name() + " with value " +
+        field.getValue());
+    if (org.apache.commons.lang.StringUtils.isNotBlank(field.getValue().getType()) &&
+        !org.apache.commons.lang.StringUtils.equalsIgnoreCase(dataType.getType().name(), field.getValue().getType())) {
       throw new IllegalArgumentException("Type mismatch! NOTE: type of values in field is optional in this case. " +
           "Field is " + field.getName() + " - " + dataType.getType().name() + " " + field.getValue().getType());
     }
@@ -687,8 +773,7 @@ public class ContentResource extends AbstractResource {
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("URI to content is " + uri);
     }
-    ContentResource resource =
-                    context.matchResource(uri, ContentResource.class);
+    ContentResource resource = context.matchResource(uri, ContentResource.class);
     return resource;
   }
 
