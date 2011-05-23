@@ -66,6 +66,10 @@
             <mimeType>text/plain</mimeType>
           </string>
         </value>
+        <search>
+          <index>true</index>
+          <store>true</store>
+        </search>
       </field>
       <field>
         <name>district</name>
@@ -84,6 +88,10 @@
             <mimeType>text/plain</mimeType>
           </string>
         </value>
+        <search>
+          <index>true</index>
+          <store>true</store>
+        </search>
       </field>
       <field>
         <name>zzcountry</name>
@@ -93,6 +101,10 @@
             <mimeType>text/plain</mimeType>
           </string>
         </value>
+        <search>
+          <index>true</index>
+          <store>true</store>
+        </search>
       </field>
     </fields>
   </contentType>               
@@ -147,6 +159,10 @@
                               <value>
                                 <datetime></datetime>
                               </value>
+                              <search>
+                                <index>true</index>
+                                <store>true</store>
+                              </search>
                             </field>
                             <field>
                               <name>to</name>
@@ -154,17 +170,33 @@
                               <value>
                                 <datetime></datetime>
                               </value>
+                              <search>
+                                <index>true</index>
+                                <store>true</store>
+                              </search>
                             </field>
                           </composition>
                         </value>
+                        <search>
+                          <index>true</index>
+                          <store>true</store>
+                        </search>
                       </field>
                     </composition>
                   </simple-value>
                 </collection>
               </value>
+              <search>
+                <index>true</index>
+                <store>true</store>
+              </search>
             </field>
           </composition>
         </value>
+        <search>
+          <index>true</index>
+          <store>true</store>
+        </search>
       </field>
       <field>
         <name>billingAddress</name>
@@ -194,6 +226,10 @@
                       <mimeType>text/plain</mimeType>
                     </string>
                   </value>
+                  <search>
+                    <index>true</index>
+                    <store>true</store>
+                  </search>
                 </field>
                 <field>
                   <name>Comment</name>
@@ -202,11 +238,19 @@
                       <mimeType>text/plain</mimeType>
                     </string>
                   </value>
+                  <search>
+                    <index>true</index>
+                    <store>true</store>
+                  </search>
                 </field>
               </composition>
             </simple-value>
           </collection>
         </value>
+        <search>
+          <index>true</index>
+          <store>true</store>
+        </search>
       </field>
     </fields>
   </contentType>

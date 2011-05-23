@@ -21,6 +21,7 @@ package com.smartitengineering.cms.ws.common.domains;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
@@ -41,7 +42,18 @@ public class CompositeFieldValueImpl extends FieldValueImpl implements Composite
     }
   }
 
-  public void setValues(Collection<Field> values) {
+  @Override
+  public String getValue() {
+    return "";
+  }
+
+  @Override
+  public void setValue(String value) {
+    throw new UnsupportedOperationException("Should not be called from here!");
+  }
+
+  @JsonIgnore
+  public void setValuesAsCollection(Collection<Field> values) {
     this.values.clear();
     if (values != null && !values.isEmpty()) {
       for (Field field : values) {

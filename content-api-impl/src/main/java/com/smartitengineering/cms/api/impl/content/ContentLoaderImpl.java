@@ -352,7 +352,7 @@ public class ContentLoaderImpl implements ContentLoader {
     final FieldValue result;
     final FieldValueType type = dataType.getType();
     if (logger.isInfoEnabled()) {
-      logger.info("Getting field value as " + type.name());
+      logger.info("Getting field value as " + type.name() + " from " + value);
     }
     switch (type) {
       case COMPOSITE:
@@ -364,11 +364,24 @@ public class ContentLoaderImpl implements ContentLoader {
             ObjectNode objectNode = (ObjectNode) node;
             CompositeDataType compositeDataType = (CompositeDataType) dataType;
             Map<String, FieldDef> defs = compositeDataType.getComposedFieldDefs();
-            Collection<FieldValue> compositeValues = new ArrayList<FieldValue>(defs.size());
+            Collection<Field> compositeValues = new ArrayList<Field>(defs.size());
             for (Entry<String, FieldDef> def : defs.entrySet()) {
               JsonNode fNode = objectNode.get(def.getKey());
-              compositeValues.add(getValueFor(fNode.toString(), def.getValue().getValueDef()));
+              final String textValue;
+              final DataType itemDataType = def.getValue().getValueDef();
+              if (itemDataType.getType().equals(FieldValueType.COLLECTION) || itemDataType.getType().equals(
+                  FieldValueType.COMPOSITE)) {
+                textValue = fNode.toString();
+              }
+              else {
+                textValue = fNode.getTextValue();
+              }
+              final FieldValue valueFor = getValueFor(textValue, itemDataType);
+              final MutableField mutableField = createMutableField(null, def.getValue());
+              mutableField.setValue(valueFor);
+              compositeValues.add(mutableField);
             }
+            compositeFieldValue.setValue(compositeValues);
           }
           else {
             throw new IllegalStateException("Collection must be of array of strings!");
@@ -389,9 +402,15 @@ public class ContentLoaderImpl implements ContentLoader {
             int size = arrayNode.size();
             ArrayList<FieldValue> values = new ArrayList<FieldValue>(size);
             for (int i = 0; i < size; ++i) {
-              String stringValue = arrayNode.get(i).getTextValue();
-              values.add(getSimpleValueFor(stringValue, ((CollectionDataType) dataType).getItemDataType().
-                  getType()));
+              final DataType itemDataType = ((CollectionDataType) dataType).getItemDataType();
+              if (itemDataType.getType().equals(FieldValueType.COMPOSITE)) {
+                final String stringValue = arrayNode.get(i).toString();
+                values.add(getValueFor(stringValue, itemDataType));
+              }
+              else {
+                final String stringValue = arrayNode.get(i).getTextValue();
+                values.add(getValueFor(stringValue, itemDataType));
+              }
             }
             collectionFieldValue.setValue(values);
           }
@@ -534,7 +553,8 @@ public class ContentLoaderImpl implements ContentLoader {
                                     null)) {
       logger.warn("Content or its ID or content definition is missing!");
     }
-    return content != null && content.getContentId() != null && content.getContentDefinition() != null && isMandatoryFieldsPresent(
+    return content != null && content.getContentId() != null && content.getContentDefinition() != null &&
+        isMandatoryFieldsPresent(
         content);
   }
 
@@ -569,7 +589,8 @@ public class ContentLoaderImpl implements ContentLoader {
   }
 
   protected void addQueryForContentId(final ContentId contentId, ContentTypeId instanceOfId, Filter filter) {
-    QueryParameter<String> param = QueryParameterFactory.getStringLikePropertyParam("id", new StringBuilder().append(contentId.
+    QueryParameter<String> param = QueryParameterFactory.getStringLikePropertyParam("id",
+                                                                                    new StringBuilder().append(contentId.
         toString()).toString());
     filter.addFieldFilter(param);
     filter.addContentTypeToFilter(instanceOfId);

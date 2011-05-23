@@ -92,8 +92,11 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
     indexFields(mutableContent, toBean, "", indexedContents, '_');
   }
 
-  protected void indexFields(final Content mutableContent, MultivalueMap<String, Object> toBean, String prefix,
+  protected void indexFields(final Content mutableContent, MultivalueMap<String, Object> toBean, final String prefix,
                              Set<ContentId> indexedContents, final char separator) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Indexing contents with prefix " + prefix + " and separator " + separator);
+    }
     if (indexedContents.contains(mutableContent.getContentId())) {
       return;
     }
@@ -102,8 +105,11 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
     indexFields(fields, prefix, separator, toBean, indexedContents);
   }
 
-  protected void indexFields(Map<String, Field> fields, String prefix, final char separator,
+  protected void indexFields(Map<String, Field> fields, final String prefix, final char separator,
                              MultivalueMap<String, Object> toBean, Set<ContentId> indexedContents) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Indexing fields" + fields + " with prefix " + prefix + " and separator " + separator);
+    }
     for (Entry<String, Field> entry : fields.entrySet()) {
       FieldDef def = entry.getValue().getFieldDef();
       if (logger.isDebugEnabled()) {
@@ -132,28 +138,30 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
     }
   }
 
-  protected void addFieldValue(MultivalueMap<String, Object> toBean, String indexFieldName, Field field, String prefix,
-                               Set<ContentId> indexedContents, final char separator) {
-    final Object value = field.getValue().getValue();
-    StringBuilder builder = new StringBuilder();
-    if (org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
-      builder.append(prefix).append(separator);
+  protected void addFieldValue(MultivalueMap<String, Object> toBean, String indexFieldName, Field field,
+                               final String prefix, Set<ContentId> indexedContents, final char separator) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Indexing field value " + field.getName() + " with prefix " + prefix + " and separator " + separator);
     }
-    final String name = builder.append(field.getName()).toString();
-    addSimpleValue(field.getValue(), field.getFieldDef().getValueDef(), toBean, name, indexFieldName, value, prefix,
-                   '_', indexedContents);
+    final Object value = field.getValue().getValue();
+    addSimpleValue(field.getValue(), field.getFieldDef().getValueDef(), toBean, field.getName(), indexFieldName, value,
+                   prefix, '_', indexedContents);
 
   }
 
   protected void addSimpleValue(final FieldValue def, DataType fieldDataType, MultivalueMap<String, Object> toBean,
-                                String fieldName, String indexFieldName, final Object value, String prefix,
+                                String fieldName, String indexFieldName, final Object value, final String prefix,
                                 final char separator, Set<ContentId> indexedContents) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Indexing simple value " + fieldDataType.getType() + " with prefix " + prefix + " and separator " +
+          separator);
+    }
     final FieldValueType valueDef = def.getDataType();
     switch (valueDef) {
       case COMPOSITE: {
         StringBuilder builder = new StringBuilder();
         if (org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
-          builder.append(prefix).append(separator);
+          builder.append(prefix).append('.');
         }
         builder.append(fieldName);
         CompositeFieldValue compositeFieldValue = (CompositeFieldValue) def;

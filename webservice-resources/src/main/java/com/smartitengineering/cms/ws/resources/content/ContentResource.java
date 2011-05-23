@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.MutableCollectionFieldValue;
+import com.smartitengineering.cms.api.content.MutableCompositeFieldValue;
 import com.smartitengineering.cms.api.content.MutableContentFieldValue;
 import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
@@ -39,6 +40,7 @@ import com.smartitengineering.cms.api.type.OtherDataType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldValueImpl;
+import com.smartitengineering.cms.ws.common.domains.CompositeFieldValue;
 import com.smartitengineering.cms.ws.common.domains.CompositeFieldValueImpl;
 import com.smartitengineering.cms.ws.common.domains.ContentImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldImpl;
@@ -306,53 +308,53 @@ public class ContentResource extends AbstractResource {
               CompositeDataType compositeDataType = (CompositeDataType) fieldDef.getValue().getValueDef();
               formFields(compositeDataType.getComposedFieldDefs(), composites, composedFields);
               CompositeFieldValueImpl valueImpl = new CompositeFieldValueImpl();
-              valueImpl.setValues(composedFields);
+              valueImpl.setValuesAsCollection(composedFields);
               fieldImpl.setValue(valueImpl);
             }
             break;
           }
           case COLLECTION: {
-            if (containsKey) {
-              CollectionDataType collectionFieldDef = (CollectionDataType) fieldDef.getValue().getValueDef();
-              CollectionFieldValueImpl fieldValueImpl = new CollectionFieldValueImpl();
-              switch (collectionFieldDef.getItemDataType().getType()) {
-                case COMPOSITE: {
-                  boolean hasCompositeValue = false;
-                  Map<String, Map<String, List<FormDataBodyPart>>> compositesCollection =
-                                                                   new HashMap<String, Map<String, List<FormDataBodyPart>>>();
-                  final String prefixPattern = new StringBuilder(fieldDef.getKey()).append("\\.([a-z0-9]+)\\..+").
-                      toString();
-                  Pattern pattern = Pattern.compile(prefixPattern);
-                  for (String key : bodyParts.keySet()) {
-                    Matcher matcher = pattern.matcher(key);
-                    if (matcher.matches()) {
-                      hasCompositeValue = true;
-                      final Map<String, List<FormDataBodyPart>> composites;
-                      String groupKey = matcher.group(1);
-                      if (compositesCollection.containsKey(groupKey)) {
-                        composites = compositesCollection.get(groupKey);
-                      }
-                      else {
-                        composites = new LinkedHashMap<String, List<FormDataBodyPart>>();
-                        compositesCollection.put(groupKey, composites);
-                      }
-                      composites.put(key.substring(matcher.end(1) + 1), bodyParts.get(key));
+            CollectionDataType collectionFieldDef = (CollectionDataType) fieldDef.getValue().getValueDef();
+            CollectionFieldValueImpl fieldValueImpl = new CollectionFieldValueImpl();
+            switch (collectionFieldDef.getItemDataType().getType()) {
+              case COMPOSITE: {
+                boolean hasCompositeValue = false;
+                Map<String, Map<String, List<FormDataBodyPart>>> compositesCollection =
+                                                                 new HashMap<String, Map<String, List<FormDataBodyPart>>>();
+                final String prefixPattern = new StringBuilder(fieldDef.getKey()).append("\\.([a-z0-9]+)\\..+").
+                    toString();
+                Pattern pattern = Pattern.compile(prefixPattern);
+                for (String key : bodyParts.keySet()) {
+                  Matcher matcher = pattern.matcher(key);
+                  if (matcher.matches()) {
+                    hasCompositeValue = true;
+                    final Map<String, List<FormDataBodyPart>> composites;
+                    String groupKey = matcher.group(1);
+                    if (compositesCollection.containsKey(groupKey)) {
+                      composites = compositesCollection.get(groupKey);
                     }
-                  }
-                  if (hasCompositeValue) {
-                    CompositeDataType compositeDataType = (CompositeDataType) collectionFieldDef.getItemDataType();
-                    for (Entry<String, Map<String, List<FormDataBodyPart>>> cols : compositesCollection.entrySet()) {
-                      Collection<com.smartitengineering.cms.ws.common.domains.Field> composedFields =
-                                                                                     new ArrayList<com.smartitengineering.cms.ws.common.domains.Field>();
-                      formFields(compositeDataType.getComposedFieldDefs(), cols.getValue(), composedFields);
-                      CompositeFieldValueImpl valueImpl = new CompositeFieldValueImpl();
-                      valueImpl.setValues(composedFields);
-                      fieldValueImpl.getValues().add(valueImpl);
+                    else {
+                      composites = new LinkedHashMap<String, List<FormDataBodyPart>>();
+                      compositesCollection.put(groupKey, composites);
                     }
+                    composites.put(key.substring(matcher.end(1) + 1), bodyParts.get(key));
                   }
-                  break;
                 }
-                default:
+                if (hasCompositeValue) {
+                  CompositeDataType compositeDataType = (CompositeDataType) collectionFieldDef.getItemDataType();
+                  for (Entry<String, Map<String, List<FormDataBodyPart>>> cols : compositesCollection.entrySet()) {
+                    Collection<com.smartitengineering.cms.ws.common.domains.Field> composedFields =
+                                                                                   new ArrayList<com.smartitengineering.cms.ws.common.domains.Field>();
+                    formFields(compositeDataType.getComposedFieldDefs(), cols.getValue(), composedFields);
+                    CompositeFieldValueImpl valueImpl = new CompositeFieldValueImpl();
+                    valueImpl.setValuesAsCollection(composedFields);
+                    fieldValueImpl.getValues().add(valueImpl);
+                  }
+                }
+                break;
+              }
+              default:
+                if (containsKey) {
                   for (FormDataBodyPart bodyPart : bodyParts.get(fieldDef.getKey())) {
                     if (bodyPart == null || org.apache.commons.lang.StringUtils.isBlank(bodyPart.getValue())) {
                       continue;
@@ -362,12 +364,12 @@ public class ContentResource extends AbstractResource {
                       fieldValueImpl.getValues().add(valueImpl);
                     }
                   }
-              }
-              if (fieldValueImpl.getValues().isEmpty()) {
-                continue;
-              }
-              fieldImpl.setValue(fieldValueImpl);
+                }
             }
+            if (fieldValueImpl.getValues().isEmpty()) {
+              continue;
+            }
+            fieldImpl.setValue(fieldValueImpl);
             break;
           }
 
@@ -595,22 +597,10 @@ public class ContentResource extends AbstractResource {
       String contentUri =
              ContentResource.getContentUri(getRelativeURIBuilder(), fromBean.getContentId()).toASCIIString();
       for (FieldDef fieldDef : type.getFieldDefs().values()) {
-        final String fieldName = fieldDef.getName();
-        Field field = fields.get(fieldName);
-        if (LOGGER.isInfoEnabled()) {
-          LOGGER.info("Field " + field);
-          if (field != null) {
-            LOGGER.info("Converting field " + field.getName() + " with value " + field.getValue().toString() +
-                " and URI " + contentUri);
-          }
+        FieldImpl fieldImpl = convertToDomainField(getRelativeURIBuilder(), fieldDef, fields, contentUri);
+        if (fieldImpl != null) {
+          contentImpl.getFields().add(fieldImpl);
         }
-        if (field == null) {
-          continue;
-        }
-        FieldImpl fieldImpl = new FieldImpl();
-        fieldImpl.setName(fieldName);
-        getDomainField(getRelativeURIBuilder(), field, contentUri, fieldImpl);
-        contentImpl.getFields().add(fieldImpl);
       }
       Collection<RepresentationDef> defs = type.getRepresentationDefs().values();
       String currentContext = new StringBuilder(contentUri).append("/r/").toString();
@@ -679,6 +669,27 @@ public class ContentResource extends AbstractResource {
       LOGGER.info("Parsing value as " + dataType.getType().name());
     }
     switch (dataType.getType()) {
+      case COMPOSITE: {
+        LOGGER.info("Parsing as composite");
+        MutableCompositeFieldValue compositeFieldValue = SmartContentAPI.getInstance().getContentLoader().
+            createCompositeFieldValue();
+        CompositeFieldValue compositeValue = (CompositeFieldValue) value;
+        CompositeDataType compositeDataType = (CompositeDataType) dataType;
+        Collection<Field> composedOf = new ArrayList<Field>(compositeValue.getValues().size());
+        Map<String, FieldDef> fieldDefs = compositeDataType.getComposedFieldDefs();
+        for (Entry<String, com.smartitengineering.cms.ws.common.domains.Field> field : compositeValue.getValues().
+            entrySet()) {
+          FieldDef def = fieldDefs.get(field.getKey());
+          if (def == null) {
+            throw new NullPointerException("No such field definition within composed field");
+          }
+          MutableField mutableField = getField(null, def, field.getValue(), context, absBuilder);
+          composedOf.add(mutableField);
+        }
+        compositeFieldValue.setValue(composedOf);
+        fieldValue = compositeFieldValue;
+        break;
+      }
       case COLLECTION:
         LOGGER.info("Parsing as collection");
         MutableCollectionFieldValue collectionFieldValue = SmartContentAPI.getInstance().getContentLoader().
@@ -779,22 +790,24 @@ public class ContentResource extends AbstractResource {
 
   protected static void getDomainField(UriBuilder builder, Field field, String contentUri, FieldImpl fieldImpl) {
 
-    final String fieldUri = new StringBuilder(contentUri).append("/f/").append(field.getName()).toString();
-    fieldImpl.setFieldUri(fieldUri);
-    fieldImpl.setFieldRawContentUri(new StringBuilder(fieldUri).append("/raw").toString());
     if (field != null) {
       fieldImpl.setName(field.getName());
       final FieldValueImpl value;
       final FieldValue contentFieldValue = field.getValue();
       final DataType valueDef = field.getFieldDef().getValueDef();
       value = getFieldvalue(builder, valueDef, contentFieldValue);
-      Map<String, String> variations = fieldImpl.getVariations();
-      Map<String, String> variationsByNames = fieldImpl.getVariationsByNames();
-      Collection<VariationDef> defs = field.getFieldDef().getVariations().values();
-      for (VariationDef def : defs) {
-        final String uri = new StringBuilder(fieldUri).append("/v/").append(def.getName()).toString();
-        variations.put(uri, def.getMIMEType());
-        variationsByNames.put(def.getName(), uri);
+      if (org.apache.commons.lang.StringUtils.isNotBlank(contentUri)) {
+        Collection<VariationDef> defs = field.getFieldDef().getVariations().values();
+        Map<String, String> variations = fieldImpl.getVariations();
+        Map<String, String> variationsByNames = fieldImpl.getVariationsByNames();
+        final String fieldUri = new StringBuilder(contentUri).append("/f/").append(field.getName()).toString();
+        fieldImpl.setFieldUri(fieldUri);
+        fieldImpl.setFieldRawContentUri(new StringBuilder(fieldUri).append("/raw").toString());
+        for (VariationDef def : defs) {
+          final String uri = new StringBuilder(fieldUri).append("/v/").append(def.getName()).toString();
+          variations.put(uri, def.getMIMEType());
+          variationsByNames.put(def.getName(), uri);
+        }
       }
       fieldImpl.setValue(value);
     }
@@ -823,6 +836,20 @@ public class ContentResource extends AbstractResource {
         value = valueImpl;
         break;
       }
+      case COMPOSITE: {
+        CompositeFieldValueImpl valueImpl = new CompositeFieldValueImpl();
+        Map<String, Field> composedFields =
+                           ((com.smartitengineering.cms.api.content.CompositeFieldValue) contentFieldValue).
+            getValueAsMap();
+        final Map<String, FieldDef> composedFieldDefs = ((CompositeDataType) valueDef).getComposedFieldDefs();
+        for (Entry<String, Field> composeeField : composedFields.entrySet()) {
+          valueImpl.getValues().put(composeeField.getKey(),
+                                    convertToDomainField(builder, composedFieldDefs.get(composeeField.getKey()),
+                                                         composedFields, ""));
+        }
+        value = valueImpl;
+        break;
+      }
       case OTHER:
       case STRING: {
         OtherFieldValueImpl valueImpl = new OtherFieldValueImpl();
@@ -839,6 +866,30 @@ public class ContentResource extends AbstractResource {
     }
     value.setType(valueDef.getType().toString());
     return value;
+  }
+
+  protected static FieldImpl convertToDomainField(UriBuilder builder, FieldDef fieldDef,
+                                                  Map<String, Field> fields, String contentUri) {
+    final String fieldName = fieldDef.getName();
+    Field field = fields.get(fieldName);
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("Field " + field);
+      if (field != null) {
+        LOGGER.info("Converting field " + field.getName() + " with value " + field.getValue().toString() +
+            " and URI " + contentUri);
+      }
+    }
+    FieldImpl fieldImpl;
+    if (field != null) {
+      fieldImpl = new FieldImpl();
+      fieldImpl.setName(fieldName);
+      getDomainField(builder, field, contentUri, fieldImpl);
+
+    }
+    else {
+      fieldImpl = null;
+    }
+    return fieldImpl;
   }
 
   protected ContentId getContentId() {

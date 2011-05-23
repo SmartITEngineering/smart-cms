@@ -21,6 +21,7 @@ package com.smartitengineering.cms.api.impl.content;
 import com.smartitengineering.cms.api.content.CollectionFieldValue;
 import com.smartitengineering.cms.api.content.CompositeFieldValue;
 import com.smartitengineering.cms.api.content.Field;
+import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.MutableCompositeFieldValue;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import java.io.StringWriter;
@@ -57,6 +58,9 @@ public class CompositeFieldValueImpl extends FieldValueImpl<Collection<Field>> i
         new WriterBasedGenerator(new IOContext(new BufferRecycler(), new Object(), true), Feature.collectDefaults(),
                                  CollectionFieldValueImpl.MAPPER, stringWriter).writeTree(objectNode);
         toString = stringWriter.toString();
+        if (logger.isInfoEnabled()) {
+          logger.info("Returning composite field value " + toString);
+        }
         return toString;
       }
       catch (Exception ex) {
@@ -72,15 +76,23 @@ public class CompositeFieldValueImpl extends FieldValueImpl<Collection<Field>> i
       JsonNodeFactory factory = CollectionFieldValueImpl.MAPPER.getNodeFactory();
       ObjectNode objectNode = new ObjectNode(factory);
       for (Field field : fields) {
-        switch (field.getFieldDef().getValueDef().getType()) {
-          case COLLECTION:
-            objectNode.put(field.getName(), (ArrayNode) ((CollectionFieldValue) field.getValue()).getAsJsonNode());
-            break;
-          case COMPOSITE:
-            objectNode.put(field.getName(), (ObjectNode) ((CompositeFieldValue) field.getValue()).getAsJsonNode());
-            break;
-          default:
-            objectNode.put(field.getName(), field.toString());
+        final FieldValue value = field.getValue();
+        if (value != null) {
+          switch (field.getFieldDef().getValueDef().getType()) {
+            case COLLECTION:
+              objectNode.put(field.getName(), (ArrayNode) ((CollectionFieldValue) value).getAsJsonNode());
+              break;
+            case COMPOSITE:
+              objectNode.put(field.getName(), (ObjectNode) ((CompositeFieldValue) value).getAsJsonNode());
+              break;
+            default: {
+              final String toString = value.toString();
+              if (logger.isInfoEnabled()) {
+                logger.info("Adding default type field value for " + field.getName() + ", value " + toString);
+              }
+              objectNode.put(field.getName(), toString);
+            }
+          }
         }
       }
       return objectNode;
@@ -91,8 +103,13 @@ public class CompositeFieldValueImpl extends FieldValueImpl<Collection<Field>> i
   public Map<String, Field> getValueAsMap() {
     Collection<Field> fields = getValue();
     LinkedHashMap<String, Field> fieldMap = new LinkedHashMap<String, Field>();
-    for (Field field : fields) {
-      fieldMap.put(field.getName(), field);
+    if (fields != null && !fields.isEmpty()) {
+      for (Field field : fields) {
+        fieldMap.put(field.getName(), field);
+      }
+    }
+    else {
+      logger.warn("EMPTY COMPOSITE FIELD!");
     }
     return fieldMap;
   }

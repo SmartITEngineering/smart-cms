@@ -80,6 +80,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
+import com.sun.jersey.multipart.FormDataMultiPart;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -2245,11 +2246,6 @@ public class AppTest {
     CompositeDataType compositeDataType = (CompositeDataType) field.getValueDef();
     Assert.assertNotNull(compositeDataType.getEmbeddedContentType());
     Assert.assertEquals(2, compositeDataType.getOwnComposition().size());
-    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ TEST COMPOSITION ~~~~~~~~~~~~~~~~~~~~~~~~~");
-    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ TEST COMPOSITION ~~~~~~~~~~~~~~~~~~~~~~~~~");
-    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ TEST COMPOSITION ~~~~~~~~~~~~~~~~~~~~~~~~~");
-    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ TEST COMPOSITION ~~~~~~~~~~~~~~~~~~~~~~~~~");
-    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ TEST COMPOSITION ~~~~~~~~~~~~~~~~~~~~~~~~~");
     Assert.assertEquals(9, compositeDataType.getComposition().size());
     Iterator<FieldDef> compositionIterator = compositeDataType.getOwnComposition().iterator();
     compositionIterator.next();
@@ -2274,6 +2270,32 @@ public class AppTest {
     compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
     Assert.assertNull(compositeDataType.getEmbeddedContentType());
     Assert.assertEquals(2, compositeDataType.getOwnComposition().size());
+  }
+
+  @Test
+  public void testCreateContentWithCompositeField() throws Exception {
+    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ COMPOSITE CONTENT CREATION ~~~~~~~~~~~~~~~~~~~~~~~~~");
+    WorkspaceFeedResource feedResource = setupCompositeWorkspace();
+    final Properties properties = new Properties();
+    properties.load(getClass().getClassLoader().getResourceAsStream(
+        "composite/form-value.properties"));
+    Set<Object> formKeys = properties.keySet();
+    FormDataMultiPart multiPart = new FormDataMultiPart();
+    for (Object key : formKeys) {
+      multiPart.field(key.toString(), properties.getProperty(key.toString()));
+    }
+    ClientResponse response = feedResource.getContents().post(MediaType.MULTIPART_FORM_DATA, multiPart,
+                                                              ClientResponse.Status.CREATED,
+                                                              ClientResponse.Status.ACCEPTED, ClientResponse.Status.OK);
+    URI uri = response.getLocation();
+    ContentResourceImpl resourceImpl = new ContentResourceImpl(feedResource, uri);
+    final Content lastReadStateOfEntity = resourceImpl.getLastReadStateOfEntity();
+    Assert.assertNotNull(lastReadStateOfEntity);
+    ContentResource resource = feedResource.getContents().createContentResource(lastReadStateOfEntity);
+    Assert.assertNotNull(resource.getLastReadStateOfEntity());
+    resource.update(lastReadStateOfEntity);
+    resource.get();
+    Assert.assertNotNull(resource.getLastReadStateOfEntity());
   }
 
   public static class ConfigurationModule extends AbstractModule {
