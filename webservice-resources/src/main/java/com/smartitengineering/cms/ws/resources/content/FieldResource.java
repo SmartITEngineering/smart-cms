@@ -20,6 +20,7 @@ package com.smartitengineering.cms.ws.resources.content;
 
 import com.smartitengineering.cms.api.content.BooleanFieldValue;
 import com.smartitengineering.cms.api.content.CollectionFieldValue;
+import com.smartitengineering.cms.api.content.CompositeFieldValue;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentFieldValue;
 import com.smartitengineering.cms.api.content.ContentId;
@@ -29,6 +30,7 @@ import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.NumberFieldValue;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
+import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
@@ -82,11 +84,17 @@ public class FieldResource extends AbstractResource {
   private final Content content;
   private final FieldDef fieldDef;
   private final EntityTag entityTag;
+  private final Field preinitField;
   protected final GenericAdapter<Field, com.smartitengineering.cms.ws.common.domains.Field> adapter;
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
   public static final String PATH_TO_VAR = "v/{varName}";
 
   public FieldResource(ServerResourceInjectables injectables, Content content, FieldDef fieldDef, EntityTag eTag) {
+    this(injectables, content, fieldDef, eTag, null);
+  }
+
+  public FieldResource(ServerResourceInjectables injectables, Content content, FieldDef fieldDef, EntityTag eTag,
+                       Field field) {
     super(injectables);
     if (content == null || fieldDef == null) {
       logger.warn("No content or field def", new NullPointerException());
@@ -98,11 +106,12 @@ public class FieldResource extends AbstractResource {
     adapterImpl.setHelper(new FieldAdapterHelper());
     this.adapter = adapterImpl;
     this.entityTag = eTag;
+    this.preinitField = field;
   }
 
   @Path(PATH_TO_VAR)
   public VariationResource getVariation(@PathParam("varName") String varName) {
-    Field field = content.getField(fieldDef.getName());
+    Field field = getCurrentField();
     if (field != null) {
       return new VariationResource(getInjectables(), content, field, varName);
     }
@@ -112,11 +121,24 @@ public class FieldResource extends AbstractResource {
   }
 
   @GET
+  @Path("/f/{fieldName}")
+  public FieldResource getComposedField(@PathParam("fieldName") final String nestedFieldName) {
+    if (!fieldDef.getValueDef().getType().equals(FieldValueType.COMPOSITE)) {
+      throw new WebApplicationException(Status.BAD_REQUEST);
+    }
+    CompositeDataType compositeFieldDef = (CompositeDataType) fieldDef.getValueDef();
+    FieldDef newFieldDef = compositeFieldDef.getComposedFieldDefs().get(nestedFieldName);
+    CompositeFieldValue compositeFieldValue = (CompositeFieldValue) getCurrentField().getValue();
+    return new FieldResource(getInjectables(), content, newFieldDef, entityTag, compositeFieldValue.getValueAsMap().get(
+        nestedFieldName));
+  }
+
+  @GET
   @Path("/raw/abs")
   public Response getAbsoluteRaw() {
     ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), entityTag);
     if (builder == null) {
-      Field field = content.getField(fieldDef.getName());
+      Field field = getCurrentField();
       if (field == null) {
         builder = Response.status(Status.NOT_FOUND);
       }
@@ -131,6 +153,15 @@ public class FieldResource extends AbstractResource {
     return builder.build();
   }
 
+  protected Field getCurrentField() {
+    if (preinitField != null) {
+      return preinitField;
+    }
+    else {
+      return content.getField(fieldDef.getName());
+    }
+  }
+
   @GET
   @Path("/raw")
   public Response getRaw() {
@@ -142,7 +173,7 @@ public class FieldResource extends AbstractResource {
     ResponseBuilder builder =
                     getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), entityTag);
     if (builder == null) {
-      Field field = content.getField(fieldDef.getName());
+      Field field = getCurrentField();
       if (field == null) {
         builder = Response.status(Status.NOT_FOUND);
       }
@@ -186,7 +217,7 @@ public class FieldResource extends AbstractResource {
   public Response get() {
     ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), entityTag);
     if (builder == null) {
-      Field field = content.getField(fieldDef.getName());
+      Field field = getCurrentField();
       if (field == null) {
         builder = Response.status(Status.NOT_FOUND);
       }
@@ -205,7 +236,7 @@ public class FieldResource extends AbstractResource {
     if (!fieldDef.isFieldStandaloneUpdateAble()) {
       return Response.status(Status.FORBIDDEN).build();
     }
-    final boolean isAvailable = content.getField(fieldDef.getName()) != null;
+    final boolean isAvailable = getCurrentField() != null;
     if (!isAvailable) {
       return Response.status(Status.NOT_FOUND).build();
     }
@@ -353,7 +384,7 @@ public class FieldResource extends AbstractResource {
   }
 
   private void processDefaultRawContent(ResponseBuilder builder) {
-    final Field field = content.getField(fieldDef.getName());
+    final Field field = getCurrentField();
     final FieldValue value = field.getValue();
     final MediaType mimeType = getFieldValueDefaultMimeType(fieldDef.getValueDef());
     switch (fieldDef.getValueDef().getType()) {
@@ -398,7 +429,7 @@ public class FieldResource extends AbstractResource {
     final Date lastModifiedDate = content.getLastModifiedDate();
     Feed feed = getFeed(toString, toString, lastModifiedDate);
     feed.addLink(getLink(getFieldUri(), Link.REL_EDIT, MediaType.APPLICATION_JSON));
-    final Field field = content.getField(fieldDef.getName());
+    final Field field = getCurrentField();
     final FieldValue value = field.getValue();
     Collection<Entry> entries = getEntries(value, lastModifiedDate);
     for (Entry entry : entries) {
@@ -474,7 +505,8 @@ public class FieldResource extends AbstractResource {
 
     @Override
     protected Field convertFromT2F(com.smartitengineering.cms.ws.common.domains.Field toBean) {
-      return ContentResource.getField(content.getContentId(), fieldDef, toBean, getResourceContext(), getAbsoluteURIBuilder());
+      return ContentResource.getField(content.getContentId(), fieldDef, toBean, getResourceContext(),
+                                      getAbsoluteURIBuilder());
     }
   }
 }
