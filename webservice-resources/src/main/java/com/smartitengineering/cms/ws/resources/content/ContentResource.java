@@ -757,7 +757,7 @@ public class ContentResource extends AbstractResource {
     final DataType dataType = fieldDef.getValueDef();
     LOGGER.info("Working with field " + field.getName() + " of type " + dataType.getType().name() + " with value " +
         field.getValue());
-    if (org.apache.commons.lang.StringUtils.isNotBlank(field.getValue().getType()) &&
+    if (field.getValue() != null && org.apache.commons.lang.StringUtils.isNotBlank(field.getValue().getType()) &&
         !org.apache.commons.lang.StringUtils.equalsIgnoreCase(dataType.getType().name(), field.getValue().getType())) {
       throw new IllegalArgumentException("Type mismatch! NOTE: type of values in field is optional in this case. " +
           "Field is " + field.getName() + " - " + dataType.getType().name() + " " + field.getValue().getType());
@@ -765,7 +765,12 @@ public class ContentResource extends AbstractResource {
     final MutableField mutableField =
                        SmartContentAPI.getInstance().getContentLoader().createMutableField(contentId, fieldDef);
     final FieldValue fieldValue;
-    fieldValue = getFieldValue(dataType, field.getValue(), context, absBuilder, importMode);
+    if (field.getValue() != null) {
+      fieldValue = getFieldValue(dataType, field.getValue(), context, absBuilder, importMode);
+    }
+    else {
+      fieldValue = null;
+    }
     mutableField.setValue(fieldValue);
     return mutableField;
   }

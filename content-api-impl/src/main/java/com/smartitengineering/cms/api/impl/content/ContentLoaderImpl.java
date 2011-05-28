@@ -366,17 +366,23 @@ public class ContentLoaderImpl implements ContentLoader {
             Map<String, FieldDef> defs = compositeDataType.getComposedFieldDefs();
             Collection<Field> compositeValues = new ArrayList<Field>(defs.size());
             for (Entry<String, FieldDef> def : defs.entrySet()) {
-              JsonNode fNode = objectNode.get(def.getKey());
-              final String textValue;
+              final JsonNode fNode = objectNode.get(def.getKey());
               final DataType itemDataType = def.getValue().getValueDef();
-              if (itemDataType.getType().equals(FieldValueType.COLLECTION) || itemDataType.getType().equals(
-                  FieldValueType.COMPOSITE)) {
-                textValue = fNode.toString();
+              final String textValue;
+              if (fNode != null) {
+                if (itemDataType.getType().equals(FieldValueType.COLLECTION) || itemDataType.getType().equals(
+                    FieldValueType.COMPOSITE)) {
+                  textValue = fNode.toString();
+                }
+                else {
+                  textValue = fNode.getTextValue();
+                }
               }
               else {
-                textValue = fNode.getTextValue();
+                textValue = "";
               }
-              final FieldValue valueFor = getValueFor(textValue, itemDataType);
+              final FieldValue valueFor = org.apache.commons.lang.StringUtils.isNotBlank(textValue) ? getValueFor(
+                  textValue, itemDataType) : null;
               final MutableField mutableField = createMutableField(null, def.getValue());
               mutableField.setValue(valueFor);
               compositeValues.add(mutableField);
@@ -532,7 +538,7 @@ public class ContentLoaderImpl implements ContentLoader {
     if (!checkForRelatedContents(content)) {
       return false;
     }
-    if (!isValidByCustomValidator(content)) {
+    if (!isValidByCustomValidators(content)) {
       return false;
     }
     return true;
@@ -554,36 +560,169 @@ public class ContentLoaderImpl implements ContentLoader {
       logger.warn("Content or its ID or content definition is missing!");
     }
     return content != null && content.getContentId() != null && content.getContentDefinition() != null &&
-        isMandatoryFieldsPresent(
-        content);
+        isMandatoryFieldsPresent(content);
   }
 
   protected boolean isMandatoryFieldsPresent(Content content) {
     ContentType type = content.getContentDefinition();
+    return isMandatoryFieldsPresent(type.getFieldDefs().values(), content.getFields());
+  }
+
+  protected boolean isMandatoryFieldsPresent(Collection<FieldDef> defs, Map<String, Field> fields) {
     boolean valid = true;
-    for (FieldDef def : type.getFieldDefs().values()) {
-      if (logger.isDebugEnabled()) {
-        logger.debug(def.getName() + " is required: " + def.isRequired());
-        logger.debug(def.getName() + ": " + content.getField(def.getName()));
+    for (FieldDef def : defs) {
+      if (!valid) {
+        logger.debug("Skipping field as already invalid! - " + def.getName());
+        continue;
       }
-      if (def.isRequired() && content.getField(def.getName()) == null) {
+      final Field cField = fields.get(def.getName());
+      if (logger.isInfoEnabled()) {
+        logger.info(def.getName() + " is required: " + def.isRequired());
+        logger.info(def.getName() + ": " + cField);
+        if (cField != null) {
+          logger.info(def.getName() + ": " + cField.getValue());
+          if (cField.getValue() != null) {
+            logger.info(def.getName() + ": " + cField.getValue().getValue());
+          }
+        }
+      }
+      if (def.isRequired() && (cField == null || cField.getValue() == null || cField.getValue().getValue() == null)) {
         if (logger.isWarnEnabled()) {
           logger.warn("Required field not present " + def.getName());
         }
-        valid = valid && false;
+        valid = false;
+      }
+      if (valid) {
+        if (def.getValueDef().getType().equals(FieldValueType.COMPOSITE)) {
+          final Collection<FieldDef> nestedDefs;
+          final Map<String, Field> nestedFields;
+          nestedDefs = ((CompositeDataType) def.getValueDef()).getComposition();
+          if (fields.containsKey(def.getName()) && cField != null) {
+            Field myField = cField;
+            CompositeFieldValue compositeFieldValue = (CompositeFieldValue) myField.getValue();
+            if (compositeFieldValue != null) {
+              nestedFields = compositeFieldValue.getValueAsMap();
+            }
+            else {
+              nestedFields = null;
+            }
+          }
+          else {
+            nestedFields = null;
+          }
+          if (nestedDefs != null && nestedFields != null) {
+            if (logger.isInfoEnabled()) {
+              logger.info("Going to validate collection's item mandatory fields from " + cField.getName());
+            }
+            valid = isMandatoryFieldsPresent(nestedDefs, nestedFields);
+          }
+        }
+        else if (def.getValueDef().getType().equals(FieldValueType.COLLECTION) &&
+            ((CollectionDataType) def.getValueDef()).getItemDataType().getType().equals(FieldValueType.COMPOSITE)) {
+          final Collection<FieldDef> nestedDefs;
+          nestedDefs = ((CompositeDataType) ((CollectionDataType) def.getValueDef()).getItemDataType()).getComposition();
+          if (fields.containsKey(def.getName()) && cField != null) {
+            final Field myField = cField;
+            CollectionFieldValue collectionFieldValue = (CollectionFieldValue) myField.getValue();
+            Collection<FieldValue> values = collectionFieldValue.getValue();
+            if (values != null) {
+              for (FieldValue fieldValue : values) {
+                if (!valid) {
+                  continue;
+                }
+                CompositeFieldValue compositeFieldValue = (CompositeFieldValue) fieldValue;
+                final Map<String, Field> nestedFields;
+                if (compositeFieldValue != null) {
+                  nestedFields = compositeFieldValue.getValueAsMap();
+                }
+                else {
+                  nestedFields = null;
+                }
+                if (nestedDefs != null && nestedFields != null) {
+                  if (logger.isInfoEnabled()) {
+                    logger.info("Going to validate collection's item mandatory fields from " + myField.getName());
+                  }
+                  valid = valid && isMandatoryFieldsPresent(nestedDefs, nestedFields);
+                }
+              }
+            }
+          }
+        }
       }
     }
     return valid;
   }
 
-  protected boolean isValidByCustomValidator(Content content) {
+  protected boolean isValidByCustomValidators(Content content) {
+    final Collection<Field> values = content.getFields().values();
+    return isValidByCustomValidators(values, content);
+  }
+
+  protected boolean isValidByCustomValidators(final Collection<Field> values, final Content content) {
     boolean valid = true;
-    for (Field field : content.getFields().values()) {
+    for (Field field : values) {
+      if (!valid) {
+        logger.debug("Skipping field as already invalid! - " + field.getName());
+        continue;
+      }
       final boolean validField = SmartContentSPI.getInstance().getValidatorProvider().isValidField(content, field);
       if (!validField && logger.isWarnEnabled()) {
         logger.warn("Custom field validation failed for " + field.getName());
       }
       valid = valid && validField;
+      if (valid) {
+        FieldDef def = field.getFieldDef();
+        if (def.getValueDef().getType().equals(FieldValueType.COMPOSITE)) {
+          final Map<String, Field> nestedFields;
+          if (field != null) {
+            CompositeFieldValue compositeFieldValue = (CompositeFieldValue) field.getValue();
+            if (compositeFieldValue != null) {
+              nestedFields = compositeFieldValue.getValueAsMap();
+            }
+            else {
+              nestedFields = null;
+            }
+          }
+          else {
+            nestedFields = null;
+          }
+          if (nestedFields != null) {
+            if (logger.isInfoEnabled()) {
+              logger.info("Going to validate composite fields from " + field.getName());
+            }
+            valid = isValidByCustomValidators(nestedFields.values(), content);
+          }
+        }
+        else if (def.getValueDef().getType().equals(FieldValueType.COLLECTION) &&
+            ((CollectionDataType) def.getValueDef()).getItemDataType().getType().equals(FieldValueType.COMPOSITE)) {
+          if (field != null) {
+            CollectionFieldValue collectionFieldValue = (CollectionFieldValue) field.getValue();
+            Collection<FieldValue> collectionValues = collectionFieldValue.getValue();
+            if (collectionValues != null) {
+              for (FieldValue fieldValue : collectionValues) {
+                if (!valid) {
+                  logger.debug("Skipping iteration over collection field as already invalid! - " + field.getName());
+                  continue;
+                }
+                CompositeFieldValue compositeFieldValue = (CompositeFieldValue) fieldValue;
+                final Map<String, Field> nestedFields;
+                if (compositeFieldValue != null) {
+                  nestedFields = compositeFieldValue.getValueAsMap();
+                }
+                else {
+                  nestedFields = null;
+                }
+                if (nestedFields != null) {
+                  if (logger.isInfoEnabled()) {
+                    logger.info("Going to validate colletion's item composite fields from " + field.getName());
+                  }
+                  valid = isValidByCustomValidators(nestedFields.values(), content);
+                }
+              }
+            }
+          }
+        }
+      }
     }
     return valid;
   }

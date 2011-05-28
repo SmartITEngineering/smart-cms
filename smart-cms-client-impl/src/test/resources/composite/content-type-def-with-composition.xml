@@ -66,6 +66,7 @@
             <mimeType>text/plain</mimeType>
           </string>
         </value>
+        <required>true</required>
         <search>
           <index>true</index>
           <store>true</store>
@@ -88,6 +89,7 @@
             <mimeType>text/plain</mimeType>
           </string>
         </value>
+        <required>true</required>
         <search>
           <index>true</index>
           <store>true</store>
@@ -238,6 +240,157 @@
                       <mimeType>text/plain</mimeType>
                     </string>
                   </value>
+                  <search>
+                    <index>true</index>
+                    <store>true</store>
+                  </search>
+                </field>
+              </composition>
+            </simple-value>
+          </collection>
+        </value>
+        <search>
+          <index>true</index>
+          <store>true</store>
+        </search>
+      </field>
+    </fields>
+  </contentType>
+  <contentType namespace="test">
+    <name>VOrder</name>
+    <primaryField>aShippingAddress</primaryField>
+    <fields>
+      <field>
+        <name>aShippingAddress</name>
+        <displayName>Shipping Address</displayName>
+        <value>
+          <composition>
+            <content>
+              <definition>
+                <typeNS>test</typeNS>
+                <typeName>Address</typeName>
+              </definition>
+            </content>
+            <field>
+              <name>authorizedPersonnel</name>
+              <displayName>Authorized Personnel</displayName>
+              <value>
+                <string>
+                  <mimeType>text/plain</mimeType>
+                </string>
+              </value>
+            </field>
+            <field>
+              <name>phones</name>
+              <displayName>Phone No.</displayName>
+              <value>
+                <collection>
+                  <simple-value>
+                    <composition>
+                      <field>
+                        <name>anumber</name>
+                        <displayName>Number</displayName>
+                        <value>
+                          <string>
+                            <mimeType>text/plain</mimeType>
+                          </string>
+                        </value>
+                      </field>
+                      <field>
+                        <name>availability</name>
+                        <displayName>Availability</displayName>
+                        <value>
+                          <composition>
+                            <field>
+                              <name>from</name>
+                              <displayName>Available From</displayName>
+                              <value>
+                                <datetime></datetime>
+                              </value>
+                              <required>true</required>
+                              <search>
+                                <index>true</index>
+                                <store>true</store>
+                              </search>
+                            </field>
+                            <field>
+                              <name>to</name>
+                              <displayName>Available Until</displayName>
+                              <value>
+                                <datetime></datetime>
+                              </value>
+                              <search>
+                                <index>true</index>
+                                <store>true</store>
+                              </search>
+                            </field>
+                          </composition>
+                        </value>
+                        <search>
+                          <index>true</index>
+                          <store>true</store>
+                        </search>
+                      </field>
+                    </composition>
+                  </simple-value>
+                </collection>
+              </value>
+              <required>true</required>
+              <search>
+                <index>true</index>
+                <store>true</store>
+              </search>
+            </field>
+          </composition>
+        </value>
+        <required>true</required>
+        <search>
+          <index>true</index>
+          <store>true</store>
+        </search>
+      </field>
+      <field>
+        <name>billingAddress</name>
+        <displayName>Billing Address</displayName>
+        <value>
+          <composition>
+            <content>
+              <definition>
+                <typeNS>test</typeNS>
+                <typeName>Address</typeName>
+              </definition>
+            </content>
+          </composition>
+        </value>
+      </field>
+      <field>
+        <name>comments</name>
+        <displayName>Comments</displayName>
+        <value>
+          <collection>
+            <simple-value>
+              <composition>
+                <field>
+                  <name>By</name>
+                  <value>
+                    <string>
+                      <mimeType>text/plain</mimeType>
+                    </string>
+                  </value>
+                  <required>true</required>
+                  <search>
+                    <index>true</index>
+                    <store>true</store>
+                  </search>
+                </field>
+                <field>
+                  <name>Comment</name>
+                  <value>
+                    <string>
+                      <mimeType>text/plain</mimeType>
+                    </string>
+                  </value>
+                  <required>true</required>
                   <search>
                     <index>true</index>
                     <store>true</store>

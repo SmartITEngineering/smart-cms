@@ -2298,6 +2298,35 @@ public class AppTest {
     Assert.assertNotNull(resource.getLastReadStateOfEntity());
   }
 
+  @Test
+  public void testRequiredFieldValidationForCompositeField() throws Exception {
+    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ MANDATORY COMPOSITE FIELD VALIDATION ~~~~~~~~~~~~~~~~~~~~~~~~~");
+    WorkspaceFeedResource feedResource = setupCompositeWorkspace();
+    final String[] resources = new String[]{"composite/form-value-invalid-collection.properties",
+      "composite/form-value-invalid-complex.properties", "composite/form-value-invalid-composition.properties",
+      "composite/form-value-invalid-content.properties"};
+    for (String resource : resources) {
+      final Properties properties = new Properties();
+      properties.load(getClass().getClassLoader().getResourceAsStream(
+          resource));
+      Set<Object> formKeys = properties.keySet();
+      FormDataMultiPart multiPart = new FormDataMultiPart();
+      for (Object key : formKeys) {
+        multiPart.field(key.toString(), properties.getProperty(key.toString()));
+      }
+      try {
+        ClientResponse response =
+                       feedResource.getContents().post(MediaType.MULTIPART_FORM_DATA, multiPart,
+                                                       ClientResponse.Status.CREATED,
+                                                       ClientResponse.Status.ACCEPTED, ClientResponse.Status.OK);
+        Assert.fail("Invalid content should have failed for " + resource);
+      }
+      catch (Exception ex) {
+        //Expected that creation fails
+      }
+    }
+  }
+
   public static class ConfigurationModule extends AbstractModule {
 
     @Override

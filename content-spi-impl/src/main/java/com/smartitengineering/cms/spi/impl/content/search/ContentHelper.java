@@ -143,6 +143,9 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
     if (logger.isInfoEnabled()) {
       logger.info("Indexing field value " + field.getName() + " with prefix " + prefix + " and separator " + separator);
     }
+    if (field == null || field.getValue() == null || field.getValue().getValue() == null) {
+      return;
+    }
     final Object value = field.getValue().getValue();
     addSimpleValue(field.getValue(), field.getFieldDef().getValueDef(), toBean, field.getName(), indexFieldName, value,
                    prefix, '_', indexedContents);
