@@ -378,6 +378,21 @@
                     </string>
                   </value>
                   <required>true</required>
+                  <validators>
+                    <validator>
+                      <uri>
+                        <internal>
+                          <name>internalval</name>
+                        </internal>
+                      </uri>
+                      <params>
+                        <param>
+                          <key>max</key>
+                          <val>8</val>
+                        </param>
+                      </params>
+                    </validator>
+                  </validators>
                   <search>
                     <index>true</index>
                     <store>true</store>

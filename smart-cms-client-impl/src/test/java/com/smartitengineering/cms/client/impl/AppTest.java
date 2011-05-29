@@ -2208,6 +2208,13 @@ public class AppTest {
         Workspace workspace = resource.createWorkspace(new WorkspaceIdImpl("test", "composites"));
         feedResource = resource.getTemplates().getWorkspaceResource(workspace.getId().getGlobalNamespace(), workspace.
             getId().getName());
+        ResourceTemplateImpl template = new ResourceTemplateImpl();
+        template.setName("internalval");
+        template.setTemplate(IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
+            "testtemplates/validator.groovy")));
+        template.setTemplateType("GROOVY");
+        template.setWorkspaceId(workspace.getId());
+        feedResource.getValidators().createValidator(template);
         valid = true;
       }
       catch (Exception ex) {
@@ -2315,14 +2322,62 @@ public class AppTest {
         multiPart.field(key.toString(), properties.getProperty(key.toString()));
       }
       try {
-        ClientResponse response =
-                       feedResource.getContents().post(MediaType.MULTIPART_FORM_DATA, multiPart,
-                                                       ClientResponse.Status.CREATED,
-                                                       ClientResponse.Status.ACCEPTED, ClientResponse.Status.OK);
+        feedResource.getContents().post(MediaType.MULTIPART_FORM_DATA, multiPart, ClientResponse.Status.CREATED,
+                                        ClientResponse.Status.ACCEPTED, ClientResponse.Status.OK);
         Assert.fail("Invalid content should have failed for " + resource);
       }
       catch (Exception ex) {
         //Expected that creation fails
+      }
+    }
+  }
+
+  @Test
+  public void testCustomFieldValidationForCompositeField() throws Exception {
+    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ CUSTOM COMPOSITE FIELD VALIDATION ~~~~~~~~~~~~~~~~~~~~~~~~~");
+    WorkspaceFeedResource feedResource = setupCompositeWorkspace();
+    final String[] invalidResources = new String[]{"composite/form-value-invalid-custom_validation.properties"};
+    for (String resource : invalidResources) {
+      final Properties properties = new Properties();
+      properties.load(getClass().getClassLoader().getResourceAsStream(
+          resource));
+      Set<Object> formKeys = properties.keySet();
+      FormDataMultiPart multiPart = new FormDataMultiPart();
+      for (Object key : formKeys) {
+        multiPart.field(key.toString(), properties.getProperty(key.toString()));
+      }
+      try {
+        feedResource.getContents().post(MediaType.MULTIPART_FORM_DATA, multiPart, ClientResponse.Status.CREATED,
+                                        ClientResponse.Status.ACCEPTED, ClientResponse.Status.OK);
+        Assert.fail("Invalid content should have failed for " + resource);
+      }
+      catch (Exception ex) {
+        //Expected that creation fails
+      }
+    }
+    final String[] validResources = new String[]{"composite/form-value-valid-custom_validation.properties"};
+    for (String resource : validResources) {
+      final Properties properties = new Properties();
+      properties.load(getClass().getClassLoader().getResourceAsStream(
+          resource));
+      Set<Object> formKeys = properties.keySet();
+      FormDataMultiPart multiPart = new FormDataMultiPart();
+      for (Object key : formKeys) {
+        multiPart.field(key.toString(), properties.getProperty(key.toString()));
+      }
+      try {
+        ClientResponse response = feedResource.getContents().post(MediaType.MULTIPART_FORM_DATA, multiPart,
+                                                                  ClientResponse.Status.CREATED,
+                                                                  ClientResponse.Status.ACCEPTED,
+                                                                  ClientResponse.Status.OK);
+        URI uri = response.getLocation();
+        ContentResourceImpl resourceImpl = new ContentResourceImpl(feedResource, uri);
+        final Content lastReadStateOfEntity = resourceImpl.getLastReadStateOfEntity();
+        Assert.assertNotNull(lastReadStateOfEntity);
+      }
+      catch (Exception ex) {
+        LOGGER.error(ex.getMessage(), ex);
+        Assert.fail("Valid content should not have failed for " + resource);
       }
     }
   }

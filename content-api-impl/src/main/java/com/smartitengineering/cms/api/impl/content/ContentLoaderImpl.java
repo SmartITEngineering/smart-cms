@@ -665,63 +665,67 @@ public class ContentLoaderImpl implements ContentLoader {
         logger.debug("Skipping field as already invalid! - " + field.getName());
         continue;
       }
-      final boolean validField = SmartContentSPI.getInstance().getValidatorProvider().isValidField(content, field);
-      if (!validField && logger.isWarnEnabled()) {
-        logger.warn("Custom field validation failed for " + field.getName());
+      if (logger.isInfoEnabled()) {
+        logger.info("Attempting custom validation for " + field.getName());
       }
-      valid = valid && validField;
-      if (valid) {
-        FieldDef def = field.getFieldDef();
-        if (def.getValueDef().getType().equals(FieldValueType.COMPOSITE)) {
-          final Map<String, Field> nestedFields;
-          if (field != null) {
-            CompositeFieldValue compositeFieldValue = (CompositeFieldValue) field.getValue();
-            if (compositeFieldValue != null) {
-              nestedFields = compositeFieldValue.getValueAsMap();
-            }
-            else {
-              nestedFields = null;
-            }
+      FieldDef def = field.getFieldDef();
+      if (def.getValueDef().getType().equals(FieldValueType.COMPOSITE)) {
+        final Map<String, Field> nestedFields;
+        if (field != null) {
+          CompositeFieldValue compositeFieldValue = (CompositeFieldValue) field.getValue();
+          if (compositeFieldValue != null) {
+            nestedFields = compositeFieldValue.getValueAsMap();
           }
           else {
             nestedFields = null;
           }
-          if (nestedFields != null) {
-            if (logger.isInfoEnabled()) {
-              logger.info("Going to validate composite fields from " + field.getName());
-            }
-            valid = isValidByCustomValidators(nestedFields.values(), content);
-          }
         }
-        else if (def.getValueDef().getType().equals(FieldValueType.COLLECTION) &&
-            ((CollectionDataType) def.getValueDef()).getItemDataType().getType().equals(FieldValueType.COMPOSITE)) {
-          if (field != null) {
-            CollectionFieldValue collectionFieldValue = (CollectionFieldValue) field.getValue();
-            Collection<FieldValue> collectionValues = collectionFieldValue.getValue();
-            if (collectionValues != null) {
-              for (FieldValue fieldValue : collectionValues) {
-                if (!valid) {
-                  logger.debug("Skipping iteration over collection field as already invalid! - " + field.getName());
-                  continue;
+        else {
+          nestedFields = null;
+        }
+        if (nestedFields != null) {
+          if (logger.isInfoEnabled()) {
+            logger.info("Going to validate composite fields from " + field.getName());
+          }
+          valid = isValidByCustomValidators(nestedFields.values(), content);
+        }
+      }
+      else if (def.getValueDef().getType().equals(FieldValueType.COLLECTION) &&
+          ((CollectionDataType) def.getValueDef()).getItemDataType().getType().equals(FieldValueType.COMPOSITE)) {
+        if (field != null) {
+          CollectionFieldValue collectionFieldValue = (CollectionFieldValue) field.getValue();
+          Collection<FieldValue> collectionValues = collectionFieldValue.getValue();
+          if (collectionValues != null) {
+            for (FieldValue fieldValue : collectionValues) {
+              if (!valid) {
+                logger.debug("Skipping iteration over collection field as already invalid! - " + field.getName());
+                continue;
+              }
+              CompositeFieldValue compositeFieldValue = (CompositeFieldValue) fieldValue;
+              final Map<String, Field> nestedFields;
+              if (compositeFieldValue != null) {
+                nestedFields = compositeFieldValue.getValueAsMap();
+              }
+              else {
+                nestedFields = null;
+              }
+              if (nestedFields != null) {
+                if (logger.isInfoEnabled()) {
+                  logger.info("Going to validate colletion's item composite fields from " + field.getName());
                 }
-                CompositeFieldValue compositeFieldValue = (CompositeFieldValue) fieldValue;
-                final Map<String, Field> nestedFields;
-                if (compositeFieldValue != null) {
-                  nestedFields = compositeFieldValue.getValueAsMap();
-                }
-                else {
-                  nestedFields = null;
-                }
-                if (nestedFields != null) {
-                  if (logger.isInfoEnabled()) {
-                    logger.info("Going to validate colletion's item composite fields from " + field.getName());
-                  }
-                  valid = isValidByCustomValidators(nestedFields.values(), content);
-                }
+                valid = isValidByCustomValidators(nestedFields.values(), content);
               }
             }
           }
         }
+      }
+      if (valid) {
+        //Check current field validation after the nested fields are checked
+        final boolean validField = SmartContentSPI.getInstance().getValidatorProvider().isValidField(content, field);
+        if (!validField && logger.isWarnEnabled()) {
+          logger.warn("Custom field validation failed for " + field.getName());
+        }
+        valid = validField;
       }
     }
     return valid;
