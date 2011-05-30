@@ -25,8 +25,11 @@ import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.spi.content.template.RepresentationGenerator;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
+import java.io.InputStream;
+import java.io.Reader;
 import java.util.Map;
 import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +58,33 @@ public abstract class AbstractTypeRepresentationGenerator implements TypeReprese
       }
       return null;
     }
-    final String representationForContent = generator.getRepresentationForContent(content, params);
+    final Object representationForContent = generator.getRepresentationForContent(content, params);
+    final byte[] bytes;
+    if (representationForContent instanceof String) {
+      bytes = StringUtils.getBytesUtf8((String) representationForContent);
+    }
+    else if (representationForContent instanceof byte[]) {
+      bytes = (byte[]) representationForContent;
+    }
+    else if (representationForContent instanceof InputStream) {
+      try {
+        bytes = IOUtils.toByteArray((InputStream) representationForContent);
+      }
+      catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+    else if (representationForContent instanceof Reader) {
+      try {
+        bytes = IOUtils.toByteArray((Reader) representationForContent);
+      }
+      catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+    else {
+      bytes = StringUtils.getBytesUtf8(representationForContent.toString());
+    }
     MutableRepresentation representation =
                           SmartContentAPI.getInstance().getContentLoader().createMutableRepresentation(content.
         getContentId());
@@ -63,7 +92,7 @@ public abstract class AbstractTypeRepresentationGenerator implements TypeReprese
     representation.setName(name);
     representation.setMimeType(content.getContentDefinition().getRepresentationDefs().get(representationName).
         getMIMEType());
-    representation.setRepresentation(StringUtils.getBytesUtf8(representationForContent));
+    representation.setRepresentation(bytes);
     return representation;
   }
 }

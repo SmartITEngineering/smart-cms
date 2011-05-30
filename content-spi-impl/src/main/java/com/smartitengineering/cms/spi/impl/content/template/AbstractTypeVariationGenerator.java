@@ -27,8 +27,11 @@ import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
 import com.smartitengineering.cms.spi.content.template.VariationGenerator;
+import java.io.InputStream;
+import java.io.Reader;
 import java.util.Map;
 import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,14 +63,40 @@ public abstract class AbstractTypeVariationGenerator implements TypeVariationGen
       }
       return null;
     }
-    final String representationForContent = generator.getVariationForField(field, params);
+    final Object variationForField = generator.getVariationForField(field, params);
+    final byte[] bytes;
+    if (variationForField instanceof String) {
+      bytes = StringUtils.getBytesUtf8((String) variationForField);
+    }
+    else if (variationForField instanceof byte[]) {
+      bytes = (byte[]) variationForField;
+    }
+    else if (variationForField instanceof InputStream) {
+      try {
+        bytes = IOUtils.toByteArray((InputStream) variationForField);
+      }
+      catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+    else if (variationForField instanceof Reader) {
+      try {
+        bytes = IOUtils.toByteArray((Reader) variationForField);
+      }
+      catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+    else {
+      bytes = StringUtils.getBytesUtf8(variationForField.toString());
+    }
     final FieldDef fieldDef = field.getFieldDef();
     MutableVariation variation = SmartContentAPI.getInstance().getContentLoader().createMutableVariation(content.
         getContentId(), fieldDef);
     final String name = template.getName();
     variation.setName(name);
     variation.setMimeType(fieldDef.getVariations().get(variationName).getMIMEType());
-    variation.setVariation(StringUtils.getBytesUtf8(representationForContent));
+    variation.setVariation(bytes);
     return variation;
   }
 }

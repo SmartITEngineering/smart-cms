@@ -27,5 +27,12 @@ import java.util.Map;
  */
 public interface VariationGenerator {
 
-  String getVariationForField(Field field, Map<String, String> params);
+  /**
+   * Generate the output of a variation template for a field
+   * @param field Field for which the variation is requested
+   * @param params Parameters from the content type definition
+   * @return May return any of String, InputStream, byte[]. Any other type of object would result invocation of
+   *          {@link Object#toString()}
+   */
+  Object getVariationForField(Field field, Map<String, String> params);
 }
