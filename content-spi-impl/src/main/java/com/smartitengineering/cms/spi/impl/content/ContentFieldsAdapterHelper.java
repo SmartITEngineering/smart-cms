@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2011  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,21 +16,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.content;
+package com.smartitengineering.cms.spi.impl.content;
 
-import com.smartitengineering.cms.api.content.Content;
-import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
-import java.util.Collection;
+import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import java.util.Map;
 
 /**
  *
  * @author imyousuf
  */
-public interface PersistentContentReader {
+public class ContentFieldsAdapterHelper extends AbstractAdapterHelper<Map<String, Field>, PersistentContentFields> {
 
-  Collection<Content> readContentsFromPersistentStorage(ContentId... ids);
+  @Override
+  protected PersistentContentFields newTInstance() {
+    return new PersistentContentFields();
+  }
 
-  Map<String, Field> getFieldsForContent(ContentId contentId);
+  @Override
+  protected void mergeFromF2T(Map<String, Field> fromBean, PersistentContentFields toBean) {
+    toBean.setFields(fromBean);
+  }
+
+  @Override
+  protected Map<String, Field> convertFromT2F(PersistentContentFields toBean) {
+    return toBean.getFields();
+  }
 }

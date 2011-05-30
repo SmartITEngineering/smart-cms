@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -51,6 +52,13 @@ public class ContentPersistentService implements PersistentService<WriteableCont
   private CommonReadDao<PersistentContent, ContentId> commonReadDao;
   @Inject
   private CommonWriteDao<PersistentContent> commonWriteDao;
+  //For Fields
+  @Inject
+  private GenericAdapter<Map<String, Field>, PersistentContentFields> fieldsAdapter;
+  @Inject
+  private CommonReadDao<PersistentContentFields, ContentId> fieldsReadDao;
+  @Inject
+  private CommonWriteDao<PersistentContentFields> fieldsWriteDao;
 
   public GenericAdapter<WriteableContent, PersistentContent> getAdapter() {
     return adapter;
@@ -79,6 +87,9 @@ public class ContentPersistentService implements PersistentService<WriteableCont
     content.setLastModifiedDate(date);
     content.setEntityTagValue(SmartContentAPI.getInstance().getContentLoader().getEntityTagValueForContent(content));
     commonWriteDao.save(adapter.convert(content));
+    final PersistentContentFields converted = fieldsAdapter.convert(content.getOwnFields());
+    converted.setId(content.getContentId());
+    fieldsWriteDao.save(converted);
   }
 
   @Override
@@ -94,11 +105,17 @@ public class ContentPersistentService implements PersistentService<WriteableCont
     content.setLastModifiedDate(new Date());
     content.setEntityTagValue(SmartContentAPI.getInstance().getContentLoader().getEntityTagValueForContent(content));
     commonWriteDao.update(adapter.convert(content));
+    final PersistentContentFields converted = fieldsAdapter.convert(content.getOwnFields());
+    converted.setId(content.getContentId());
+    fieldsWriteDao.update(converted);
   }
 
   @Override
-  public void delete(WriteableContent bean) throws Exception {
-    commonWriteDao.delete(adapter.convert(bean));
+  public void delete(WriteableContent content) throws Exception {
+    commonWriteDao.delete(adapter.convert(content));
+    final PersistentContentFields converted = fieldsAdapter.convert(content.getOwnFields());
+    converted.setId(content.getContentId());
+    fieldsWriteDao.delete(converted);
   }
 
   @Override
@@ -118,5 +135,16 @@ public class ContentPersistentService implements PersistentService<WriteableCont
     for (Field field : from.getFields().values()) {
       to.setField(field);
     }
+  }
+
+  public Map<String, Field> getFieldsForContent(ContentId contentId) {
+    if (contentId == null) {
+      return Collections.emptyMap();
+    }
+    final PersistentContentFields content = fieldsReadDao.getById(contentId);
+    if (content == null) {
+      return Collections.emptyMap();
+    }
+    return fieldsAdapter.convertInversely(content);
   }
 }

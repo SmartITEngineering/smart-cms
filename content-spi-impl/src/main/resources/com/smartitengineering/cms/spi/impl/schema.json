@@ -36,7 +36,12 @@
     "columnFamilyConfigurations": [
       {
         "familyName": "self"
-      },
+      }
+    ]
+  },
+  {
+    "tableName": "cms_fields",
+    "columnFamilyConfigurations": [
       {
         "familyName": "simpleFields"
       },

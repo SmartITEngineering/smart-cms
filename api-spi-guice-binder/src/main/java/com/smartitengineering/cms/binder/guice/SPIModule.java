@@ -29,6 +29,7 @@ import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
@@ -41,9 +42,12 @@ import com.smartitengineering.cms.spi.content.PersistentContentReader;
 import com.smartitengineering.cms.spi.content.UriProvider;
 import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
 import com.smartitengineering.cms.spi.impl.content.ContentAdapterHelper;
+import com.smartitengineering.cms.spi.impl.content.ContentFieldsAdapterHelper;
 import com.smartitengineering.cms.spi.impl.content.ContentObjectConverter;
 import com.smartitengineering.cms.spi.impl.content.ContentPersistentService;
+import com.smartitengineering.cms.spi.impl.content.FieldsObjectConverter;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
+import com.smartitengineering.cms.spi.impl.content.PersistentContentFields;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentFilterConfigsProvider;
 import com.smartitengineering.cms.spi.impl.content.guice.ContentSchemaBaseConfigProvider;
 import com.smartitengineering.cms.spi.impl.events.EventConsumerImpl;
@@ -103,6 +107,8 @@ import com.smartitengineering.dao.impl.hbase.spi.impl.LockAttainerImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.MixedExecutorServiceImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
+import com.smartitengineering.dao.impl.hbase.spi.impl.guice.GenericBaseConfigProvider;
+import com.smartitengineering.dao.impl.hbase.spi.impl.guice.GenericFilterConfigsProvider;
 import com.smartitengineering.dao.solr.MultivalueMap;
 import com.smartitengineering.dao.solr.ServerConfiguration;
 import com.smartitengineering.dao.solr.ServerFactory;
@@ -126,6 +132,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -275,7 +282,8 @@ public class SPIModule extends PrivateModule {
     bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, ContentTypeId>>() {
     }).to(new TypeLiteral<CommonDao<PersistentContentType, ContentTypeId>>() {
     }).in(Singleton.class);
-    final TypeLiteral<SchemaInfoProviderImpl<PersistentContentType, ContentTypeId>> typeLiteral = new TypeLiteral<SchemaInfoProviderImpl<PersistentContentType, ContentTypeId>>() {
+    final TypeLiteral<SchemaInfoProviderImpl<PersistentContentType, ContentTypeId>> typeLiteral =
+                                                                                    new TypeLiteral<SchemaInfoProviderImpl<PersistentContentType, ContentTypeId>>() {
     };
     bind(new TypeLiteral<MergeService<PersistentContentType, ContentTypeId>>() {
     }).to(new TypeLiteral<DiffBasedMergeService<PersistentContentType, ContentTypeId>>() {
@@ -317,6 +325,14 @@ public class SPIModule extends PrivateModule {
     }).annotatedWith(Names.named("primaryCacheableWriteDao"));
     bind(new TypeLiteral<CommonWriteDao<PersistentContent>>() {
     }).to(new TypeLiteral<CacheableDao<PersistentContent, ContentId, String>>() {
+    }).in(Singleton.class);
+    bind(new TypeLiteral<CommonWriteDao<PersistentContentFields>>() {
+    }).annotatedWith(Names.named("primaryCacheableWriteDao")).to(new TypeLiteral<CommonDao<PersistentContentFields, ContentId>>() {
+    }).in(Singleton.class);
+    binder().expose(new TypeLiteral<CommonWriteDao<PersistentContentFields>>() {
+    }).annotatedWith(Names.named("primaryCacheableWriteDao"));
+    bind(new TypeLiteral<CommonWriteDao<PersistentContentFields>>() {
+    }).to(new TypeLiteral<CacheableDao<PersistentContentFields, ContentId, String>>() {
     }).in(Singleton.class);
     bind(new TypeLiteral<EventListener<Content>>() {
     }).to(ContentEventListener.class).in(Singleton.class);
@@ -474,6 +490,48 @@ public class SPIModule extends PrivateModule {
     }).in(Scopes.SINGLETON);
     bind(new TypeLiteral<AbstractAdapterHelper<WriteableContent, PersistentContent>>() {
     }).to(ContentAdapterHelper.class).in(Scopes.SINGLETON);
+    /**
+     * For persistent fields
+     */
+    bind(new TypeLiteral<ObjectRowConverter<PersistentContentFields>>() {
+    }).to(FieldsObjectConverter.class).in(Singleton.class);
+    bind(new TypeLiteral<CommonReadDao<PersistentContentFields, ContentId>>() {
+    }).annotatedWith(Names.named("primaryCacheableReadDao")).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentFields, ContentId>>() {
+    }).in(Singleton.class);
+    binder().expose(new TypeLiteral<CommonReadDao<PersistentContentFields, ContentId>>() {
+    }).annotatedWith(Names.named("primaryCacheableReadDao"));
+    bind(new TypeLiteral<CommonReadDao<PersistentContentFields, ContentId>>() {
+    }).to(new TypeLiteral<CacheableDao<PersistentContentFields, ContentId, String>>() {
+    }).in(Singleton.class);
+    bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentFields, ContentId>>() {
+    }).to(new TypeLiteral<CommonDao<PersistentContentFields, ContentId>>() {
+    }).in(Singleton.class);
+    final TypeLiteral<SchemaInfoProvider<PersistentContentFields, ContentId>> fieldSchema =
+                                                                              new TypeLiteral<SchemaInfoProvider<PersistentContentFields, ContentId>>() {
+    };
+    bind(fieldSchema).to(new TypeLiteral<SchemaInfoProviderImpl<PersistentContentFields, ContentId>>() {
+    }).in(Singleton.class);
+    bind(new TypeLiteral<MergeService<PersistentContentFields, ContentId>>() {
+    }).to(new TypeLiteral<DiffBasedMergeService<PersistentContentFields, ContentId>>() {
+    });
+    bind(new TypeLiteral<LockAttainer<PersistentContentFields, ContentId>>() {
+    }).to(new TypeLiteral<LockAttainerImpl<PersistentContentFields, ContentId>>() {
+    }).in(Scopes.SINGLETON);
+    binder().expose(fieldSchema);
+    bind(new TypeLiteral<FilterConfigs<PersistentContentFields>>() {
+    }).toProvider(new GenericFilterConfigsProvider<PersistentContentFields>(
+        "com/smartitengineering/cms/spi/impl/content/FieldsFilterConfigs.json")).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistentContentFields>>() {
+    }).toProvider(new GenericBaseConfigProvider<PersistentContentFields>(
+        "com/smartitengineering/cms/spi/impl/content/FieldsSchemaBaseConfig.json")).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<GenericAdapter<Map<String, Field>, PersistentContentFields>>() {
+    }).to(new TypeLiteral<GenericAdapterImpl<Map<String, Field>, PersistentContentFields>>() {
+    }).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<AbstractAdapterHelper<Map<String, Field>, PersistentContentFields>>() {
+    }).to(ContentFieldsAdapterHelper.class).in(Scopes.SINGLETON);
+    /**
+     * Persistent fields end
+     */
     bind(PersistentContentReader.class).to(ContentPersistentService.class);
     binder().expose(PersistentContentReader.class);
     /*

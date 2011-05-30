@@ -58,6 +58,7 @@ import com.smartitengineering.cms.client.api.WorkspaceValidatorsResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationsResource;
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldValue;
+import com.smartitengineering.cms.ws.common.domains.CompositeFieldValue;
 import com.smartitengineering.cms.ws.common.domains.Content;
 import com.smartitengineering.cms.ws.common.domains.Field;
 import com.smartitengineering.cms.ws.common.domains.FieldImpl;
@@ -2298,6 +2299,8 @@ public class AppTest {
     ContentResourceImpl resourceImpl = new ContentResourceImpl(feedResource, uri);
     final Content lastReadStateOfEntity = resourceImpl.getLastReadStateOfEntity();
     Assert.assertNotNull(lastReadStateOfEntity);
+    Assert.assertEquals("i", ((CompositeFieldValue) lastReadStateOfEntity.getFieldsMap().get("billingAddress").getValue()).
+        getValues().get("astreet1").getValue().getValue());
     ContentResource resource = feedResource.getContents().createContentResource(lastReadStateOfEntity);
     Assert.assertNotNull(resource.getLastReadStateOfEntity());
     resource.update(lastReadStateOfEntity);

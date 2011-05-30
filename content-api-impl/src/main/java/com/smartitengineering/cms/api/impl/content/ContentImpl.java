@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.commons.lang.ObjectUtils;
 
@@ -54,7 +54,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   private ContentStatus contentStatus;
   private Date creationDate;
   private Date lastModifiedDate;
-  private Map<String, Field> map = new HashMap<String, Field>();
+  private Map<String, Field> map;
   private Map<String, Field> cachedFieldMap;
   private String entityTagValue;
   private boolean privateContent;
@@ -97,7 +97,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
 
   @Override
   public void setField(Field field) {
-    map.put(field.getName(), field);
+    getMap().put(field.getName(), field);
     cachedFieldMap = null;
   }
 
@@ -136,26 +136,35 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
     final Content parent = getParent();
     final ContentType def = getContentDefinition();
     if (cachedFieldMap == null) {
-      Map<String, Field> fields = new HashMap<String, Field>(this.map);
+      Map<String, Field> fields = new LinkedHashMap<String, Field>();
       if (parent != null && def != null) {
         Map<String, Field> parentFields = parent.getFields();
         for (String fieldName : parentFields.keySet()) {
           FieldDef myDef = def.getOwnFieldDefs().get(fieldName);
           FieldDef thatDef = parent.getContentDefinition().getOwnFieldDefs().get(fieldName);
           if (myDef != null && thatDef != null && ObjectUtils.equals(myDef, thatDef) && myDef.getValueDef().getType().
-              equals(thatDef.getValueDef().getType()) && !fields.containsKey(fieldName)) {
+              equals(thatDef.getValueDef().getType())) {
             fields.put(fieldName, parent.getField(fieldName));
           }
         }
       }
+      fields.putAll(getMap());
       cachedFieldMap = fields;
     }
     return Collections.unmodifiableMap(cachedFieldMap);
   }
 
+  public Map<String, Field> getMap() {
+    if (map == null) {
+      map = new LinkedHashMap<String, Field>(SmartContentSPI.getInstance().getContentReader().getFieldsForContent(
+          contentId));
+    }
+    return map;
+  }
+
   @Override
   public Map<String, Field> getOwnFields() {
-    return Collections.unmodifiableMap(map);
+    return Collections.unmodifiableMap(getMap());
   }
 
   @Override
@@ -202,7 +211,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
 
   @Override
   public void removeField(String fieldName) {
-    map.remove(fieldName);
+    getMap().remove(fieldName);
   }
 
   @Override
@@ -229,24 +238,24 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
       throw new IOException("Content ID and Content Type Definition is not set!");
     }
     super.create();
-    Event<Content> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(EventType.CREATE,
-                                                                                                    Type.CONTENT, this);
+    Event<Content> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(
+        EventType.CREATE, Type.CONTENT, this);
     SmartContentAPI.getInstance().getEventRegistrar().notifyEvent(contentEvent);
   }
 
   @Override
   public void delete() throws IOException {
     super.delete();
-    Event<Content> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(EventType.DELETE,
-                                                                                                    Type.CONTENT, this);
+    Event<Content> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(
+        EventType.DELETE, Type.CONTENT, this);
     SmartContentAPI.getInstance().getEventRegistrar().notifyEvent(contentEvent);
   }
 
   @Override
   protected void update() throws IOException {
     super.update();
-    Event<Content> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(EventType.UPDATE,
-                                                                                                    Type.CONTENT, this);
+    Event<Content> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(
+        EventType.UPDATE, Type.CONTENT, this);
     SmartContentAPI.getInstance().getEventRegistrar().notifyEvent(contentEvent);
   }
 

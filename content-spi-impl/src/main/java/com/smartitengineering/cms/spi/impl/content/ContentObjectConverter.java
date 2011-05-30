@@ -19,18 +19,12 @@
 package com.smartitengineering.cms.spi.impl.content;
 
 import com.google.inject.Inject;
-import com.smartitengineering.cms.api.content.CollectionFieldValue;
 import com.smartitengineering.cms.api.content.ContentId;
-import com.smartitengineering.cms.api.content.Field;
-import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
-import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
-import com.smartitengineering.cms.api.type.FieldDef;
-import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.PersistableContent;
@@ -40,8 +34,6 @@ import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import com.smartitengineering.dao.impl.hbase.spi.impl.AbstractObjectRowConverter;
 import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -54,11 +46,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 public class ContentObjectConverter extends AbstractObjectRowConverter<PersistentContent, ContentId> {
 
   public final static byte[] FAMILY_SELF = Bytes.toBytes("self");
-  public final static byte[] FAMILY_SIMPLE_FIELDS = Bytes.toBytes("simpleFields");
-  public final static byte[] FAMILY_COLLECTION = Bytes.toBytes("collections");
-  public final static byte[] FAMILY_STRING = Bytes.toBytes("strings");
-  public final static byte[] FAMILY_OTHER = Bytes.toBytes("others");
-  public final static byte[] FAMILY_FIELD_TYPE = Bytes.toBytes("fieldType");
   public final static byte[] CELL_PARENT_ID = Bytes.toBytes("parent");
   public final static byte[] CELL_CONTENT_TYPE_ID = Bytes.toBytes("contentType");
   public final static byte[] CELL_STATUS = Bytes.toBytes("status");
@@ -78,7 +65,6 @@ public class ContentObjectConverter extends AbstractObjectRowConverter<Persisten
   protected void getPutForTable(PersistentContent instance, ExecutorService service, Put put) {
     WriteableContent content = instance.getMutableContent();
     putSelfData(content, put);
-    putFields(content, put);
   }
 
   @Override
@@ -153,43 +139,6 @@ public class ContentObjectConverter extends AbstractObjectRowConverter<Persisten
       logger.error("Could not parse content type id", ex);
       throw new RuntimeException(ex);
     }
-    Map<byte[], byte[]> fieldTypeMap = startRow.getFamilyMap(FAMILY_FIELD_TYPE);
-    for (Entry<byte[], byte[]> entry : fieldTypeMap.entrySet()) {
-      String fieldName = Bytes.toString(entry.getKey());
-      String typeName = Bytes.toString(entry.getValue());
-      FieldValueType valueType = FieldValueType.valueOf(typeName);
-      final FieldDef fieldDef;
-      if (type != null) {
-        fieldDef = type.getFieldDefs().get(fieldName);
-      }
-      else {
-        fieldDef = null;
-      }
-      if (fieldDef == null) {
-        logger.warn(new StringBuilder("Ignoring field with name ").append(fieldName).append(" as not definition found").
-            toString());
-        continue;
-      }
-      final String value;
-      switch (valueType) {
-        case COLLECTION:
-          value = Bytes.toString(startRow.getValue(FAMILY_COLLECTION, entry.getKey()));
-          break;
-        case OTHER:
-          value = Bytes.toString(startRow.getValue(FAMILY_OTHER, entry.getKey()));
-          break;
-        case STRING:
-          value = Bytes.toString(startRow.getValue(FAMILY_STRING, entry.getKey()));
-          break;
-        default:
-          value = Bytes.toString(startRow.getValue(FAMILY_SIMPLE_FIELDS, entry.getKey()));
-          break;
-      }
-      MutableField field = SmartContentAPI.getInstance().getContentLoader().createMutableField(content.getContentId(),
-                                                                                               fieldDef);
-      field.setValue(SmartContentAPI.getInstance().getContentLoader().getValueFor(value, fieldDef.getValueDef()));
-      content.setField(field);
-    }
     PersistentContent persistentContent = new PersistentContent();
     persistentContent.setMutableContent(content);
     return persistentContent;
@@ -220,38 +169,5 @@ public class ContentObjectConverter extends AbstractObjectRowConverter<Persisten
         throw new RuntimeException(ex);
       }
     }
-  }
-
-  private void putFields(WriteableContent content, Put put) {
-    for (Field field : content.getOwnFields().values()) {
-      if (field == null) {
-        logger.warn("Null field in content's own field");
-        continue;
-      }
-      if (field.getValue() == null) {
-        logger.warn("Null value for field " + field.getName());
-        continue;
-      }
-      switch (field.getValue().getDataType()) {
-        case COLLECTION:
-          putField(field, put, FAMILY_COLLECTION);
-          break;
-        case STRING:
-          putField(field, put, FAMILY_STRING);
-          break;
-        case OTHER:
-          putField(field, put, FAMILY_OTHER);
-          break;
-        default:
-          putField(field, put, FAMILY_SIMPLE_FIELDS);
-      }
-    }
-  }
-
-  private void putField(Field field, Put put, byte[] family) {
-    final byte[] toBytes = Bytes.toBytes(field.getName());
-    final String fieldType = field.getValue().getDataType().name();
-    put.add(FAMILY_FIELD_TYPE, toBytes, Bytes.toBytes(fieldType.toString()));
-    put.add(family, toBytes, Bytes.toBytes(field.getValue().toString()));
   }
 }
