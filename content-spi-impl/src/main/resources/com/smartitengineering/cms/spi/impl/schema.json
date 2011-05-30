@@ -43,19 +43,7 @@
     "tableName": "cms_fields",
     "columnFamilyConfigurations": [
       {
-        "familyName": "simpleFields"
-      },
-      {
-        "familyName": "collections"
-      },
-      {
-        "familyName": "strings"
-      },
-      {
-        "familyName": "others"
-      },
-      {
-        "familyName": "fieldType"
+        "familyName": "self"
       }
     ]
   },

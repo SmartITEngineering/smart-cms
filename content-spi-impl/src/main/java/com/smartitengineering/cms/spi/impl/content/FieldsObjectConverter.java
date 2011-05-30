@@ -25,9 +25,9 @@ import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.FieldDef;
-import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.impl.AbstractObjectRowConverter;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.hadoop.hbase.client.Delete;
@@ -41,11 +41,7 @@ import org.apache.hadoop.hbase.util.Bytes;
  */
 public class FieldsObjectConverter extends AbstractObjectRowConverter<PersistentContentFields, ContentId> {
 
-  public final static byte[] FAMILY_SIMPLE_FIELDS = Bytes.toBytes("simpleFields");
-  public final static byte[] FAMILY_COLLECTION = Bytes.toBytes("collections");
-  public final static byte[] FAMILY_STRING = Bytes.toBytes("strings");
-  public final static byte[] FAMILY_OTHER = Bytes.toBytes("others");
-  public final static byte[] FAMILY_FIELD_TYPE = Bytes.toBytes("fieldType");
+  public final static byte[] FAMILY_SELF = Bytes.toBytes("self");
 
   @Override
   protected String[] getTablesToAttainLock() {
@@ -77,11 +73,10 @@ public class FieldsObjectConverter extends AbstractObjectRowConverter<Persistent
       return null;
     }
     final ContentType type = mainContent.getContentDefinition();
-    Map<byte[], byte[]> fieldTypeMap = startRow.getFamilyMap(FAMILY_FIELD_TYPE);
-    for (Entry<byte[], byte[]> entry : fieldTypeMap.entrySet()) {
-      String fieldName = Bytes.toString(entry.getKey());
-      String typeName = Bytes.toString(entry.getValue());
-      FieldValueType valueType = FieldValueType.valueOf(typeName);
+    final Map<byte[], byte[]> fieldMap = new LinkedHashMap<byte[], byte[]>(startRow.getFamilyMap(FAMILY_SELF));
+    for (Entry<byte[], byte[]> entry : fieldMap.entrySet()) {
+      final byte[] key = entry.getKey();
+      String fieldName = Bytes.toString(key);
       final FieldDef fieldDef;
       if (type != null) {
         fieldDef = type.getFieldDefs().get(fieldName);
@@ -95,20 +90,7 @@ public class FieldsObjectConverter extends AbstractObjectRowConverter<Persistent
         continue;
       }
       final String value;
-      switch (valueType) {
-        case COLLECTION:
-          value = Bytes.toString(startRow.getValue(FAMILY_COLLECTION, entry.getKey()));
-          break;
-        case OTHER:
-          value = Bytes.toString(startRow.getValue(FAMILY_OTHER, entry.getKey()));
-          break;
-        case STRING:
-          value = Bytes.toString(startRow.getValue(FAMILY_STRING, entry.getKey()));
-          break;
-        default:
-          value = Bytes.toString(startRow.getValue(FAMILY_SIMPLE_FIELDS, entry.getKey()));
-          break;
-      }
+      value = Bytes.toString(fieldMap.get(key));
       MutableField field = SmartContentAPI.getInstance().getContentLoader().createMutableField(content.getId(),
                                                                                                fieldDef);
       field.setValue(SmartContentAPI.getInstance().getContentLoader().getValueFor(value, fieldDef.getValueDef()));
@@ -127,26 +109,12 @@ public class FieldsObjectConverter extends AbstractObjectRowConverter<Persistent
         logger.warn("Null value for field " + field.getName());
         continue;
       }
-      switch (field.getValue().getDataType()) {
-        case COLLECTION:
-          putField(field, put, FAMILY_COLLECTION);
-          break;
-        case STRING:
-          putField(field, put, FAMILY_STRING);
-          break;
-        case OTHER:
-          putField(field, put, FAMILY_OTHER);
-          break;
-        default:
-          putField(field, put, FAMILY_SIMPLE_FIELDS);
-      }
+      putField(field, put);
     }
   }
 
-  private void putField(Field field, Put put, byte[] family) {
+  private void putField(Field field, Put put) {
     final byte[] toBytes = Bytes.toBytes(field.getName());
-    final String fieldType = field.getValue().getDataType().name();
-    put.add(FAMILY_FIELD_TYPE, toBytes, Bytes.toBytes(fieldType.toString()));
-    put.add(family, toBytes, Bytes.toBytes(field.getValue().toString()));
+    put.add(FAMILY_SELF, toBytes, Bytes.toBytes(field.getValue().toString()));
   }
 }
