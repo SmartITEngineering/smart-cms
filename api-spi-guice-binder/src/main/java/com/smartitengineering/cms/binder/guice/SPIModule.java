@@ -575,8 +575,10 @@ public class SPIModule extends PrivateModule {
     if (cache == null) {
       throw new IllegalStateException("Could not retrieve cache!");
     }
-    bind(Cache.class).toInstance(cache);
-    binder().expose(Cache.class);
+    bind(CacheManager.class).toInstance(cacheManager);
+    bind(Cache.class).annotatedWith(Names.named("defaultCache")).toInstance(cache);
+    binder().expose(CacheManager.class);
+    binder().expose(Cache.class).annotatedWith(Names.named("defaultCache"));
   }
 
   static <T extends Serializable> BasicKey<T> getKeyInstance(String keyPrefix, String prefixSeparator) {

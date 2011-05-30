@@ -21,6 +21,7 @@ package com.smartitengineering.cms.binder.guice;
 import com.google.inject.PrivateModule;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.dao.common.cache.BasicKey;
@@ -31,6 +32,9 @@ import com.smartitengineering.dao.common.cache.dao.impl.CacheableDaoImpl;
 import com.smartitengineering.dao.common.cache.dao.impl.IdToStringCacheKeyGenerator;
 import com.smartitengineering.dao.common.cache.impl.ehcache.EhcacheCacheServiceProviderImpl;
 import java.util.Properties;
+import net.sf.ehcache.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -39,10 +43,17 @@ import java.util.Properties;
 public class SPIContentTypeCacheModule extends PrivateModule {
 
   private final String prefixSeparator;
+  private final String cacheName;
+  private final static String CACHE_NAME_PROP_KEY = "com.smartitengineering.cms.cache.type.name";
+  private final static String CACHE_NAME_DEFAULT = "typeCache";
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   public SPIContentTypeCacheModule(Properties properties) {
     prefixSeparator = properties.getProperty(SPIModule.PREFIX_SEPARATOR_PROP_KEY,
                                              SPIModule.PREFIX_SEPARATOR_PROP_DEFAULT);
+    cacheName = properties.getProperty(CACHE_NAME_PROP_KEY, CACHE_NAME_DEFAULT);
+    logger.info("Cache name " + cacheName);
+
   }
 
   @Override
@@ -60,5 +71,7 @@ public class SPIContentTypeCacheModule extends PrivateModule {
     }).in(Singleton.class);
     binder().expose(new TypeLiteral<CacheableDao<PersistentContentType, ContentTypeId, String>>() {
     });
+    bind(String.class).annotatedWith(Names.named("trialCacheName")).toInstance(cacheName);
+    bind(Cache.class).toProvider(CacheProvider.class);
   }
 }

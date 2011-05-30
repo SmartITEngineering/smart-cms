@@ -54,6 +54,9 @@ import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
 import java.util.Properties;
+import net.sf.ehcache.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -62,10 +65,17 @@ import java.util.Properties;
 public class SPIWorkspaceServiceModule extends PrivateModule {
 
   private final String prefixSeparator;
+  private final String cacheName;
+  private final static String CACHE_NAME_PROP_KEY = "com.smartitengineering.cms.cache.ws.name";
+  private final static String CACHE_NAME_DEFAULT = "workspaceCache";
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   public SPIWorkspaceServiceModule(Properties properties) {
     prefixSeparator = properties.getProperty(SPIModule.PREFIX_SEPARATOR_PROP_KEY,
                                              SPIModule.PREFIX_SEPARATOR_PROP_DEFAULT);
+    cacheName = properties.getProperty(CACHE_NAME_PROP_KEY, CACHE_NAME_DEFAULT);
+    logger.info("Cache name " + cacheName);
+
   }
 
   @Override
@@ -88,7 +98,8 @@ public class SPIWorkspaceServiceModule extends PrivateModule {
     bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentWorkspace, WorkspaceId>>() {
     }).to(new TypeLiteral<CommonDao<PersistentWorkspace, WorkspaceId>>() {
     }).in(Singleton.class);
-    final TypeLiteral<SchemaInfoProviderImpl<PersistentWorkspace, WorkspaceId>> wTypeLiteral = new TypeLiteral<SchemaInfoProviderImpl<PersistentWorkspace, WorkspaceId>>() {
+    final TypeLiteral<SchemaInfoProviderImpl<PersistentWorkspace, WorkspaceId>> wTypeLiteral =
+                                                                                new TypeLiteral<SchemaInfoProviderImpl<PersistentWorkspace, WorkspaceId>>() {
     };
     bind(new TypeLiteral<Class<WorkspaceId>>() {
     }).toInstance(WorkspaceId.class);
@@ -116,6 +127,8 @@ public class SPIWorkspaceServiceModule extends PrivateModule {
     }).toInstance(SPIModule.<String>getKeyInstance("Workspace", prefixSeparator));
     bind(WorkspaceService.class).to(WorkspaceServiceCacheImpl.class).in(Singleton.class);
     binder().expose(WorkspaceService.class);
+    bind(String.class).annotatedWith(Names.named("trialCacheName")).toInstance(cacheName);
+    bind(Cache.class).toProvider(CacheProvider.class);
     /*
      * End injection specific to common dao of workspace
      */

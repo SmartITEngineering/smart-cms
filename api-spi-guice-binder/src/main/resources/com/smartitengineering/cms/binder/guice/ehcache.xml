@@ -12,4 +12,13 @@
        diskExpiryThreadIntervalSeconds="1">
           
   </cache>
+  <cache name="fieldCache"
+       maxElementsInMemory="5000"
+       eternal="false"
+       timeToIdleSeconds="120"
+       timeToLiveSeconds="600"
+       overflowToDisk="false"
+       diskPersistent="false"
+       diskExpiryThreadIntervalSeconds="1">
+  </cache>
 </ehcache>
