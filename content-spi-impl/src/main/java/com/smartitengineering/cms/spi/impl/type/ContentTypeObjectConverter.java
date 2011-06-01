@@ -189,6 +189,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         }
         put.add(FAMILY_SIMPLE, CELL_PARENT_ID, getInfoProvider().getRowIdFromId(parent));
       }
+      putParams(put, FAMILY_SIMPLE, HConstants.EMPTY_BYTE_ARRAY, instance.getMutableContentType().
+          getParameterizedDisplayNames(), CELL_PARAMETERIZED_DISPLAY_NAME_PREFIX);
       /*
        * Content statuses
        */
@@ -436,12 +438,13 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       if (logger.isInfoEnabled()) {
         logger.info("ContentTypeId " + contentType.getContentTypeID());
       }
-      byte[] displayName = startRow.getValue(FAMILY_SIMPLE, CELL_DISPLAY_NAME);
+      Map<byte[], byte[]> simpleValues = startRow.getFamilyMap(FAMILY_SIMPLE);
+      byte[] displayName = simpleValues.remove(CELL_DISPLAY_NAME);
       if (displayName != null) {
         logger.debug("Set display name of the content type!");
         contentType.setDisplayName(Bytes.toString(displayName));
       }
-      byte[] primaryFieldName = startRow.getValue(FAMILY_SIMPLE, CELL_PRIMARY_FIELD_NAME);
+      byte[] primaryFieldName = simpleValues.remove(CELL_PRIMARY_FIELD_NAME);
       if (primaryFieldName != null) {
         final String toString = Bytes.toString(primaryFieldName);
         if (logger.isInfoEnabled()) {
@@ -449,14 +452,30 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         }
         contentType.setPrimaryFieldName(toString);
       }
-      contentType.setEntityTagValue(Bytes.toString(startRow.getValue(FAMILY_SIMPLE, CELL_ENTITY_TAG)));
+      contentType.setEntityTagValue(Bytes.toString(simpleValues.remove(CELL_ENTITY_TAG)));
       logger.debug("Setting creation and last modified date");
-      contentType.setCreationDate(Utils.toDate(startRow.getValue(FAMILY_SIMPLE, CELL_CREATION_DATE)));
-      contentType.setLastModifiedDate(Utils.toDate(startRow.getValue(FAMILY_SIMPLE, CELL_LAST_MODIFIED_DATE)));
-      final byte[] parentId = startRow.getValue(FAMILY_SIMPLE, CELL_PARENT_ID);
+      contentType.setCreationDate(Utils.toDate(simpleValues.remove(CELL_CREATION_DATE)));
+      contentType.setLastModifiedDate(Utils.toDate(simpleValues.remove(CELL_LAST_MODIFIED_DATE)));
+      final byte[] parentId = simpleValues.remove(CELL_PARENT_ID);
       if (parentId != null) {
         logger.debug("Setting parent id");
         contentType.setParent(getInfoProvider().getIdFromRowId(parentId));
+      }
+      if (!simpleValues.isEmpty()) {
+        String displayNamesPrefix = new StringBuilder(CELL_PARAMETERIZED_DISPLAY_NAME_PREFIX).append(':').toString();
+        final byte[] toBytes = Bytes.toBytes(CELL_PARAMETERIZED_DISPLAY_NAME_PREFIX);
+        for (Entry<byte[], byte[]> entry : simpleValues.entrySet()) {
+          if (logger.isInfoEnabled()) {
+            logger.info("Extra simple fields Key " + Bytes.toString(entry.getKey()) + " " + Bytes.startsWith(entry.
+                getKey(), toBytes));
+            logger.info("Extra simple fields Value " + Bytes.toString(entry.getValue()));
+          }
+          if (Bytes.startsWith(entry.getKey(), toBytes)) {
+            String paramKey = Bytes.toString(entry.getKey()).substring(displayNamesPrefix.length());
+            String paramVal = Bytes.toString(entry.getValue());
+            contentType.getMutableParameterizedDisplayNames().put(paramKey, paramVal);
+          }
+        }
       }
       if (logger.isDebugEnabled()) {
         final FastDateFormat formatter = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT;
@@ -662,7 +681,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       final Matcher validatorMatcher = validatorPattern.matcher(key);
       final Matcher paramsMatcher = paramsPattern.matcher(key);
       final Matcher displayNamesMatcher = displayNamesPattern.matcher(key);
-      
+
       if (displayNamesMatcher.matches()) {
         final String paramKey = displayNamesMatcher.group(1);
         final String paramValue = Bytes.toString(cell.getValue());

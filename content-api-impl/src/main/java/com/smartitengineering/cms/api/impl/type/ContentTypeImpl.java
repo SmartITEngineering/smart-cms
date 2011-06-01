@@ -62,6 +62,7 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
   private boolean fromPersistentStorage;
   private String primaryFieldName;
   private final Map<MediaType, String> representations = new HashMap<MediaType, String>();
+  private final Map<String, String> parameterizedDisplayNames = new LinkedHashMap<String, String>();
 
   @Override
   public void put() throws IOException {
@@ -377,5 +378,20 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
     Event<ContentType> contentEvent = SmartContentAPI.getInstance().getEventRegistrar().<ContentType>createEvent(
         EventType.UPDATE, Type.CONTENT_TYPE, this);
     SmartContentAPI.getInstance().getEventRegistrar().notifyEvent(contentEvent);
+  }
+
+  public void setParameterizedDisplayNames(Map<String, String> params) {
+    this.parameterizedDisplayNames.clear();
+    if (params != null && !params.isEmpty()) {
+      this.parameterizedDisplayNames.putAll(params);
+    }
+  }
+
+  public Map<String, String> getMutableParameterizedDisplayNames() {
+    return this.parameterizedDisplayNames;
+  }
+
+  public Map<String, String> getParameterizedDisplayNames() {
+    return Collections.unmodifiableMap(parameterizedDisplayNames);
   }
 }

@@ -73,4 +73,6 @@ public interface ContentType {
   public Map<MediaType, String> getRepresentations();
 
   public String getEntityTagValue();
+  
+  public Map<String, String> getParameterizedDisplayNames();
 }

@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.type;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * A mutable version of {@link ContentType}. It should be used attained using a
@@ -58,4 +59,8 @@ public interface MutableContentType
   public void setDisplayName(String displayName);
 
   public void setPrimaryFieldName(String primaryFieldName);
+
+  public void setParameterizedDisplayNames(Map<String, String> params);
+
+  public Map<String, String> getMutableParameterizedDisplayNames();
 }

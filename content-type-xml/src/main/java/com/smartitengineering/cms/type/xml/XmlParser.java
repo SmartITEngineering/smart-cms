@@ -120,6 +120,7 @@ public class XmlParser implements XmlConstants {
         contentTypeId = getContentTypeId(workspaceId, namespace, name);
         mutableContent.setContentTypeID(contentTypeId);
         displayName = parseOptionalStringElement(contentTypeElement, DISPLAY_NAME); //min=0,max=1
+        mutableContent.setParameterizedDisplayNames(parseParams(contentTypeElement, PARAMETERIZED_DISPLAY_NAMES));
         for (int child = 0; child < childElements.size(); child++) {//fields min=1,max=unbounted
           if (StringUtils.equalsIgnoreCase(childElements.get(child).getLocalName(), FIELDS)) {
             fieldDefs.addAll(parseFieldDefs(childElements.get(child)));

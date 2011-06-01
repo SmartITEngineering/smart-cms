@@ -296,6 +296,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
     typeImpl.getMutableStatuses().clear();
     typeImpl.getMutableStatuses().addAll(contentType.getStatuses().values());
     typeImpl.setRepresentations(contentType.getRepresentations());
+    typeImpl.setParameterizedDisplayNames(contentType.getParameterizedDisplayNames());
   }
 
   @Override

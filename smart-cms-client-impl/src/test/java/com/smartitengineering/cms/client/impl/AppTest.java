@@ -2287,6 +2287,11 @@ public class AppTest {
     parameters = compositeDataType.getComposedFieldDefs().get("By").getParameters();
     Assert.assertEquals(1, parameters.size());
     Assert.assertEquals("fieldVal", parameters.get("fieldParam"));
+    idImpl.setName("Address");
+    type = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(idImpl);
+    parameters = type.getParameterizedDisplayNames();
+    Assert.assertEquals(1, parameters.size());
+    Assert.assertEquals("Address (en-US)", parameters.get("en-US"));
   }
 
   @Test
