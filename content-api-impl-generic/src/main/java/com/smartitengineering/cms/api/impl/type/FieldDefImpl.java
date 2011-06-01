@@ -48,7 +48,8 @@ public class FieldDefImpl implements MutableFieldDef {
   private final List<ValidatorDef> validatorDefs = new ArrayList<ValidatorDef>();
   private SearchDef searchDef;
   private boolean standaloneUpdateAble = false;
-  private final Map<String, String> params = new LinkedHashMap<String, String>();
+  private final Map<String, String> parameters = new LinkedHashMap<String, String>();
+  private final Map<String, String> parameterizedDisplayNames = new LinkedHashMap<String, String>();
 
   @Override
   public void setName(String newFieldName) throws IllegalArgumentException {
@@ -187,17 +188,32 @@ public class FieldDefImpl implements MutableFieldDef {
   }
 
   public void setParameters(Map<String, String> params) {
-    this.params.clear();
+    this.parameters.clear();
     if (params != null && !params.isEmpty()) {
-      this.params.putAll(params);
+      this.parameters.putAll(params);
     }
   }
 
   public Map<String, String> getMutableParameters() {
-    return this.params;
+    return this.parameters;
   }
 
   public Map<String, String> getParameters() {
-    return Collections.unmodifiableMap(this.params);
+    return Collections.unmodifiableMap(this.parameters);
+  }
+
+  public void setParameterizedDisplayNames(Map<String, String> params) {
+    this.parameterizedDisplayNames.clear();
+    if (params != null && !params.isEmpty()) {
+      this.parameterizedDisplayNames.putAll(params);
+    }
+  }
+
+  public Map<String, String> getMutableParameterizedDisplayNames() {
+    return this.parameterizedDisplayNames;
+  }
+
+  public Map<String, String> getParameterizedDisplayNames() {
+    return Collections.unmodifiableMap(parameterizedDisplayNames);
   }
 }

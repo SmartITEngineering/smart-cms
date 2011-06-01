@@ -2258,6 +2258,9 @@ public class AppTest {
     Map<String, String> parameters = compositeDataType.getComposedFieldDefs().get("astreet1").getParameters();
     Assert.assertEquals(1, parameters.size());
     Assert.assertEquals("fieldVal", parameters.get("fieldParam"));
+    parameters = compositeDataType.getComposedFieldDefs().get("astreet2").getParameterizedDisplayNames();
+    Assert.assertEquals(1, parameters.size());
+    Assert.assertEquals("Street (Line 2) (en-US)", parameters.get("en-US"));
     Iterator<FieldDef> compositionIterator = compositeDataType.getOwnComposition().iterator();
     compositionIterator.next();
     FieldDef collectionFieldDef = compositionIterator.next();

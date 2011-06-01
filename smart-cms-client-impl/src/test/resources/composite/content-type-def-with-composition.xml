@@ -29,6 +29,12 @@
                xsi:schemaLocation='http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../../../../content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd'>
   <contentType namespace="test">
     <name>Address</name>
+    <parameterizedDisplayNames>
+      <param>
+        <key>en-US</key>
+        <val>Address (en-US)</val>
+      </param>
+    </parameterizedDisplayNames>
     <primaryField>zipCode</primaryField>
     <fields>
       <field>
@@ -48,7 +54,13 @@
       </field>
       <field>
         <name>astreet2</name>
-        <displayName>Stree (Line 2)</displayName>
+        <displayName>Street (Line 2)</displayName>
+        <parameterizedDisplayNames>
+          <param>
+            <key>en-US</key>
+            <val>Street (Line 2) (en-US)</val>
+          </param>
+        </parameterizedDisplayNames>
         <value>
           <string>
             <mimeType>text/plain</mimeType>

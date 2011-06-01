@@ -57,6 +57,10 @@ public interface MutableFieldDef
 
   public Map<String, String> getMutableParameters();
 
+  public void setParameterizedDisplayNames(Map<String, String> params);
+
+  public Map<String, String> getMutableParameterizedDisplayNames();
+
   public void setCustomValidators(Collection<? extends ValidatorDef> validatorDefs);
 
   public void setSearchDefinition(SearchDef searchDef);

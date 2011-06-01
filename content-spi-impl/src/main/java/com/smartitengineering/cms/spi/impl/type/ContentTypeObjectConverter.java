@@ -87,6 +87,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   public static final String COMPOSITE_EMBED_SEPARATOR_STR = "embed";
   public static final String COMPOSITE_FIELDS_SEPARATOR_STR = "fields";
   public static final String CELL_PARAMS_PREFIX = "params";
+  public static final String CELL_PARAMETERIZED_DISPLAY_NAME_PREFIX = "displayNames";
   public static final byte[] COMPOSITE_EMBED_SEPARATOR = Bytes.toBytes(COMPOSITE_EMBED_SEPARATOR_STR);
   public static final byte[] COMPOSITE_FIELDS_SEPARATOR = Bytes.toBytes(COMPOSITE_FIELDS_SEPARATOR_STR);
   public final static byte[] FAMILY_SIMPLE = Bytes.toBytes("simple");
@@ -257,6 +258,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_DISPLAY_NAME), Bytes.toBytes(value.getDisplayName()));
       }
       putParams(put, FAMILY_FIELDS, toBytes, value.getParameters());
+      putParams(put, FAMILY_FIELDS, toBytes, value.getParameterizedDisplayNames(),
+                CELL_PARAMETERIZED_DISPLAY_NAME_PREFIX);
       /*
        * Variations
        */
@@ -392,7 +395,13 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   }
 
   protected void putParams(Put put, final byte[] family, final byte[] prefix, final Map<String, String> params) {
-    final byte[] paramsPrefix = Bytes.add(prefix, Bytes.toBytes(new StringBuilder(CELL_PARAMS_PREFIX).append(":").
+    final String paramsPrefixStr = CELL_PARAMS_PREFIX;
+    putParams(put, family, prefix, params, paramsPrefixStr);
+  }
+
+  protected void putParams(Put put, final byte[] family, final byte[] prefix, final Map<String, String> params,
+                           final String paramsPrefixStr) {
+    final byte[] paramsPrefix = Bytes.add(prefix, Bytes.toBytes(new StringBuilder(paramsPrefixStr).append(":").
         toString()));
     if (params != null && !params.isEmpty()) {
       for (Entry<String, String> param : params.entrySet()) {
@@ -620,6 +629,13 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
           paramsPatternString).toString());
     }
     Pattern paramsPattern = Pattern.compile(paramsPatternString);
+    final String displayNamesPatternStr = new StringBuilder(fieldName).append(':').append(
+        CELL_PARAMETERIZED_DISPLAY_NAME_PREFIX).append(":(.+)").toString();
+    if (logger.isDebugEnabled()) {
+      logger.debug(new StringBuilder("Using following pattern to identify params: ").append(
+          displayNamesPatternStr).toString());
+    }
+    Pattern displayNamesPattern = Pattern.compile(displayNamesPatternStr);
     final String searchDefPatternString = new StringBuilder(fieldName).append(":(").append(CELL_FIELD_SEARCHDEF).
         append(':').append(".*)").toString();
     if (logger.isDebugEnabled()) {
@@ -645,14 +661,21 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       final Matcher variationsDefMatcher = variationsDefPattern.matcher(key);
       final Matcher validatorMatcher = validatorPattern.matcher(key);
       final Matcher paramsMatcher = paramsPattern.matcher(key);
-      /*
-       * Search Def
-       */
-      if (paramsMatcher.matches()) {
+      final Matcher displayNamesMatcher = displayNamesPattern.matcher(key);
+      
+      if (displayNamesMatcher.matches()) {
+        final String paramKey = displayNamesMatcher.group(1);
+        final String paramValue = Bytes.toString(cell.getValue());
+        fieldDef.getMutableParameterizedDisplayNames().put(paramKey, paramValue);
+      }
+      else if (paramsMatcher.matches()) {
         final String paramKey = paramsMatcher.group(1);
         final String paramValue = Bytes.toString(cell.getValue());
         fieldParams.put(paramKey, paramValue);
       }
+      /*
+       * Search Def
+       */
       else if (searchDefMatcher.matches()) {
         logger.debug("Matched search definition pattern");
         byte[] searchDefCell = Bytes.toBytes(searchDefMatcher.group(1));

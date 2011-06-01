@@ -40,6 +40,8 @@ public interface FieldDef {
   String getType();
 
   boolean isRequired();
-  
+
   Map<String, String> getParameters();
+
+  public Map<String, String> getParameterizedDisplayNames();
 }

@@ -57,6 +57,7 @@ public interface XmlConstants {
   public String EXTERNAL = "external";
   public String URI = "uri";
   public String PARAMS = "params";
+  public String PARAMETERIZED_DISPLAY_NAMES = "parameterizedDisplayNames";
   public String PARAM = "param";
   public String KEY = "key";
   public String VAL = "val";

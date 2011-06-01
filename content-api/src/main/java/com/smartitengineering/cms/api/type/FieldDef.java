@@ -54,6 +54,8 @@ public interface FieldDef {
   public boolean isRequired();
   
   public Map<String, String> getParameters();
+  
+  public Map<String, String> getParameterizedDisplayNames();
 
   public Map<String, VariationDef> getVariations();
 

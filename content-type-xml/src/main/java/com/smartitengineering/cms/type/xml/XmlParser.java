@@ -408,6 +408,7 @@ public class XmlParser implements XmlConstants {
     fieldDef.setSearchDefinition(parseSearchDef(rootElement, SEARCH));
     fieldDef.setValueDef(parseValueDef(rootElement, VALUE));
     fieldDef.setParameters(parseParams(rootElement, PARAMS));
+    fieldDef.setParameterizedDisplayNames(parseParams(rootElement, PARAMETERIZED_DISPLAY_NAMES));
     if (parseVariations(rootElement, VARIATIONS) != null) {
       fieldDef.setVariations(parseVariations(rootElement, VARIATIONS));
     }

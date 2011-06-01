@@ -29,6 +29,7 @@ public class FieldDefImpl implements FieldDef {
   private String name, type;
   private boolean required;
   private Map<String, String> parameters;
+  private Map<String, String> parameterizedDisplayNames;
 
   @Override
   public String getName() {
@@ -63,5 +64,13 @@ public class FieldDefImpl implements FieldDef {
 
   public void setParameters(Map<String, String> parameters) {
     this.parameters = parameters;
+  }
+
+  public Map<String, String> getParameterizedDisplayNames() {
+    return parameterizedDisplayNames;
+  }
+
+  public void setParameterizedDisplayNames(Map<String, String> parameterizedDisplayNames) {
+    this.parameterizedDisplayNames = parameterizedDisplayNames;
   }
 }
