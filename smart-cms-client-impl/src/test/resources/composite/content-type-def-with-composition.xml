@@ -39,6 +39,12 @@
             <mimeType>text/plain</mimeType>
           </string>
         </value>
+        <params>
+          <param>
+            <key>fieldParam</key>
+            <val>fieldVal</val>
+          </param>
+        </params>
       </field>
       <field>
         <name>astreet2</name>
@@ -232,6 +238,12 @@
                     <index>true</index>
                     <store>true</store>
                   </search>
+                  <params>
+                    <param>
+                      <key>fieldParam</key>
+                      <val>fieldVal</val>
+                    </param>
+                  </params>
                 </field>
                 <field>
                   <name>Comment</name>

@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.type;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Editable version of {@link FieldDef}
@@ -35,7 +36,7 @@ public interface MutableFieldDef
    */
   public void setName(String newFieldName)
       throws IllegalArgumentException;
-  
+
   /**
    * Sets the display name for this field.
    * @param newDisplayNameForField 
@@ -51,6 +52,10 @@ public interface MutableFieldDef
   public void setValueDef(DataType dataType);
 
   public void setVariations(Collection<? extends VariationDef> variationDefs);
+
+  public void setParameters(Map<String, String> params);
+
+  public Map<String, String> getMutableParameters();
 
   public void setCustomValidators(Collection<? extends ValidatorDef> validatorDefs);
 

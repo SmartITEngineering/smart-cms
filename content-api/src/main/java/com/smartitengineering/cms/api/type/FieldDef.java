@@ -52,6 +52,8 @@ public interface FieldDef {
    * @return whether the field is required or not
    */
   public boolean isRequired();
+  
+  public Map<String, String> getParameters();
 
   public Map<String, VariationDef> getVariations();
 

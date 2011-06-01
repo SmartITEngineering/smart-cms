@@ -48,6 +48,7 @@ public class FieldDefImpl implements MutableFieldDef {
   private final List<ValidatorDef> validatorDefs = new ArrayList<ValidatorDef>();
   private SearchDef searchDef;
   private boolean standaloneUpdateAble = false;
+  private final Map<String, String> params = new LinkedHashMap<String, String>();
 
   @Override
   public void setName(String newFieldName) throws IllegalArgumentException {
@@ -183,5 +184,20 @@ public class FieldDefImpl implements MutableFieldDef {
 
   public String getDisplayName() {
     return StringUtils.isNotBlank(displayName) ? displayName : getName();
+  }
+
+  public void setParameters(Map<String, String> params) {
+    this.params.clear();
+    if (params != null && !params.isEmpty()) {
+      this.params.putAll(params);
+    }
+  }
+
+  public Map<String, String> getMutableParameters() {
+    return this.params;
+  }
+
+  public Map<String, String> getParameters() {
+    return Collections.unmodifiableMap(this.params);
   }
 }

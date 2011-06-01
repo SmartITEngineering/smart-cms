@@ -262,6 +262,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
         <xs:element ref="validators" minOccurs="0" maxOccurs="1"/>
         <xs:element ref="search" minOccurs="0" maxOccurs="1"/>
         <xs:element ref="update-standalone" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="params" minOccurs="0" maxOccurs="1" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

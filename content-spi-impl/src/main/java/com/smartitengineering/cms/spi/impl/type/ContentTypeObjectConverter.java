@@ -86,6 +86,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
 
   public static final String COMPOSITE_EMBED_SEPARATOR_STR = "embed";
   public static final String COMPOSITE_FIELDS_SEPARATOR_STR = "fields";
+  public static final String CELL_PARAMS_PREFIX = "params";
   public static final byte[] COMPOSITE_EMBED_SEPARATOR = Bytes.toBytes(COMPOSITE_EMBED_SEPARATOR_STR);
   public static final byte[] COMPOSITE_FIELDS_SEPARATOR = Bytes.toBytes(COMPOSITE_FIELDS_SEPARATOR_STR);
   public final static byte[] FAMILY_SIMPLE = Bytes.toBytes("simple");
@@ -255,6 +256,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       if (StringUtils.isNotBlank(value.getDisplayName())) {
         put.add(FAMILY_FIELDS, Bytes.add(toBytes, CELL_FIELD_DISPLAY_NAME), Bytes.toBytes(value.getDisplayName()));
       }
+      putParams(put, FAMILY_FIELDS, toBytes, value.getParameters());
       /*
        * Variations
        */
@@ -390,7 +392,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   }
 
   protected void putParams(Put put, final byte[] family, final byte[] prefix, final Map<String, String> params) {
-    final byte[] paramsPrefix = Bytes.add(prefix, Bytes.toBytes("params:"));
+    final byte[] paramsPrefix = Bytes.add(prefix, Bytes.toBytes(new StringBuilder(CELL_PARAMS_PREFIX).append(":").
+        toString()));
     if (params != null && !params.isEmpty()) {
       for (Entry<String, String> param : params.entrySet()) {
         final byte[] qualifier = Bytes.add(paramsPrefix, Bytes.toBytes(param.getKey()));
@@ -597,6 +600,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
     DataType mutableDataType = null;
     fieldDef.setName(fieldName);
     final Map<String, byte[]> compositeFields = new LinkedHashMap<String, byte[]>();
+    final Map<String, String> fieldParams = new LinkedHashMap<String, String>();
     CompositeStatus compositeStatus = distinguishCompositeFields(fieldCells, compositeFields, fieldName);
     if (logger.isInfoEnabled()) {
       logger.info("Composition status " + compositeStatus.name());
@@ -609,6 +613,13 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
           validatorPatternString).toString());
     }
     Pattern validatorPattern = Pattern.compile(validatorPatternString);
+    final String paramsPatternString = new StringBuilder(fieldName).append(':').append(CELL_PARAMS_PREFIX).
+        append(":(.+)").toString();
+    if (logger.isDebugEnabled()) {
+      logger.debug(new StringBuilder("Using following pattern to identify params: ").append(
+          paramsPatternString).toString());
+    }
+    Pattern paramsPattern = Pattern.compile(paramsPatternString);
     final String searchDefPatternString = new StringBuilder(fieldName).append(":(").append(CELL_FIELD_SEARCHDEF).
         append(':').append(".*)").toString();
     if (logger.isDebugEnabled()) {
@@ -633,10 +644,16 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       final Matcher searchDefMatcher = searchDefPattern.matcher(key);
       final Matcher variationsDefMatcher = variationsDefPattern.matcher(key);
       final Matcher validatorMatcher = validatorPattern.matcher(key);
+      final Matcher paramsMatcher = paramsPattern.matcher(key);
       /*
        * Search Def
        */
-      if (searchDefMatcher.matches()) {
+      if (paramsMatcher.matches()) {
+        final String paramKey = paramsMatcher.group(1);
+        final String paramValue = Bytes.toString(cell.getValue());
+        fieldParams.put(paramKey, paramValue);
+      }
+      else if (searchDefMatcher.matches()) {
         logger.debug("Matched search definition pattern");
         byte[] searchDefCell = Bytes.toBytes(searchDefMatcher.group(1));
         if (Arrays.equals(CELL_FIELD_SEARCHDEF_INDEXED, searchDefCell)) {
@@ -708,7 +725,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
             uri.setValue(Bytes.toString(value));
             validatorDef.setUri(uri);
           }
-          else if (StringUtils.isNotBlank(validatorCell) && validatorCell.startsWith("params") && validatorCell.indexOf(
+          else if (StringUtils.isNotBlank(validatorCell) && validatorCell.startsWith(CELL_PARAMS_PREFIX) &&
+              validatorCell.indexOf(
               ':') > -1) {
             logger.info("Match params");
             String paramKey = validatorCell.split(":")[1];
@@ -814,6 +832,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
     if (!fieldVariations.isEmpty()) {
       fieldDef.setVariations(fieldVariations.values());
     }
+    fieldDef.setParameters(fieldParams);
   }
 
   protected DataType createDataType(FieldValueType valueType) {
@@ -1006,7 +1025,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       uri.setValue(Bytes.toString(value));
       resourceDef.setResourceUri(uri);
     }
-    else if (StringUtils.isNotBlank(qualifierStr) && qualifierStr.startsWith("params") && qualifierStr.indexOf(':') >
+    else if (StringUtils.isNotBlank(qualifierStr) && qualifierStr.startsWith(CELL_PARAMS_PREFIX) &&
+        qualifierStr.indexOf(':') >
         -1) {
       String paramKey = qualifierStr.split(":")[1];
       String paramVal = Bytes.toString(value);

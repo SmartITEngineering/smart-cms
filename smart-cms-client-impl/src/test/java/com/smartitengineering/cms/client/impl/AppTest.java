@@ -2255,6 +2255,9 @@ public class AppTest {
     Assert.assertNotNull(compositeDataType.getEmbeddedContentType());
     Assert.assertEquals(2, compositeDataType.getOwnComposition().size());
     Assert.assertEquals(9, compositeDataType.getComposition().size());
+    Map<String, String> parameters = compositeDataType.getComposedFieldDefs().get("astreet1").getParameters();
+    Assert.assertEquals(1, parameters.size());
+    Assert.assertEquals("fieldVal", parameters.get("fieldParam"));
     Iterator<FieldDef> compositionIterator = compositeDataType.getOwnComposition().iterator();
     compositionIterator.next();
     FieldDef collectionFieldDef = compositionIterator.next();
@@ -2278,6 +2281,9 @@ public class AppTest {
     compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
     Assert.assertNull(compositeDataType.getEmbeddedContentType());
     Assert.assertEquals(2, compositeDataType.getOwnComposition().size());
+    parameters = compositeDataType.getComposedFieldDefs().get("By").getParameters();
+    Assert.assertEquals(1, parameters.size());
+    Assert.assertEquals("fieldVal", parameters.get("fieldParam"));
   }
 
   @Test

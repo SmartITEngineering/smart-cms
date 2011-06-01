@@ -18,6 +18,8 @@
  */
 package com.smartitengineering.cms.ws.common.domains;
 
+import java.util.Map;
+
 /**
  *
  * @author imyousuf
@@ -26,6 +28,7 @@ public class FieldDefImpl implements FieldDef {
 
   private String name, type;
   private boolean required;
+  private Map<String, String> parameters;
 
   @Override
   public String getName() {
@@ -52,5 +55,13 @@ public class FieldDefImpl implements FieldDef {
 
   public void setType(String type) {
     this.type = type;
+  }
+
+  public Map<String, String> getParameters() {
+    return parameters;
+  }
+
+  public void setParameters(Map<String, String> parameters) {
+    this.parameters = parameters;
   }
 }

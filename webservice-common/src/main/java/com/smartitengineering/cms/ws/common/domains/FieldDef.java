@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.ws.common.domains;
 
 import com.smartitengineering.cms.ws.common.jackson.FieldDefTypeIdResolver;
+import java.util.Map;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -39,4 +40,6 @@ public interface FieldDef {
   String getType();
 
   boolean isRequired();
+  
+  Map<String, String> getParameters();
 }
