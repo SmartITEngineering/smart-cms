@@ -30,6 +30,8 @@ import java.util.Map;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.runtime.RuntimeSingleton;
 import org.apache.velocity.runtime.parser.node.SimpleNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -42,10 +44,11 @@ public class VelocityVariationGenerator extends AbstractTypeVariationGenerator {
     return new VelocityTemplateVariationGenerator(template.getTemplate());
   }
 
-  class VelocityTemplateVariationGenerator implements VariationGenerator {
+  static class VelocityTemplateVariationGenerator implements VariationGenerator {
 
     private final SimpleNode simpleNode;
     private final VelocityContext ctx = new VelocityContext();
+    protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     public VelocityTemplateVariationGenerator(byte[] templateData) throws InvalidTemplateException {
       try {
@@ -65,7 +68,7 @@ public class VelocityVariationGenerator extends AbstractTypeVariationGenerator {
     public String getVariationForField(Field field, Map<String, String> params) {
       StringWriter writer = new StringWriter();
       ctx.put("field", field);
-      if(params != null) {
+      if (params != null) {
         ctx.put("params", params);
       }
       try {

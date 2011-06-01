@@ -30,6 +30,8 @@ import java.util.Map;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.runtime.RuntimeSingleton;
 import org.apache.velocity.runtime.parser.node.SimpleNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -42,10 +44,11 @@ public class VelocityRepresentationGenerator extends AbstractTypeRepresentationG
     return new VelocityTemplateRepresentationGenerator(template.getTemplate());
   }
 
-  class VelocityTemplateRepresentationGenerator implements RepresentationGenerator {
+  static class VelocityTemplateRepresentationGenerator implements RepresentationGenerator {
 
     private final SimpleNode simpleNode;
     private final VelocityContext ctx = new VelocityContext();
+    protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     public VelocityTemplateRepresentationGenerator(byte[] templateData) throws InvalidTemplateException {
       try {
