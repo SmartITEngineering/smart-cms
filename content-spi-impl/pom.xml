@@ -103,6 +103,10 @@ The module is responsible for Implementing the SPI for the CMS.
       <artifactId>async-events-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
       <artifactId>content-api-impl</artifactId>
       <version>${project.version}</version>

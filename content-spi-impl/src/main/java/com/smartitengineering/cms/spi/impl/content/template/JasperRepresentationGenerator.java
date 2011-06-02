@@ -44,6 +44,7 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
 import net.sf.jasperreports.engine.export.JRRtfExporter;
 import net.sf.jasperreports.engine.export.JRTextExporter;
+import net.sf.jasperreports.engine.export.JRTextExporterParameter;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.oasis.JROdsExporter;
@@ -146,6 +147,8 @@ public class JasperRepresentationGenerator extends AbstractTypeRepresentationGen
       }
       else if (StringUtils.equalsIgnoreCase(output, TXT)) {
         JRExporter exporter = new JRTextExporter();
+        exporter.setParameter(JRTextExporterParameter.CHARACTER_WIDTH, 2.0f);
+        exporter.setParameter(JRTextExporterParameter.CHARACTER_HEIGHT, 2.0f);
         return exportJasperPrint(exporter, print);
       }
       else if (StringUtils.equalsIgnoreCase(output, ODS)) {
@@ -169,6 +172,12 @@ public class JasperRepresentationGenerator extends AbstractTypeRepresentationGen
       ByteArrayOutputStream outStream = new ByteArrayOutputStream();
       exporter.setParameter(JRExporterParameter.JASPER_PRINT, print);
       exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, outStream);
+      try {
+        exporter.exportReport();
+      }
+      catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
       return outStream.toByteArray();
     }
 
