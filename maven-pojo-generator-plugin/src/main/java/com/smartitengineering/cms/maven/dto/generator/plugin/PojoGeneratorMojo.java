@@ -22,7 +22,6 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.File;
-import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.lang.StringUtils;
@@ -50,11 +49,6 @@ public class PojoGeneratorMojo extends AbstractMojo {
    */
   private Map<String, String> contentTypesResourceConfig;
   /**
-   * A content type classpath resource name
-   * @parameter
-   */
-  private String contentTypeResourceConfig;
-  /**
    * A content type file
    * @parameter
    */
@@ -63,22 +57,19 @@ public class PojoGeneratorMojo extends AbstractMojo {
   public void execute()
       throws MojoExecutionException {
     File f = outputDirectory;
-
     if (!f.exists()) {
       f.mkdirs();
     }
-    if (contentTypesResourceConfig == null || contentTypesResourceConfig.isEmpty() || StringUtils.isBlank(
-        contentTypeResourceConfig) || contentTypeResource == null) {
+    if ((contentTypesResourceConfig == null || contentTypesResourceConfig.isEmpty()) && contentTypeResource == null) {
       throw new MojoExecutionException("Parameters not specified properly. Any one and only one of " +
           "contentTypesResourceConfig, contentTypeResourceConfig and contentTypeResource must be specified!");
     }
     final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-    if (contentTypeResource != null && (contentTypeResource.exists() || !contentTypeResource.isFile())) {
-      throw new MojoExecutionException("'contentTypeResource' file either does not exist or is not a file");
-    }
-    else if (StringUtils.isNotBlank(contentTypeResourceConfig) && classLoader.getResource(contentTypeResourceConfig) ==
-        null) {
-      throw new MojoExecutionException("'contentTypeResourceConfig' classpath resource does not exist");
+    if (contentTypeResource != null) {
+      if ((!contentTypeResource.exists() || !contentTypeResource.isFile())) {
+        throw new MojoExecutionException("'contentTypeResource' file either does not exist or is not a file: " +
+            (contentTypeResource == null ? null : contentTypeResource.getAbsolutePath()));
+      }
     }
     else {
       for (Entry<String, String> contentTypeRsrc : contentTypesResourceConfig.entrySet()) {
@@ -88,21 +79,18 @@ public class PojoGeneratorMojo extends AbstractMojo {
         }
         final String[] wId = key.split(":");
         if (wId.length != 2) {
-          throw new MojoExecutionException("'contentTypesResourceConfig' key must be in 'string:string' format");
+          throw new MojoExecutionException("'contentTypesResourceConfig' key must be in 'string:string' format: " + key);
         }
         final String value = contentTypeRsrc.getValue();
         if (StringUtils.isBlank(value)) {
           throw new MojoExecutionException("'contentTypesResourceConfig' can not have empty resource config");
         }
         File file = new File(value);
-        URL rsrcUrl = classLoader.getResource(value);
         if (file.exists() && file.isFile()) {
-        }
-        else if (rsrcUrl != null) {
         }
         else {
           throw new MojoExecutionException("'contentTypesResourceConfig' can not have a resource config that is neither" +
-              "a file nor a classpath resoruce");
+              "a file nor a classpath resoruce: " + value);
         }
       }
     }
