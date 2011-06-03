@@ -151,7 +151,11 @@ public final class SmartContentSPI {
    * @see PersistentServiceRegistrar#getPersistentService(java.lang.Class)
    */
   public <T extends PersistentWriter> PersistentService<T> getPersistentService(Class<T> writerClass) {
-    return getPersistentServiceRegistrar().getPersistentService(writerClass);
+    final PersistentServiceRegistrar registrar = getPersistentServiceRegistrar();
+    if (registrar == null) {
+      return null;
+    }
+    return registrar.getPersistentService(writerClass);
   }
 
   public SearchFieldNameGenerator getSearchFieldNameGenerator() {

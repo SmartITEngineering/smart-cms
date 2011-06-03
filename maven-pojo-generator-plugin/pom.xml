@@ -35,6 +35,10 @@
       <artifactId>maven-plugin-api</artifactId>
     </dependency>
     <dependency>
+     <groupId>org.apache.maven</groupId>
+     <artifactId>maven-project</artifactId>
+   </dependency>
+    <dependency>
       <groupId>com.sun.codemodel</groupId>
       <artifactId>codemodel</artifactId>
     </dependency>
@@ -42,6 +46,15 @@
       <groupId>com.smartitengineering.smart-cms</groupId>
       <artifactId>content-type-xml</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.smartitengineering.smart-cms</groupId>
+      <artifactId>content-api-impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jdk14</artifactId>
     </dependency>
   </dependencies>
 </project>
