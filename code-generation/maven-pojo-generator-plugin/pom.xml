@@ -20,8 +20,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>smart-cms</artifactId>
-    <groupId>com.smartitengineering</groupId>
+    <groupId>com.smartitengineering.cms</groupId>
+    <artifactId>code-generation</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
   <groupId>com.smartitengineering.cms</groupId>
@@ -35,9 +35,9 @@
       <artifactId>maven-plugin-api</artifactId>
     </dependency>
     <dependency>
-     <groupId>org.apache.maven</groupId>
-     <artifactId>maven-project</artifactId>
-   </dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-project</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.sun.codemodel</groupId>
       <artifactId>codemodel</artifactId>
