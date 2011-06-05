@@ -32,5 +32,6 @@
   <name>Code Generate Modules for Content Repository</name>
   <modules>
     <module>maven-pojo-generator-plugin</module>
+    <module>content-repo-dao-impl</module>
   </modules>
 </project>
