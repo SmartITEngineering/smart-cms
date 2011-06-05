@@ -20,12 +20,24 @@ package com.smartitengineering.cms.maven.dto.generator.plugin;
 
 import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
+import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.type.xml.XMLParserIntrospector;
 import com.smartitengineering.cms.type.xml.XmlParser;
+import com.sun.codemodel.JBlock;
+import com.sun.codemodel.JClass;
+import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
+import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JFieldVar;
+import com.sun.codemodel.JMethod;
+import com.sun.codemodel.JMod;
+import com.sun.codemodel.JType;
+import com.sun.codemodel.JVar;
 import nu.xom.Element;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -33,7 +45,10 @@ import org.apache.maven.plugin.MojoExecutionException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Collection;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -154,10 +169,109 @@ public class PojoGeneratorMojo extends AbstractMojo {
     }
   }
 
-  private void generateCode(JCodeModel codeModel, Set<MutableContentType> types) throws Exception {
+  protected void generateCode(JCodeModel codeModel, Set<MutableContentType> types) throws Exception {
+    Map<ContentTypeId, JDefinedClass> classes = new LinkedHashMap<ContentTypeId, JDefinedClass>();
     for (MutableContentType type : types) {
-      ContentTypeId typeId = type.getContentTypeID();
-      codeModel._class(new StringBuilder(typeId.getNamespace()).append('.').append(typeId.getName()).toString());
+      classes.put(type.getContentTypeID(), generateClassForType(type, codeModel));
+    }
+    for (MutableContentType type : types) {
+      final JDefinedClass typeClass = classes.get(type.getContentTypeID());
+      if (type.getParent() != null) {
+        final JClass parentClass = classes.get(type.getParent());
+        typeClass._extends(parentClass);
+      }
+    }
+    for (MutableContentType type : types) {
+      generateFields(type.getOwnFieldDefs(), classes.get(type.getContentTypeID()), classes);
+    }
+  }
+
+  protected JDefinedClass generateClassForType(MutableContentType type, JCodeModel codeModel) throws
+      JClassAlreadyExistsException {
+    ContentTypeId typeId = type.getContentTypeID();
+    JDefinedClass definedClass = codeModel._class(new StringBuilder(typeId.getNamespace()).append('.').append(typeId.
+        getName()).toString());
+    return definedClass;
+  }
+
+  protected void generateFields(Map<String, FieldDef> fields, JDefinedClass definedClass,
+                                Map<ContentTypeId, JDefinedClass> classes) {
+    for (FieldDef def : fields.values()) {
+      final Class fieldClass;
+      final JType jType;
+      
+      switch (def.getValueDef().getType()) {
+        case BOOLEAN:
+          fieldClass = Boolean.class;
+          jType = null;
+          break;
+        case STRING:
+          fieldClass = String.class;
+          jType = null;
+          break;
+        case CONTENT:
+          ContentDataType contentDataType = (ContentDataType) def.getValueDef();
+          fieldClass = null;
+          final ContentTypeId typeDef = contentDataType.getTypeDef();
+          jType = classes.get(typeDef);
+          break;
+        case DATE_TIME:
+          fieldClass = Date.class;
+          jType = null;
+          break;
+        case INTEGER:
+          fieldClass = Integer.class;
+          jType = null;
+          break;
+        case DOUBLE:
+          fieldClass = Double.class;
+          jType = null;
+          break;
+        case LONG:
+          fieldClass = Long.class;
+          jType = null;
+          break;
+        case OTHER:
+          fieldClass = byte[].class;
+          jType = null;
+          break;
+        case COLLECTION:
+          fieldClass = List.class;
+          jType = null;
+          break;
+        case COMPOSITE:
+          fieldClass = Object.class;
+          jType = null;
+          break;
+        default:
+          fieldClass = Object.class;
+          jType = null;
+      }
+      final String name = def.getName();
+      final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).append(name.
+          substring(1)).toString();
+      final String getterName = new StringBuilder("get").append(getterSetterSuffix).toString();
+      final String setterName = new StringBuilder("set").append(getterSetterSuffix).toString();
+      final JFieldVar fieldVar;
+      final JMethod getterMethod;
+      final JMethod setterMethod;
+      final JVar paramVar;
+      if (jType == null) {
+        fieldVar = definedClass.field(JMod.PROTECTED, fieldClass, name);
+        getterMethod = definedClass.method(JMod.PUBLIC, fieldClass, getterName);
+        setterMethod = definedClass.method(JMod.PUBLIC, JCodeModel.boxToPrimitive.get(Void.class), setterName);
+        paramVar = setterMethod.param(fieldClass, name);
+      }
+      else {
+        fieldVar = definedClass.field(JMod.PROTECTED, jType, name);
+        getterMethod = definedClass.method(JMod.PUBLIC, jType, getterName);
+        setterMethod = definedClass.method(JMod.PUBLIC, JCodeModel.boxToPrimitive.get(Void.class), setterName);
+        paramVar = setterMethod.param(jType, name);
+      }
+      final JBlock getterBlock = getterMethod.body();
+      getterBlock._return(fieldVar);
+      JBlock setterBlock = setterMethod.body();
+      setterBlock.assign(JExpr._this().ref(fieldVar), paramVar);
     }
   }
 }
