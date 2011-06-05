@@ -73,6 +73,37 @@ public interface ContentType {
   public Map<MediaType, String> getRepresentations();
 
   public String getEntityTagValue();
-  
+
   public Map<String, String> getParameterizedDisplayNames();
+
+  /**
+   * Retrieves the definition type for this content type definition. It works as follows, if current defines its type 
+   * then use that. If nothing is specified and there is no parent content type then return 
+   * {@link DefinitionType#getDefaufltType()  default type} If nothing is specified and there is an inheritence in the 
+   * content type definition then return as concrete type of that type, i.e. {@link DefinitionType#CONCRETE_TYPE} and 
+   * {@link DefinitionType#CONCRETE_COMPONENT} for {@link DefinitionType#ABSTRACT_TYPE} and 
+   * {@link DefinitionType#ABSTRACT_COMPONENT} respectively. With restriction that {@link DefinitionType#CONCRETE_TYPE} 
+   * can be extended from {@link DefinitionType#ABSTRACT_COMPONENT}, Type must extend from type and component from 
+   * component. The implication of this type is that, only {@link DefinitionType#CONCRETE_TYPE} can be created as 
+   * content.
+   * @return Type of the definition and it should never return null.
+   */
+  public DefinitionType getDefinitionType();
+
+  /**
+   * Simply retrieve the definition set this very type.
+   */
+  public DefinitionType getSelfDefinitionType();
+
+  enum DefinitionType {
+
+    ABSTRACT_TYPE,
+    ABSTRACT_COMPONENT,
+    CONCRETE_TYPE,
+    CONCRETE_COMPONENT;
+
+    public static DefinitionType getDefaufltType() {
+      return CONCRETE_TYPE;
+    }
+  }
 }

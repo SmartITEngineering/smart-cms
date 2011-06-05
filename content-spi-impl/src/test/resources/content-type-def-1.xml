@@ -33,6 +33,7 @@
       <typeNS>jpeg</typeNS>
       <typeName>RST</typeName>
     </parent>
+    <defType>CONCRETE_TYPE</defType>
     <fields>
       <field>
         <name>fieldA</name>

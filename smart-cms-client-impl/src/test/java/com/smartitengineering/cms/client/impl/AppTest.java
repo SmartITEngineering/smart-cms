@@ -2399,6 +2399,45 @@ public class AppTest {
     }
   }
 
+  @Test
+  public void testDefTypePersistence() throws Exception {
+    com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl id =
+                                                                  new com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl();
+    id.setGlobalNamespace("test");
+    id.setName("composites");
+    ContentTypeIdImpl idImpl = new ContentTypeIdImpl();
+    idImpl.setWorkspace(id);
+    idImpl.setNamespace("test");
+    idImpl.setName("Address");
+    ContentType type = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(idImpl);
+    Assert.assertEquals(ContentType.DefinitionType.CONCRETE_COMPONENT, type.getDefinitionType());
+  }
+
+  @Test
+  public void testNonConcreteTypeCreate() throws Exception {
+    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ CREATE NON CONCRETE TYPE CONTENT ~~~~~~~~~~~~~~~~~~~~~~~~~");
+    WorkspaceFeedResource feedResource = setupCompositeWorkspace();
+    final String[] invalidResources = new String[]{"composite/address-form.properties"};
+    for (String resource : invalidResources) {
+      final Properties properties = new Properties();
+      properties.load(getClass().getClassLoader().getResourceAsStream(
+          resource));
+      Set<Object> formKeys = properties.keySet();
+      FormDataMultiPart multiPart = new FormDataMultiPart();
+      for (Object key : formKeys) {
+        multiPart.field(key.toString(), properties.getProperty(key.toString()));
+      }
+      try {
+        feedResource.getContents().post(MediaType.MULTIPART_FORM_DATA, multiPart, ClientResponse.Status.CREATED,
+                                        ClientResponse.Status.ACCEPTED, ClientResponse.Status.OK);
+        Assert.fail("Invalid content should have failed for " + resource);
+      }
+      catch (Exception ex) {
+        //Expected that creation fails
+      }
+    }
+  }
+
   public static class ConfigurationModule extends AbstractModule {
 
     @Override

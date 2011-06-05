@@ -35,6 +35,7 @@ import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
+import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
@@ -135,6 +136,13 @@ public class XmlParser implements XmlConstants {
         }
         if (StringUtils.isNotBlank(primaryFieldName)) {
           mutableContent.setPrimaryFieldName(primaryFieldName);
+        }
+        String defType = parseOptionalStringElement(contentTypeElement, DEF_TYPE);
+        if (logger.isInfoEnabled()) {
+          logger.info("Def type parsed: " + defType);
+        }
+        if (StringUtils.isNotBlank(defType)) {
+          mutableContent.setDefinitionType(ContentType.DefinitionType.valueOf(defType));
         }
         mutableContent.setDisplayName(displayName);
         mutableContent.setParent(contentTypeId);

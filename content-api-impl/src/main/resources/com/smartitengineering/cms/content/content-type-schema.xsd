@@ -160,22 +160,13 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:element name="templateType">
+  <xs:element name="defType">
     <xs:simpleType>
       <xs:restriction base="xs:string">
-        <xs:enumeration value="velocity" />
-        <xs:enumeration value="ruby" />
-        <xs:enumeration value="javascript" />
-        <xs:enumeration value="groovy" />
-      </xs:restriction>
-    </xs:simpleType>
-  </xs:element>
-  <xs:element name="validatorType">
-    <xs:simpleType>
-      <xs:restriction base="xs:string">
-        <xs:enumeration value="ruby" />
-        <xs:enumeration value="javascript" />
-        <xs:enumeration value="groovy" />
+        <xs:enumeration value="ABSTRACT_TYPE" />
+        <xs:enumeration value="ABSTRACT_COMPONENT" />
+        <xs:enumeration value="CONCRETE_TYPE" />
+        <xs:enumeration value="CONCRETE_COMPONENT" />
       </xs:restriction>
     </xs:simpleType>
   </xs:element>
@@ -292,6 +283,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
         <xs:element ref="displayName" minOccurs="0" maxOccurs="1" />
         <xs:element ref="parameterizedDisplayNames" minOccurs="0" maxOccurs="1" />
         <xs:element ref="parent" minOccurs="0" maxOccurs="1" />
+        <xs:element ref="defType" minOccurs="0" maxOccurs="1" />
         <xs:element ref="primaryField" minOccurs="0" maxOccurs="1" />
         <xs:element ref="fields" minOccurs="1" />
         <xs:element ref="status" minOccurs="0" maxOccurs="1" />
