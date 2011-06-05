@@ -29,6 +29,7 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.repo.dao.impl.AbstractRepositoryDomain;
 import com.smartitengineering.cms.type.xml.XMLParserIntrospector;
 import com.smartitengineering.cms.type.xml.XmlParser;
 import com.sun.codemodel.ClassType;
@@ -199,11 +200,15 @@ public class PojoGeneratorMojo extends AbstractMojo {
       mod = mod | JMod.ABSTRACT;
     }
     else if (defType.equals(ContentType.DefinitionType.ABSTRACT_TYPE)) {
-      //TODO Extend/implement persistent dto
       mod = mod | JMod.ABSTRACT;
     }
     JDefinedClass definedClass = codeModel._class(mod, new StringBuilder(typeId.getNamespace()).append('.').append(typeId.
         getName()).toString(), ClassType.CLASS);
+    if (defType.equals(ContentType.DefinitionType.ABSTRACT_TYPE) || defType.equals(
+        ContentType.DefinitionType.CONCRETE_TYPE)) {
+      JClass clazz = codeModel.ref(AbstractRepositoryDomain.class);
+      definedClass._extends(clazz.narrow(definedClass));
+    }
     return definedClass;
   }
 
