@@ -23,12 +23,15 @@ import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
+import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.ContentType.DefinitionType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.type.xml.XMLParserIntrospector;
 import com.smartitengineering.cms.type.xml.XmlParser;
+import com.sun.codemodel.ClassType;
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
@@ -189,8 +192,18 @@ public class PojoGeneratorMojo extends AbstractMojo {
   protected JDefinedClass generateClassForType(MutableContentType type, JCodeModel codeModel) throws
       JClassAlreadyExistsException {
     ContentTypeId typeId = type.getContentTypeID();
-    JDefinedClass definedClass = codeModel._class(new StringBuilder(typeId.getNamespace()).append('.').append(typeId.
-        getName()).toString());
+    int mod = JMod.PUBLIC;
+    final DefinitionType defType = type.getDefinitionType();
+    if (defType.equals(ContentType.DefinitionType.ABSTRACT_COMPONENT)) {
+      // Extend nothing
+      mod = mod | JMod.ABSTRACT;
+    }
+    else if (defType.equals(ContentType.DefinitionType.ABSTRACT_TYPE)) {
+      //TODO Extend/implement persistent dto
+      mod = mod | JMod.ABSTRACT;
+    }
+    JDefinedClass definedClass = codeModel._class(mod, new StringBuilder(typeId.getNamespace()).append('.').append(typeId.
+        getName()).toString(), ClassType.CLASS);
     return definedClass;
   }
 
