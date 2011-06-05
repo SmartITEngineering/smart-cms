@@ -20,6 +20,8 @@ package com.smartitengineering.cms.maven.dto.generator.plugin;
 
 import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
+import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldDef;
@@ -41,14 +43,12 @@ import com.sun.codemodel.JVar;
 import nu.xom.Element;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -182,7 +182,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
       }
     }
     for (MutableContentType type : types) {
-      generateFields(type.getOwnFieldDefs(), classes.get(type.getContentTypeID()), classes);
+      generateFields(type.getOwnFieldDefs().values(), classes.get(type.getContentTypeID()), classes, codeModel);
     }
   }
 
@@ -194,12 +194,15 @@ public class PojoGeneratorMojo extends AbstractMojo {
     return definedClass;
   }
 
-  protected void generateFields(Map<String, FieldDef> fields, JDefinedClass definedClass,
-                                Map<ContentTypeId, JDefinedClass> classes) {
-    for (FieldDef def : fields.values()) {
+  protected void generateFields(Collection<FieldDef> fields, JDefinedClass definedClass,
+                                Map<ContentTypeId, JDefinedClass> classes, JCodeModel codeModel) throws
+      JClassAlreadyExistsException, ClassNotFoundException {
+    for (FieldDef def : fields) {
       final Class fieldClass;
       final JType jType;
-      
+      final String name = def.getName();
+      final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).append(name.
+          substring(1)).toString();
       switch (def.getValueDef().getType()) {
         case BOOLEAN:
           fieldClass = Boolean.class;
@@ -236,20 +239,84 @@ public class PojoGeneratorMojo extends AbstractMojo {
           jType = null;
           break;
         case COLLECTION:
-          fieldClass = List.class;
-          jType = null;
+          fieldClass = null;
+          final String itemType;
+          CollectionDataType collectionDataType = (CollectionDataType) def.getValueDef();
+          switch (collectionDataType.getItemDataType().getType()) {
+            case BOOLEAN:
+              itemType = Boolean.class.getName();
+              break;
+            case STRING:
+              itemType = String.class.getName();
+              break;
+            case CONTENT:
+              itemType = classes.get(((ContentDataType) collectionDataType.getItemDataType()).getTypeDef()).fullName();
+              break;
+            case DATE_TIME:
+              itemType = Date.class.getName();
+              break;
+            case INTEGER:
+              itemType = Integer.class.getName();
+              break;
+            case DOUBLE:
+              itemType = Double.class.getName();
+              break;
+            case LONG:
+              itemType = Long.class.getName();
+              break;
+            case OTHER:
+              itemType = byte[].class.getName();
+              break;
+            case COMPOSITE: {
+              CompositeDataType compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
+              ContentDataType composedOfContent = compositeDataType.getEmbeddedContentType();
+              if (compositeDataType.getOwnComposition() != null && !compositeDataType.getOwnComposition().isEmpty()) {
+                JDefinedClass compositeFieldClass = definedClass._class(JMod.STATIC | JMod.PUBLIC, getterSetterSuffix);
+                if (composedOfContent != null) {
+                  compositeFieldClass._extends(classes.get(composedOfContent.getTypeDef()));
+                }
+                generateFields(compositeDataType.getOwnComposition(), compositeFieldClass, classes, codeModel);
+                itemType = compositeFieldClass.fullName();
+              }
+              else if (composedOfContent != null) {
+                itemType = classes.get(composedOfContent.getTypeDef()).fullName();
+              }
+              else {
+                itemType = "Object";
+              }
+              break;
+            }
+            default:
+              itemType = "Object";
+          }
+          jType = codeModel.parseType(new StringBuilder("java.util.List<").append(itemType).append('>').toString());
           break;
-        case COMPOSITE:
-          fieldClass = Object.class;
-          jType = null;
+        case COMPOSITE: {
+          CompositeDataType compositeDataType = (CompositeDataType) def.getValueDef();
+          ContentDataType composedOfContent = compositeDataType.getEmbeddedContentType();
+          if (compositeDataType.getOwnComposition() != null && !compositeDataType.getOwnComposition().isEmpty()) {
+            fieldClass = null;
+            JDefinedClass compositeFieldClass = definedClass._class(JMod.STATIC | JMod.PUBLIC, getterSetterSuffix);
+            if (composedOfContent != null) {
+              compositeFieldClass._extends(classes.get(composedOfContent.getTypeDef()));
+            }
+            generateFields(compositeDataType.getOwnComposition(), compositeFieldClass, classes, codeModel);
+            jType = compositeFieldClass;
+          }
+          else if (composedOfContent != null) {
+            fieldClass = null;
+            jType = classes.get(composedOfContent.getTypeDef());
+          }
+          else {
+            fieldClass = Object.class;
+            jType = null;
+          }
           break;
+        }
         default:
           fieldClass = Object.class;
           jType = null;
       }
-      final String name = def.getName();
-      final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).append(name.
-          substring(1)).toString();
       final String getterName = new StringBuilder("get").append(getterSetterSuffix).toString();
       final String setterName = new StringBuilder("set").append(getterSetterSuffix).toString();
       final JFieldVar fieldVar;
