@@ -4,10 +4,10 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>code-generation</artifactId>
-    <groupId>com.smartitengineering.cms</groupId>
+    <groupId>com.smartitengineering.smart-cms</groupId>
     <version>0.1-SNAPSHOT</version>
   </parent>
-  <groupId>com.smartitengineering.cms</groupId>
+  <groupId>com.smartitengineering.smart-cms</groupId>
   <artifactId>content-repo-dao-impl</artifactId>
   <version>0.1-SNAPSHOT</version>
   <name>Content Repository DAO Impl</name>

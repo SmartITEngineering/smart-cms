@@ -20,11 +20,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.smartitengineering.cms</groupId>
+    <groupId>com.smartitengineering.smart-cms</groupId>
     <artifactId>code-generation</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
-  <groupId>com.smartitengineering.cms</groupId>
+  <groupId>com.smartitengineering.smart-cms</groupId>
   <artifactId>maven-pojo-generator-plugin</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
@@ -50,6 +50,11 @@
     <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
       <artifactId>content-api-impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.smartitengineering.smart-cms</groupId>
+      <artifactId>content-repo-dao-impl</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

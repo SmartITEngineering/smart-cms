@@ -25,7 +25,7 @@
     <groupId>com.smartitengineering</groupId>
     <version>0.1-SNAPSHOT</version>
   </parent>
-  <groupId>com.smartitengineering.cms</groupId>
+  <groupId>com.smartitengineering.smart-cms</groupId>
   <artifactId>code-generation</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
