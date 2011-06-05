@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *   
+ * This is a simple Content Management System (CMS)
+ * Copyright (C) 2011 Imran M Yousuf (imyousuf@smartitengineering.com)
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.smartitengineering.smart-cms</groupId>
+  <artifactId>cms-codegenerator-demo</artifactId>
+  <parent>
+    <groupId>com.smartitengineering.smart-cms</groupId>
+    <artifactId>code-generation</artifactId>
+    <version>0.1-SNAPSHOT</version>
+  </parent>
+  <version>0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>CMS Code Generator Demo</name>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>com.smartitengineering.smart-cms</groupId>
+      <artifactId>content-repo-dao-impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>com.smartitengineering.smart-cms</groupId>
+        <artifactId>maven-pojo-generator-plugin</artifactId>
+        <version>${project.version}</version>
+        <configuration>
+          <outputDirectory>${project.build.directory}/generated-sources/cms-pojo/</outputDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>generate-pojo-file</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <contentTypeResource>${basedir}/src/main/resources/content-type-def-with-composition.xml</contentTypeResource>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-pojo-resource</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <contentTypeResource>${basedir}/src/main/resources/content-type-def-with-composition_1.xml</contentTypeResource>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-pojo-resources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <contentTypesResourceConfig>
+                <a:b>${basedir}/src/main/resources/content-type-def-with-composition_2.xml</a:b>
+                <b:c>${basedir}/src/main/resources/content-type-def-with-composition_3.xml</b:c>
+              </contentTypesResourceConfig>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

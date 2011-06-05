@@ -33,5 +33,6 @@
   <modules>
     <module>maven-pojo-generator-plugin</module>
     <module>content-repo-dao-impl</module>
+    <module>cms-codegenerator-demo</module>
   </modules>
 </project>
