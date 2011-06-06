@@ -18,7 +18,9 @@
  */
 package com.smartitengineering.cms.ws.common.domains;
 
+import java.util.Collection;
 import java.util.Map;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 /**
@@ -27,5 +29,9 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize;
  */
 @JsonDeserialize(as = CompositeFieldDefImpl.class)
 public interface CompositeFieldDef extends FieldDef {
+
   Map<String, FieldDef> getComposedFields();
+
+  @JsonIgnore
+  Collection<FieldDef> getComposedFieldDefs();
 }

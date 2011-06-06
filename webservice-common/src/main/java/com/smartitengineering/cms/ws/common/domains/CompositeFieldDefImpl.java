@@ -18,9 +18,11 @@
  */
 package com.smartitengineering.cms.ws.common.domains;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
@@ -41,5 +43,10 @@ public class CompositeFieldDefImpl extends FieldDefImpl implements CompositeFiel
         this.composedFields.put(field.getName(), field);
       }
     }
+  }
+
+  @JsonIgnore
+  public Collection<FieldDef> getComposedFieldDefs() {
+    return composedFields.values();
   }
 }
