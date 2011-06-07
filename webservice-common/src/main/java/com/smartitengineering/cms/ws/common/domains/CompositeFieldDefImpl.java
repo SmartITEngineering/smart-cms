@@ -37,7 +37,7 @@ public class CompositeFieldDefImpl extends FieldDefImpl implements CompositeFiel
   }
 
   public void setComposedFields(List<FieldDef> composedFields) {
-    composedFields.clear();
+    this.composedFields.clear();
     if (composedFields != null && !composedFields.isEmpty()) {
       for (FieldDef field : composedFields) {
         this.composedFields.put(field.getName(), field);
