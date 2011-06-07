@@ -10,6 +10,7 @@ import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.domain.PersistentDTO;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -21,7 +22,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author imyousuf
  */
-public abstract class AbstractRepoAdapterHelper<T extends AbstractRepositoryDomain<T>> extends AbstractAdapterHelper<Content, T> {
+public abstract class AbstractRepoAdapterHelper<T extends AbstractRepositoryDomain<? extends PersistentDTO>>
+    extends AbstractAdapterHelper<Content, T> {
 
   protected transient final Logger logger = LoggerFactory.getLogger(getClass());
   protected final Class<? extends T> beanClass;
@@ -45,6 +47,13 @@ public abstract class AbstractRepoAdapterHelper<T extends AbstractRepositoryDoma
                                                                                                typeNS, typeName);
     }
     return contentTypeId;
+  }
+
+  protected ContentId getContentId(String id) {
+    final byte[] bytesUtf8 = org.apache.commons.codec.binary.StringUtils.getBytesUtf8(id);
+    ContentId cId = SmartContentAPI.getInstance().getContentLoader().createContentId(defaultContainerWorkspace,
+                                                                                     bytesUtf8);
+    return cId;
   }
 
   protected final Class<? extends T> initializeEntityClassFromGenerics() {

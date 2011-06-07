@@ -8,6 +8,7 @@ import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.dao.common.CommonDao;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
+import com.smartitengineering.domain.PersistentDTO;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -20,7 +21,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author imyousuf
  */
-public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<T>> implements CommonDao<T, String> {
+public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends PersistentDTO>>
+    implements CommonDao<T, String> {
 
   @Inject
   private WorkspaceId defaultContainerWorkspace;

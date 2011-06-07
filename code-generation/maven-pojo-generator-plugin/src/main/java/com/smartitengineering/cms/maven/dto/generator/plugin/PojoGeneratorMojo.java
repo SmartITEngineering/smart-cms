@@ -18,6 +18,9 @@
  */
 package com.smartitengineering.cms.maven.dto.generator.plugin;
 
+import com.google.inject.PrivateModule;
+import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
 import com.smartitengineering.cms.api.type.CollectionDataType;
@@ -29,6 +32,7 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.repo.dao.impl.AbstractRepoAdapterHelper;
 import com.smartitengineering.cms.repo.dao.impl.AbstractRepositoryDomain;
 import com.smartitengineering.cms.type.xml.XMLParserIntrospector;
 import com.smartitengineering.cms.type.xml.XmlParser;
@@ -184,9 +188,13 @@ public class PojoGeneratorMojo extends AbstractMojo {
 
   protected void generateCode(JCodeModel codeModel, Set<MutableContentType> types) throws Exception {
     Map<ContentTypeId, JDefinedClass> classes = new LinkedHashMap<ContentTypeId, JDefinedClass>();
+    Map<ContentTypeId, JDefinedClass> helpers = new LinkedHashMap<ContentTypeId, JDefinedClass>();
+    Map<ContentTypeId, JDefinedClass> modules = new LinkedHashMap<ContentTypeId, JDefinedClass>();
+    // Create the classes
     for (MutableContentType type : types) {
       classes.put(type.getContentTypeID(), generateClassForType(type, codeModel));
     }
+    // Set parent content types as appropriate
     for (MutableContentType type : types) {
       final JDefinedClass typeClass = classes.get(type.getContentTypeID());
       if (type.getParent() != null) {
@@ -194,8 +202,50 @@ public class PojoGeneratorMojo extends AbstractMojo {
         typeClass._extends(parentClass);
       }
     }
+    // Create members and their accessors
     for (MutableContentType type : types) {
       generateFields(type.getOwnFieldDefs().values(), classes.get(type.getContentTypeID()), classes, codeModel);
+    }
+    // Create helpers and google guice module for concrete type definitions
+    JClass parentClass = codeModel.ref(AbstractRepoAdapterHelper.class);
+    JClass privateModuleClass = codeModel.ref(PrivateModule.class);
+    for (MutableContentType type : types) {
+      if (type.getDefinitionType().equals(DefinitionType.CONCRETE_TYPE)) {
+        final ContentTypeId contentTypeID = type.getContentTypeID();
+        JDefinedClass definedClass = classes.get(contentTypeID);
+        {
+          final String helperClassName = new StringBuilder(contentTypeID.getNamespace()).append('.').append(contentTypeID.
+              getName()).append("Helper").toString();
+          final JDefinedClass helperClass = codeModel._class(helperClassName);
+          helpers.put(contentTypeID, helperClass);
+          helperClass._extends(parentClass.narrow(definedClass));
+          {
+            JMethod forwardConversion = helperClass.method(JMod.PROTECTED, JCodeModel.boxToPrimitive.get(Void.class),
+                                                           "mergeContentIntoBean");
+            forwardConversion.param(Content.class, "fromBean");
+            forwardConversion.param(definedClass, "toBean");
+          }
+          {
+            JMethod reverseConversion = helperClass.method(JMod.PROTECTED, JCodeModel.boxToPrimitive.get(Void.class),
+                                                           "mergeBeanIntoContent");
+            reverseConversion.param(definedClass, "fromBean");
+            reverseConversion.param(WriteableContent.class, "toBean");
+          }
+          {
+            JMethod instanceCreation = helperClass.method(JMod.PROTECTED, definedClass, "newTInstance");
+            JBlock block = instanceCreation.body();
+            block._return(JExpr._new(definedClass));
+          }
+        }
+        {
+          final String moduleClassName = new StringBuilder(contentTypeID.getNamespace()).append('.').append(contentTypeID.
+              getName()).append("Module").toString();
+          final JDefinedClass moduleClass = codeModel._class(moduleClassName);
+          modules.put(contentTypeID, moduleClass);
+          moduleClass._extends(privateModuleClass);
+          moduleClass.method(JMod.PUBLIC, JCodeModel.boxToPrimitive.get(Void.class), "configure");
+        }
+      }
     }
   }
 
