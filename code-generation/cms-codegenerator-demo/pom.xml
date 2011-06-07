@@ -68,6 +68,7 @@
               <goal>generate</goal>
             </goals>
             <configuration>
+              <workspaceId>a:b</workspaceId>
               <contentTypeResource>${basedir}/src/main/resources/content-type-def-with-composition.xml</contentTypeResource>
             </configuration>
           </execution>
@@ -78,6 +79,7 @@
               <goal>generate</goal>
             </goals>
             <configuration>
+              <workspaceId>a:b</workspaceId>
               <contentTypeResource>${basedir}/src/main/resources/content-type-def-with-composition_1.xml</contentTypeResource>
             </configuration>
           </execution>

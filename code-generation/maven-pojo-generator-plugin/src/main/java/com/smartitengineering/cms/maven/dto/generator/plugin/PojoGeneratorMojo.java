@@ -87,6 +87,11 @@ public class PojoGeneratorMojo extends AbstractMojo {
    */
   private File contentTypeResource;
   /**
+   * The workspace id for the specified content type resource. It will be used to DI in the adapter and DAO Impl
+   * @parameter
+   */
+  private String workspaceId;
+  /**
    * The Maven project instance for the executing project.
    *
    * @parameter expression="${project}"
@@ -107,13 +112,17 @@ public class PojoGeneratorMojo extends AbstractMojo {
     JCodeModel codeModel = new JCodeModel();
     Set<MutableContentType> types = new LinkedHashSet<MutableContentType>();
     if (contentTypeResource != null) {
-      if ((!contentTypeResource.exists() || !contentTypeResource.isFile())) {
+      if (!contentTypeResource.exists() || !contentTypeResource.isFile()) {
         throw new MojoExecutionException("'contentTypeResource' file either does not exist or is not a file: " +
             (contentTypeResource == null ? null : contentTypeResource.getAbsolutePath()));
       }
+      if (StringUtils.isBlank(workspaceId) || workspaceId.split(":").length != 2) {
+        throw new MojoExecutionException("Workspace ID not specified or is not in format 'namespace:name'");
+      }
+      String wIds[] = workspaceId.split(":");
       final WorkspaceIdImpl dummyIdImpl = new WorkspaceIdImpl();
-      dummyIdImpl.setGlobalNamespace("a");
-      dummyIdImpl.setName("b");
+      dummyIdImpl.setGlobalNamespace(wIds[0]);
+      dummyIdImpl.setName(wIds[1]);
       types.addAll(parseContentType(dummyIdImpl, contentTypeResource));
     }
     else {
