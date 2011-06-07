@@ -86,11 +86,11 @@ public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<T>> implements
   }
 
   public <OtherTemplate> OtherTemplate getOther(QueryParameter... query) {
-    return getOther(Arrays.asList(query));
+    return this.<OtherTemplate>getOther(Arrays.asList(query));
   }
 
   public <OtherTemplate> List<OtherTemplate> getOtherList(QueryParameter... query) {
-    return getOtherList(Arrays.asList(query));
+    return this.<OtherTemplate>getOtherList(Arrays.asList(query));
   }
 
   public void save(T... states) {
