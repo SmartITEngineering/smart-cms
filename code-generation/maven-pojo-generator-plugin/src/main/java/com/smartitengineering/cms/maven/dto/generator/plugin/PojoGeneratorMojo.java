@@ -19,7 +19,10 @@
 package com.smartitengineering.cms.maven.dto.generator.plugin;
 
 import com.google.inject.PrivateModule;
+import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
@@ -34,8 +37,15 @@ import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.repo.dao.impl.AbstractRepoAdapterHelper;
 import com.smartitengineering.cms.repo.dao.impl.AbstractRepositoryDomain;
+import com.smartitengineering.cms.repo.dao.impl.RepositoryDaoImpl;
 import com.smartitengineering.cms.type.xml.XMLParserIntrospector;
 import com.smartitengineering.cms.type.xml.XmlParser;
+import com.smartitengineering.dao.common.CommonDao;
+import com.smartitengineering.dao.common.CommonReadDao;
+import com.smartitengineering.dao.common.CommonWriteDao;
+import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
+import com.smartitengineering.util.bean.adapter.GenericAdapter;
+import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
 import com.sun.codemodel.ClassType;
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClass;
@@ -44,6 +54,7 @@ import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JFieldVar;
+import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JType;
@@ -93,6 +104,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
   /**
    * The workspace id for the specified content type resource. It will be used to DI in the adapter and DAO Impl
    * @parameter
+   * @required
    */
   private String workspaceId;
   /**
@@ -209,14 +221,28 @@ public class PojoGeneratorMojo extends AbstractMojo {
     // Create helpers and google guice module for concrete type definitions
     JClass parentClass = codeModel.ref(AbstractRepoAdapterHelper.class);
     JClass privateModuleClass = codeModel.ref(PrivateModule.class);
+    // Initialize common classes for Google Guice bindings
+    JClass typeLiteral = codeModel.ref(TypeLiteral.class);
+    JClass commonDao = codeModel.ref(CommonDao.class);
+    JClass commonReadDao = codeModel.ref(CommonReadDao.class);
+    JClass commonWriteDao = codeModel.ref(CommonWriteDao.class);
+    JClass commonDaoImpl = codeModel.ref(RepositoryDaoImpl.class);
+    JClass genericAdapter = codeModel.ref(GenericAdapter.class).narrow(Content.class);
+    JClass genericAdapterImpl = codeModel.ref(GenericAdapterImpl.class).narrow(Content.class);
+    JClass abstractHelper = codeModel.ref(AbstractAdapterHelper.class).narrow(Content.class);
+    JClass singletonScope = codeModel.ref(Singleton.class);
+    JClass workspaceIdClass = codeModel.ref(WorkspaceId.class);
+    JClass apiClass = codeModel.ref(SmartContentAPI.class);
+    String[] wId = workspaceId.split(":");
     for (MutableContentType type : types) {
       if (type.getDefinitionType().equals(DefinitionType.CONCRETE_TYPE)) {
         final ContentTypeId contentTypeID = type.getContentTypeID();
         JDefinedClass definedClass = classes.get(contentTypeID);
+        final JDefinedClass helperClass;
         {
           final String helperClassName = new StringBuilder(contentTypeID.getNamespace()).append('.').append(contentTypeID.
               getName()).append("Helper").toString();
-          final JDefinedClass helperClass = codeModel._class(helperClassName);
+          helperClass = codeModel._class(helperClassName);
           helpers.put(contentTypeID, helperClass);
           helperClass._extends(parentClass.narrow(definedClass));
           {
@@ -243,7 +269,68 @@ public class PojoGeneratorMojo extends AbstractMojo {
           final JDefinedClass moduleClass = codeModel._class(moduleClassName);
           modules.put(contentTypeID, moduleClass);
           moduleClass._extends(privateModuleClass);
-          moduleClass.method(JMod.PUBLIC, JCodeModel.boxToPrimitive.get(Void.class), "configure");
+          JMethod configureMethod = moduleClass.method(JMod.PUBLIC, JCodeModel.boxToPrimitive.get(Void.class),
+                                                       "configure");
+          JBlock block = configureMethod.body();
+          final JDefinedClass commonDaoType;
+          {
+            final JClass narrowedCommonDaoTypeLiteral = typeLiteral.narrow(commonDao.narrow(definedClass).narrow(
+                String.class));
+            commonDaoType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).append(
+                "CommonDaoType").toString());
+            commonDaoType._extends(narrowedCommonDaoTypeLiteral);
+            final JClass narrowedDaoImplTypeLiteral = typeLiteral.narrow(commonDaoImpl.narrow(definedClass));
+            final JDefinedClass daoImplType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).
+                append("DaoImplType").toString());
+            daoImplType._extends(narrowedDaoImplTypeLiteral);
+            block.add(JExpr.invoke("bind").arg(JExpr._new(commonDaoType)).invoke("to").arg(JExpr._new(daoImplType)).
+                invoke("in").arg(singletonScope.dotclass()));
+            block.add(JExpr.invoke("binder").invoke("expose").arg(JExpr._new(commonDaoType)));
+          }
+          {
+            final JClass narrowedReadTypeLiteral = typeLiteral.narrow(commonReadDao.narrow(definedClass).narrow(
+                String.class));
+            final JDefinedClass readDaoType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).
+                append("ReadDaoType").toString());
+            readDaoType._extends(narrowedReadTypeLiteral);
+            block.add(JExpr.invoke("bind").arg(JExpr._new(readDaoType)).invoke("to").arg(JExpr._new(commonDaoType)).
+                invoke("in").arg(singletonScope.dotclass()));
+            block.add(JExpr.invoke("binder").invoke("expose").arg(JExpr._new(readDaoType)));
+          }
+          {
+            final JClass narrowedWriteTypeLiteral = typeLiteral.narrow(commonWriteDao.narrow(definedClass));
+            final JDefinedClass writeDaoType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).
+                append("WriteDaoType").toString());
+            writeDaoType._extends(narrowedWriteTypeLiteral);
+            block.add(JExpr.invoke("bind").arg(JExpr._new(writeDaoType)).invoke("to").arg(JExpr._new(commonDaoType)).
+                invoke("in").arg(singletonScope.dotclass()));
+            block.add(JExpr.invoke("binder").invoke("expose").arg(JExpr._new(writeDaoType)));
+          }
+          {
+            JClass lGenericAdapter = genericAdapter.narrow(definedClass);
+            JClass lGenericAdapterImpl = genericAdapterImpl.narrow(definedClass);
+            JClass lAbstractHelper = abstractHelper.narrow(definedClass);
+            final JDefinedClass adapterHelperType = moduleClass._class(new StringBuilder(
+                type.getContentTypeID().getName()).append("AdapterType").toString());
+            adapterHelperType._extends(typeLiteral.narrow(lGenericAdapter));
+            final JDefinedClass adapterImplType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).
+                append("AdapterImplType").toString());
+            adapterImplType._extends(typeLiteral.narrow(lGenericAdapterImpl));
+            final JDefinedClass abstractHelperType = moduleClass._class(new StringBuilder(type.getContentTypeID().
+                getName()).append("AdapterHelperType").toString());
+            abstractHelperType._extends(typeLiteral.narrow(lAbstractHelper));
+            final JDefinedClass helperType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).
+                append("AdapterHelperImplType").toString());
+            helperType._extends(typeLiteral.narrow(helperClass));
+            block.add(JExpr.invoke("bind").arg(JExpr._new(adapterHelperType)).invoke("to").arg(JExpr._new(
+                adapterImplType)).invoke("in").arg(singletonScope.dotclass()));
+            block.add(JExpr.invoke("bind").arg(JExpr._new(abstractHelperType)).invoke("to").arg(JExpr._new(helperType)).
+                invoke("in").arg(singletonScope.dotclass()));
+            final JInvocation workspaceApiInvocation = apiClass.staticInvoke("getInstance").invoke("getWorkspaceApi").
+                invoke("createWorkspaceId");
+            final JInvocation _new = workspaceApiInvocation.arg(wId[0]).arg(wId[1]);
+            block.add(JExpr.invoke("bind").arg(workspaceIdClass.dotclass()).invoke("toInstance").arg(_new));
+          }
         }
       }
     }
