@@ -214,6 +214,17 @@
     <primaryField>aShippingAddress</primaryField>
     <fields>
       <field>
+        <name>aBillingPerson</name>
+        <value>
+          <content>
+            <definition>
+              <typeNS>test</typeNS>
+              <typeName>Person</typeName>
+            </definition>
+          </content>
+        </value>
+      </field>
+      <field>
         <name>aPerson</name>
         <value>
           <content>
