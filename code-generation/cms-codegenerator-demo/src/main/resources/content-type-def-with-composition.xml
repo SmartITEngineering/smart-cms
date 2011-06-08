@@ -26,7 +26,7 @@
 -->
 <contentTypes  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
                xmlns='http://www.smartitengineering.com/smart-cms/content/content-type-schema'
-               xsi:schemaLocation='http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../../../smart-cms/content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd'>
+               xsi:schemaLocation='http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../../../../content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd'>
   <contentType namespace="test">
     <name>Name</name>
     <defType>ABSTRACT_COMPONENT</defType>
@@ -90,6 +90,18 @@
           <string>
             <mimeType>text/plain</mimeType>
           </string>
+        </value>
+      </field>
+      <field>
+        <name>alias</name>
+        <value>
+          <collection>
+            <simple-value>
+              <string>
+                <mimeType>text/plain</mimeType>
+              </string>
+            </simple-value>
+          </collection>
         </value>
       </field>
       <field>
@@ -213,6 +225,21 @@
     <name>Order</name>
     <primaryField>aShippingAddress</primaryField>
     <fields>
+      <field>
+        <name>aAuthorizedPersons</name>
+        <value>
+          <collection>
+            <simple-value>
+              <content>
+                <definition>
+                  <typeNS>test</typeNS>
+                  <typeName>Person</typeName>
+                </definition>
+              </content>
+            </simple-value>
+          </collection>
+        </value>
+      </field>
       <field>
         <name>aBillingPerson</name>
         <value>

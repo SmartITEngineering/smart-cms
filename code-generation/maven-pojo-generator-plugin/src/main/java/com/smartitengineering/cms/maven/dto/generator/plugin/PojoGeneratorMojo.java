@@ -18,10 +18,15 @@
  */
 package com.smartitengineering.cms.maven.dto.generator.plugin;
 
+import com.google.inject.Inject;
 import com.google.inject.PrivateModule;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.smartitengineering.cms.api.content.CompositeFieldValue;
 import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.content.Field;
+import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
@@ -51,6 +56,7 @@ import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
+import com.sun.codemodel.JConditional;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JFieldVar;
@@ -59,13 +65,16 @@ import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
+import com.sun.codemodel.JWhileLoop;
 import nu.xom.Element;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -178,6 +187,51 @@ public class PojoGeneratorMojo extends AbstractMojo {
     }
   }
 
+  protected Map<String, FieldDef> getAllFields(ContentType currentType, Set<? extends ContentType> types) {
+    Map<String, FieldDef> defs = new LinkedHashMap<String, FieldDef>();
+    boolean hasMore = true;
+    while (hasMore) {
+      Map<String, FieldDef> ownFields = currentType.getOwnFieldDefs();
+      for (Entry<String, FieldDef> ownField : ownFields.entrySet()) {
+        if (!defs.containsKey(ownField.getKey())) {
+          defs.put(ownField.getKey(), ownField.getValue());
+        }
+      }
+      if (currentType.getParent() != null) {
+        final ContentTypeId parent = currentType.getParent();
+        currentType = getType(types, parent);
+        hasMore = currentType != null;
+      }
+      else {
+        hasMore = false;
+      }
+    }
+    return defs;
+  }
+
+  protected ContentType getType(Set<? extends ContentType> types, final ContentTypeId id) {
+    for (ContentType type : types) {
+      if (type.getContentTypeID().equals(id)) {
+        return type;
+      }
+    }
+    return null;
+  }
+
+  protected JFieldVar initializeDao(final JDefinedClass typeDef, JDefinedClass helperClass, JCodeModel model) {
+    final String varClassName = typeDef.name();
+    String readDaoName = new StringBuilder(new StringBuilder().append(
+        ("" + varClassName.charAt(0)).toLowerCase()).append(varClassName.substring(1)).toString()).append(
+        "ReadDao").toString();
+    JFieldVar readDaoVar = helperClass.fields().get(readDaoName);
+    if (readDaoVar == null) {
+      readDaoVar = helperClass.field(JMod.PRIVATE, model.ref(CommonReadDao.class).narrow(typeDef).narrow(
+          String.class), readDaoName);
+      readDaoVar.annotate(Inject.class);
+    }
+    return readDaoVar;
+  }
+
   protected Collection<MutableContentType> parseContentType(final WorkspaceId id, File file) throws
       MojoExecutionException {
     try {
@@ -204,7 +258,8 @@ public class PojoGeneratorMojo extends AbstractMojo {
     Map<ContentTypeId, JDefinedClass> modules = new LinkedHashMap<ContentTypeId, JDefinedClass>();
     // Create the classes
     for (MutableContentType type : types) {
-      classes.put(type.getContentTypeID(), generateClassForType(type, codeModel));
+      final ContentTypeId contentTypeID = type.getContentTypeID();
+      classes.put(contentTypeID, generateClassForType(type, codeModel));
     }
     // Set parent content types as appropriate
     for (MutableContentType type : types) {
@@ -219,7 +274,6 @@ public class PojoGeneratorMojo extends AbstractMojo {
       generateFields(type.getOwnFieldDefs().values(), classes.get(type.getContentTypeID()), classes, codeModel);
     }
     // Create helpers and google guice module for concrete type definitions
-    JClass parentClass = codeModel.ref(AbstractRepoAdapterHelper.class);
     JClass privateModuleClass = codeModel.ref(PrivateModule.class);
     // Initialize common classes for Google Guice bindings
     JClass typeLiteral = codeModel.ref(TypeLiteral.class);
@@ -238,31 +292,8 @@ public class PojoGeneratorMojo extends AbstractMojo {
       if (type.getDefinitionType().equals(DefinitionType.CONCRETE_TYPE)) {
         final ContentTypeId contentTypeID = type.getContentTypeID();
         JDefinedClass definedClass = classes.get(contentTypeID);
-        final JDefinedClass helperClass;
-        {
-          final String helperClassName = new StringBuilder(contentTypeID.getNamespace()).append('.').append(contentTypeID.
-              getName()).append("Helper").toString();
-          helperClass = codeModel._class(helperClassName);
-          helpers.put(contentTypeID, helperClass);
-          helperClass._extends(parentClass.narrow(definedClass));
-          {
-            JMethod forwardConversion = helperClass.method(JMod.PROTECTED, JCodeModel.boxToPrimitive.get(Void.class),
-                                                           "mergeContentIntoBean");
-            forwardConversion.param(Content.class, "fromBean");
-            forwardConversion.param(definedClass, "toBean");
-          }
-          {
-            JMethod reverseConversion = helperClass.method(JMod.PROTECTED, JCodeModel.boxToPrimitive.get(Void.class),
-                                                           "mergeBeanIntoContent");
-            reverseConversion.param(definedClass, "fromBean");
-            reverseConversion.param(WriteableContent.class, "toBean");
-          }
-          {
-            JMethod instanceCreation = helperClass.method(JMod.PROTECTED, definedClass, "newTInstance");
-            JBlock block = instanceCreation.body();
-            block._return(JExpr._new(definedClass));
-          }
-        }
+        final JDefinedClass helperClass = generateHelper(type, codeModel, classes, types);
+        helpers.put(contentTypeID, helperClass);
         {
           final String moduleClassName = new StringBuilder(contentTypeID.getNamespace()).append('.').append(contentTypeID.
               getName()).append("Module").toString();
@@ -334,6 +365,44 @@ public class PojoGeneratorMojo extends AbstractMojo {
         }
       }
     }
+  }
+
+  protected JDefinedClass generateHelper(final ContentType contentType, JCodeModel codeModel,
+                                         Map<ContentTypeId, JDefinedClass> classes, Set<? extends ContentType> types)
+      throws JClassAlreadyExistsException {
+    ContentTypeId contentTypeID = contentType.getContentTypeID();
+    final JDefinedClass definedClass = classes.get(contentTypeID);
+    final JClass parentClass = codeModel.ref(AbstractRepoAdapterHelper.class);
+    final JDefinedClass helperClass;
+    final String helperClassName = new StringBuilder(contentTypeID.getNamespace()).append('.').append(contentTypeID.
+        getName()).append("Helper").toString();
+    helperClass = codeModel._class(helperClassName);
+    helperClass._extends(parentClass.narrow(definedClass));
+    ContentType currentType = contentType;
+    Map<String, FieldDef> defs = getAllFields(currentType, types);
+    {
+      JMethod forwardConversion = helperClass.method(JMod.PROTECTED, JCodeModel.boxToPrimitive.get(Void.class),
+                                                     "mergeContentIntoBean");
+      JVar content = forwardConversion.param(Content.class, "fromBean");
+      JVar toBean = forwardConversion.param(definedClass, "toBean");
+      JBlock block = forwardConversion.body();
+      generateForwardBlocks(defs.values(), block, content, toBean, codeModel, definedClass, helperClass, classes, types,
+                            "");
+    }
+    {
+      JMethod reverseConversion = helperClass.method(JMod.PROTECTED, JCodeModel.boxToPrimitive.get(Void.class),
+                                                     "mergeBeanIntoContent");
+      JVar fromBean = reverseConversion.param(definedClass, "fromBean");
+      JVar wContent = reverseConversion.param(WriteableContent.class, "toBean");
+      JBlock block = reverseConversion.body();
+      generateReverseBlocks(defs.values(), block, fromBean, wContent, codeModel);
+    }
+    {
+      JMethod instanceCreation = helperClass.method(JMod.PROTECTED, definedClass, "newTInstance");
+      JBlock block = instanceCreation.body();
+      block._return(JExpr._new(definedClass));
+    }
+    return helperClass;
   }
 
   protected JDefinedClass generateClassForType(MutableContentType type, JCodeModel codeModel) throws
@@ -434,16 +503,23 @@ public class PojoGeneratorMojo extends AbstractMojo {
             case COMPOSITE: {
               CompositeDataType compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
               ContentDataType composedOfContent = compositeDataType.getEmbeddedContentType();
+              final JDefinedClass composedOfClass;
+              if (composedOfContent != null) {
+                composedOfClass = classes.get(composedOfContent.getTypeDef());
+              }
+              else {
+                composedOfClass = null;
+              }
               if (compositeDataType.getOwnComposition() != null && !compositeDataType.getOwnComposition().isEmpty()) {
                 JDefinedClass compositeFieldClass = definedClass._class(JMod.STATIC | JMod.PUBLIC, getterSetterSuffix);
                 if (composedOfContent != null) {
-                  compositeFieldClass._extends(classes.get(composedOfContent.getTypeDef()));
+                  compositeFieldClass._extends(composedOfClass);
                 }
                 generateFields(compositeDataType.getOwnComposition(), compositeFieldClass, classes, codeModel);
                 itemType = compositeFieldClass.fullName();
               }
               else if (composedOfContent != null) {
-                itemType = classes.get(composedOfContent.getTypeDef()).fullName();
+                itemType = composedOfClass.fullName();
               }
               else {
                 itemType = "Object";
@@ -453,7 +529,8 @@ public class PojoGeneratorMojo extends AbstractMojo {
             default:
               itemType = "Object";
           }
-          jType = codeModel.parseType(new StringBuilder("java.util.List<").append(itemType).append('>').toString());
+          jType =
+          codeModel.parseType(new StringBuilder("java.util.Collection<").append(itemType).append('>').toString());
           break;
         case COMPOSITE: {
           CompositeDataType compositeDataType = (CompositeDataType) def.getValueDef();
@@ -503,6 +580,387 @@ public class PojoGeneratorMojo extends AbstractMojo {
       getterBlock._return(fieldVar);
       JBlock setterBlock = setterMethod.body();
       setterBlock.assign(JExpr._this().ref(fieldVar), paramVar);
+    }
+  }
+
+  protected void generateForwardBlocks(Collection<FieldDef> values, JBlock block, JVar from, JVar toBean,
+                                       JCodeModel model, JDefinedClass currentClass, JDefinedClass helperClass,
+                                       Map<ContentTypeId, JDefinedClass> classes, Set<? extends ContentType> types,
+                                       String prefix) {
+    final JClass contentIdRef = model.ref(ContentId.class);
+    for (FieldDef def : values) {
+      final String name = def.getName();
+      final String varName = getVarName(prefix, name);
+      final String fieldVar = new StringBuilder(varName).append("Field").toString();
+      JVar field = block.decl(model.ref(Field.class), fieldVar, from.invoke("getField").arg(name));
+      JConditional conditional = block._if(field.ne(JExpr._null()));
+      JBlock valBlock = conditional._then();
+      switch (def.getValueDef().getType()) {
+        case BOOLEAN:
+          setField(valBlock, model, field, name, toBean, Boolean.class, prefix);
+          break;
+        case STRING:
+          setField(valBlock, model, field, name, toBean, String.class, prefix);
+          break;
+        case DATE_TIME:
+          setField(valBlock, model, field, name, toBean, Date.class, prefix);
+          break;
+        case INTEGER:
+          setField(valBlock, model, field, name, toBean, Integer.class, prefix);
+          break;
+        case DOUBLE:
+          setField(valBlock, model, field, name, toBean, Double.class, prefix);
+          break;
+        case LONG:
+          setField(valBlock, model, field, name, toBean, Long.class, prefix);
+          break;
+        case OTHER:
+          setField(valBlock, model, field, name, toBean, byte[].class, prefix);
+          break;
+        case CONTENT: {
+          ContentDataType contentDataType = (ContentDataType) def.getValueDef();
+          final JDefinedClass typeDef = classes.get(contentDataType.getTypeDef());
+          if (typeDef != null) {
+            JFieldVar readDaoVar = initializeDao(typeDef, helperClass, model);
+            if (readDaoVar != null) {
+              final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).append(name.
+                  substring(1)).toString();
+              final String setterName = new StringBuilder("set").append(getterSetterSuffix).toString();
+              final String fieldValVar = new StringBuilder(varName).append("Val").toString();
+              JVar fieldVal = valBlock.decl(model.ref(FieldValue.class).narrow(contentIdRef), fieldValVar,
+                                            field.invoke("getValue"));
+              JConditional valCond = valBlock._if(fieldVal.ne(JExpr._null()));
+              JBlock setBlock = valCond._then();
+              final JVar contentIdVal = setBlock.decl(contentIdRef, getVarName(prefix, "contentIdVal"), fieldVal.invoke(
+                  "getValue"));
+              JConditional idValCond = setBlock._if(contentIdVal.ne(JExpr._null()));
+              idValCond._then().add(toBean.invoke(setterName).arg(readDaoVar.invoke("getById").arg(
+                  contentIdVal.invoke("toString"))));
+            }
+          }
+          break;
+        }
+        case COMPOSITE: {
+          CompositeDataType compositeDataType = (CompositeDataType) def.getValueDef();
+          Set<FieldDef> compositeFields = new LinkedHashSet<FieldDef>();
+          if (compositeDataType.getEmbeddedContentType() != null) {
+            ContentType currentType = getType(types, compositeDataType.getEmbeddedContentType().getTypeDef());
+            if (currentType != null) {
+              compositeFields.addAll(getAllFields(currentType, types).values());
+            }
+          }
+          compositeFields.addAll(compositeDataType.getOwnComposition());
+          JClass compFieldVal = model.ref(FieldValue.class).narrow(model.ref(Collection.class).narrow(Field.class));
+          final JVar fieldVal = valBlock.decl(compFieldVal, new StringBuilder(varName).append("FieldVal").toString(),
+                                              field.invoke("getValue"));
+          JDefinedClass compositeDefinition = findClass(compositeDataType, currentClass, classes, name);
+          JDefinedClass newCompositeDefintion = findConcreteClass(compositeDefinition, classes);
+          if (compositeDefinition != null && newCompositeDefintion != null) {
+            JBlock validCompVal = valBlock._if(fieldVal.ne(JExpr._null()))._then();
+            final JVar compositeToBean = validCompVal.decl(compositeDefinition, varName, JExpr._new(
+                newCompositeDefintion));
+            final JClass ref = model.ref(CompositeFieldValue.class);
+            JVar compositeFromBean = validCompVal.decl(ref, new StringBuilder(varName).append("Val").toString(), JExpr.
+                cast(ref, fieldVal));
+            String compPrefix = new StringBuilder(varName).append('_').toString();
+            generateForwardBlocks(compositeFields, validCompVal, compositeFromBean, compositeToBean, model,
+                                  compositeDefinition, helperClass, classes, types, compPrefix);
+            final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).append(name.
+                substring(1)).toString();
+            final String setterName = new StringBuilder("set").append(getterSetterSuffix).toString();
+            validCompVal.add(toBean.invoke(setterName).arg(compositeToBean));
+          }
+          break;
+        }
+        case COLLECTION:
+          CollectionDataType collectionDataType = (CollectionDataType) def.getValueDef();
+          switch (collectionDataType.getItemDataType().getType()) {
+            case BOOLEAN:
+              setCollectionField(valBlock, model, field, Boolean.class, name, toBean, prefix);
+              break;
+            case STRING:
+              setCollectionField(valBlock, model, field, String.class, name, toBean, prefix);
+              break;
+            case DATE_TIME:
+              setCollectionField(valBlock, model, field, Date.class, name, toBean, prefix);
+              break;
+            case INTEGER:
+              setCollectionField(valBlock, model, field, Integer.class, name, toBean, prefix);
+              break;
+            case DOUBLE:
+              setCollectionField(valBlock, model, field, Double.class, name, toBean, prefix);
+              break;
+            case LONG:
+              setCollectionField(valBlock, model, field, Long.class, name, toBean, prefix);
+              break;
+            case OTHER:
+              setCollectionField(valBlock, model, field, byte[].class, name, toBean, prefix);
+              break;
+            case CONTENT: {
+              ContentDataType contentDataType = (ContentDataType) collectionDataType.getItemDataType();
+              final JDefinedClass narrowClass = classes.get(contentDataType.getTypeDef());
+              if (narrowClass != null) {
+                JFieldVar readDaoVar = initializeDao(narrowClass, helperClass, model);
+                if (readDaoVar != null) {
+                  JVar resultVal = valBlock.decl(model.ref(Collection.class).narrow(narrowClass), getVarName(prefix,
+                                                                                                             "beanList"),
+                                                 JExpr._new(model.ref(ArrayList.class).narrow(narrowClass)));
+                  final JClass narrowedCollection = model.ref(Collection.class).narrow(FieldValue.class);
+                  JVar fieldVal = valBlock.decl(model.ref(FieldValue.class).narrow(narrowedCollection),
+                                                getVarName(prefix, "fieldVal"), field.invoke("getValue"));
+                  JConditional collectionValCond = valBlock._if(fieldVal.ne(JExpr._null()));
+                  JBlock validValBlock = collectionValCond._then();
+                  JVar collectionVal = validValBlock.decl(narrowedCollection, getVarName(prefix, "collectionVal"),
+                                                          fieldVal.invoke("getValue"));
+                  JConditional validCollectionCond = validValBlock._if(collectionVal.ne(JExpr._null()).cand(collectionVal.
+                      invoke("isEmpty").not()));
+                  JBlock iterateBlock = validCollectionCond._then();
+                  JVar iterator = iterateBlock.decl(model.ref(Iterator.class).narrow(FieldValue.class),
+                                                    getVarName(prefix, "iterator"), collectionVal.invoke("iterator"));
+                  JWhileLoop loop = iterateBlock._while(iterator.invoke("hasNext"));
+                  JBlock loopBlock = loop.body();
+                  JVar val = loopBlock.decl(model.ref(FieldValue.class).narrow(contentIdRef), getVarName(prefix, "val"),
+                                            iterator.invoke("next"));
+                  JConditional singleValCond = loopBlock._if(val.ne(JExpr._null()));
+                  final JBlock _then = singleValCond._then();
+                  final JVar contentIdVal = _then.decl(contentIdRef, getVarName(prefix, "contentIdVal"),
+                                                       val.invoke("getValue"));
+                  JConditional idValCond = _then._if(contentIdVal.ne(JExpr._null()));
+                  idValCond._then().add(resultVal.invoke("add").arg(readDaoVar.invoke("getById").arg(
+                      contentIdVal.invoke("toString"))));
+                  final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).
+                      append(name.substring(1)).toString();
+                  final String setterName = new StringBuilder("set").append(getterSetterSuffix).toString();
+                  valBlock.add(toBean.invoke(setterName).arg(resultVal));
+                }
+              }
+              break;
+            }
+            case COMPOSITE: {
+              CompositeDataType compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
+              Set<FieldDef> compositeFields = new LinkedHashSet<FieldDef>();
+              if (compositeDataType.getEmbeddedContentType() != null) {
+                ContentType currentType = getType(types, compositeDataType.getEmbeddedContentType().getTypeDef());
+                if (currentType != null) {
+                  compositeFields.addAll(getAllFields(currentType, types).values());
+                }
+              }
+              compositeFields.addAll(compositeDataType.getOwnComposition());
+              JDefinedClass compositeDefinition = findClass(compositeDataType, currentClass, classes, name);
+              JDefinedClass newCompositeDefintion = findConcreteClass(compositeDefinition, classes);
+              if (compositeDefinition != null && newCompositeDefintion != null) {
+                JVar resultVal = valBlock.decl(model.ref(Collection.class).narrow(newCompositeDefintion),
+                                               getVarName(prefix, "beanList"),
+                                               JExpr._new(model.ref(ArrayList.class).narrow(newCompositeDefintion)));
+                final JClass narrowedCollection = model.ref(Collection.class).narrow(FieldValue.class);
+                JVar fieldVal = valBlock.decl(model.ref(FieldValue.class).narrow(narrowedCollection),
+                                              getVarName(prefix, "fieldVal"), field.invoke("getValue"));
+                JConditional collectionValCond = valBlock._if(fieldVal.ne(JExpr._null()));
+                JBlock validValBlock = collectionValCond._then();
+                JVar collectionVal = validValBlock.decl(narrowedCollection, getVarName(prefix, "collectionVal"),
+                                                        fieldVal.invoke("getValue"));
+                JConditional validCollectionCond = validValBlock._if(collectionVal.ne(JExpr._null()).cand(collectionVal.
+                    invoke("isEmpty").not()));
+                JBlock iterateBlock = validCollectionCond._then();
+                JVar iterator = iterateBlock.decl(model.ref(Iterator.class).narrow(FieldValue.class),
+                                                  getVarName(prefix, "iterator"), collectionVal.invoke("iterator"));
+                JWhileLoop loop = iterateBlock._while(iterator.invoke("hasNext"));
+                JBlock loopBlock = loop.body();
+                JVar val = loopBlock.decl(model.ref(FieldValue.class).narrow(model.ref(Collection.class).narrow(
+                    Field.class)), getVarName(prefix, "val"), iterator.invoke("next"));
+                final JBlock _then = loopBlock;
+                JBlock validCompVal = _then._if(val.ne(JExpr._null()))._then();
+                final JVar compositeToBean = validCompVal.decl(compositeDefinition, varName, JExpr._new(
+                    newCompositeDefintion));
+                final JClass ref = model.ref(CompositeFieldValue.class);
+                JVar compositeFromBean = validCompVal.decl(ref, new StringBuilder(varName).append("Val").toString(),
+                                                           JExpr.cast(ref, val));
+                String compPrefix = new StringBuilder(varName).append('_').toString();
+                generateForwardBlocks(compositeFields, validCompVal, compositeFromBean, compositeToBean, model,
+                                      compositeDefinition, helperClass, classes, types, compPrefix);
+                final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).append(name.
+                    substring(1)).toString();
+                final String setterName = new StringBuilder("set").append(getterSetterSuffix).toString();
+                validCompVal.add(resultVal.invoke("add").arg(compositeToBean));
+                valBlock.add(toBean.invoke(setterName).arg(resultVal));
+              }
+            }
+          }
+          break;
+        default:
+      }
+    }
+  }
+
+  protected void setCollectionField(JBlock valBlock, JCodeModel model, JVar field, final Class narrowClass,
+                                    final String name, JVar toBean, String prefix) {
+    final JVar collectionVal = addToCollection(valBlock, model, field, narrowClass, prefix);
+    final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).append(name.
+        substring(1)).toString();
+    final String setterName = new StringBuilder("set").append(getterSetterSuffix).toString();
+    valBlock.add(toBean.invoke(setterName).arg(collectionVal));
+  }
+
+  protected String getVarName(String prefix, String literal) {
+    return new StringBuilder(prefix).append(literal).toString();
+  }
+
+  protected JVar addToCollection(JBlock valBlock, JCodeModel model, JVar field, final Class narrowClass, String prefix) {
+    JVar resultVal = valBlock.decl(model.ref(Collection.class).narrow(narrowClass), getVarName(prefix, "beanList"),
+                                   JExpr._new(model.ref(ArrayList.class).narrow(narrowClass)));
+    final JClass narrowedCollection = model.ref(Collection.class).narrow(FieldValue.class);
+    JVar fieldVal = valBlock.decl(model.ref(FieldValue.class).narrow(narrowedCollection),
+                                  getVarName(prefix, "fieldVal"), field.invoke("getValue"));
+    JConditional collectionValCond = valBlock._if(fieldVal.ne(JExpr._null()));
+    JBlock validValBlock = collectionValCond._then();
+    JVar collectionVal = validValBlock.decl(narrowedCollection, getVarName(prefix, "collectionVal"), fieldVal.invoke(
+        "getValue"));
+    JConditional validCollectionCond = validValBlock._if(collectionVal.ne(JExpr._null()).cand(collectionVal.invoke(
+        "isEmpty").not()));
+    JBlock iterateBlock = validCollectionCond._then();
+    JVar iterator = iterateBlock.decl(model.ref(Iterator.class).narrow(FieldValue.class), getVarName(prefix, "iterator"),
+                                      collectionVal.invoke("iterator"));
+    JWhileLoop loop = iterateBlock._while(iterator.invoke("hasNext"));
+    JBlock loopBlock = loop.body();
+    JVar val = loopBlock.decl(model.ref(FieldValue.class).narrow(narrowClass), getVarName(prefix, "val"), iterator.
+        invoke("next"));
+    JConditional singleValCond = loopBlock._if(val.ne(JExpr._null()));
+    singleValCond._then().add(resultVal.invoke("add").arg(val.invoke("getValue")));
+    return resultVal;
+  }
+
+  protected void setField(JBlock block, JCodeModel model, JVar field, final String name, JVar toBean, Class valType,
+                          String prefix) {
+    final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).append(name.
+        substring(1)).toString();
+    final String setterName = new StringBuilder("set").append(getterSetterSuffix).toString();
+    final String fieldValVar = getVarName(prefix, new StringBuilder(name).append("Val").toString());
+    JVar fieldVal = block.decl(model.ref(FieldValue.class).narrow(valType), fieldValVar, field.invoke("getValue"));
+    JConditional valCond = block._if(fieldVal.eq(JExpr._null()));
+    JBlock setBlock = valCond._then();
+    setBlock.add(toBean.invoke(setterName).arg(fieldVal.invoke("getValue")));
+  }
+
+  protected void addField(JBlock block, JCodeModel model, JVar field, final String name, JVar toBean, Class valType,
+                          String prefix) {
+    final String setterName = "add";
+    final String fieldValVar = getVarName(prefix, new StringBuilder(name).append("Val").toString());
+    JVar fieldVal = block.decl(model.ref(FieldValue.class).narrow(valType), fieldValVar, field.invoke("getValue"));
+    JConditional valCond = block._if(fieldVal.eq(JExpr._null()));
+    JBlock setBlock = valCond._then();
+    setBlock.add(toBean.invoke(setterName).arg(fieldVal.invoke("getValue")));
+  }
+
+  protected JDefinedClass findClass(CompositeDataType compositeDataType, JDefinedClass currentClass,
+                                    Map<ContentTypeId, JDefinedClass> classes, String fieldName) {
+    final String getterSetterSuffix = new StringBuilder().append(("" + fieldName.charAt(0)).toUpperCase()).append(fieldName.
+        substring(1)).toString();
+    JDefinedClass jType = null;
+    ContentDataType composedOfContent = compositeDataType.getEmbeddedContentType();
+    if (compositeDataType.getOwnComposition() != null && !compositeDataType.getOwnComposition().isEmpty()) {
+      Iterator<JDefinedClass> compositeFieldClasses = currentClass.classes();
+      while (compositeFieldClasses.hasNext()) {
+        JDefinedClass innerClass = compositeFieldClasses.next();
+        if (innerClass.name().equals(getterSetterSuffix)) {
+          jType = innerClass;
+        }
+      }
+    }
+    else if (composedOfContent != null) {
+      jType = classes.get(composedOfContent.getTypeDef());
+    }
+    return jType;
+  }
+
+  protected JDefinedClass findConcreteClass(JDefinedClass compositeDefinition,
+                                            Map<ContentTypeId, JDefinedClass> classes) {
+    if (compositeDefinition.isAbstract()) {
+      for (JDefinedClass clazz : classes.values()) {
+        if (!clazz.isAbstract() && compositeDefinition.isAssignableFrom(clazz)) {
+          return clazz;
+        }
+        else {
+          JDefinedClass inInnerClass = findConcreteInInnerClass(compositeDefinition, clazz);
+          if (inInnerClass != null) {
+            return inInnerClass;
+          }
+        }
+      }
+      return null;
+    }
+    else {
+      return compositeDefinition;
+    }
+  }
+
+  protected JDefinedClass findConcreteInInnerClass(JDefinedClass compositeDefinition, JDefinedClass clazz) {
+    final Iterator<JDefinedClass> classes = clazz.classes();
+    while (classes.hasNext()) {
+      JDefinedClass innerClass = classes.next();
+      if (compositeDefinition.isAssignableFrom(innerClass)) {
+        return innerClass;
+      }
+      else {
+        JDefinedClass inInnerClass = findConcreteInInnerClass(compositeDefinition, innerClass);
+        if (inInnerClass != null) {
+          return inInnerClass;
+        }
+      }
+    }
+    return null;
+  }
+
+  protected void generateReverseBlocks(Collection<FieldDef> values, JBlock block, JVar fromBean, JVar wContent,
+                                       JCodeModel model) {
+    for (FieldDef def : values) {
+      switch (def.getValueDef().getType()) {
+        case BOOLEAN:
+          break;
+        case STRING:
+          break;
+        case CONTENT:
+          break;
+        case DATE_TIME:
+          break;
+        case INTEGER:
+          break;
+        case DOUBLE:
+          break;
+        case LONG:
+          break;
+        case OTHER:
+          break;
+        case COLLECTION:
+          CollectionDataType collectionDataType = (CollectionDataType) def.getValueDef();
+          switch (collectionDataType.getItemDataType().getType()) {
+            case BOOLEAN:
+              break;
+            case STRING:
+              break;
+            case CONTENT: {
+              break;
+            }
+            case DATE_TIME:
+              break;
+            case INTEGER:
+              break;
+            case DOUBLE:
+              break;
+            case LONG:
+              break;
+            case OTHER:
+              break;
+            case COMPOSITE: {
+              CompositeDataType compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
+            }
+          }
+          break;
+        case COMPOSITE: {
+          CompositeDataType compositeDataType = (CompositeDataType) def.getValueDef();
+          break;
+        }
+        default:
+      }
     }
   }
 }
