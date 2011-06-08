@@ -31,9 +31,23 @@ public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends Pers
   protected transient final Logger logger = LoggerFactory.getLogger(getClass());
 
   protected ContentId getContentId(String id) {
-    final byte[] bytesUtf8 = org.apache.commons.codec.binary.StringUtils.getBytesUtf8(id);
-    ContentId cId = SmartContentAPI.getInstance().getContentLoader().createContentId(defaultContainerWorkspace,
-                                                                                     bytesUtf8);
+    final ContentId cId;
+    if (id.contains(":")) {
+      String[] idTokens = id.split(":");
+      if (idTokens.length != 3) {
+        final byte[] bytesUtf8 = org.apache.commons.codec.binary.StringUtils.getBytesUtf8(idTokens[0]);
+        cId = SmartContentAPI.getInstance().getContentLoader().createContentId(defaultContainerWorkspace, bytesUtf8);
+      }
+      else {
+        final byte[] bytesUtf8 = org.apache.commons.codec.binary.StringUtils.getBytesUtf8(idTokens[2]);
+        cId = SmartContentAPI.getInstance().getContentLoader().createContentId(SmartContentAPI.getInstance().
+            getWorkspaceApi().createWorkspaceId(idTokens[0], idTokens[1]), bytesUtf8);
+      }
+    }
+    else {
+      final byte[] bytesUtf8 = org.apache.commons.codec.binary.StringUtils.getBytesUtf8(id);
+      cId = SmartContentAPI.getInstance().getContentLoader().createContentId(defaultContainerWorkspace, bytesUtf8);
+    }
     return cId;
   }
 
