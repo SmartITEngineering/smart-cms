@@ -113,4 +113,12 @@ public class CompositeFieldValueImpl extends FieldValueImpl<Collection<Field>> i
     }
     return fieldMap;
   }
+
+  public Map<String, Field> getFields() {
+    return getValueAsMap();
+  }
+
+  public Field getField(String fieldName) {
+    return getValueAsMap().get(fieldName);
+  }
 }
