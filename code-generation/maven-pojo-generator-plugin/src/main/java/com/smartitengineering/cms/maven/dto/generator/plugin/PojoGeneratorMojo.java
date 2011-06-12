@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.maven.dto.generator.plugin;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.PrivateModule;
 import com.google.inject.Singleton;
@@ -117,6 +118,12 @@ public class PojoGeneratorMojo extends AbstractMojo {
    */
   private File contentTypeResource;
   /**
+   * Default package for aggregating modules
+   * @parameter
+   * @required
+   */
+  private String packageForGuiceMasterModule;
+  /**
    * The workspace id for the specified content type resource. It will be used to DI in the adapter and DAO Impl
    * @parameter
    * @required
@@ -139,6 +146,9 @@ public class PojoGeneratorMojo extends AbstractMojo {
     if ((contentTypesResourceConfig == null || contentTypesResourceConfig.isEmpty()) && contentTypeResource == null) {
       throw new MojoExecutionException("Parameters not specified properly. Any one and only one of " +
           "contentTypesResourceConfig, contentTypeResourceConfig and contentTypeResource must be specified!");
+    }
+    if (StringUtils.isBlank(packageForGuiceMasterModule)) {
+      throw new MojoExecutionException("Parameter 'packageForGuiceMasterModule' can not be blank");
     }
     JCodeModel codeModel = new JCodeModel();
     Set<MutableContentType> types = new LinkedHashSet<MutableContentType>();
@@ -384,6 +394,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
         }
       }
     }
+    generateMasterModule(modules, codeModel);
   }
 
   protected JDefinedClass generateHelper(final ContentType contentType, JCodeModel codeModel,
@@ -1203,5 +1214,18 @@ public class PojoGeneratorMojo extends AbstractMojo {
                                               getVarName(prefix, "fieldVal"), contentLoader.invoke(methodName));
     forBody.add(mutableItemFieldValue.invoke("setValue").arg(iterator_item.invoke("next")));
     forBody.add(collection.invoke("add").arg(mutableItemFieldValue));
+  }
+
+  protected void generateMasterModule(Map<ContentTypeId, JDefinedClass> modules, JCodeModel codeModel) throws
+      JClassAlreadyExistsException {
+    final String moduleClassName = new StringBuilder(packageForGuiceMasterModule).append(".MasterModule").toString();
+    final JDefinedClass moduleClass = codeModel._class(moduleClassName);
+    moduleClass._extends(codeModel.ref(AbstractModule.class));
+    JMethod configureMethod = moduleClass.method(JMod.PUBLIC, JCodeModel.boxToPrimitive.get(Void.class),
+                                                 "configure");
+    JBlock block = configureMethod.body();
+    for (JDefinedClass clazz : modules.values()) {
+      block.invoke("install").arg(JExpr._new(clazz));
+    }
   }
 }
