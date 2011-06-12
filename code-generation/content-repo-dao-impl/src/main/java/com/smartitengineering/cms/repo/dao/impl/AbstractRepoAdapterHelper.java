@@ -73,6 +73,21 @@ public abstract class AbstractRepoAdapterHelper<T extends AbstractRepositoryDoma
     return cId;
   }
 
+  protected WorkspaceId getWorkspaceId(T toBean) throws IllegalArgumentException {
+    final WorkspaceId wId;
+    if (StringUtils.isNotBlank(toBean.getWorkspaceId())) {
+      String[] idParts = toBean.getWorkspaceId().split(":");
+      if (idParts == null || idParts.length != 2) {
+        throw new IllegalArgumentException("Workspace ID must be set as 'namespace:name'");
+      }
+      wId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId(idParts[0], idParts[1]);
+    }
+    else {
+      wId = defaultContainerWorkspace;
+    }
+    return wId;
+  }
+
   protected final Class<? extends T> initializeEntityClassFromGenerics() {
     Class<? extends T> extractedEntityClass = null;
     try {
@@ -113,29 +128,22 @@ public abstract class AbstractRepoAdapterHelper<T extends AbstractRepositoryDoma
     final SmartContentAPI instance = SmartContentAPI.getInstance();
     final ContentLoader contentLoader = instance.getContentLoader();
     WriteableContent content = contentLoader.createContent(getContentTypeId().getContentType());
-    if (StringUtils.isNotBlank(toBean.getWorkspaceId()) && StringUtils.isNotBlank(toBean.getId())) {
+    if (StringUtils.isNotBlank(toBean.getId())) {
       String[] idParts = toBean.getWorkspaceId().split(":");
       if (idParts == null || idParts.length != 2) {
         throw new IllegalArgumentException("Workspace ID must be set as 'namespace:name'");
       }
-      final WorkspaceId wId = instance.getWorkspaceApi().createWorkspaceId(idParts[0], idParts[1]);
+      final WorkspaceId wId = getWorkspaceId(toBean);
       final byte[] bytesUtf8 = org.apache.commons.codec.binary.StringUtils.getBytesUtf8(toBean.getId());
       ContentId cId = contentLoader.createContentId(wId, bytesUtf8);
       content.setContentId(cId);
     }
     else {
       final WorkspaceId wId;
-      if (StringUtils.isNotBlank(toBean.getWorkspaceId())) {
-        String[] idParts = toBean.getWorkspaceId().split(":");
-        if (idParts == null || idParts.length != 2) {
-          throw new IllegalArgumentException("Workspace ID must be set as 'namespace:name'");
-        }
-        wId = instance.getWorkspaceApi().createWorkspaceId(idParts[0], idParts[1]);
-      }
-      else {
-        wId = defaultContainerWorkspace;
-      }
+      wId = getWorkspaceId(toBean);
       content.createContentId(wId);
+      byte[] idBytes = content.getContentId().getId();
+      toBean.setId(org.apache.commons.codec.binary.StringUtils.newStringUtf8(idBytes));
     }
     final ContentStatus status;
     final ContentType type = getContentTypeId().getContentType();

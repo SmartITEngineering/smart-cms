@@ -136,6 +136,7 @@ public class CompositeFieldValueImpl extends FieldValueImpl<Collection<Field>> i
     if (getValue() == null) {
       setValue(null);
     }
+    getValue().add(field);
   }
 
   public void removeField(String fieldName) {
