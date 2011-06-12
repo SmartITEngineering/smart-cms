@@ -28,6 +28,7 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import org.codehaus.jackson.JsonGenerator.Feature;
 import org.codehaus.jackson.impl.WriterBasedGenerator;
@@ -120,5 +121,27 @@ public class CompositeFieldValueImpl extends FieldValueImpl<Collection<Field>> i
 
   public Field getField(String fieldName) {
     return getValueAsMap().get(fieldName);
+  }
+
+  @Override
+  public void setValue(Collection<Field> newV) {
+    Collection<Field> fields = new LinkedHashSet<Field>();
+    if (newV != null) {
+      fields.addAll(newV);
+    }
+    super.setValue(fields);
+  }
+
+  public void setField(Field field) {
+    if (getValue() == null) {
+      setValue(null);
+    }
+  }
+
+  public void removeField(String fieldName) {
+    final Field field = getFields().get(fieldName);
+    if (field != null) {
+      getValue().remove(field);
+    }
   }
 }
