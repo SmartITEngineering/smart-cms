@@ -295,7 +295,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
         final JDefinedClass helperClass = generateHelper(type, codeModel, classes, types);
         helpers.put(contentTypeID, helperClass);
         {
-          final String moduleClassName = new StringBuilder(contentTypeID.getNamespace()).append('.').append(contentTypeID.
+          final String moduleClassName = new StringBuilder(contentTypeID.getNamespace()).append(".guice.").append(contentTypeID.
               getName()).append("Module").toString();
           final JDefinedClass moduleClass = codeModel._class(moduleClassName);
           modules.put(contentTypeID, moduleClass);
@@ -374,7 +374,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
     final JDefinedClass definedClass = classes.get(contentTypeID);
     final JClass parentClass = codeModel.ref(AbstractRepoAdapterHelper.class);
     final JDefinedClass helperClass;
-    final String helperClassName = new StringBuilder(contentTypeID.getNamespace()).append('.').append(contentTypeID.
+    final String helperClassName = new StringBuilder(contentTypeID.getNamespace()).append(".helpers.").append(contentTypeID.
         getName()).append("Helper").toString();
     helperClass = codeModel._class(helperClassName);
     helperClass._extends(parentClass.narrow(definedClass));
