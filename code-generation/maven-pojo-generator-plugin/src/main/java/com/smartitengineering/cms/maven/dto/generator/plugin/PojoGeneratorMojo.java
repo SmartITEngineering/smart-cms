@@ -27,6 +27,7 @@ import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
+import com.smartitengineering.cms.api.content.MutableCompositeFieldValue;
 import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.content.MutableFieldValue;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
@@ -190,6 +191,19 @@ public class PojoGeneratorMojo extends AbstractMojo {
     catch (Exception ex) {
       throw new MojoExecutionException(ex.getMessage(), ex);
     }
+  }
+
+  protected Set<FieldDef> getAllComposedFields(CompositeDataType compositeDataType,
+                                               Set<? extends ContentType> types) {
+    Set<FieldDef> compositeFields = new LinkedHashSet<FieldDef>();
+    if (compositeDataType.getEmbeddedContentType() != null) {
+      ContentType currentType = getType(types, compositeDataType.getEmbeddedContentType().getTypeDef());
+      if (currentType != null) {
+        compositeFields.addAll(getAllFields(currentType, types).values());
+      }
+    }
+    compositeFields.addAll(compositeDataType.getOwnComposition());
+    return compositeFields;
   }
 
   protected Map<String, FieldDef> getAllFields(ContentType currentType, Set<? extends ContentType> types) {
@@ -407,7 +421,8 @@ public class PojoGeneratorMojo extends AbstractMojo {
                                       staticInvoke.invoke("getContentLoader"));
       JVar fieldDefs = block.decl(codeModel.ref(Map.class).narrow(String.class).narrow(FieldDef.class), "fieldDefs",
                                   wContent.invoke("getContentDefinition").invoke("getFieldDefs"));
-      generateReverseBlocks(defs.values(), block, fromBean, wContent, contentLoader, fieldDefs, codeModel, "");
+      generateReverseBlocks(defs.values(), block, fromBean, wContent, contentLoader, fieldDefs, codeModel, definedClass,
+                            classes, types, "");
     }
     {
       JMethod instanceCreation = helperClass.method(JMod.PROTECTED, definedClass, "newTInstance");
@@ -654,14 +669,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
         }
         case COMPOSITE: {
           CompositeDataType compositeDataType = (CompositeDataType) def.getValueDef();
-          Set<FieldDef> compositeFields = new LinkedHashSet<FieldDef>();
-          if (compositeDataType.getEmbeddedContentType() != null) {
-            ContentType currentType = getType(types, compositeDataType.getEmbeddedContentType().getTypeDef());
-            if (currentType != null) {
-              compositeFields.addAll(getAllFields(currentType, types).values());
-            }
-          }
-          compositeFields.addAll(compositeDataType.getOwnComposition());
+          Set<FieldDef> compositeFields = getAllComposedFields(compositeDataType, types);
           JClass compFieldVal = model.ref(FieldValue.class).narrow(model.ref(Collection.class).narrow(Field.class));
           final JVar fieldVal = valBlock.decl(compFieldVal, new StringBuilder(varName).append("FieldVal").toString(),
                                               field.invoke("getValue"));
@@ -923,7 +931,9 @@ public class PojoGeneratorMojo extends AbstractMojo {
   }
 
   protected void generateReverseBlocks(Collection<FieldDef> values, JBlock block, JVar fromBean, JVar wContent,
-                                       JVar contentLoader, JVar fieldDefs, JCodeModel model, String prefix) {
+                                       JVar contentLoader, JVar fieldDefs, JCodeModel model, JDefinedClass currentClass,
+                                       Map<ContentTypeId, JDefinedClass> classes, Set<? extends ContentType> types,
+                                       String prefix) {
     for (FieldDef def : values) {
       final String name = def.getName();
       final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).append(name.
@@ -996,6 +1006,27 @@ public class PojoGeneratorMojo extends AbstractMojo {
         }
         case COMPOSITE: {
           CompositeDataType compositeDataType = (CompositeDataType) def.getValueDef();
+          JBlock nonNullBlock = block._if(fromBean.invoke(getterName).ne(JExpr._null()).cand(fieldDefs.invoke("get").arg(
+              name).ne(JExpr._null())))._then();
+          JDefinedClass clazz = findClass(compositeDataType, currentClass, classes, name);
+          JVar input = nonNullBlock.decl(clazz, getVarName(prefix, "compositeField"), fromBean.invoke(getterName));
+          final JInvocation defArg = fieldDefs.invoke("get").arg(name);
+          JVar fieldDef = nonNullBlock.decl(model.ref(FieldDef.class), getVarName(prefix, "def"), defArg);
+          JVar compositeFieldDefs = nonNullBlock.decl(
+              model.ref(Map.class).narrow(String.class).narrow(FieldDef.class), getVarName(prefix, "compositeFieldDefs"),
+              JExpr.invoke(JExpr.cast(model.ref(CompositeDataType.class), fieldDef.invoke("getValueDef")),
+                           "getComposedFieldDefs"));
+          JVar mutableField =
+               nonNullBlock.decl(model.ref(MutableField.class), getVarName(prefix, "mutableField"),
+                                 contentLoader.invoke("createMutableField").arg(JExpr._null()).arg(fieldDef));
+          JVar mutableFieldValue = nonNullBlock.decl(model.ref(MutableCompositeFieldValue.class),
+                                                     getVarName(prefix, "fieldVal"),
+                                                     contentLoader.invoke("createCompositeFieldValue"));
+          Collection<FieldDef> defs = getAllComposedFields(compositeDataType, types);
+          generateReverseBlocks(defs, nonNullBlock, input, mutableFieldValue, contentLoader, compositeFieldDefs, model,
+                                clazz, classes, types, new StringBuilder(prefix).append(name).append('_').toString());
+          nonNullBlock.add(mutableField.invoke("setValue").arg(mutableFieldValue));
+          nonNullBlock.add(wContent.invoke("setField").arg(mutableField));
           break;
         }
         case COLLECTION:
@@ -1058,9 +1089,8 @@ public class PojoGeneratorMojo extends AbstractMojo {
                                                     contentLoader.invoke("createMutableField").arg(JExpr._null()).arg(fieldDefs.
                   invoke("get").arg(name)));
               JVar mutableFieldValue = nonNullBlock.decl(model.ref(MutableFieldValue.class).narrow(model.ref(
-                  Collection.class).
-                  narrow(model.ref(FieldValue.class))), getVarName(prefix, "fieldVals"), contentLoader.invoke(
-                  "createCollectionFieldValue"));
+                  Collection.class).narrow(model.ref(FieldValue.class))), getVarName(prefix, "fieldVals"),
+                                                         contentLoader.invoke("createCollectionFieldValue"));
               nonNullBlock.add(mutableField.invoke("setValue").arg(mutableFieldValue));
               nonNullBlock.add(wContent.invoke("setField").arg(mutableField));
               JVar collection = nonNullBlock.decl(model.ref(Collection.class).narrow(model.ref(FieldValue.class)),
@@ -1087,6 +1117,44 @@ public class PojoGeneratorMojo extends AbstractMojo {
             }
             case COMPOSITE: {
               CompositeDataType compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
+              JBlock nonNullBlock = block._if(fromBean.invoke(getterName).ne(JExpr._null()).cand(fieldDefs.invoke("get").
+                  arg(name).ne(JExpr._null())))._then();
+              JDefinedClass clazz = findClass(compositeDataType, currentClass, classes, name);
+              final JInvocation defArg = fieldDefs.invoke("get").arg(name);
+              JVar fieldDef = nonNullBlock.decl(model.ref(FieldDef.class), getVarName(prefix, "def"), defArg);
+              JVar compositeFieldDefs = nonNullBlock.decl(model.ref(Map.class).narrow(String.class).narrow(
+                  FieldDef.class), getVarName(prefix, "compositeFieldDefs"),
+                                                          JExpr.invoke(JExpr.cast(model.ref(CompositeDataType.class),
+                                                                                  fieldDef.invoke("getValueDef")),
+                                                                       "getComposedFieldDefs"));
+              JVar mutableField = nonNullBlock.decl(model.ref(MutableField.class), getVarName(prefix, "mutableField"),
+                                                    contentLoader.invoke("createMutableField").arg(JExpr._null()).arg(
+                  fieldDef));
+              JVar mutableFieldValue = nonNullBlock.decl(model.ref(MutableFieldValue.class).narrow(model.ref(
+                  Collection.class).narrow(model.ref(FieldValue.class))), getVarName(prefix, "fieldVals"),
+                                                         contentLoader.invoke("createCollectionFieldValue"));
+              nonNullBlock.add(mutableField.invoke("setValue").arg(mutableFieldValue));
+              nonNullBlock.add(wContent.invoke("setField").arg(mutableField));
+              JVar collection = nonNullBlock.decl(model.ref(Collection.class).narrow(model.ref(FieldValue.class)),
+                                                  getVarName(prefix, "collectionVar"), JExpr._new(model.ref(
+                  ArrayList.class).narrow(FieldValue.class)));
+              nonNullBlock.add(mutableFieldValue.invoke("setValue").arg(collection));
+              final JForLoop forLoop = nonNullBlock._for();
+              final JClass narrowedDomain = clazz;
+              JVar iterator_item = forLoop.init(model.ref(Iterator.class).narrow(narrowedDomain), getVarName(
+                  prefix, "i"), fromBean.invoke(getterName).invoke("iterator"));
+              forLoop.test(iterator_item.invoke("hasNext"));
+              final JBlock forBody = forLoop.body();
+              JVar nextVal = forBody.decl(narrowedDomain, getVarName(prefix, "domain"), iterator_item.invoke(
+                  "next"));
+              JVar mutableItemFieldValue =
+                   forBody.decl(model.ref(MutableCompositeFieldValue.class),
+                                getVarName(prefix, "fieldVal"), contentLoader.invoke("createCompositeFieldValue"));
+              Collection<FieldDef> defs = getAllComposedFields(compositeDataType, types);
+              generateReverseBlocks(defs, forBody, nextVal, mutableItemFieldValue, contentLoader,
+                                    compositeFieldDefs, model, clazz, classes, types,
+                                    new StringBuilder(prefix).append(name).append('_').toString());
+
             }
           }
           break;
