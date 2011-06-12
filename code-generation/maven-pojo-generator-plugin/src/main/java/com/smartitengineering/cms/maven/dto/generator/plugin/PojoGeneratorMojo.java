@@ -27,7 +27,10 @@ import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
+import com.smartitengineering.cms.api.content.MutableField;
+import com.smartitengineering.cms.api.content.MutableFieldValue;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
@@ -60,6 +63,7 @@ import com.sun.codemodel.JConditional;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JFieldVar;
+import com.sun.codemodel.JForLoop;
 import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
@@ -395,7 +399,14 @@ public class PojoGeneratorMojo extends AbstractMojo {
       JVar fromBean = reverseConversion.param(definedClass, "fromBean");
       JVar wContent = reverseConversion.param(WriteableContent.class, "toBean");
       JBlock block = reverseConversion.body();
-      generateReverseBlocks(defs.values(), block, fromBean, wContent, codeModel);
+      JInvocation staticInvoke = codeModel.ref(SmartContentAPI.class).staticInvoke("getInstance");
+      block._if(staticInvoke.eq(JExpr._null()))._then()._throw(JExpr._new(codeModel.ref(IllegalStateException.class)).
+          arg("Smart Content API can not be null!"));
+      JVar contentLoader = block.decl(JMod.FINAL, codeModel.ref(ContentLoader.class), "contentLoader",
+                                      staticInvoke.invoke("getContentLoader"));
+      JVar fieldDefs = block.decl(codeModel.ref(Map.class).narrow(String.class).narrow(FieldDef.class), "fieldDefs",
+                                  wContent.invoke("getContentDefinition").invoke("getFieldDefs"));
+      generateReverseBlocks(defs.values(), block, fromBean, wContent, contentLoader, fieldDefs, codeModel, "");
     }
     {
       JMethod instanceCreation = helperClass.method(JMod.PROTECTED, definedClass, "newTInstance");
@@ -911,56 +922,173 @@ public class PojoGeneratorMojo extends AbstractMojo {
   }
 
   protected void generateReverseBlocks(Collection<FieldDef> values, JBlock block, JVar fromBean, JVar wContent,
-                                       JCodeModel model) {
+                                       JVar contentLoader, JVar fieldDefs, JCodeModel model, String prefix) {
     for (FieldDef def : values) {
+      final String name = def.getName();
+      final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).append(name.
+          substring(1)).toString();
+      final String getterName = new StringBuilder("get").append(getterSetterSuffix).toString();
       switch (def.getValueDef().getType()) {
-        case BOOLEAN:
+        case BOOLEAN: {
+          final String methodName = "createBooleanFieldValue";
+          final Class valClass = Boolean.class;
+          setSimpleField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
+                         methodName, prefix);
           break;
-        case STRING:
+        }
+        case STRING: {
+          final String methodName = "createStringFieldValue";
+          final Class valClass = String.class;
+          setSimpleField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
+                         methodName, prefix);
           break;
+        }
+        case DATE_TIME: {
+          final String methodName = "createDateTimeFieldValue";
+          final Class valClass = Date.class;
+          setSimpleField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
+                         methodName, prefix);
+          break;
+        }
+        case INTEGER: {
+          final String methodName = "createIntegerFieldValue";
+          final Class valClass = Integer.class;
+          setSimpleField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
+                         methodName, prefix);
+          break;
+        }
+        case DOUBLE: {
+          final String methodName = "createDoubleFieldValue";
+          final Class valClass = Double.class;
+          setSimpleField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
+                         methodName, prefix);
+          break;
+        }
+        case LONG: {
+          final String methodName = "createLongFieldValue";
+          final Class valClass = Long.class;
+          setSimpleField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
+                         methodName, prefix);
+          break;
+        }
+        case OTHER: {
+          final String methodName = "createOtherFieldValue";
+          final Class valClass = byte[].class;
+          setSimpleField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
+                         methodName, prefix);
+          break;
+        }
         case CONTENT:
-          break;
-        case DATE_TIME:
-          break;
-        case INTEGER:
-          break;
-        case DOUBLE:
-          break;
-        case LONG:
-          break;
-        case OTHER:
-          break;
-        case COLLECTION:
-          CollectionDataType collectionDataType = (CollectionDataType) def.getValueDef();
-          switch (collectionDataType.getItemDataType().getType()) {
-            case BOOLEAN:
-              break;
-            case STRING:
-              break;
-            case CONTENT: {
-              break;
-            }
-            case DATE_TIME:
-              break;
-            case INTEGER:
-              break;
-            case DOUBLE:
-              break;
-            case LONG:
-              break;
-            case OTHER:
-              break;
-            case COMPOSITE: {
-              CompositeDataType compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
-            }
-          }
+
           break;
         case COMPOSITE: {
           CompositeDataType compositeDataType = (CompositeDataType) def.getValueDef();
           break;
         }
+        case COLLECTION:
+          CollectionDataType collectionDataType = (CollectionDataType) def.getValueDef();
+          switch (collectionDataType.getItemDataType().getType()) {
+            case BOOLEAN: {
+              final String methodName = "createBooleanFieldValue";
+              final Class valClass = Boolean.class;
+              setSimpleMultiField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
+                                  methodName, prefix);
+              break;
+            }
+            case STRING: {
+              final String methodName = "createStringFieldValue";
+              final Class valClass = String.class;
+              setSimpleMultiField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
+                                  methodName, prefix);
+              break;
+            }
+            case DATE_TIME: {
+              final String methodName = "createDateTimeFieldValue";
+              final Class valClass = Date.class;
+              setSimpleMultiField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
+                                  methodName, prefix);
+              break;
+            }
+            case INTEGER: {
+              final String methodName = "createIntegerFieldValue";
+              final Class valClass = Integer.class;
+              setSimpleMultiField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
+                                  methodName, prefix);
+              break;
+            }
+            case DOUBLE: {
+              final String methodName = "createDoubleFieldValue";
+              final Class valClass = Double.class;
+              setSimpleMultiField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
+                                  methodName, prefix);
+              break;
+            }
+            case LONG: {
+              final String methodName = "createLongFieldValue";
+              final Class valClass = Long.class;
+              setSimpleMultiField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
+                                  methodName, prefix);
+              break;
+            }
+            case OTHER: {
+              final String methodName = "createOtherFieldValue";
+              final Class valClass = byte[].class;
+              setSimpleMultiField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
+                                  methodName, prefix);
+              break;
+            }
+            case CONTENT: {
+              break;
+            }
+            case COMPOSITE: {
+              CompositeDataType compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
+            }
+          }
+          break;
         default:
       }
     }
+  }
+
+  protected void setSimpleField(JBlock block, JVar fromBean, JVar wContent, final String getterName, JVar fieldDefs,
+                                final String name, JCodeModel model, JVar contentLoader, final Class valClass,
+                                final String methodName, String prefix) {
+    JBlock nonNullBlock = block._if(fromBean.invoke(getterName).ne(JExpr._null()).cand(fieldDefs.invoke("get").arg(
+        name).ne(JExpr._null())))._then();
+    JVar mutableField = nonNullBlock.decl(model.ref(MutableField.class), getVarName(prefix, "mutableField"),
+                                          contentLoader.invoke("createMutableField").arg(JExpr._null()).arg(fieldDefs.
+        invoke("get").arg(name)));
+    JVar mutableFieldValue = nonNullBlock.decl(model.ref(MutableFieldValue.class).narrow(valClass),
+                                               getVarName(prefix, "fieldVal"), contentLoader.invoke(methodName));
+    nonNullBlock.add(mutableFieldValue.invoke("setValue").arg(fromBean.invoke(getterName)));
+    nonNullBlock.add(mutableField.invoke("setValue").arg(mutableFieldValue));
+    nonNullBlock.add(wContent.invoke("setField").arg(mutableField));
+  }
+
+  protected void setSimpleMultiField(JBlock block, JVar fromBean, JVar wContent, final String getterName,
+                                     JVar fieldDefs, final String name, JCodeModel model, JVar contentLoader,
+                                     final Class valClass, final String methodName, String prefix) {
+    JBlock nonNullBlock = block._if(fromBean.invoke(getterName).ne(JExpr._null()).cand(fieldDefs.invoke("get").arg(
+        name).ne(JExpr._null())))._then();
+    JVar mutableField = nonNullBlock.decl(model.ref(MutableField.class), getVarName(prefix, "mutableField"),
+                                          contentLoader.invoke("createMutableField").arg(JExpr._null()).arg(fieldDefs.
+        invoke("get").arg(name)));
+    JVar mutableFieldValue = nonNullBlock.decl(model.ref(MutableFieldValue.class).narrow(model.ref(Collection.class).
+        narrow(model.ref(FieldValue.class))), getVarName(prefix, "fieldVals"), contentLoader.invoke(
+        "createCollectionFieldValue"));
+    nonNullBlock.add(mutableField.invoke("setValue").arg(mutableFieldValue));
+    nonNullBlock.add(wContent.invoke("setField").arg(mutableField));
+    JVar collection = nonNullBlock.decl(model.ref(Collection.class).narrow(model.ref(FieldValue.class)), getVarName(
+        prefix, "collectionVar"), JExpr._new(model.ref(ArrayList.class).narrow(FieldValue.class)));
+    nonNullBlock.add(mutableFieldValue.invoke("setValue").arg(collection));
+    final JForLoop forLoop = nonNullBlock._for();
+    JVar iterator_item = forLoop.init(model.ref(Iterator.class).narrow(valClass), getVarName(prefix, "i"),
+                                      fromBean.invoke(getterName).invoke("iterator"));
+    forLoop.test(iterator_item.invoke("hasNext"));
+    final JBlock forBody = forLoop.body();
+    JVar mutableItemFieldValue = forBody.decl(model.ref(MutableFieldValue.class).narrow(valClass),
+                                              getVarName(prefix, "fieldVal"), contentLoader.invoke(methodName));
+    forBody.add(mutableItemFieldValue.invoke("setValue").arg(iterator_item.invoke("next")));
+    forBody.add(collection.invoke("add").arg(mutableItemFieldValue));
   }
 }
