@@ -56,6 +56,23 @@ public abstract class AbstractRepoAdapterHelper<T extends AbstractRepositoryDoma
     return cId;
   }
 
+  protected ContentId getContentId(String id, String workspaceId) {
+    if (StringUtils.isBlank(workspaceId)) {
+      return getContentId(id);
+    }
+    final byte[] bytesUtf8 = org.apache.commons.codec.binary.StringUtils.getBytesUtf8(id);
+    String[] idParts = workspaceId.split(":");
+    final WorkspaceId wId;
+    if (idParts.length >= 2) {
+      wId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId(idParts[0], idParts[1]);
+    }
+    else {
+      wId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId(idParts[0]);
+    }
+    ContentId cId = SmartContentAPI.getInstance().getContentLoader().createContentId(wId, bytesUtf8);
+    return cId;
+  }
+
   protected final Class<? extends T> initializeEntityClassFromGenerics() {
     Class<? extends T> extractedEntityClass = null;
     try {

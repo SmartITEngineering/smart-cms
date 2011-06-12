@@ -51,6 +51,7 @@ import com.smartitengineering.cms.type.xml.XmlParser;
 import com.smartitengineering.dao.common.CommonDao;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
+import com.smartitengineering.domain.PersistentDTO;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
@@ -978,9 +979,21 @@ public class PojoGeneratorMojo extends AbstractMojo {
                          methodName, prefix);
           break;
         }
-        case CONTENT:
-
+        case CONTENT: {
+          JBlock nonNullBlock = block._if(fromBean.invoke(getterName).ne(JExpr._null()).cand(fieldDefs.invoke("get").arg(
+              name).ne(JExpr._null()).cand(fromBean.invoke(getterName).invoke("getId").ne(JExpr._null()))))._then();
+          JVar mutableField = nonNullBlock.decl(model.ref(MutableField.class), getVarName(prefix, "mutableField"),
+                                                contentLoader.invoke("createMutableField").arg(JExpr._null()).
+              arg(fieldDefs.invoke("get").arg(name)));
+          JVar mutableFieldValue = nonNullBlock.decl(model.ref(MutableFieldValue.class).narrow(ContentId.class),
+                                                     getVarName(prefix, "fieldVal"),
+                                                     contentLoader.invoke("createContentFieldValue"));
+          nonNullBlock.add(mutableFieldValue.invoke("setValue").arg(JExpr._super().invoke("getContentId").arg(fromBean.
+              invoke(getterName).invoke("getId")).arg(fromBean.invoke(getterName).invoke("getWorkspaceId"))));
+          nonNullBlock.add(mutableField.invoke("setValue").arg(mutableFieldValue));
+          nonNullBlock.add(wContent.invoke("setField").arg(mutableField));
           break;
+        }
         case COMPOSITE: {
           CompositeDataType compositeDataType = (CompositeDataType) def.getValueDef();
           break;
@@ -1038,6 +1051,38 @@ public class PojoGeneratorMojo extends AbstractMojo {
               break;
             }
             case CONTENT: {
+              JBlock nonNullBlock = block._if(fromBean.invoke(getterName).ne(JExpr._null()).cand(fieldDefs.invoke("get").
+                  arg(
+                  name).ne(JExpr._null())))._then();
+              JVar mutableField = nonNullBlock.decl(model.ref(MutableField.class), getVarName(prefix, "mutableField"),
+                                                    contentLoader.invoke("createMutableField").arg(JExpr._null()).arg(fieldDefs.
+                  invoke("get").arg(name)));
+              JVar mutableFieldValue = nonNullBlock.decl(model.ref(MutableFieldValue.class).narrow(model.ref(
+                  Collection.class).
+                  narrow(model.ref(FieldValue.class))), getVarName(prefix, "fieldVals"), contentLoader.invoke(
+                  "createCollectionFieldValue"));
+              nonNullBlock.add(mutableField.invoke("setValue").arg(mutableFieldValue));
+              nonNullBlock.add(wContent.invoke("setField").arg(mutableField));
+              JVar collection = nonNullBlock.decl(model.ref(Collection.class).narrow(model.ref(FieldValue.class)),
+                                                  getVarName(prefix, "collectionVar"), JExpr._new(model.ref(
+                  ArrayList.class).narrow(FieldValue.class)));
+              nonNullBlock.add(mutableFieldValue.invoke("setValue").arg(collection));
+              final JForLoop forLoop = nonNullBlock._for();
+              final JClass narrowedDomain = model.ref(AbstractRepositoryDomain.class).narrow(model.ref(
+                  PersistentDTO.class).narrow(model.ref(PersistentDTO.class).wildcard()).narrow(String.class).narrow(
+                  Long.class).wildcard());
+              JVar iterator_item = forLoop.init(model.ref(Iterator.class).narrow(narrowedDomain.wildcard()), getVarName(
+                  prefix, "i"), fromBean.invoke(getterName).invoke("iterator"));
+              forLoop.test(iterator_item.invoke("hasNext"));
+              final JBlock forBody = forLoop.body();
+              JVar nextVal = forBody.decl(narrowedDomain, getVarName(prefix, "domain"), iterator_item.invoke(
+                  "next"));
+              JVar mutableItemFieldValue =
+                   forBody.decl(model.ref(MutableFieldValue.class).narrow(ContentId.class),
+                                getVarName(prefix, "fieldVal"), contentLoader.invoke("createContentFieldValue"));
+              forBody.add(mutableItemFieldValue.invoke("setValue").arg(JExpr._super().invoke("getContentId").arg(nextVal.
+                  invoke("getId")).arg(nextVal.invoke("getWorkspaceId"))));
+              forBody.add(collection.invoke("add").arg(mutableItemFieldValue));
               break;
             }
             case COMPOSITE: {
