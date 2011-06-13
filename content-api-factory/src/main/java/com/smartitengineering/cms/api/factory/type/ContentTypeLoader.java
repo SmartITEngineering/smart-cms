@@ -182,7 +182,7 @@ public interface ContentTypeLoader {
    * @return New field definition
    */
   public MutableFieldDef createMutableFieldDef();
-  
+
   public MutableFieldDef createMutableFieldDef(FieldDef parentContainer);
 
   public ContentTypeId createContentTypeId(WorkspaceId workspaceId, String namespace, String name);
@@ -202,6 +202,8 @@ public interface ContentTypeLoader {
   public MutableStringDataType createMutableStringDataType();
 
   public String getSearchFieldName(FieldDef fieldDef);
+
+  public String getSearchFieldNameWithoutTypeSpecifics(FieldDef fieldDef);
 
   public String getEntityTagValueForContentType(ContentType contentType);
 }

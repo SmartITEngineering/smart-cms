@@ -348,6 +348,10 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
     return SmartContentSPI.getInstance().getSearchFieldNameGenerator().getSearchFieldName(fieldDef);
   }
 
+  public String getSearchFieldNameWithoutTypeSpecifics(FieldDef fieldDef) {
+    return SmartContentSPI.getInstance().getSearchFieldNameGenerator().getFieldName(fieldDef);
+  }
+
   @Override
   public WritableContentType getWritableContentType(ContentType contentType) {
     return getContentTypeImpl(contentType);
