@@ -22,6 +22,7 @@ import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
 import com.sun.jersey.api.client.Client;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.logging.Level;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import junit.framework.Assert;
@@ -178,7 +179,20 @@ public class CodeGenerationTest {
     name.setMiddleInitial("M");
     person.setName(name);
     service.save(person);
+    try {
+      Thread.sleep(SLEEP_DURATION);
+    }
+    catch (InterruptedException ex) {
+      LOGGER.warn(ex.getMessage(), ex);
+    }
     Assert.assertNotNull(person.getId());
+    Person rPerson = service.getById(person.getId());
+    Assert.assertNotNull(rPerson);
+    Assert.assertNotNull(rPerson.getName());
+    Assert.assertEquals(person.getNationalId(), rPerson.getNationalId());
+    Assert.assertEquals(person.getName().getFirstName(), rPerson.getName().getFirstName());
+    Assert.assertEquals(person.getName().getLastName(), rPerson.getName().getLastName());
+    Assert.assertEquals(person.getName().getMiddleInitial(), rPerson.getName().getMiddleInitial());
   }
 
   public static class ConfigurationModule extends AbstractModule {
@@ -210,6 +224,10 @@ public class CodeGenerationTest {
 
     public void save(Person person) {
       dao.save(person);
+    }
+
+    public Person getById(String id) {
+      return dao.getById(id);
     }
   }
 }

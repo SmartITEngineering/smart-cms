@@ -867,7 +867,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
     final String setterName = new StringBuilder("set").append(getterSetterSuffix).toString();
     final String fieldValVar = getVarName(prefix, new StringBuilder(name).append("Val").toString());
     JVar fieldVal = block.decl(model.ref(FieldValue.class).narrow(valType), fieldValVar, field.invoke("getValue"));
-    JConditional valCond = block._if(fieldVal.eq(JExpr._null()));
+    JConditional valCond = block._if(fieldVal.ne(JExpr._null()));
     JBlock setBlock = valCond._then();
     setBlock.add(toBean.invoke(setterName).arg(fieldVal.invoke("getValue")));
   }
@@ -877,7 +877,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
     final String setterName = "add";
     final String fieldValVar = getVarName(prefix, new StringBuilder(name).append("Val").toString());
     JVar fieldVal = block.decl(model.ref(FieldValue.class).narrow(valType), fieldValVar, field.invoke("getValue"));
-    JConditional valCond = block._if(fieldVal.eq(JExpr._null()));
+    JConditional valCond = block._if(fieldVal.ne(JExpr._null()));
     JBlock setBlock = valCond._then();
     setBlock.add(toBean.invoke(setterName).arg(fieldVal.invoke("getValue")));
   }
