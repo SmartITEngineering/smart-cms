@@ -49,6 +49,8 @@ public interface MutableFieldDef
    */
   public void setRequired(boolean required);
 
+  public void setParentContainer(FieldDef parent);
+
   public void setValueDef(DataType dataType);
 
   public void setVariations(Collection<? extends VariationDef> variationDefs);

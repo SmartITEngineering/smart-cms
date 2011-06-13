@@ -113,7 +113,7 @@ public class CodeGenerationTest {
     System.setProperty(ApplicationWideClientFactoryImpl.TRACE, "true");
 
     Client client = CacheableClient.create();
-    client.resource("http://localhost:9090/api/channels/test").header(HttpHeaders.CONTENT_TYPE,
+    client.resource("http://localhost:7090/api/channels/test").header(HttpHeaders.CONTENT_TYPE,
                                                                       MediaType.APPLICATION_JSON).put(
         "{\"name\":\"test\"}");
     LOGGER.info("Created test channel!");

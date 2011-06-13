@@ -245,8 +245,16 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   }
 
   @Override
+  public MutableFieldDef createMutableFieldDef(FieldDef parentContainer) {
+    final FieldDefImpl fieldDefImpl = new FieldDefImpl();
+    fieldDefImpl.setParentContainer(parentContainer);
+    return fieldDefImpl;
+
+  }
+
+  @Override
   public MutableFieldDef createMutableFieldDef() {
-    return new FieldDefImpl();
+    return createMutableFieldDef(null);
   }
 
   @Override

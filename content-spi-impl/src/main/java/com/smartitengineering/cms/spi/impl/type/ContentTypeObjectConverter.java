@@ -868,7 +868,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       Utils.organizeByPrefixOnString(compositeFields, compositeFieldsMap, ':');
       for (String composedFieldName : compositeFieldsMap.keySet()) {
         final MutableFieldDef composedFieldDef = SmartContentAPI.getInstance().getContentTypeLoader().
-            createMutableFieldDef();
+            createMutableFieldDef(fieldDef);
         final Map<String, byte[]> composedFieldCells = compositeFieldsMap.get(composedFieldName);
         if (logger.isInfoEnabled()) {
           logger.info("::::::::::::::::::::: Nested composite field from " + fieldName + " for " + composedFieldName +

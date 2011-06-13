@@ -231,6 +231,13 @@
               <reload>manual</reload>
             </configuration>
           </execution>
+          <execution>
+            <id>stop-jetty</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
     </plugins>
@@ -238,6 +245,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit.version>4.8.2</junit.version>
+    <jetty.port>7090</jetty.port>
+    <jetty.stop.port>7999</jetty.stop.port>
     <hub.version>0.1-rdbms-SNAPSHOT</hub.version>
   </properties>
 </project>
