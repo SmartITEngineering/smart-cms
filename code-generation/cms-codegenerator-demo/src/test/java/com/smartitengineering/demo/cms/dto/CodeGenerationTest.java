@@ -6,12 +6,12 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
+import com.smartitengineering.cms.api.factory.type.WritableContentType;
+import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.binder.guice.Initializer;
-import com.smartitengineering.cms.client.api.RootResource;
-import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
-import com.smartitengineering.cms.client.impl.RootResourceImpl;
-import com.smartitengineering.cms.ws.common.domains.Workspace;
-import com.smartitengineering.cms.ws.common.domains.WorkspaceImpl.WorkspaceIdImpl;
 import com.smartitengineering.dao.common.CommonDao;
 import com.smartitengineering.dao.hbase.ddl.HBaseTableGenerator;
 import com.smartitengineering.dao.hbase.ddl.config.json.ConfigurationJsonParser;
@@ -20,13 +20,11 @@ import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ConnectionConfig;
 import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
 import com.sun.jersey.api.client.Client;
-import java.io.File;
-import java.net.URI;
+import java.util.Collection;
 import java.util.Properties;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import junit.framework.Assert;
-import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.eclipse.jetty.server.Handler;
@@ -104,12 +102,6 @@ public class CodeGenerationTest {
     System.setProperty("solr.solr.home", "./target/sample-conf/");
     Handler solr = new WebAppContext("./target/solr/", "/solr");
     handlerList.addHandler(solr);
-    final String webapp = "../../smart-cms-client-impl/src/test/webapp/";
-    if (!new File(webapp).exists()) {
-      throw new IllegalStateException("WebApp file/dir does not exist!");
-    }
-    WebAppContext webAppHandler = new WebAppContext(webapp, "/cms");
-    handlerList.addHandler(webAppHandler);
     jettyServer.setHandler(handlerList);
     jettyServer.setSendDateHeader(true);
     jettyServer.start();
@@ -128,36 +120,31 @@ public class CodeGenerationTest {
      * Setup workspaces
      */
     {
-      RootResource resource = RootResourceImpl.getRoot(URI.create(ROOT_URI_STRING));
-      resource.get();
-      WorkspaceFeedResource feedResource;
+      final WorkspaceId wId;
       try {
-        feedResource = resource.getTemplates().getWorkspaceResource("p", "q");
+        wId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspace("p", "q");
       }
       catch (Exception ex) {
-        feedResource = null;
         LOGGER.info("Exception getting feed resoruce", ex);
+        throw new RuntimeException(ex);
       }
       boolean valid = false;
-      if (feedResource == null) {
-        try {
-          Workspace workspace = resource.createWorkspace(new WorkspaceIdImpl("p", "q"));
-          resource = RootResourceImpl.getRoot(URI.create(ROOT_URI_STRING));
-          resource.get();
-          feedResource = resource.getTemplates().getWorkspaceResource(workspace.getId().getGlobalNamespace(), workspace.
-              getId().getName());
-          String contentTypeXml = IOUtils.toString(CodeGenerationTest.class.getClassLoader().getResourceAsStream(
-              "content-type-def-with-composition.xml"));
-          feedResource.getContentTypes().createContentType(contentTypeXml);
-          valid = true;
+      try {
+        Workspace workspace = wId.getWorkspae();
+        final ContentTypeLoader contentTypeLoader = SmartContentAPI.getInstance().getContentTypeLoader();
+        final Collection<WritableContentType> types;
+        types = contentTypeLoader.parseContentTypes(workspace.getId(), CodeGenerationTest.class.getClassLoader().
+            getResourceAsStream("content-type-def-with-composition.xml"),
+                                                    com.smartitengineering.cms.api.common.MediaType.APPLICATION_XML);
+        for (WritableContentType type : types) {
+          type.put();
         }
-        catch (Exception ex) {
-          LOGGER.error("Error creating test workspace for templates", ex);
-        }
-      }
-      else {
         valid = true;
       }
+      catch (Exception ex) {
+        LOGGER.error("Error creating test workspace for templates", ex);
+      }
+
       Assert.assertTrue(valid);
     }
   }
