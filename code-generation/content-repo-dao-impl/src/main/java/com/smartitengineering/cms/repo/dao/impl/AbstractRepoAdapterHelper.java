@@ -84,6 +84,7 @@ public abstract class AbstractRepoAdapterHelper<T extends AbstractRepositoryDoma
     }
     else {
       wId = defaultContainerWorkspace;
+      toBean.setWorkspaceId(defaultContainerWorkspace.toString());
     }
     return wId;
   }
@@ -127,7 +128,19 @@ public abstract class AbstractRepoAdapterHelper<T extends AbstractRepositoryDoma
   protected Content convertFromT2F(T toBean) {
     final SmartContentAPI instance = SmartContentAPI.getInstance();
     final ContentLoader contentLoader = instance.getContentLoader();
-    WriteableContent content = contentLoader.createContent(getContentTypeId().getContentType());
+    final WriteableContent content;
+    if (StringUtils.isBlank(toBean.getId())) {
+      content = contentLoader.createContent(getContentTypeId().getContentType());
+    }
+    else {
+      Content pContent = contentLoader.loadContent(getContentId(toBean.getId(), getWorkspaceId(toBean).toString()));
+      if (pContent != null) {
+        content = contentLoader.getWritableContent(pContent);
+      }
+      else {
+        content = contentLoader.createContent(getContentTypeId().getContentType());
+      }
+    }
     if (StringUtils.isNotBlank(toBean.getId())) {
       String[] idParts = toBean.getWorkspaceId().split(":");
       if (idParts == null || idParts.length != 2) {

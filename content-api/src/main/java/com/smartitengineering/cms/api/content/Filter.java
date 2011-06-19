@@ -81,4 +81,8 @@ public interface Filter {
   void setFriendliesIncluded(boolean friendliesIncluded);
 
   boolean isFriendliesIncluded();
+  
+  boolean isFieldParamsEscaped();
+  
+  void setFieldParamsEscaped(boolean bool);
 }

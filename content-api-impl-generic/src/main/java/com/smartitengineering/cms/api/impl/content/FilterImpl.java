@@ -49,6 +49,7 @@ public class FilterImpl implements Filter {
   private WorkspaceId workspaceId;
   private String searchTerms;
   private boolean friendliesIncluded = true;
+  private boolean fieldParamsEscaped = false;
 
   @Override
   public void addContentTypeToFilter(ContentTypeId... types) {
@@ -185,5 +186,13 @@ public class FilterImpl implements Filter {
   @Override
   public void setFriendliesIncluded(boolean friendliesIncluded) {
     this.friendliesIncluded = friendliesIncluded;
+  }
+
+  public boolean isFieldParamsEscaped() {
+    return fieldParamsEscaped;
+  }
+
+  public void setFieldParamsEscaped(boolean fieldParamsEscaped) {
+    this.fieldParamsEscaped = fieldParamsEscaped;
   }
 }

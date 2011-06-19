@@ -20,8 +20,12 @@ import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ConnectionConfig;
 import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
 import com.sun.jersey.api.client.Client;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import junit.framework.Assert;
@@ -178,20 +182,54 @@ public class CodeGenerationTest {
     name.setMiddleInitial("M");
     person.setName(name);
     service.save(person);
-    try {
-      Thread.sleep(SLEEP_DURATION);
-    }
-    catch (InterruptedException ex) {
-      LOGGER.warn(ex.getMessage(), ex);
-    }
+    sleep();
     Assert.assertNotNull(person.getId());
     Person rPerson = service.getById(person.getId());
     Assert.assertNotNull(rPerson);
+    Assert.assertNotNull(rPerson.getId());
+    Assert.assertNotNull(rPerson.getWorkspaceId());
     Assert.assertNotNull(rPerson.getName());
     Assert.assertEquals(person.getNationalId(), rPerson.getNationalId());
     Assert.assertEquals(person.getName().getFirstName(), rPerson.getName().getFirstName());
     Assert.assertEquals(person.getName().getLastName(), rPerson.getName().getLastName());
     Assert.assertEquals(person.getName().getMiddleInitial(), rPerson.getName().getMiddleInitial());
+    service.delete(rPerson);
+    rPerson = service.getById(person.getId());
+    Assert.assertNull(rPerson);
+  }
+
+  @Test
+  public void testGetAll() {
+    Injector injector = Guice.createInjector(new MasterModule(), new ServiceModule());
+    Assert.assertNotNull(injector);
+    PersonService service = injector.getInstance(PersonService.class);
+    Assert.assertNotNull(service);
+    List<Person> list = new ArrayList<Person>();
+    int size = 103;
+    for (int i = 0; i < size; ++i) {
+      Person person = new Person();
+      person.setNationalId(String.valueOf(i));
+      Name name = new ExtName();
+      name.setFirstName("Imran");
+      name.setLastName("Yousuf");
+      name.setMiddleInitial("M");
+      person.setName(name);
+      list.add(person);
+      service.save(person);
+    }
+    sleep();
+    sleep();
+    List<Person> all = new ArrayList<Person>(service.getAll());
+    Assert.assertEquals(size, all.size());
+    Set<String> nIds = new HashSet<String>();
+    for (int i = 0; i < size; ++i) {
+      Person rPerson = all.get(i);
+      nIds.add(rPerson.getNationalId());
+      service.delete(rPerson);
+      rPerson = service.getById(rPerson.getId());
+      Assert.assertNull(rPerson);
+    }
+    Assert.assertEquals(size, nIds.size());
   }
 
   public static class ConfigurationModule extends AbstractModule {
@@ -227,6 +265,27 @@ public class CodeGenerationTest {
 
     public Person getById(String id) {
       return dao.getById(id);
+    }
+
+    public void update(Person person) {
+      dao.update(person);
+    }
+
+    public void delete(Person person) {
+      dao.delete(person);
+    }
+
+    public Set<Person> getAll() {
+      return dao.getAll();
+    }
+  }
+
+  protected void sleep() {
+    try {
+      Thread.sleep(SLEEP_DURATION);
+    }
+    catch (InterruptedException ex) {
+      LOGGER.warn(ex.getMessage(), ex);
     }
   }
 }

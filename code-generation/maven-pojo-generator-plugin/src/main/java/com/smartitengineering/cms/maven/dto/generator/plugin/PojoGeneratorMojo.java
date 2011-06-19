@@ -311,6 +311,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
     JClass commonWriteDao = codeModel.ref(CommonWriteDao.class);
     JClass commonDaoImpl = codeModel.ref(RepositoryDaoImpl.class);
     JClass genericAdapter = codeModel.ref(GenericAdapter.class).narrow(Content.class);
+    JClass classRef = codeModel.ref(Class.class);
     JClass genericAdapterImpl = codeModel.ref(GenericAdapterImpl.class).narrow(Content.class);
     JClass abstractHelper = codeModel.ref(AbstractAdapterHelper.class).narrow(Content.class);
     JClass singletonScope = codeModel.ref(Singleton.class);
@@ -339,6 +340,11 @@ public class PojoGeneratorMojo extends AbstractMojo {
             commonDaoType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).append(
                 "CommonDaoType").toString());
             commonDaoType._extends(narrowedCommonDaoTypeLiteral);
+            final JClass beanClass = classRef.narrow(definedClass.wildcard());
+            JDefinedClass classType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).append(
+                "ClassType").toString());
+            classType._extends(typeLiteral.narrow(beanClass));
+            block.add(JExpr.invoke("bind").arg(JExpr._new(classType)).invoke("toInstance").arg(definedClass.dotclass()));
             final JClass narrowedDaoImplTypeLiteral = typeLiteral.narrow(commonDaoImpl.narrow(definedClass));
             final JDefinedClass daoImplType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).
                 append("DaoImplType").toString());
