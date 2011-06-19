@@ -206,6 +206,13 @@
               <reload>manual</reload>
             </configuration>
           </execution>
+          <execution>
+            <id>stop-jetty</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
     </plugins>

@@ -123,8 +123,7 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
       if (org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
         builder.append(prefix).append(separator);
       }
-      String defName = SmartContentSPI.getInstance().getSearchFieldNameGenerator().
-          getSearchFieldName(def, org.apache.commons.lang.StringUtils.isNotBlank(prefix));
+      String defName = SmartContentSPI.getInstance().getSearchFieldNameGenerator().getSearchFieldName(def);
       if (org.apache.commons.lang.StringUtils.isBlank(defName)) {
         continue;
       }
@@ -147,13 +146,14 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
       return;
     }
     final Object value = field.getValue().getValue();
-    addSimpleValue(field.getValue(), field.getFieldDef().getValueDef(), toBean, field.getName(), indexFieldName, value,
+    addSimpleValue(field.getValue(), field.getFieldDef().getValueDef(), toBean, field.getFieldDef(), indexFieldName,
+                   value,
                    prefix, '_', indexedContents);
 
   }
 
   protected void addSimpleValue(final FieldValue def, DataType fieldDataType, MultivalueMap<String, Object> toBean,
-                                String fieldName, String indexFieldName, final Object value, final String prefix,
+                                FieldDef fieldDef, String indexFieldName, final Object value, final String prefix,
                                 final char separator, Set<ContentId> indexedContents) {
     if (logger.isInfoEnabled()) {
       logger.info("Indexing simple value " + fieldDataType.getType() + " with prefix " + prefix + " and separator " +
@@ -162,20 +162,15 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
     final FieldValueType valueDef = def.getDataType();
     switch (valueDef) {
       case COMPOSITE: {
-        StringBuilder builder = new StringBuilder();
-        if (org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
-          builder.append(prefix).append('.');
-        }
-        builder.append(fieldName);
         CompositeFieldValue compositeFieldValue = (CompositeFieldValue) def;
-        indexFields(compositeFieldValue.getValueAsMap(), builder.toString(), '.', toBean, indexedContents);
+        indexFields(compositeFieldValue.getValueAsMap(), prefix, separator, toBean, indexedContents);
         break;
       }
       case COLLECTION:
         CollectionFieldValue fieldValue = (CollectionFieldValue) def;
         Collection<FieldValue> values = fieldValue.getValue();
         for (FieldValue val : values) {
-          addSimpleValue(val, ((CollectionDataType) fieldDataType).getItemDataType(), toBean, fieldName, indexFieldName,
+          addSimpleValue(val, ((CollectionDataType) fieldDataType).getItemDataType(), toBean, fieldDef, indexFieldName,
                          val.getValue(), prefix, '_', indexedContents);
         }
         break;
@@ -189,7 +184,12 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
         if (contentDataType.isAvaialbleForSearch()) {
           Content content = SmartContentAPI.getInstance().getContentLoader().loadContent((ContentId) value);
           if (content != null) {
-            indexFields(content, toBean, fieldName, indexedContents, '_');
+            StringBuilder newPrefix = new StringBuilder();
+            if (org.apache.commons.lang.StringUtils.isNotBlank(prefix)) {
+              newPrefix.append(prefix).append(separator);
+            }
+            newPrefix.append(SmartContentSPI.getInstance().getSearchFieldNameGenerator().getFieldName(fieldDef));
+            indexFields(content, toBean, newPrefix.toString(), indexedContents, separator);
           }
         }
         break;

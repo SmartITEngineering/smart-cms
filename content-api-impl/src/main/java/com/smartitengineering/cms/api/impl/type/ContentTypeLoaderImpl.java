@@ -245,8 +245,16 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   }
 
   @Override
+  public MutableFieldDef createMutableFieldDef(FieldDef parentContainer) {
+    final FieldDefImpl fieldDefImpl = new FieldDefImpl();
+    fieldDefImpl.setParentContainer(parentContainer);
+    return fieldDefImpl;
+
+  }
+
+  @Override
   public MutableFieldDef createMutableFieldDef() {
-    return new FieldDefImpl();
+    return createMutableFieldDef(null);
   }
 
   @Override
@@ -297,6 +305,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
     typeImpl.getMutableStatuses().addAll(contentType.getStatuses().values());
     typeImpl.setRepresentations(contentType.getRepresentations());
     typeImpl.setParameterizedDisplayNames(contentType.getParameterizedDisplayNames());
+    typeImpl.setDefinitionType(contentType.getSelfDefinitionType());
   }
 
   @Override
@@ -337,6 +346,10 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   @Override
   public String getSearchFieldName(FieldDef fieldDef) {
     return SmartContentSPI.getInstance().getSearchFieldNameGenerator().getSearchFieldName(fieldDef);
+  }
+
+  public String getSearchFieldNameWithoutTypeSpecifics(FieldDef fieldDef) {
+    return SmartContentSPI.getInstance().getSearchFieldNameGenerator().getFieldName(fieldDef);
   }
 
   @Override

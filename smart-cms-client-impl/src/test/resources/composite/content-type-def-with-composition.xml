@@ -35,6 +35,7 @@
         <val>Address (en-US)</val>
       </param>
     </parameterizedDisplayNames>
+    <defType>CONCRETE_COMPONENT</defType>
     <primaryField>zipCode</primaryField>
     <fields>
       <field>

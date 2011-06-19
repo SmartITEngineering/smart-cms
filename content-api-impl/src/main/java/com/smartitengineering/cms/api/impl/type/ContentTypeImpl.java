@@ -63,6 +63,7 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
   private String primaryFieldName;
   private final Map<MediaType, String> representations = new HashMap<MediaType, String>();
   private final Map<String, String> parameterizedDisplayNames = new LinkedHashMap<String, String>();
+  private DefinitionType definitionType;
 
   @Override
   public void put() throws IOException {
@@ -348,6 +349,23 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
       logger.info("Primary Field Def present: " + primaryFieldName + " " + (getPrimaryFieldDef() != null));
       logger.info("Primary Field Def: " + getPrimaryFieldDef());
     }
+    if (getParent() != null && getParent().getContentType() != null) {
+      DefinitionType parentType = getParent().getContentType().getDefinitionType();
+      if (parentType.equals(DefinitionType.ABSTRACT_COMPONENT) || parentType.equals(DefinitionType.CONCRETE_COMPONENT)) {
+        final DefinitionType myDefType = getDefinitionType();
+        if (myDefType.equals(DefinitionType.ABSTRACT_TYPE) || myDefType.equals(DefinitionType.CONCRETE_TYPE)) {
+          logger.warn("Parent definition is of component, but this is of type!");
+          return false;
+        }
+      }
+      else {
+        final DefinitionType myDefType = getDefinitionType();
+        if (myDefType.equals(DefinitionType.ABSTRACT_COMPONENT) || myDefType.equals(DefinitionType.CONCRETE_COMPONENT)) {
+          logger.warn("Parent definition is of type, but this is of component!");
+          return false;
+        }
+      }
+    }
     return getPrimaryFieldDef() != null && !getStatuses().isEmpty();
   }
 
@@ -393,5 +411,39 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
 
   public Map<String, String> getParameterizedDisplayNames() {
     return Collections.unmodifiableMap(parameterizedDisplayNames);
+  }
+
+  public void setDefinitionType(DefinitionType type) {
+    this.definitionType = type;
+  }
+
+  public DefinitionType getDefinitionType() {
+    if (definitionType != null) {
+      return definitionType;
+    }
+    else {
+      if (getParent() == null || getParent().getContentType() == null) {
+        return DefinitionType.getDefaufltType();
+      }
+      else {
+        ContentType parent = getParent().getContentType();
+        final DefinitionType parentDefType = parent.getDefinitionType();
+        if (parentDefType.equals(DefinitionType.ABSTRACT_COMPONENT) || parentDefType.equals(
+            DefinitionType.CONCRETE_COMPONENT)) {
+          return DefinitionType.CONCRETE_COMPONENT;
+        }
+        else if (parentDefType.equals(DefinitionType.ABSTRACT_TYPE) ||
+            parentDefType.equals(DefinitionType.CONCRETE_TYPE)) {
+          return DefinitionType.CONCRETE_TYPE;
+        }
+        else {
+          return DefinitionType.getDefaufltType();
+        }
+      }
+    }
+  }
+
+  public DefinitionType getSelfDefinitionType() {
+    return definitionType;
   }
 }

@@ -63,4 +63,6 @@ public interface MutableContentType
   public void setParameterizedDisplayNames(Map<String, String> params);
 
   public Map<String, String> getMutableParameterizedDisplayNames();
+
+  public void setDefinitionType(DefinitionType type);
 }

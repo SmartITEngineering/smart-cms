@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.type.xml;
 
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.impl.type.CollectionDataTypeImpl;
 import com.smartitengineering.cms.api.impl.type.CompositionDataTypeImpl;
 import com.smartitengineering.cms.api.impl.type.ContentDataTypeImpl;
@@ -35,6 +36,7 @@ import com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
+import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
@@ -123,7 +125,7 @@ public class XmlParser implements XmlConstants {
         mutableContent.setParameterizedDisplayNames(parseParams(contentTypeElement, PARAMETERIZED_DISPLAY_NAMES));
         for (int child = 0; child < childElements.size(); child++) {//fields min=1,max=unbounted
           if (StringUtils.equalsIgnoreCase(childElements.get(child).getLocalName(), FIELDS)) {
-            fieldDefs.addAll(parseFieldDefs(childElements.get(child)));
+            fieldDefs.addAll(parseFieldDefs(childElements.get(child), null));
           }
         }
         statuses = parseContentStatuses(contentTypeElement, STATUS);
@@ -135,6 +137,13 @@ public class XmlParser implements XmlConstants {
         }
         if (StringUtils.isNotBlank(primaryFieldName)) {
           mutableContent.setPrimaryFieldName(primaryFieldName);
+        }
+        String defType = parseOptionalStringElement(contentTypeElement, DEF_TYPE);
+        if (logger.isInfoEnabled()) {
+          logger.info("Def type parsed: " + defType);
+        }
+        if (StringUtils.isNotBlank(defType)) {
+          mutableContent.setDefinitionType(ContentType.DefinitionType.valueOf(defType));
         }
         mutableContent.setDisplayName(displayName);
         mutableContent.setParent(contentTypeId);
@@ -326,13 +335,13 @@ public class XmlParser implements XmlConstants {
     return type;
   }
 
-  protected CollectionDataType parseCollection(Element rootElement) {
+  protected CollectionDataType parseCollection(Element rootElement, FieldDef parent) {
     MutableCollectionDataType type = new CollectionDataTypeImpl();
     for (int i = 0; i < rootElement.getChildElements().size(); i++) {
       final Element element = rootElement.getChildElements().get(i);
       if (StringUtils.equalsIgnoreCase(element.getLocalName(), SIMPLE_VALUE)) {
         final Element simpleElement = (Element) element.getChild(1);
-        type.setItemDataType(parseSimpleValue(simpleElement));
+        type.setItemDataType(parseSimpleValue(simpleElement, parent));
       }
       type.setMinSize(NumberUtils.toInt(parseOptionalStringElement(rootElement, MIN_SIZE), Integer.MIN_VALUE));
       if (logger.isDebugEnabled()) {
@@ -348,7 +357,7 @@ public class XmlParser implements XmlConstants {
     return type;
   }
 
-  protected DataType parseSimpleValue(Element rootElement) {
+  protected DataType parseSimpleValue(Element rootElement, FieldDef parent) {
     final String localName = rootElement.getLocalName();
     if (logger.isDebugEnabled()) {
       logger.debug("Local name for simple value " + localName);
@@ -376,7 +385,7 @@ public class XmlParser implements XmlConstants {
         return DataType.BOOLEAN;
       }
       else if (StringUtils.equalsIgnoreCase(localName, COMPOSITE)) {
-        return parseCompositeDataType(rootElement);
+        return parseCompositeDataType(rootElement, parent);
       }
       else {
         return DataType.INTEGER;
@@ -384,22 +393,23 @@ public class XmlParser implements XmlConstants {
     }
   }
 
-  protected Collection<FieldDef> parseFieldDefs(Element rootElement) {
+  protected Collection<FieldDef> parseFieldDefs(Element rootElement, FieldDef parent) {
     List<FieldDef> fieldDefs = new ArrayList<FieldDef>();
     final Elements childElements = rootElement.getChildElements(FIELD, NAMESPACE);
     if (childElements != null) {
       for (int i = 0; i < childElements.size(); i++) {
-        fieldDefs.add(parseFieldDef(childElements.get(i)));
+        fieldDefs.add(parseFieldDef(childElements.get(i), parent));
       }
     }
     return fieldDefs;
   }
 
-  protected FieldDef parseFieldDef(Element rootElement) {
+  protected FieldDef parseFieldDef(Element rootElement, FieldDef parent) {
     if (logger.isInfoEnabled()) {
       logger.info("Field definition " + rootElement.toXML());
     }
     MutableFieldDef fieldDef = new FieldDefImpl();
+    fieldDef.setParentContainer(parent);
     fieldDef.setCustomValidators(parseValidators(rootElement, VALIDATORS));
     fieldDef.setFieldStandaloneUpdateAble(Boolean.parseBoolean(
         parseOptionalStringElement(rootElement, UPDATE_STANDALONE)));
@@ -407,7 +417,7 @@ public class XmlParser implements XmlConstants {
     fieldDef.setDisplayName(parseOptionalStringElement(rootElement, DISPLAY_NAME));
     fieldDef.setRequired(Boolean.parseBoolean(parseOptionalStringElement(rootElement, REQUIRED)));
     fieldDef.setSearchDefinition(parseSearchDef(rootElement, SEARCH));
-    fieldDef.setValueDef(parseValueDef(rootElement, VALUE));
+    fieldDef.setValueDef(parseValueDef(rootElement, VALUE, fieldDef));
     fieldDef.setParameters(parseParams(rootElement, PARAMS));
     fieldDef.setParameterizedDisplayNames(parseParams(rootElement, PARAMETERIZED_DISPLAY_NAMES));
     if (parseVariations(rootElement, VARIATIONS) != null) {
@@ -540,26 +550,26 @@ public class XmlParser implements XmlConstants {
   }
 
   /********************************** CONFUSED ****************************************/
-  protected DataType parseValueDef(Element rootElement, String elementName) {
+  protected DataType parseValueDef(Element rootElement, String elementName, FieldDef parent) {
     final Element childNode = getChildNode(rootElement, elementName);
     if (logger.isDebugEnabled()) {
       logger.debug("Local name for root element " + rootElement.getLocalName());
       logger.debug("Local name for child element " + childNode.getLocalName());
     }
-    return parseValue(childNode);
+    return parseValue(childNode, parent);
   }
 
-  protected DataType parseValue(Element valueElement) {
+  protected DataType parseValue(Element valueElement, FieldDef parent) {
     final Element element = (Element) valueElement.getChild(1);
     if (logger.isDebugEnabled()) {
       logger.debug("Local name for value element " + valueElement.getLocalName());
       logger.debug("Local name for main element " + element.getLocalName());
     }
     if (StringUtils.equalsIgnoreCase(element.getLocalName(), COLLECTION)) {
-      return parseCollection(element);
+      return parseCollection(element, parent);
     }
     else {
-      return parseSimpleValue(element);
+      return parseSimpleValue(element, parent);
     }
   }
 
@@ -577,14 +587,14 @@ public class XmlParser implements XmlConstants {
     return type;
   }
 
-  private DataType parseCompositeDataType(Element rootElement) {
+  private DataType parseCompositeDataType(Element rootElement, FieldDef parent) {
     MutableCompositeDataType compositeDataType = new CompositionDataTypeImpl();
     Elements contentElem = rootElement.getChildElements(CONTENT, NAMESPACE);
     if (contentElem != null && contentElem.size() > 0) {
       ContentDataType contentDataType = parseContent(contentElem.get(0));
       compositeDataType.setEmbeddedContentType(contentDataType);
     }
-    Collection<FieldDef> fields = parseFieldDefs(rootElement);
+    Collection<FieldDef> fields = parseFieldDefs(rootElement, parent);
     if (fields != null && !fields.isEmpty()) {
       compositeDataType.getOwnMutableComposition().addAll(fields);
     }

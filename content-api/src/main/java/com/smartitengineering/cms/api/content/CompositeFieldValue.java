@@ -28,6 +28,20 @@ import java.util.Map;
 public interface CompositeFieldValue extends FieldValue<Collection<Field>> {
 
   Object getAsJsonNode();
-  
+
   Map<String, Field> getValueAsMap();
+
+  /**
+   * Same as {@link CompositeFieldValue#getValueAsMap() }, is there to keep coherence with {@link Content#getFields() }
+   * @return Fields value composed of
+   */
+  Map<String, Field> getFields();
+
+  /**
+   * Same as {@link CompositeFieldValue#getValueAsMap() valueMap}.get(String fieldName), is there to keep coherence with
+   * {@link Content#getField(java.lang.String)  }
+   * @param fieldName Name of the composed field
+   * @return  Return the composed specified by field name
+   */
+  Field getField(String fieldName);
 }

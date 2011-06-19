@@ -39,6 +39,7 @@ import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.queryparam.BiOperandQueryParameter;
 import com.smartitengineering.dao.common.queryparam.MatchMode;
 import com.smartitengineering.dao.common.queryparam.OperatorType;
+import com.smartitengineering.dao.common.queryparam.Order;
 import com.smartitengineering.dao.common.queryparam.ParameterType;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import com.smartitengineering.dao.common.queryparam.QueryParameterCastHelper;
@@ -51,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -172,7 +174,8 @@ public class ContentSearcherImpl implements ContentSearcher {
         query.append(SolrFieldNames.STATUS).append(": ").append(ClientUtils.escapeQueryChars(contentStatus.getName()));
       }
     }
-    Collection<QueryParameter> fieldQuery = filter.getFieldFilters();
+    Collection<QueryParameter> fieldQuery = new ArrayList<QueryParameter>(filter.getFieldFilters());
+    final QueryParameter orderParam = findAndRemoveOrderByParam(fieldQuery);
     if (fieldQuery != null && !fieldQuery.isEmpty()) {
       for (QueryParameter parameter : fieldQuery) {
         if (parameter.getParameterType().equals(ParameterType.PARAMETER_TYPE_PROPERTY) &&
@@ -181,7 +184,8 @@ public class ContentSearcherImpl implements ContentSearcher {
             query.append(seperator);
           }
           StringLikeQueryParameter param = QueryParameterCastHelper.STRING_PARAM_HELPER.cast(parameter);
-          query.append(param.getPropertyName()).append(": ").append(ClientUtils.escapeQueryChars(param.getValue()));
+          query.append(param.getPropertyName()).append(": ").append(filter.isFieldParamsEscaped() ? param.getValue() :
+              ClientUtils.escapeQueryChars(param.getValue()));
         }
       }
     }
@@ -191,9 +195,17 @@ public class ContentSearcherImpl implements ContentSearcher {
     if (logger.isInfoEnabled()) {
       logger.info("Query q = " + finalQuery.toString());
     }
-    final com.smartitengineering.common.dao.search.SearchResult<Content> searchResult = textSearchDao.detailedSearch(QueryParameterFactory.
-        getStringLikePropertyParam("q", finalQuery.toString()), QueryParameterFactory.getFirstResultParam(filter.
-        getStartFrom()), QueryParameterFactory.getMaxResultsParam(filter.getMaxContents()));
+    final QueryParameter sortParam;
+    if (orderParam != null) {
+      sortParam = orderParam;
+    }
+    else {
+      sortParam = QueryParameterFactory.getOrderByParam(SolrFieldNames.CREATIONDATE, Order.DESC);
+    }
+    final com.smartitengineering.common.dao.search.SearchResult<Content> searchResult;
+    searchResult = textSearchDao.detailedSearch(QueryParameterFactory.getStringLikePropertyParam("q", finalQuery.
+        toString()), QueryParameterFactory.getFirstResultParam(filter.getStartFrom()), QueryParameterFactory.
+        getMaxResultsParam(filter.getMaxContents()), sortParam);
     final Collection<Content> result;
     if (searchResult == null || searchResult.getResult() == null || searchResult.getResult().isEmpty()) {
       result = Collections.emptyList();
@@ -350,5 +362,22 @@ public class ContentSearcherImpl implements ContentSearcher {
         }
       }
     });
+  }
+
+  private QueryParameter findAndRemoveOrderByParam(Collection<QueryParameter> fieldQuery) {
+    Iterator<QueryParameter> iterator = fieldQuery.iterator();
+    while (iterator.hasNext()) {
+      QueryParameter parameter = iterator.next();
+      if (parameter.getParameterType().equals(ParameterType.PARAMETER_TYPE_ORDER_BY)) {
+        iterator.remove();
+        return parameter;
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public String escapeStringForSearch(String string) {
+    return ClientUtils.escapeQueryChars(string);
   }
 }

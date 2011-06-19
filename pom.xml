@@ -128,5 +128,6 @@
     <module>content-api-impl-generic</module>
     <module>content-type-xml</module>
     <module>content-spi-uri-impl</module>
+    <module>code-generation</module>
   </modules>
 </project>

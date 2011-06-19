@@ -25,4 +25,8 @@ import java.util.Collection;
  * @author imyousuf
  */
 public interface MutableCompositeFieldValue extends MutableFieldValue<Collection<Field>>, CompositeFieldValue {
+
+  public void setField(Field field);
+
+  public void removeField(String fieldName);
 }

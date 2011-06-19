@@ -38,50 +38,57 @@ import com.smartitengineering.util.bean.annotations.InjectableField;
 @Aggregator(contextName = SmartContentSPI.SPI_CONTEXT)
 public final class LockManager {
 
-		/**
-		 * The lock handler implementation to be used to receive lock implementations.
-		 * Use "lockHandler" as bean name to be injected here.
-		 */
-		@InjectableField
-		protected LockHandler lockHandler;
+  /**
+   * The lock handler implementation to be used to receive lock implementations.
+   * Use "lockHandler" as bean name to be injected here.
+   */
+  @InjectableField
+  protected LockHandler lockHandler;
 
-		private LockManager() {
-		}
+  private LockManager() {
+  }
 
-		public LockHandler getLockHandler() {
-				return lockHandler;
-		}
-		private static LockManager lockManager;
+  public LockHandler getLockHandler() {
+    return lockHandler;
+  }
+  private static LockManager lockManager;
 
-		private synchronized static LockManager getInstance() {
-				if (lockManager == null) {
-						lockManager = new LockManager();
-						BeanFactoryRegistrar.aggregate(lockManager);
-				}
-				return lockManager;
-		}
+  private synchronized static LockManager getInstance() {
+    if (lockManager == null) {
+      lockManager = new LockManager();
+      BeanFactoryRegistrar.aggregate(lockManager);
+    }
+    return lockManager;
+  }
 
-		/**
-		 * Registers a {@link Key} and returns its respective {@link Lock}. If the
-		 * key was already present then it will return the same lock instance as for
-		 * other instances of the key or else it will create a lock for the key and
-		 * return it.
-		 * @param key Key to register lock against
-		 * @return Lock for the key.
-		 * @see {@link LockHandler#register(com.smartitengineering.cms.content.lock.Key)}
-		 */
-		public static synchronized Lock register(Key key) {
-				return getInstance().getLockHandler().register(key);
-		}
+  /**
+   * Registers a {@link Key} and returns its respective {@link Lock}. If the
+   * key was already present then it will return the same lock instance as for
+   * other instances of the key or else it will create a lock for the key and
+   * return it.
+   * @param key Key to register lock against
+   * @return Lock for the key.
+   * @see {@link LockHandler#register(com.smartitengineering.cms.content.lock.Key)}
+   */
+  public static synchronized Lock register(Key key) {
+    final LockHandler handler = getInstance().getLockHandler();
+    if (handler == null) {
+      return null;
+    }
+    return handler.register(key);
+  }
 
-		/**
-		 * Unregister a key from the registrar. It does not necessarily mean that
-		 * the key/lock will be removed from the registrar. They will be removed if
-		 * and only if register and unregister invocation is equal.
-		 * @param key Key to unregister
-		 * @see {@link LockHandler#unregister(com.smartitengineering.cms.content.lock.Key)}
-		 */
-		public static synchronized void unregister(Key key) {
-				getInstance().getLockHandler().unregister(key);
-		}
+  /**
+   * Unregister a key from the registrar. It does not necessarily mean that
+   * the key/lock will be removed from the registrar. They will be removed if
+   * and only if register and unregister invocation is equal.
+   * @param key Key to unregister
+   * @see {@link LockHandler#unregister(com.smartitengineering.cms.content.lock.Key)}
+   */
+  public static synchronized void unregister(Key key) {
+    final LockHandler handler = getInstance().getLockHandler();
+    if (handler != null) {
+      handler.unregister(key);
+    }
+  }
 }

@@ -242,6 +242,11 @@ public class ContentLoaderImpl implements ContentLoader {
   }
 
   @Override
+  public String escapeStringForSearch(String string) {
+    return SmartContentSPI.getInstance().getContentSearcher().escapeStringForSearch(string);
+  }
+
+  @Override
   public MutableDateTimeFieldValue createDateTimeFieldValue() {
     final DateTimeFieldValueImpl dateTimeFieldValueImpl = new DateTimeFieldValueImpl();
     dateTimeFieldValueImpl.setFieldValueType(FieldValueType.DATE_TIME);
@@ -560,6 +565,7 @@ public class ContentLoaderImpl implements ContentLoader {
       logger.warn("Content or its ID or content definition is missing!");
     }
     return content != null && content.getContentId() != null && content.getContentDefinition() != null &&
+        content.getContentDefinition().getDefinitionType().equals(ContentType.DefinitionType.CONCRETE_TYPE) &&
         isMandatoryFieldsPresent(content);
   }
 

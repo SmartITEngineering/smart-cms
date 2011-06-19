@@ -61,7 +61,7 @@ public class ContentTypeHelper extends AbstractAdapterHelper<ContentType, Multiv
     if (org.apache.commons.lang.StringUtils.isNotBlank(contentType.getDisplayName())) {
       toBean.addValue(CONTENT_TYPE_DISPLAY_NAME, contentType.getDisplayName());
     }
-    toBean.addValue(SolrFieldNames.STATUS, "published");
+    toBean.addValue(SolrFieldNames.STATUS, contentType.getDefinitionType().name());
     toBean.addValue(SolrFieldNames.PRIVATE, false);
     ContentTypeId parent = contentType.getParent();
     if (logger.isInfoEnabled()) {

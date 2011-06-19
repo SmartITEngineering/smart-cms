@@ -33,7 +33,7 @@ public interface FieldDef {
    * @return the name
    */
   public String getName();
-  
+
   /**
    * Return the display label for this field. If it is not set then it would be mean identical to invoking 
    * {@link FieldDef#getName()}
@@ -52,9 +52,16 @@ public interface FieldDef {
    * @return whether the field is required or not
    */
   public boolean isRequired();
-  
+
+  /**
+   * Get the field def that contains this def. This is primarily the case when current field is a field of a composite
+   * field.
+   * @return The immediate field def that contains this definition, null if not such container
+   */
+  public FieldDef getParentContainer();
+
   public Map<String, String> getParameters();
-  
+
   public Map<String, String> getParameterizedDisplayNames();
 
   public Map<String, VariationDef> getVariations();

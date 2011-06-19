@@ -23,6 +23,7 @@ import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.SearchDef;
 import com.smartitengineering.cms.spi.type.SearchFieldNameGenerator;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -30,11 +31,24 @@ import com.smartitengineering.cms.spi.type.SearchFieldNameGenerator;
  */
 public class SearchFieldNameGeneratorImpl implements SearchFieldNameGenerator {
 
+  public String getFieldName(FieldDef def) {
+    if (def == null) {
+      return "";
+    }
+    String parentName = getFieldName(def.getParentContainer());
+    StringBuilder builder = new StringBuilder();
+    if (StringUtils.isNotBlank(parentName)) {
+      builder.append(parentName).append('.');
+    }
+    builder.append(def.getName());
+    return builder.toString();
+  }
+
   @Override
-  public String getSearchFieldName(FieldDef def, boolean nestedFieldDef) {
+  public String getSearchFieldName(FieldDef def) {
     final SearchDef searchDefinition = def.getSearchDefinition();
     if (searchDefinition != null && (searchDefinition.isIndexed() || searchDefinition.isStored())) {
-      StringBuilder indexFieldName = new StringBuilder(def.getName());
+      StringBuilder indexFieldName = new StringBuilder(getFieldName(def));
       final FieldValueType type = def.getValueDef().getType();
       final FieldValueType mainType;
       final String multi;
@@ -42,13 +56,23 @@ public class SearchFieldNameGeneratorImpl implements SearchFieldNameGenerator {
         mainType = ((CollectionDataType) def.getValueDef()).getItemDataType().getType();
         multi = "m";
       }
-      else if (nestedFieldDef) {
-        mainType = type;
-        multi = "m";
-      }
       else {
+        boolean found = false;
+        FieldDef fd = def;
+        while (!found && fd.getParentContainer() != null) {
+          fd = fd.getParentContainer();
+          if (fd.getValueDef() != null && fd.getValueDef().getType() != null && fd.getValueDef().getType().equals(
+              FieldValueType.COLLECTION)) {
+            found = true;
+          }
+        }
         mainType = type;
-        multi = "";
+        if (found) {
+          multi = "m";
+        }
+        else {
+          multi = "";
+        }
       }
       indexFieldName.append('_').append(mainType.name()).append('_').append(multi);
       if (searchDefinition.isIndexed()) {
@@ -62,10 +86,5 @@ public class SearchFieldNameGeneratorImpl implements SearchFieldNameGenerator {
     else {
       return null;
     }
-  }
-
-  @Override
-  public String getSearchFieldName(FieldDef fieldDef) {
-    return getSearchFieldName(fieldDef, false);
   }
 }

@@ -50,6 +50,7 @@ public class FieldDefImpl implements MutableFieldDef {
   private boolean standaloneUpdateAble = false;
   private final Map<String, String> parameters = new LinkedHashMap<String, String>();
   private final Map<String, String> parameterizedDisplayNames = new LinkedHashMap<String, String>();
+  private FieldDef parentContainer;
 
   @Override
   public void setName(String newFieldName) throws IllegalArgumentException {
@@ -215,5 +216,13 @@ public class FieldDefImpl implements MutableFieldDef {
 
   public Map<String, String> getParameterizedDisplayNames() {
     return Collections.unmodifiableMap(parameterizedDisplayNames);
+  }
+
+  public FieldDef getParentContainer() {
+    return parentContainer;
+  }
+
+  public void setParentContainer(FieldDef parentContainer) {
+    this.parentContainer = parentContainer;
   }
 }

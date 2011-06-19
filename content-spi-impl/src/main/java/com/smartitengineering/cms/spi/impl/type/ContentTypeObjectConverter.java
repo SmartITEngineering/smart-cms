@@ -24,6 +24,7 @@ import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
+import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
@@ -97,6 +98,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   public final static byte[] FAMILY_TYPE_REPRESENTATIONS = Bytes.toBytes("variants");
   public final static byte[] CELL_DISPLAY_NAME = Bytes.toBytes("displayName");
   public final static byte[] CELL_PRIMARY_FIELD_NAME = Bytes.toBytes("primaryFieldName");
+  public final static byte[] CELL_DEF_TYPE = Bytes.toBytes("defType");
   public final static byte[] CELL_CREATION_DATE = Bytes.toBytes("creationDate");
   public final static byte[] CELL_LAST_MODIFIED_DATE = Bytes.toBytes("lastModifiedDate");
   public final static byte[] CELL_PARENT_ID = Bytes.toBytes("parent");
@@ -161,6 +163,10 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       }
       if (StringUtils.isNotBlank(primaryFieldName)) {
         put.add(FAMILY_SIMPLE, CELL_PRIMARY_FIELD_NAME, Bytes.toBytes(primaryFieldName));
+      }
+      if (instance.getMutableContentType().getSelfDefinitionType() != null) {
+        put.add(FAMILY_SIMPLE, CELL_DEF_TYPE, Bytes.toBytes(instance.getMutableContentType().getSelfDefinitionType().
+            name()));
       }
       put.add(FAMILY_SIMPLE, CELL_ENTITY_TAG, Bytes.toBytes(instance.getMutableContentType().getEntityTagValue()));
       final Date lastModifiedDate = date;
@@ -451,6 +457,14 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
           logger.info("Set primary field name of the content type!" + toString);
         }
         contentType.setPrimaryFieldName(toString);
+      }
+      byte[] defTyoe = simpleValues.remove(CELL_DEF_TYPE);
+      if (defTyoe != null) {
+        final String toString = Bytes.toString(defTyoe);
+        if (logger.isInfoEnabled()) {
+          logger.info("Set primary field name of the content type!" + toString);
+        }
+        contentType.setDefinitionType(ContentType.DefinitionType.valueOf(toString));
       }
       contentType.setEntityTagValue(Bytes.toString(simpleValues.remove(CELL_ENTITY_TAG)));
       logger.debug("Setting creation and last modified date");
@@ -854,7 +868,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       Utils.organizeByPrefixOnString(compositeFields, compositeFieldsMap, ':');
       for (String composedFieldName : compositeFieldsMap.keySet()) {
         final MutableFieldDef composedFieldDef = SmartContentAPI.getInstance().getContentTypeLoader().
-            createMutableFieldDef();
+            createMutableFieldDef(fieldDef);
         final Map<String, byte[]> composedFieldCells = compositeFieldsMap.get(composedFieldName);
         if (logger.isInfoEnabled()) {
           logger.info("::::::::::::::::::::: Nested composite field from " + fieldName + " for " + composedFieldName +

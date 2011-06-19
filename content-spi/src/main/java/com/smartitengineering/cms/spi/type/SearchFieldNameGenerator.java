@@ -26,7 +26,12 @@ import com.smartitengineering.cms.api.type.FieldDef;
  */
 public interface SearchFieldNameGenerator {
 
-  public String getSearchFieldName(FieldDef fieldDef);
+  /**
+   * Retrieves the field name without the type specific additions.
+   * @param def Field def to retrieve the solr field name prefix
+   * @return The solr field name prefix to which type specific suffix needs to be added.
+   */
+  public String getFieldName(FieldDef def);
 
-  public String getSearchFieldName(FieldDef fieldDef, boolean nestedFieldDef);
+  public String getSearchFieldName(FieldDef fieldDef);
 }

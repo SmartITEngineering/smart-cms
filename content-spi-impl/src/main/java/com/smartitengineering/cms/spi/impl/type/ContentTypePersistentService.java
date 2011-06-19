@@ -125,6 +125,7 @@ public class ContentTypePersistentService implements PersistentService<WritableC
     contentType.getMutableRepresentationDefs().addAll(bean.getMutableRepresentationDefs());
     contentType.getMutableStatuses().addAll(bean.getMutableStatuses());
     contentType.setParameterizedDisplayNames(bean.getParameterizedDisplayNames());
+    contentType.setDefinitionType(bean.getSelfDefinitionType());
     return contentType;
   }
 }
