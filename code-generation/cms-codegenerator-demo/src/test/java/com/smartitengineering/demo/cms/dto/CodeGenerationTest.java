@@ -13,6 +13,11 @@ import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.binder.guice.Initializer;
 import com.smartitengineering.dao.common.CommonDao;
+import com.smartitengineering.dao.common.queryparam.FetchMode;
+import com.smartitengineering.dao.common.queryparam.MatchMode;
+import com.smartitengineering.dao.common.queryparam.Order;
+import com.smartitengineering.dao.common.queryparam.QueryParameter;
+import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.dao.hbase.ddl.HBaseTableGenerator;
 import com.smartitengineering.dao.hbase.ddl.config.json.ConfigurationJsonParser;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
@@ -29,6 +34,7 @@ import java.util.Set;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import junit.framework.Assert;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.eclipse.jetty.server.Handler;
@@ -230,6 +236,58 @@ public class CodeGenerationTest {
       Assert.assertNull(rPerson);
     }
     Assert.assertEquals(size, nIds.size());
+    sleep();
+  }
+
+  @Test
+  public void testSearch() {
+    Injector injector = Guice.createInjector(new MasterModule(), new ServiceModule());
+    Assert.assertNotNull(injector);
+    PersonService service = injector.getInstance(PersonService.class);
+    Assert.assertNotNull(service);
+    List<Person> list = new ArrayList<Person>();
+    int size = 102;
+    String[] names = new String[]{"Imran", "Mahdi", "Hasan"};
+    for (int i = 0; i < size; ++i) {
+      Person person = new Person();
+      person.setNationalId(StringUtils.leftPad(String.valueOf(i), 3, '0'));
+      Name name = new ExtName();
+      name.setFirstName(names[i % 3]);
+      name.setLastName("Yousuf");
+      person.setName(name);
+      list.add(person);
+      service.save(person);
+    }
+    sleep();
+    sleep();
+    //Test limit
+    List<Person> all = new ArrayList<Person>(service.search(QueryParameterFactory.getOrderByParam(
+        Person.PROPERTY_NATIONALID, Order.ASC), QueryParameterFactory.getFirstResultParam(10), QueryParameterFactory.
+        getMaxResultsParam(10)));
+    Assert.assertEquals(10, all.size());
+    for (int i = 0; i < 10; ++i) {
+      Person rPerson = all.get(i);
+      Assert.assertEquals(StringUtils.leftPad(String.valueOf(i + 10), 3, '0'), rPerson.getNationalId());
+    }
+    //Test string with starts 
+    all = new ArrayList<Person>(service.search(QueryParameterFactory.getOrderByParam(Person.PROPERTY_NATIONALID,
+                                                                                     Order.ASC), QueryParameterFactory.
+        getFirstResultParam(0), QueryParameterFactory.getMaxResultsParam(size), QueryParameterFactory.
+        getNestedParametersParam(Person.PROPERTY_NAME, FetchMode.DEFAULT, QueryParameterFactory.
+        getStringLikePropertyParam(Name.PROPERTY_FIRSTNAME, "imr", MatchMode.START))));
+    Assert.assertEquals(size / 3, all.size());
+    // Delete ALL created data
+    all = new ArrayList<Person>(service.getAll());
+    Set<String> nIds = new HashSet<String>();
+    for (int i = 0; i < size; ++i) {
+      Person rPerson = all.get(i);
+      nIds.add(rPerson.getNationalId());
+      service.delete(rPerson);
+      rPerson = service.getById(rPerson.getId());
+      Assert.assertNull(rPerson);
+    }
+    Assert.assertEquals(size, nIds.size());
+    sleep();
   }
 
   public static class ConfigurationModule extends AbstractModule {
@@ -277,6 +335,10 @@ public class CodeGenerationTest {
 
     public Set<Person> getAll() {
       return dao.getAll();
+    }
+
+    public Collection<Person> search(QueryParameter... params) {
+      return dao.getList(params);
     }
   }
 

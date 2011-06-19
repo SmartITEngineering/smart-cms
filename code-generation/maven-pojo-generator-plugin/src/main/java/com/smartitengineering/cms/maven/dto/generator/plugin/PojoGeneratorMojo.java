@@ -608,6 +608,9 @@ public class PojoGeneratorMojo extends AbstractMojo {
       final JMethod getterMethod;
       final JMethod setterMethod;
       final JVar paramVar;
+      final JFieldVar propConstant = definedClass.field(JMod.PUBLIC | JMod.FINAL | JMod.STATIC, String.class,
+                                                        new StringBuilder("PROPERTY").append('_').append(name.
+          toUpperCase()).toString(), JExpr.lit(name));
       if (jType == null) {
         fieldVar = definedClass.field(JMod.PROTECTED, fieldClass, name);
         getterMethod = definedClass.method(JMod.PUBLIC, fieldClass, getterName);

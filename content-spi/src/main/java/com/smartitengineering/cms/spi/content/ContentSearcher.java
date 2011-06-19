@@ -35,4 +35,6 @@ public interface ContentSearcher {
   void reIndex(ContentId contentId);
 
   void reIndex(WorkspaceId workspaceId);
+
+  String escapeStringForSearch(String string);
 }

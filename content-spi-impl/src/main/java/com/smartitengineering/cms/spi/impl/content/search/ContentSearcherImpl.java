@@ -174,7 +174,7 @@ public class ContentSearcherImpl implements ContentSearcher {
         query.append(SolrFieldNames.STATUS).append(": ").append(ClientUtils.escapeQueryChars(contentStatus.getName()));
       }
     }
-    Collection<QueryParameter> fieldQuery = filter.getFieldFilters();
+    Collection<QueryParameter> fieldQuery = new ArrayList<QueryParameter>(filter.getFieldFilters());
     final QueryParameter orderParam = findAndRemoveOrderByParam(fieldQuery);
     if (fieldQuery != null && !fieldQuery.isEmpty()) {
       for (QueryParameter parameter : fieldQuery) {
@@ -184,7 +184,8 @@ public class ContentSearcherImpl implements ContentSearcher {
             query.append(seperator);
           }
           StringLikeQueryParameter param = QueryParameterCastHelper.STRING_PARAM_HELPER.cast(parameter);
-          query.append(param.getPropertyName()).append(": ").append(filter.isFieldParamsEscaped() ? param.getValue() : ClientUtils.escapeQueryChars(param.getValue()));
+          query.append(param.getPropertyName()).append(": ").append(filter.isFieldParamsEscaped() ? param.getValue() :
+              ClientUtils.escapeQueryChars(param.getValue()));
         }
       }
     }
@@ -373,5 +374,10 @@ public class ContentSearcherImpl implements ContentSearcher {
       }
     }
     return null;
+  }
+
+  @Override
+  public String escapeStringForSearch(String string) {
+    return ClientUtils.escapeQueryChars(string);
   }
 }

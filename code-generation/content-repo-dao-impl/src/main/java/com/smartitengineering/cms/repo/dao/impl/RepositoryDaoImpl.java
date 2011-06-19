@@ -7,10 +7,28 @@ import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Filter;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
+import com.smartitengineering.cms.api.type.CollectionDataType;
+import com.smartitengineering.cms.api.type.CompositeDataType;
+import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.type.DataType;
+import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.dao.common.CommonDao;
+import com.smartitengineering.dao.common.queryparam.BiOperandQueryParameter;
+import com.smartitengineering.dao.common.queryparam.CompositionQueryParameter;
+import com.smartitengineering.dao.common.queryparam.MatchMode;
+import com.smartitengineering.dao.common.queryparam.OperatorType;
+import com.smartitengineering.dao.common.queryparam.Order;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
+import com.smartitengineering.dao.common.queryparam.QueryParameterCastHelper;
+import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
+import com.smartitengineering.dao.common.queryparam.QueryParameterWithPropertyName;
+import com.smartitengineering.dao.common.queryparam.SimpleNameValueQueryParameter;
+import com.smartitengineering.dao.common.queryparam.StringLikeQueryParameter;
+import com.smartitengineering.dao.common.queryparam.UniOperandQueryParameter;
+import com.smartitengineering.dao.common.queryparam.ValueOnlyQueryParameter;
 import com.smartitengineering.domain.PersistentDTO;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
 import java.lang.reflect.ParameterizedType;
@@ -18,9 +36,13 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +60,7 @@ public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends Pers
   protected final Class<? extends T> beanClass;
   private ContentTypeId contentTypeId;
   protected transient final Logger logger = LoggerFactory.getLogger(getClass());
+  private static final String SOLR_DATE_FORMAT = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern() + "'Z'";
 
   @Inject
   public RepositoryDaoImpl(Class<? extends T> entityClass) {
@@ -178,9 +201,218 @@ public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends Pers
     return result;
   }
 
-  private Filter processQueryParams(Filter filter,
-                                    List<QueryParameter> queries) {
+  protected Filter processQueryParams(Filter filter,
+                                      List<QueryParameter> queries) {
+    filter.setFieldParamsEscaped(true);
+    return processQueryParams(filter, queries, "", getContentTypeId().getContentType().getFieldDefs());
+  }
+
+  protected Filter processQueryParams(final Filter filter,
+                                      final Collection<QueryParameter> queries,
+                                      final String prefix,
+                                      final Map<String, FieldDef> defs) {
+    for (QueryParameter parameter : queries) {
+      switch (parameter.getParameterType()) {
+        case PARAMETER_TYPE_PROPERTY: {
+          QueryParameterWithPropertyName para = (QueryParameterWithPropertyName) parameter;
+          FieldDef def = defs.get(para.getPropertyName());
+          addQueryForProperty(parameter, def, prefix, filter);
+          break;
+        }
+        case PARAMETER_TYPE_NESTED_PROPERTY: {
+          CompositionQueryParameter para = QueryParameterCastHelper.COMPOSITION_PARAM_FOR_NESTED_TYPE.cast(parameter);
+          FieldDef def = defs.get(para.getPropertyName());
+          final DataType type;
+          if (def.getValueDef().getType().equals(FieldValueType.COLLECTION)) {
+            type = ((CollectionDataType) def.getValueDef()).getItemDataType();
+          }
+          else {
+            type = def.getValueDef();
+          }
+          if (type.getType().equals(FieldValueType.CONTENT)) {
+            ContentDataType dataType = (ContentDataType) type;
+            final StringBuilder prefixBldr = new StringBuilder();
+            if (StringUtils.isNotBlank(prefix)) {
+              prefixBldr.append(prefix).append('_');
+            }
+            final String fieldName = SmartContentAPI.getInstance().getContentTypeLoader().
+                getSearchFieldNameWithoutTypeSpecifics(def);
+            if (StringUtils.isNotBlank(fieldName)) {
+              processQueryParams(filter, para.getNestedParameters(), prefixBldr.append(fieldName).toString(),
+                                 dataType.getTypeDef().getContentType().getFieldDefs());
+            }
+          }
+          else if (type.getType().equals(FieldValueType.COMPOSITE)) {
+            CompositeDataType dataType = (CompositeDataType) type;
+            processQueryParams(filter, para.getNestedParameters(), prefix, dataType.getComposedFieldDefs());
+          }
+          break;
+        }
+        case PARAMETER_TYPE_MAX_RESULT: {
+          ValueOnlyQueryParameter<Integer> param = QueryParameterCastHelper.VALUE_PARAM_HELPER.cast(parameter);
+          filter.setMaxContents(param.getValue());
+          break;
+        }
+        case PARAMETER_TYPE_FIRST_RESULT: {
+          ValueOnlyQueryParameter<Integer> param = QueryParameterCastHelper.VALUE_PARAM_HELPER.cast(parameter);
+          filter.setStartFrom(param.getValue());
+          break;
+        }
+        case PARAMETER_TYPE_ORDER_BY: {
+          SimpleNameValueQueryParameter<Order> orderBy = QueryParameterCastHelper.SIMPLE_PARAM_HELPER.cast(parameter);
+          final FieldDef def = defs.get(orderBy.getPropertyName());
+          if (def != null) {
+            String fieldName = SmartContentAPI.getInstance().getContentTypeLoader().getSearchFieldName(def);
+            if (StringUtils.isNotBlank(fieldName)) {
+              filter.addFieldFilter(QueryParameterFactory.getOrderByParam(new StringBuilder(prefix).append(fieldName).
+                  toString(), orderBy.getValue()));
+            }
+          }
+          break;
+        }
+      }
+    }
     return filter;
+  }
+
+  protected void addQueryForProperty(QueryParameter parameter, FieldDef def, final String prefix, Filter filter) {
+    if (def != null) {
+      String fieldName = SmartContentAPI.getInstance().getContentTypeLoader().getSearchFieldName(def);
+      if (StringUtils.isNotBlank(fieldName)) {
+        String searchFieldName = new StringBuilder(prefix).append(fieldName).toString();
+        final String query;
+        if (parameter instanceof StringLikeQueryParameter) {
+          StringLikeQueryParameter queryParameter = (StringLikeQueryParameter) parameter;
+          MatchMode mode = queryParameter.getMatchMode();
+          if (mode == null) {
+            mode = MatchMode.START;
+          }
+          switch (mode) {
+            case START: {
+              query = new StringBuilder(formatInSolrFormat(queryParameter.getValue())).append('*').toString();
+              break;
+            }
+            case EXACT: {
+              query = queryParameter.getValue();
+              break;
+            }
+            case END: {
+              query = new StringBuilder('*').append(formatInSolrFormat(queryParameter.getValue())).toString();
+              break;
+            }
+            default:
+            case ANYWHERE: {
+              query =
+              new StringBuilder('*').append(formatInSolrFormat(queryParameter.getValue())).append('*').toString();
+              break;
+            }
+          }
+        }
+        else {
+          query = generateDateQuery(parameter);
+        }
+        if (StringUtils.isNotBlank(query)) {
+          filter.addFieldFilter(QueryParameterFactory.getStringLikePropertyParam(searchFieldName, query));
+        }
+      }
+    }
+  }
+
+  protected <T> String generateDateQuery(QueryParameter<T> creationDateFilter) {
+    StringBuilder query = new StringBuilder();
+    String dateQuery = "";
+    switch (creationDateFilter.getParameterType()) {
+      case PARAMETER_TYPE_PROPERTY:
+        if (creationDateFilter instanceof UniOperandQueryParameter) {
+          UniOperandQueryParameter<T> param =
+                                      (UniOperandQueryParameter<T>) creationDateFilter;
+          switch (param.getOperatorType()) {
+            case OPERATOR_EQUAL:
+              dateQuery = formatInSolrFormat(param.getValue());
+              break;
+            case OPERATOR_LESSER:
+              query.insert(0, "NOT ");
+              dateQuery = "[" + formatInSolrFormat(param.getValue()) + " TO *]";
+//              dateQuery = "-[" + param.getValue() + " TO *]";
+              break;
+            case OPERATOR_GREATER_EQUAL:
+              dateQuery = "[" + formatInSolrFormat(param.getValue()) + " TO *]";
+              break;
+            case OPERATOR_GREATER:
+              query.insert(0, "NOT ");
+              dateQuery = "[* TO " + formatInSolrFormat(param.getValue()) + "]";
+//              dateQuery = "-[* TO " + param.getValue() + "]";
+              break;
+            case OPERATOR_LESSER_EQUAL:
+              dateQuery = "[* TO " + formatInSolrFormat(param.getValue()) + "]";
+              break;
+            default:
+              dateQuery = "[* TO *]";
+          }
+        }
+        if (creationDateFilter instanceof BiOperandQueryParameter) {
+          BiOperandQueryParameter<T> param =
+                                     (BiOperandQueryParameter<T>) creationDateFilter;
+          if (param.getOperatorType().equals(OperatorType.OPERATOR_BETWEEN)) {
+            dateQuery = "[" + formatInSolrFormat(param.getFirstValue()) + " TO " + formatInSolrFormat(param.
+                getSecondValue()) + "]";
+          }
+        }
+        break;
+      default:
+        UniOperandQueryParameter<Date> param =
+                                       (UniOperandQueryParameter<Date>) creationDateFilter;
+        dateQuery = param.getPropertyName() + ": [* TO *]";
+        break;
+    }
+    query.append(dateQuery);
+    return query.toString();
+  }
+
+  protected <T> String formatInSolrFormat(T value) {
+    if (value instanceof Date) {
+      return formatInSolrFormat((Date) value);
+    }
+    if (value instanceof Integer) {
+      return formatInSolrFormat((Integer) value);
+    }
+    if (value instanceof Long) {
+      return formatInSolrFormat((Long) value);
+    }
+    if (value instanceof Double) {
+      return formatInSolrFormat((Double) value);
+    }
+    if (value instanceof Boolean) {
+      return formatInSolrFormat((Boolean) value);
+    }
+    if (value instanceof String) {
+      return formatInSolrFormat((String) value);
+    }
+    return null;
+  }
+
+  protected String formatInSolrFormat(Date value) {
+    return DateFormatUtils.formatUTC(value, SOLR_DATE_FORMAT);
+  }
+
+  protected String formatInSolrFormat(Integer value) {
+    return String.valueOf(value);
+  }
+
+  protected String formatInSolrFormat(Long value) {
+    return String.valueOf(value);
+  }
+
+  protected String formatInSolrFormat(Double value) {
+    return String.valueOf(value);
+  }
+
+  protected String formatInSolrFormat(Boolean value) {
+    return String.valueOf(value);
+  }
+
+  protected String formatInSolrFormat(String value) {
+    return SmartContentAPI.getInstance().getContentLoader().escapeStringForSearch(value);
   }
 
   public <OtherTemplate> OtherTemplate getOther(List<QueryParameter> query) {

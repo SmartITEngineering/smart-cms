@@ -39,6 +39,10 @@
             <mimeType>text/plain</mimeType>
           </string>
         </value>
+        <search>
+          <index>true</index>
+          <store>false</store>
+        </search>
       </field>
       <field>
         <name>LastName</name>
@@ -47,6 +51,10 @@
             <mimeType>text/plain</mimeType>
           </string>
         </value>
+        <search>
+          <index>true</index>
+          <store>false</store>
+        </search>
       </field>
       <field>
         <name>MiddleInitial</name>
@@ -55,6 +63,10 @@
             <mimeType>text/plain</mimeType>
           </string>
         </value>
+        <search>
+          <index>true</index>
+          <store>false</store>
+        </search>
       </field>
     </fields>
   </contentType>
@@ -91,6 +103,10 @@
             <mimeType>text/plain</mimeType>
           </string>
         </value>
+        <search>
+          <index>true</index>
+          <store>false</store>
+        </search>
       </field>
       <field>
         <name>alias</name>
@@ -113,9 +129,14 @@
                 <typeNS>test</typeNS>
                 <typeName>Name</typeName>
               </definition>
+              <availableForSearch>true</availableForSearch>
             </content>
           </composition>
         </value>
+        <search>
+          <index>true</index>
+          <store>false</store>
+        </search>
       </field>
     </fields>
   </contentType>                 

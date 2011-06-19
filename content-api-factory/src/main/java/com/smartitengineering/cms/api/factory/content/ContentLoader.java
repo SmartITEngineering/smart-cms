@@ -121,6 +121,8 @@ public interface ContentLoader {
   SearchResult<Content> createSearchResult(Collection<Content> result, long totalResultsCount);
 
   SearchResult<Content> search(Filter filter);
+  
+  String escapeStringForSearch(String string);
 
   Variation getVariation(Content content, Field field, String name);
 

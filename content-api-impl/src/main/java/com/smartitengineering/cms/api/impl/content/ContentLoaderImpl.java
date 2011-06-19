@@ -242,6 +242,11 @@ public class ContentLoaderImpl implements ContentLoader {
   }
 
   @Override
+  public String escapeStringForSearch(String string) {
+    return SmartContentSPI.getInstance().getContentSearcher().escapeStringForSearch(string);
+  }
+
+  @Override
   public MutableDateTimeFieldValue createDateTimeFieldValue() {
     final DateTimeFieldValueImpl dateTimeFieldValueImpl = new DateTimeFieldValueImpl();
     dateTimeFieldValueImpl.setFieldValueType(FieldValueType.DATE_TIME);
