@@ -18,9 +18,12 @@
  */
 package com.smartitengineering.cms.spi.impl.content.template;
 
+import com.smartitengineering.cms.api.content.CollectionFieldValue;
 import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.spi.content.template.RepresentationGenerator;
@@ -61,6 +64,7 @@ import org.slf4j.LoggerFactory;
 public class JasperRepresentationGenerator extends AbstractTypeRepresentationGenerator {
 
   public static final String OUTPUT = "output";
+  public static final String POJO_FIELD = "pojo_field";
   public static final String PDF = "pdf";
   public static final String XML = "xml";
   public static final String XLS = "xls";
@@ -184,6 +188,7 @@ public class JasperRepresentationGenerator extends AbstractTypeRepresentationGen
     protected Map<String, Object> getParams(Map<String, String> params) {
       Map<String, String> clonedParams = new LinkedHashMap<String, String>(params);
       clonedParams.remove(OUTPUT);
+      clonedParams.remove(POJO_FIELD);
       LinkedHashMap<String, Object> parameters = new LinkedHashMap<String, Object>();
       Iterator<Entry<String, String>> itarator = clonedParams.entrySet().iterator();
       while (itarator.hasNext()) {
@@ -218,7 +223,26 @@ public class JasperRepresentationGenerator extends AbstractTypeRepresentationGen
 
     @Override
     public byte[] getRepresentationForContent(Content content, Map<String, String> params) {
-      final JRDataSource jRBeanCollectionDataSource = new JRBeanCollectionDataSource(Collections.singleton(content));
+      final Field field;
+      if (params.get(POJO_FIELD) == null) {
+        field = null;
+      }
+      else {
+        field = content.getField(params.get(POJO_FIELD));
+      }
+      final JRDataSource jRBeanCollectionDataSource;
+      if (field == null) {
+        jRBeanCollectionDataSource = new JRBeanCollectionDataSource(Collections.singleton(content));
+      }
+      else {
+        if (field.getFieldDef().getValueDef().getType().equals(FieldValueType.COLLECTION)) {
+          CollectionFieldValue collectionFieldValue = (CollectionFieldValue) field.getValue();
+          jRBeanCollectionDataSource = new JRBeanCollectionDataSource(collectionFieldValue.getValue());
+        }
+        else {
+          jRBeanCollectionDataSource = new JRBeanCollectionDataSource(Collections.singleton(field.getValue()));
+        }
+      }
       return generateReport(params, jRBeanCollectionDataSource);
     }
 
