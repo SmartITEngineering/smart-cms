@@ -592,7 +592,10 @@ public class XmlParser implements XmlConstants {
     Elements contentElem = rootElement.getChildElements(CONTENT, NAMESPACE);
     if (contentElem != null && contentElem.size() > 0) {
       ContentDataType contentDataType = parseContent(contentElem.get(0));
-      compositeDataType.setEmbeddedContentType(contentDataType);
+      if (contentDataType != null) {
+        compositeDataType.setEmbeddedContentDataType(
+            new CompositionDataTypeImpl.EmbeddedContentDataTypeImpl(parent, contentDataType));
+      }
     }
     Collection<FieldDef> fields = parseFieldDefs(rootElement, parent);
     if (fields != null && !fields.isEmpty()) {

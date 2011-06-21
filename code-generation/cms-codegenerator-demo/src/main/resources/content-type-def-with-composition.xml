@@ -41,7 +41,7 @@
         </value>
         <search>
           <index>true</index>
-          <store>false</store>
+          <store>true</store>
         </search>
       </field>
       <field>

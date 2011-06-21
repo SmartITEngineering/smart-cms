@@ -28,10 +28,19 @@ import java.util.Map;
 public interface CompositeDataType extends DataType {
 
   ContentDataType getEmbeddedContentType();
+  
+  EmbeddedContentDataType getEmbeddedContentDataType();
 
   Collection<FieldDef> getOwnComposition();
 
   Collection<FieldDef> getComposition();
-  
+
   Map<String, FieldDef> getComposedFieldDefs();
+
+  static interface EmbeddedContentDataType {
+
+    ContentDataType getContentDataType();
+
+    FieldDef getFieldEmbeddedIn();
+  }
 }

@@ -25,6 +25,8 @@ import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ConnectionConfig;
 import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
 import com.sun.jersey.api.client.Client;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -260,6 +262,7 @@ public class CodeGenerationTest {
     }
     sleep();
     sleep();
+    debug();
     //Test limit
     List<Person> all = new ArrayList<Person>(service.search(QueryParameterFactory.getOrderByParam(
         Person.PROPERTY_NATIONALID, Order.ASC), QueryParameterFactory.getFirstResultParam(10), QueryParameterFactory.
@@ -348,6 +351,18 @@ public class CodeGenerationTest {
     }
     catch (InterruptedException ex) {
       LOGGER.warn(ex.getMessage(), ex);
+    }
+  }
+
+  protected void debug() {
+    try {
+      if (Boolean.parseBoolean(System.getProperty("codeg.debug"))) {
+        System.out.print("Debugging. Please press enter to continue....");
+        new BufferedReader(new InputStreamReader(System.in)).readLine();
+      }
+    }
+    catch (Exception ex) {
+      throw new RuntimeException(ex);
     }
   }
 }

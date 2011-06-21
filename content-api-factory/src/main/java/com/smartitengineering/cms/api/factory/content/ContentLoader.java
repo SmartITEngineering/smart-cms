@@ -44,6 +44,8 @@ import com.smartitengineering.cms.api.content.CompositeFieldValue;
 import com.smartitengineering.cms.api.content.MutableCompositeFieldValue;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.content.Variation;
+import com.smartitengineering.cms.api.type.CompositeDataType.EmbeddedContentDataType;
+import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
@@ -61,6 +63,8 @@ public interface ContentLoader {
   MutableField createMutableField(Field field);
 
   MutableDateTimeFieldValue createDateTimeFieldValue();
+
+  EmbeddedContentDataType createEmbeddedContentDataType(FieldDef def, ContentDataType type);
 
   MutableDateTimeFieldValue createDateTimeFieldValue(DateTimeFieldValue fieldValue);
 
@@ -121,7 +125,7 @@ public interface ContentLoader {
   SearchResult<Content> createSearchResult(Collection<Content> result, long totalResultsCount);
 
   SearchResult<Content> search(Filter filter);
-  
+
   String escapeStringForSearch(String string);
 
   Variation getVariation(Content content, Field field, String name);

@@ -46,8 +46,10 @@ import com.smartitengineering.cms.api.content.OtherFieldValue;
 import com.smartitengineering.cms.api.common.SearchResult;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
+import com.smartitengineering.cms.api.impl.type.CompositionDataTypeImpl.EmbeddedContentDataTypeImpl;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.CompositeDataType;
+import com.smartitengineering.cms.api.type.CompositeDataType.EmbeddedContentDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
@@ -821,5 +823,9 @@ public class ContentLoaderImpl implements ContentLoader {
       return null;
     }
     return idImpl;
+  }
+
+  public EmbeddedContentDataType createEmbeddedContentDataType(FieldDef def, ContentDataType type) {
+    return new EmbeddedContentDataTypeImpl(def, type);
   }
 }

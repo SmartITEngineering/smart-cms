@@ -835,7 +835,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
             logger.debug("Its a special data type cell!");
             final String specialFieldPatternPrefix = new StringBuilder(fieldName).append(':').append(
                 Bytes.toString(CELL_FIELD_VAL_TYPE)).toString();
-            mutableDataType = fillSpecialFields(specialFieldPatternPrefix, key, mutableDataType, value);
+            mutableDataType = fillSpecialFields(specialFieldPatternPrefix, key, mutableDataType, value, fieldDef);
           }
         }
       }
@@ -934,7 +934,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   }
 
   protected DataType fillSpecialFields(final String patternPrefix, final String key, DataType mutableDataType,
-                                       final byte[] value) throws ClassNotFoundException, IOException {
+                                       final byte[] value, FieldDef def) throws ClassNotFoundException, IOException {
     final String specialFieldPatternString = new StringBuilder(patternPrefix).append(
         SPCL_FIELD_DATA_TYPE_PATTERN).
         toString();
@@ -966,16 +966,22 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
             MutableContentDataType contentDataType = (MutableContentDataType) compositeDataType.getEmbeddedContentType();
             if (contentDataType == null) {
               contentDataType = (MutableContentDataType) createDataType(FieldValueType.CONTENT);
-              compositeDataType.setEmbeddedContentType(contentDataType);
+              if (contentDataType != null) {
+                compositeDataType.setEmbeddedContentDataType(SmartContentAPI.getInstance().getContentLoader().
+                    createEmbeddedContentDataType(def, contentDataType));
+              }
             }
             final String prefix = "test";
             String dummyKey = new StringBuilder(prefix).append(':').
                 append(specialFieldValueTypeInfoKey.substring(COMPOSITE_EMBED_SEPARATOR_STR.length() + 1)).toString();
             MutableContentDataType returnedContentDataType = (MutableContentDataType) fillSpecialFields(prefix, dummyKey,
                                                                                                         contentDataType,
-                                                                                                        value);
+                                                                                                        value, def);
             if (contentDataType != returnedContentDataType) {
-              compositeDataType.setEmbeddedContentType(returnedContentDataType);
+              if (returnedContentDataType != null) {
+                compositeDataType.setEmbeddedContentDataType(SmartContentAPI.getInstance().getContentLoader().
+                    createEmbeddedContentDataType(def, returnedContentDataType));
+              }
             }
           }
           break;
@@ -1003,7 +1009,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
             final String prefix = new StringBuilder(patternPrefix).append(COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX).
                 toString();
             collectionDataType.setItemDataType(fillSpecialFields(prefix, key, collectionDataType.getItemDataType(),
-                                                                 value));
+                                                                 value, def));
           }
           break;
         case CONTENT:

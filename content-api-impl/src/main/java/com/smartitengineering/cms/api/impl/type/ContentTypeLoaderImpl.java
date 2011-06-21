@@ -399,7 +399,7 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
   public MutableCompositeDataType createMutableCompositeDataType(CompositeDataType dataType) {
     CompositionDataTypeImpl dataTypeImpl = new CompositionDataTypeImpl();
     if (dataType != null) {
-      dataTypeImpl.setEmbeddedContentType(dataType.getEmbeddedContentType());
+      dataTypeImpl.setEmbeddedContentDataType(dataType.getEmbeddedContentDataType());
       dataTypeImpl.getOwnMutableComposition().addAll(dataType.getOwnComposition());
     }
     return dataTypeImpl;

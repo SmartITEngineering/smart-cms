@@ -26,7 +26,7 @@ import java.util.Collection;
  */
 public interface MutableCompositeDataType extends CompositeDataType {
 
-  void setEmbeddedContentType(ContentDataType contentDataType);
+  void setEmbeddedContentDataType(EmbeddedContentDataType contentDataType);
   
   Collection<FieldDef> getOwnMutableComposition();
 }

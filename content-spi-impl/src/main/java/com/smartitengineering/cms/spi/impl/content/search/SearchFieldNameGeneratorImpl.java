@@ -24,12 +24,16 @@ import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.SearchDef;
 import com.smartitengineering.cms.spi.type.SearchFieldNameGenerator;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author imyousuf
  */
 public class SearchFieldNameGeneratorImpl implements SearchFieldNameGenerator {
+
+  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   public String getFieldName(FieldDef def) {
     if (def == null) {
@@ -41,6 +45,7 @@ public class SearchFieldNameGeneratorImpl implements SearchFieldNameGenerator {
       builder.append(parentName).append('.');
     }
     builder.append(def.getName());
+    logger.info("Search field name for " + def.getDisplayName() + " is " + builder.toString());
     return builder.toString();
   }
 
