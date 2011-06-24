@@ -16,6 +16,7 @@ import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.dao.common.CommonDao;
+import com.smartitengineering.dao.common.queryparam.BasicCompoundQueryParameter;
 import com.smartitengineering.dao.common.queryparam.BiOperandQueryParameter;
 import com.smartitengineering.dao.common.queryparam.CompositionQueryParameter;
 import com.smartitengineering.dao.common.queryparam.MatchMode;
@@ -37,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -204,19 +206,63 @@ public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends Pers
   protected Filter processQueryParams(Filter filter,
                                       List<QueryParameter> queries) {
     filter.setFieldParamsEscaped(true);
-    return processQueryParams(filter, queries, "", getContentTypeId().getContentType().getFieldDefs());
+    List<QueryParameter> cQueries = new ArrayList<QueryParameter>(queries);
+    Iterator<QueryParameter> pIterator = cQueries.iterator();
+    while (pIterator.hasNext()) {
+      QueryParameter parameter = pIterator.next();
+      switch (parameter.getParameterType()) {
+        case PARAMETER_TYPE_MAX_RESULT: {
+          ValueOnlyQueryParameter<Integer> param = QueryParameterCastHelper.VALUE_PARAM_HELPER.cast(parameter);
+          filter.setMaxContents(param.getValue());
+          pIterator.remove();
+          break;
+        }
+        case PARAMETER_TYPE_FIRST_RESULT: {
+          ValueOnlyQueryParameter<Integer> param = QueryParameterCastHelper.VALUE_PARAM_HELPER.cast(parameter);
+          filter.setStartFrom(param.getValue());
+          pIterator.remove();
+          break;
+        }
+      }
+    }
+    List<QueryParameter> params = processQueryParams(cQueries, "", getContentTypeId().getContentType().getFieldDefs());
+    filter.addFieldFilter(params.toArray(new QueryParameter[params.size()]));
+    return filter;
   }
 
-  protected Filter processQueryParams(final Filter filter,
-                                      final Collection<QueryParameter> queries,
-                                      final String prefix,
-                                      final Map<String, FieldDef> defs) {
+  protected List<QueryParameter> processQueryParams(final Collection<QueryParameter> queries,
+                                                    final String prefix,
+                                                    final Map<String, FieldDef> defs) {
+    final List<QueryParameter> params = new ArrayList<QueryParameter>();
     for (QueryParameter parameter : queries) {
       switch (parameter.getParameterType()) {
+        case PARAMETER_TYPE_CONJUNCTION: {
+          BasicCompoundQueryParameter compoundQueryParameter = (BasicCompoundQueryParameter) parameter;
+          final List<QueryParameter> conParams = processQueryParams(compoundQueryParameter.getNestedParameters(), prefix,
+                                                                    defs);
+          if (!conParams.isEmpty()) {
+            params.add(
+                QueryParameterFactory.getConjunctionParam(conParams.toArray(new QueryParameter[conParams.size()])));
+          }
+          break;
+        }
+        case PARAMETER_TYPE_DISJUNCTION: {
+          BasicCompoundQueryParameter compoundQueryParameter = (BasicCompoundQueryParameter) parameter;
+          final List<QueryParameter> disParams = processQueryParams(compoundQueryParameter.getNestedParameters(), prefix,
+                                                                    defs);
+          if (!disParams.isEmpty()) {
+            params.add(
+                QueryParameterFactory.getDisjunctionParam(disParams.toArray(new QueryParameter[disParams.size()])));
+          }
+          break;
+        }
         case PARAMETER_TYPE_PROPERTY: {
           QueryParameterWithPropertyName para = (QueryParameterWithPropertyName) parameter;
           FieldDef def = defs.get(para.getPropertyName());
-          addQueryForProperty(parameter, def, prefix, filter);
+          final QueryParameter fieldQuery = addQueryForProperty(parameter, def, prefix);
+          if (fieldQuery != null) {
+            params.add(fieldQuery);
+          }
           break;
         }
         case PARAMETER_TYPE_NESTED_PROPERTY: {
@@ -238,24 +284,14 @@ public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends Pers
             final String fieldName = SmartContentAPI.getInstance().getContentTypeLoader().
                 getSearchFieldNameWithoutTypeSpecifics(def);
             if (StringUtils.isNotBlank(fieldName)) {
-              processQueryParams(filter, para.getNestedParameters(), prefixBldr.append(fieldName).toString(),
-                                 dataType.getTypeDef().getContentType().getFieldDefs());
+              params.addAll(processQueryParams(para.getNestedParameters(), prefixBldr.append(fieldName).toString(),
+                                               dataType.getTypeDef().getContentType().getFieldDefs()));
             }
           }
           else if (type.getType().equals(FieldValueType.COMPOSITE)) {
             CompositeDataType dataType = (CompositeDataType) type;
-            processQueryParams(filter, para.getNestedParameters(), prefix, dataType.getComposedFieldDefs());
+            params.addAll(processQueryParams(para.getNestedParameters(), prefix, dataType.getComposedFieldDefs()));
           }
-          break;
-        }
-        case PARAMETER_TYPE_MAX_RESULT: {
-          ValueOnlyQueryParameter<Integer> param = QueryParameterCastHelper.VALUE_PARAM_HELPER.cast(parameter);
-          filter.setMaxContents(param.getValue());
-          break;
-        }
-        case PARAMETER_TYPE_FIRST_RESULT: {
-          ValueOnlyQueryParameter<Integer> param = QueryParameterCastHelper.VALUE_PARAM_HELPER.cast(parameter);
-          filter.setStartFrom(param.getValue());
           break;
         }
         case PARAMETER_TYPE_ORDER_BY: {
@@ -264,7 +300,7 @@ public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends Pers
           if (def != null) {
             String fieldName = SmartContentAPI.getInstance().getContentTypeLoader().getSearchFieldName(def);
             if (StringUtils.isNotBlank(fieldName)) {
-              filter.addFieldFilter(QueryParameterFactory.getOrderByParam(new StringBuilder(prefix).append(fieldName).
+              params.add(QueryParameterFactory.getOrderByParam(new StringBuilder(prefix).append(fieldName).
                   toString(), orderBy.getValue()));
             }
           }
@@ -272,10 +308,10 @@ public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends Pers
         }
       }
     }
-    return filter;
+    return params;
   }
 
-  protected void addQueryForProperty(QueryParameter parameter, FieldDef def, final String prefix, Filter filter) {
+  protected QueryParameter addQueryForProperty(QueryParameter parameter, FieldDef def, final String prefix) {
     if (def != null) {
       String fieldName = SmartContentAPI.getInstance().getContentTypeLoader().getSearchFieldName(def);
       if (StringUtils.isNotBlank(fieldName)) {
@@ -309,16 +345,19 @@ public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends Pers
           }
         }
         else {
-          query = generateDateQuery(parameter);
+          query = generateQuery(parameter);
         }
         if (StringUtils.isNotBlank(query)) {
-          filter.addFieldFilter(QueryParameterFactory.getStringLikePropertyParam(searchFieldName, query));
+          final QueryParameter<String> stringLikePropertyParam =
+                                       QueryParameterFactory.getStringLikePropertyParam(searchFieldName, query);
+          return stringLikePropertyParam;
         }
       }
     }
+    return null;
   }
 
-  protected <T> String generateDateQuery(QueryParameter<T> creationDateFilter) {
+  protected <T> String generateQuery(QueryParameter<T> creationDateFilter) {
     StringBuilder query = new StringBuilder();
     String dateQuery = "";
     switch (creationDateFilter.getParameterType()) {

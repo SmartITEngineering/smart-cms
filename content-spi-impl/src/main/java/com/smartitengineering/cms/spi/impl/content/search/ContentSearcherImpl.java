@@ -36,6 +36,7 @@ import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.cms.spi.impl.events.SolrFieldNames;
 import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
 import com.smartitengineering.dao.common.CommonReadDao;
+import com.smartitengineering.dao.common.queryparam.BasicCompoundQueryParameter;
 import com.smartitengineering.dao.common.queryparam.BiOperandQueryParameter;
 import com.smartitengineering.dao.common.queryparam.MatchMode;
 import com.smartitengineering.dao.common.queryparam.OperatorType;
@@ -84,13 +85,13 @@ public class ContentSearcherImpl implements ContentSearcher {
   @Named(REINDEX_LISTENER_NAME)
   private EventListener reindexListener;
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+  private final String disjunctionSeperator = " OR ";
+  private final String conjunctionSeperator = " AND ";
   private static final String SOLR_DATE_FORMAT = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern() + "'Z'";
 
   @Override
   public SearchResult<Content> search(Filter filter) {
     final StringBuilder finalQuery = new StringBuilder();
-    String disjunctionSeperator = " OR ";
-    String conjunctionSeperator = " AND ";
     String seperator = filter.isDisjunction() ? disjunctionSeperator : conjunctionSeperator;
     int count = 0;
     Set<ContentTypeId> contentTypeIds = filter.getContentTypeFilters();
@@ -176,19 +177,7 @@ public class ContentSearcherImpl implements ContentSearcher {
     }
     Collection<QueryParameter> fieldQuery = new ArrayList<QueryParameter>(filter.getFieldFilters());
     final QueryParameter orderParam = findAndRemoveOrderByParam(fieldQuery);
-    if (fieldQuery != null && !fieldQuery.isEmpty()) {
-      for (QueryParameter parameter : fieldQuery) {
-        if (parameter.getParameterType().equals(ParameterType.PARAMETER_TYPE_PROPERTY) &&
-            parameter instanceof StringLikeQueryParameter) {
-          if (query.length() > 0) {
-            query.append(seperator);
-          }
-          StringLikeQueryParameter param = QueryParameterCastHelper.STRING_PARAM_HELPER.cast(parameter);
-          query.append(param.getPropertyName()).append(": ").append(filter.isFieldParamsEscaped() ? param.getValue() :
-              ClientUtils.escapeQueryChars(param.getValue()));
-        }
-      }
-    }
+    processParams(fieldQuery, query, seperator, filter.isFieldParamsEscaped());
     if (query.length() > 0) {
       finalQuery.append(conjunctionSeperator).append('(').append(query.toString()).append(')');
     }
@@ -219,6 +208,47 @@ public class ContentSearcherImpl implements ContentSearcher {
       }
     }
     return SmartContentAPI.getInstance().getContentLoader().createSearchResult(result, searchResult.getTotalResults());
+  }
+
+  protected void processParams(Collection<QueryParameter> queries, final StringBuilder query, String seperator,
+                               boolean paramsEscaped) throws IllegalArgumentException {
+    if (queries != null && !queries.isEmpty()) {
+      for (QueryParameter parameter : queries) {
+        if (parameter.getParameterType().equals(ParameterType.PARAMETER_TYPE_PROPERTY) &&
+            parameter instanceof StringLikeQueryParameter) {
+          if (query.length() > 0) {
+            query.append(seperator);
+          }
+          StringLikeQueryParameter param = QueryParameterCastHelper.STRING_PARAM_HELPER.cast(parameter);
+          query.append(param.getPropertyName()).append(": ").append(paramsEscaped ? param.getValue() :
+              ClientUtils.escapeQueryChars(param.getValue()));
+        }
+        else if (parameter.getParameterType().equals(ParameterType.PARAMETER_TYPE_CONJUNCTION)) {
+          BasicCompoundQueryParameter compoundQueryParameter = (BasicCompoundQueryParameter) parameter;
+          StringBuilder nestedJunction = new StringBuilder();
+          processParams(compoundQueryParameter.getNestedParameters(), nestedJunction, conjunctionSeperator,
+                        paramsEscaped);
+          if (nestedJunction.length() > 0) {
+            if (query.length() > 0) {
+              query.append(seperator);
+            }
+            query.append('(').append(nestedJunction).append(')');
+          }
+        }
+        else if (parameter.getParameterType().equals(ParameterType.PARAMETER_TYPE_DISJUNCTION)) {
+          BasicCompoundQueryParameter compoundQueryParameter = (BasicCompoundQueryParameter) parameter;
+          StringBuilder nestedJunction = new StringBuilder();
+          processParams(compoundQueryParameter.getNestedParameters(), nestedJunction, disjunctionSeperator,
+                        paramsEscaped);
+          if (nestedJunction.length() > 0) {
+            if (query.length() > 0) {
+              query.append(seperator);
+            }
+            query.append('(').append(nestedJunction).append(')');
+          }
+        }
+      }
+    }
   }
 
   public static String generateDateQuery(String fieldName, QueryParameter<Date> creationDateFilter) {
