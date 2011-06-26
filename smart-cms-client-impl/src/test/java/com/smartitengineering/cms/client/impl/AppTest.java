@@ -2438,6 +2438,19 @@ public class AppTest {
     }
   }
 
+  @Test
+  public void testContentStatusesResource() throws Exception {
+    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ Content TYPE STATUSES ~~~~~~~~~~~~~~~~~~~~~~~~~");
+    WorkspaceFeedResource feedResource = setupCompositeWorkspace();
+    RootResource resource = RootResourceImpl.getRoot(URI.create(ROOT_URI_STRING));
+    resource.get();
+    ContentTypeFeedResource typeFeedResource = resource.getTemplates().getContentTypeResource(feedResource.
+        getWorkspaceNamespace(), feedResource.getWorkspaceName(), "test", "Address");
+    Assert.assertNotNull(typeFeedResource);
+    Assert.assertNotNull(typeFeedResource.getStatuses());
+    Assert.assertFalse(typeFeedResource.getStatuses().isEmpty());
+  }
+
   public static class ConfigurationModule extends AbstractModule {
 
     @Override

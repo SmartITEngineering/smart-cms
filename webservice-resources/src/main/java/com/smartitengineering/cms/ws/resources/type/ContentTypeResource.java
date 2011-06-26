@@ -23,6 +23,7 @@ import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
+import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
@@ -81,6 +82,7 @@ public class ContentTypeResource extends AbstractResource {
   public static final String PATH_TO_REINDEX = "reindex";
   public static final String PATH_TO_CHILDREN = "children";
   public static final String PATH_TO_INSTANCES = "instances";
+  public static final String PATH_TO_STATUSES = "statuses";
 
   public ContentTypeResource(ServerResourceInjectables injectables, ContentType type) {
     super(injectables);
@@ -158,6 +160,11 @@ public class ContentTypeResource extends AbstractResource {
       feed.addLink(getLink(instancesUri, PATH_TO_INSTANCES,
                            com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
       feed.addLink(getLink(getUriInfo().getRequestUri(), Link.REL_ALTERNATE, MediaType.APPLICATION_XML));
+      final URI statusesUri = getRelativeURIBuilder().path(ContentTypesResource.class).path(
+          ContentTypesResource.PATH_TO_CONTENT_TYPE).path(PATH_TO_STATUSES).build(type.getContentTypeID().getWorkspace().
+          getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(),
+                                                                                  type.getContentTypeID().getName());
+      feed.addLink(getLink(statusesUri, "statuses", MediaType.APPLICATION_ATOM_XML));
       Map<String, FieldDef> fieldDefs = type.getFieldDefs();
       feed.addSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME_SPACE, type.getContentTypeID().getWorkspace().
           getGlobalNamespace());
@@ -322,6 +329,32 @@ public class ContentTypeResource extends AbstractResource {
     resource.setContentTypeId(Collections.singletonList(type.getContentTypeID().toString()));
     resource.setIncludeFriendlies(false);
     return resource;
+  }
+
+  @GET
+  @Path(PATH_TO_STATUSES)
+  @Produces(MediaType.APPLICATION_ATOM_XML)
+  public Response getStatuses() {
+    ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(lastModified, tag);
+    if (builder == null) {
+      Map<String, ContentStatus> statuses = type.getStatuses();
+      Feed feed = getFeed("Statuses", lastModified);
+      for (String name : statuses.keySet()) {
+        if (StringUtils.isNotBlank(name)) {
+          if (logger.isInfoEnabled()) {
+            logger.info("Adding status " + name);
+          }
+          org.apache.abdera.model.Entry entry = getEntry(name, name, lastModified);
+          entry.setContent(name);
+          feed.addEntry(entry);
+        }
+      }
+      builder = Response.ok(feed);
+      builder.lastModified(lastModified);
+      builder.tag(tag);
+      builder.header(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+    }
+    return builder.build();
   }
 
   public static URI getContentTypeRelativeURI(UriInfo info, ContentTypeId typeId) {

@@ -32,6 +32,8 @@ public interface ContentTypeFeedResource extends Resource<Feed> {
   ContentTypeResource getContentTypeResource();
 
   List<FieldDef> getFieldDefs();
+  
+  List<String> getStatuses();
 
   String getDisplayName();
 

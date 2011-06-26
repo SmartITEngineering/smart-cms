@@ -28,6 +28,7 @@ import com.smartitengineering.util.rest.atom.AtomClientUtil;
 import com.smartitengineering.util.rest.client.Resource;
 import com.smartitengineering.util.rest.client.ResourceLink;
 import com.sun.jersey.api.client.UniformInterfaceException;
+import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,7 +66,8 @@ public class ContentTypeFeedResourceImpl extends AbstractFeedClientResource<Reso
 
   @Override
   public List<FieldDef> getFieldDefs() {
-    if (getLastReadStateOfEntity() == null || getLastReadStateOfEntity().getEntries() == null || getLastReadStateOfEntity().
+    if (getLastReadStateOfEntity() == null || getLastReadStateOfEntity().getEntries() == null ||
+        getLastReadStateOfEntity().
         getEntries().isEmpty()) {
       return Collections.emptyList();
     }
@@ -87,13 +89,15 @@ public class ContentTypeFeedResourceImpl extends AbstractFeedClientResource<Reso
 
   @Override
   public ContentTypeSearchResultResource getChildren() {
-    return new ContentTypeSearchResultResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+    return new ContentTypeSearchResultResourceImpl(this,
+                                                   AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
         getLink("children")));
   }
 
   @Override
   public ContentTypeSearchResultResource getInstances() {
-    return new ContentTypeSearchResultResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+    return new ContentTypeSearchResultResourceImpl(this,
+                                                   AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
         getLink("instances")));
   }
 
@@ -120,5 +124,23 @@ public class ContentTypeFeedResourceImpl extends AbstractFeedClientResource<Reso
   @Override
   public String getContentTypeNamespace() {
     return getLastReadStateOfEntity().getSimpleExtension(SimpleFeedExtensions.CONTENT_TYPE_NAME_SPACE);
+  }
+
+  @Override
+  public List<String> getStatuses() {
+    ArrayList<String> statuses = new ArrayList<String>();
+    try {
+      ResourceLink link = getRelatedResourceUris().getFirst("statuses");
+      WebResource resource = getClient().resource(getUri().resolve(link.getUri()));
+      resource.accept(link.getMimeType());
+      Feed statusFeed = resource.get(Feed.class);
+      for (Entry entry : statusFeed.getEntries()) {
+        statuses.add(entry.getContent());
+      }
+    }
+    catch (Exception ex) {
+      logger.warn("Could not fetch statuses!", ex);
+    }
+    return statuses;
   }
 }
