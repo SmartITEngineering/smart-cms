@@ -242,31 +242,8 @@ public class ContentResource extends AbstractResource {
   @POST
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   public Response post(FormDataMultiPart multiPart) {
-    ContentImpl contentImpl = new ContentImpl();
-    contentImpl.setContentTypeUri(multiPart.getField("contentTypeUri").getValue());
-    final FormDataBodyPart field = multiPart.getField("parentContentUri");
-    if (field != null) {
-      contentImpl.setParentContentUri(field.getValue());
-    }
-    contentImpl.setStatus(multiPart.getField("status").getValue());
-    final FormDataBodyPart part = multiPart.getField("private");
-    contentImpl.setPrivateContent(part == null || org.apache.commons.lang.StringUtils.isBlank(part.getValue()) ?
-        (content != null ? content.isPrivate() : false) : (part.getValue().equals("on") ? true : false));
-    if (org.apache.commons.lang.StringUtils.isNotBlank(contentImpl.getContentTypeUri())) {
-      final ContentType contentType;
-      try {
-        contentType = getContentTypeResource(contentImpl.getContentTypeUri(), getInjectables()).getType();
-      }
-      catch (Exception ex) {
-        LOGGER.warn("Count not extract content type info!", ex);
-        return Response.status(Response.Status.BAD_REQUEST).build();
-      }
-      final Map<String, FieldDef> allDefs = contentType.getFieldDefs();
-      final Collection<com.smartitengineering.cms.ws.common.domains.Field> fields = new ArrayList();
-      final Map<String, List<FormDataBodyPart>> bodyParts = multiPart.getFields();
-      formFields(allDefs, bodyParts, fields);
-      contentImpl.getFields().addAll(fields);
-    }
+    com.smartitengineering.cms.ws.common.domains.Content contentImpl = parseMultipartFormData(multiPart,
+                                                                                              getInjectables());
     if (LOGGER.isInfoEnabled()) {
       try {
         ObjectMapper mapper = new ObjectMapper();
@@ -279,9 +256,39 @@ public class ContentResource extends AbstractResource {
     return put(contentImpl, this.content == null ? null : new EntityTag("*"));
   }
 
-  protected void formFields(final Map<String, FieldDef> allDefs,
-                            final Map<String, List<FormDataBodyPart>> bodyParts,
-                            final Collection<com.smartitengineering.cms.ws.common.domains.Field> fields) {
+  public static com.smartitengineering.cms.ws.common.domains.Content parseMultipartFormData(
+      FormDataMultiPart multiPart, ServerResourceInjectables injectables) throws WebApplicationException {
+    ContentImpl contentImpl = new ContentImpl();
+    contentImpl.setContentTypeUri(multiPart.getField("contentTypeUri").getValue());
+    final FormDataBodyPart field = multiPart.getField("parentContentUri");
+    if (field != null) {
+      contentImpl.setParentContentUri(field.getValue());
+    }
+    contentImpl.setStatus(multiPart.getField("status").getValue());
+    final FormDataBodyPart part = multiPart.getField("private");
+    contentImpl.setPrivateContent(part == null || org.apache.commons.lang.StringUtils.isBlank(part.getValue()) ?
+        false : (part.getValue().equals("on") ? true : false));
+    if (org.apache.commons.lang.StringUtils.isNotBlank(contentImpl.getContentTypeUri())) {
+      final ContentType contentType;
+      try {
+        contentType = getContentTypeResource(contentImpl.getContentTypeUri(), injectables).getType();
+      }
+      catch (Exception ex) {
+        LOGGER.warn("Count not extract content type info!", ex);
+        throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).build());
+      }
+      final Map<String, FieldDef> allDefs = contentType.getFieldDefs();
+      final Collection<com.smartitengineering.cms.ws.common.domains.Field> fields = new ArrayList();
+      final Map<String, List<FormDataBodyPart>> bodyParts = multiPart.getFields();
+      formFields(allDefs, bodyParts, fields);
+      contentImpl.getFields().addAll(fields);
+    }
+    return contentImpl;
+  }
+
+  protected static void formFields(final Map<String, FieldDef> allDefs,
+                                   final Map<String, List<FormDataBodyPart>> bodyParts,
+                                   final Collection<com.smartitengineering.cms.ws.common.domains.Field> fields) {
     for (Entry<String, FieldDef> fieldDef : allDefs.entrySet()) {
       if (bodyParts != null && !bodyParts.isEmpty()) {
         if (LOGGER.isInfoEnabled()) {
@@ -413,7 +420,7 @@ public class ContentResource extends AbstractResource {
   }
   private static final byte[] TMP = new byte[0];
 
-  protected FieldValueImpl addFieldFromBodyPart(FormDataBodyPart bodyPart, DataType dataType) {
+  protected static FieldValueImpl addFieldFromBodyPart(FormDataBodyPart bodyPart, DataType dataType) {
     switch (dataType.getType()) {
       case STRING:
         OtherFieldValueImpl stringFieldValueImpl = new OtherFieldValueImpl();
