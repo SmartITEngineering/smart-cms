@@ -36,6 +36,7 @@ public class CompositeFieldDefImpl extends FieldDefImpl implements CompositeFiel
     return composedFields;
   }
 
+  @JsonIgnore
   public void setComposedFields(List<FieldDef> composedFields) {
     this.composedFields.clear();
     if (composedFields != null && !composedFields.isEmpty()) {
@@ -48,5 +49,12 @@ public class CompositeFieldDefImpl extends FieldDefImpl implements CompositeFiel
   @JsonIgnore
   public Collection<FieldDef> getComposedFieldDefs() {
     return composedFields.values();
+  }
+
+  public void setComposedFields(Map<String, FieldDef> defs) {
+    composedFields.clear();
+    if (defs != null && !defs.isEmpty()) {
+      composedFields.putAll(defs);
+    }
   }
 }

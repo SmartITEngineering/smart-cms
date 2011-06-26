@@ -19,12 +19,16 @@
 package com.smartitengineering.cms.ws.common;
 
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldValueImpl;
+import com.smartitengineering.cms.ws.common.domains.CompositeFieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.Content;
 import com.smartitengineering.cms.ws.common.domains.ContentImpl;
+import com.smartitengineering.cms.ws.common.domains.FieldDef;
 import com.smartitengineering.cms.ws.common.domains.FieldImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldValue;
 import com.smartitengineering.cms.ws.common.domains.FieldValueImpl;
+import com.smartitengineering.cms.ws.common.domains.OtherFieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.OtherFieldValueImpl;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Date;
@@ -121,5 +125,24 @@ public class ContentDeSerializationTest extends TestCase {
     StringWriter writer = new StringWriter();
     mapper.writeValue(writer, mapper.readValue(IOUtils.toInputStream(CONTENT), ContentImpl.class));
     assertEquals(CONTENT, writer.toString());
+  }
+
+  public void testCompositeField() throws Exception {
+    OtherFieldDefImpl oDefImpl = new OtherFieldDefImpl();
+    oDefImpl.setName("oField1");
+    oDefImpl.setMimeType("text/plain");
+    oDefImpl.setType("STRING");
+    CompositeFieldDefImpl cDefImpl = new CompositeFieldDefImpl();
+    cDefImpl.setName("cField1");
+    cDefImpl.setType("COMPOSITE");
+    cDefImpl.setComposedFields(Arrays.<FieldDef>asList(oDefImpl));
+    CompositeFieldDefImpl defImpl = new CompositeFieldDefImpl();
+    defImpl.setName("field1");
+    defImpl.setType("COMPOSITE");
+    defImpl.setComposedFields(Arrays.<FieldDef>asList(cDefImpl));
+    StringWriter writer = new StringWriter();
+    mapper.writeValue(writer, defImpl);
+    System.out.println(writer.toString());
+    FieldDef def = mapper.readValue(new StringReader(writer.toString()), FieldDef.class);
   }
 }
