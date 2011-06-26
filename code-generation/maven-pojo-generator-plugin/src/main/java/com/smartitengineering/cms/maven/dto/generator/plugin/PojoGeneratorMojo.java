@@ -983,21 +983,21 @@ public class PojoGeneratorMojo extends AbstractMojo {
         }
         case INTEGER: {
           final String methodName = "createIntegerFieldValue";
-          final Class valClass = Integer.class;
+          final Class valClass = Number.class;
           setSimpleField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
                          methodName, prefix);
           break;
         }
         case DOUBLE: {
           final String methodName = "createDoubleFieldValue";
-          final Class valClass = Double.class;
+          final Class valClass = Number.class;
           setSimpleField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
                          methodName, prefix);
           break;
         }
         case LONG: {
           final String methodName = "createLongFieldValue";
-          final Class valClass = Long.class;
+          final Class valClass = Number.class;
           setSimpleField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
                          methodName, prefix);
           break;

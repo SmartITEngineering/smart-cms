@@ -25,8 +25,6 @@ import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ConnectionConfig;
 import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
 import com.sun.jersey.api.client.Client;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -183,7 +181,7 @@ public class CodeGenerationTest {
     PersonService service = injector.getInstance(PersonService.class);
     Assert.assertNotNull(service);
     Person person = new Person();
-    person.setNationalId("123123123");
+    person.setNationalId(123123123);
     Name name = new ExtName();
     name.setFirstName("Imran");
     name.setLastName("Yousuf");
@@ -216,7 +214,7 @@ public class CodeGenerationTest {
     int size = 103;
     for (int i = 0; i < size; ++i) {
       Person person = new Person();
-      person.setNationalId(String.valueOf(i));
+      person.setNationalId(i);
       Name name = new ExtName();
       name.setFirstName("Imran");
       name.setLastName("Yousuf");
@@ -229,7 +227,7 @@ public class CodeGenerationTest {
     sleep();
     List<Person> all = new ArrayList<Person>(service.getAll());
     Assert.assertEquals(size, all.size());
-    Set<String> nIds = new HashSet<String>();
+    Set<Integer> nIds = new HashSet<Integer>();
     for (int i = 0; i < size; ++i) {
       Person rPerson = all.get(i);
       nIds.add(rPerson.getNationalId());
@@ -252,7 +250,7 @@ public class CodeGenerationTest {
     String[] names = new String[]{"Imran", "Mahdi", "Hasan"};
     for (int i = 0; i < size; ++i) {
       Person person = new Person();
-      person.setNationalId(StringUtils.leftPad(String.valueOf(i), 3, '0'));
+      person.setNationalId(i);
       Name name = new ExtName();
       name.setFirstName(names[i % 3]);
       name.setLastName("Yousuf");
@@ -262,15 +260,15 @@ public class CodeGenerationTest {
     }
     sleep();
     sleep();
-    debug();
     //Test limit
     List<Person> all = new ArrayList<Person>(service.search(QueryParameterFactory.getOrderByParam(
         Person.PROPERTY_NATIONALID, Order.ASC), QueryParameterFactory.getFirstResultParam(10), QueryParameterFactory.
         getMaxResultsParam(10)));
     Assert.assertEquals(10, all.size());
+    debug();
     for (int i = 0; i < 10; ++i) {
       Person rPerson = all.get(i);
-      Assert.assertEquals(StringUtils.leftPad(String.valueOf(i + 10), 3, '0'), rPerson.getNationalId());
+      Assert.assertEquals(i + 10, rPerson.getNationalId().intValue());
     }
     //Test string with starts 
     all = new ArrayList<Person>(service.search(QueryParameterFactory.getOrderByParam(Person.PROPERTY_NATIONALID,
@@ -281,7 +279,7 @@ public class CodeGenerationTest {
     Assert.assertEquals(size / 3, all.size());
     // Delete ALL created data
     all = new ArrayList<Person>(service.getAll());
-    Set<String> nIds = new HashSet<String>();
+    Set<Integer> nIds = new HashSet<Integer>();
     for (int i = 0; i < size; ++i) {
       Person rPerson = all.get(i);
       nIds.add(rPerson.getNationalId());
@@ -357,8 +355,7 @@ public class CodeGenerationTest {
   protected void debug() {
     try {
       if (Boolean.parseBoolean(System.getProperty("codeg.debug"))) {
-        System.out.print("Debugging. Please press enter to continue....");
-        new BufferedReader(new InputStreamReader(System.in)).readLine();
+        Thread.sleep(100000);
       }
     }
     catch (Exception ex) {
