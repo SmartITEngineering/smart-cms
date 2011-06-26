@@ -99,13 +99,11 @@
       <field>
         <name>NationalId</name>
         <value>
-          <string>
-            <mimeType>text/plain</mimeType>
-          </string>
+          <integer />
         </value>
         <search>
           <index>true</index>
-          <store>false</store>
+          <store>true</store>
         </search>
       </field>
       <field>
