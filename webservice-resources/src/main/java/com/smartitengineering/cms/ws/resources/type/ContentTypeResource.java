@@ -223,6 +223,22 @@ public class ContentTypeResource extends AbstractResource {
             ((ContentFieldDefImpl) itemFieldDef).setInstanceOfId(((ContentDataType) collectionDataType.getItemDataType()).
                 getTypeDef().toString());
             break;
+          case COMPOSITE: {
+            itemFieldDef = new CompositeFieldDefImpl();
+            CompositeFieldDefImpl defImpl = (CompositeFieldDefImpl) itemFieldDef;
+            CompositeDataType compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
+            final Collection<FieldDef> composition = compositeDataType.getComposition();
+            if (composition != null && !composition.isEmpty()) {
+              List<com.smartitengineering.cms.ws.common.domains.FieldDef> composedFields =
+                                                                          new ArrayList<com.smartitengineering.cms.ws.common.domains.FieldDef>(composition.
+                  size());
+              for (FieldDef composedField : composition) {
+                composedFields.add(convertFieldDef(composedField));
+              }
+              defImpl.setComposedFields(composedFields);
+            }
+            break;
+          }
           default:
             itemFieldDef = new FieldDefImpl();
             break;
