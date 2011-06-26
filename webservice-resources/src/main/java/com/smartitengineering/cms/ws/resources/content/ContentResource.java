@@ -141,7 +141,7 @@ public class ContentResource extends AbstractResource {
     }
     GenericAdapterImpl adapterImpl =
                        new GenericAdapterImpl<Content, com.smartitengineering.cms.ws.common.domains.Content>();
-    adapterImpl.setHelper(new ContentAdapterHelper());
+    adapterImpl.setHelper(new ContentAdapterHelper(injectables, importMode));
     adapter = adapterImpl;
   }
 
@@ -255,7 +255,7 @@ public class ContentResource extends AbstractResource {
     if (org.apache.commons.lang.StringUtils.isNotBlank(contentImpl.getContentTypeUri())) {
       final ContentType contentType;
       try {
-        contentType = getContentTypeResource(contentImpl.getContentTypeUri()).getType();
+        contentType = getContentTypeResource(contentImpl.getContentTypeUri(), getInjectables()).getType();
       }
       catch (Exception ex) {
         LOGGER.warn("Count not extract content type info!", ex);
@@ -398,18 +398,18 @@ public class ContentResource extends AbstractResource {
     }
   }
 
-  protected ContentTypeResource getContentTypeResource(String uri) throws ClassCastException,
-                                                                          ContainerException {
+  protected static ContentTypeResource getContentTypeResource(String uri, ServerResourceInjectables injectables) throws
+      ClassCastException, ContainerException {
     final URI checkUri;
     if (uri.startsWith("http:")) {
       checkUri = URI.create(uri);
     }
     else {
-      URI absUri = getAbsoluteURIBuilder().build();
+      URI absUri = injectables.getUriInfo().getBaseUriBuilder().build();
       checkUri =
       UriBuilder.fromPath(uri).host(absUri.getHost()).port(absUri.getPort()).scheme(absUri.getScheme()).build();
     }
-    return getResourceContext().matchResource(checkUri, ContentTypeResource.class);
+    return injectables.getResourceContext().matchResource(checkUri, ContentTypeResource.class);
   }
   private static final byte[] TMP = new byte[0];
 
@@ -559,11 +559,27 @@ public class ContentResource extends AbstractResource {
     return "Smart CMS";
   }
 
-  public class ContentAdapterHelper extends AbstractAdapterHelper<Content, com.smartitengineering.cms.ws.common.domains.Content> {
+  public static class ContentAdapterHelper extends AbstractAdapterHelper<Content, com.smartitengineering.cms.ws.common.domains.Content> {
+
+    private final ServerResourceInjectables injectables;
+    private final boolean importMode;
+
+    public ContentAdapterHelper(ServerResourceInjectables injectables, boolean importMode) {
+      this.injectables = injectables;
+      this.importMode = importMode;
+    }
 
     @Override
     protected com.smartitengineering.cms.ws.common.domains.Content newTInstance() {
       return new ContentImpl();
+    }
+
+    protected UriBuilder getRelativeURIBuilder() {
+      return UriBuilder.fromPath(injectables.getUriInfo().getBaseUriBuilder().build().getPath());
+    }
+
+    protected UriBuilder getAbsoluteURIBuilder() {
+      return injectables.getUriInfo().getBaseUriBuilder();
     }
 
     @Override
@@ -579,7 +595,7 @@ public class ContentResource extends AbstractResource {
             toString());
       }
       contentImpl.setContentTypeUri(
-          ContentTypeResource.getContentTypeRelativeURI(getUriInfo(), type.getContentTypeID()).toASCIIString());
+          ContentTypeResource.getContentTypeRelativeURI(injectables.getUriInfo(), type.getContentTypeID()).toASCIIString());
       if (fromBean.getParentId() != null) {
         contentImpl.setParentContentUri(ContentResource.getContentUri(getRelativeURIBuilder(), fromBean.getParentId()).
             toASCIIString());
@@ -617,7 +633,7 @@ public class ContentResource extends AbstractResource {
     protected Content convertFromT2F(com.smartitengineering.cms.ws.common.domains.Content toBean) {
       final ContentType contentType;
       try {
-        ContentTypeResource resource = getContentTypeResource(toBean.getContentTypeUri());
+        ContentTypeResource resource = getContentTypeResource(toBean.getContentTypeUri(), injectables);
         if (resource == null) {
           throw new NullPointerException("No such content type!");
         }
@@ -638,7 +654,7 @@ public class ContentResource extends AbstractResource {
       if (org.apache.commons.lang.StringUtils.isNotBlank(parentContentUri)) {
         try {
           final ContentResource resource = getContentResource(parentContentUri, getAbsoluteURIBuilder(),
-                                                              getResourceContext());
+                                                              injectables.getResourceContext());
           if (resource == null) {
             throw new NullPointerException("No such parent content!");
           }
@@ -654,7 +670,7 @@ public class ContentResource extends AbstractResource {
       }
       for (com.smartitengineering.cms.ws.common.domains.Field field : toBean.getFields()) {
         MutableField mutableField = getField(writeableContent.getContentId(), contentType.getFieldDefs().get(
-            field.getName()), field, getResourceContext(), getAbsoluteURIBuilder(), importMode);
+            field.getName()), field, injectables.getResourceContext(), getAbsoluteURIBuilder(), importMode);
         writeableContent.setField(mutableField);
       }
       return writeableContent;

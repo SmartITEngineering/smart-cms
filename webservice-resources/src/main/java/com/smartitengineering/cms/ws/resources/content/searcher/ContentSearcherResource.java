@@ -27,6 +27,7 @@ import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.ws.common.domains.SearchResult;
 import com.smartitengineering.cms.ws.resources.content.ContentResource;
+import com.smartitengineering.cms.ws.resources.content.ContentResource.ContentAdapterHelper;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
@@ -87,9 +88,7 @@ public class ContentSearcherResource extends AbstractResource {
     super(injectables);
     GenericAdapterImpl adapterImpl =
                        new GenericAdapterImpl<Content, com.smartitengineering.cms.ws.common.domains.Content>();
-    adapterImpl.setHelper(
-        new ContentResource(injectables, SmartContentAPI.getInstance().getContentLoader().
-        createContentId(SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId("", "NULL"), new byte[0])).new ContentAdapterHelper());
+    adapterImpl.setHelper(new ContentAdapterHelper(injectables, false));
     adapter = adapterImpl;
   }
 
@@ -482,8 +481,8 @@ public class ContentSearcherResource extends AbstractResource {
     }
     else if (strDate.contains(",")) {
       String[] date = strDate.split(",");
-      queryParameter = QueryParameterFactory.getBetweenPropertyParam("between", new Date(Long.parseLong(date[0])), new Date(Long.
-          parseLong(date[1])));
+      queryParameter = QueryParameterFactory.getBetweenPropertyParam("between", new Date(Long.parseLong(date[0])),
+                                                                     new Date(Long.parseLong(date[1])));
     }
     else {
       queryParameter = null;
