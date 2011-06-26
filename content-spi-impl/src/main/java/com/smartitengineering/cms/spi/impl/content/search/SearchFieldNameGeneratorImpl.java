@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 public class SearchFieldNameGeneratorImpl implements SearchFieldNameGenerator {
 
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
+  public static final String PROP_CMS_SEARCH_FIELD_TYPE_NAME = "CMS_SEARCH_FIELD_TYPE_NAME";
 
   public String getFieldName(FieldDef def) {
     if (def == null) {
@@ -79,7 +80,15 @@ public class SearchFieldNameGeneratorImpl implements SearchFieldNameGenerator {
           multi = "";
         }
       }
-      indexFieldName.append('_').append(mainType.name()).append('_').append(multi);
+      final String typeSuffix;
+      final String getSuffixProp = def.getParameters().get(PROP_CMS_SEARCH_FIELD_TYPE_NAME);
+      if (StringUtils.isNotBlank(getSuffixProp)) {
+        typeSuffix = getSuffixProp;
+      }
+      else {
+        typeSuffix = mainType.name();
+      }
+      indexFieldName.append('_').append(typeSuffix).append('_').append(multi);
       if (searchDefinition.isIndexed()) {
         indexFieldName.append('i');
       }
