@@ -114,20 +114,9 @@
     </plugins>
   </build>
   <modules>
-    <module>content-api</module>
-    <module>content-api-impl</module>
-    <module>content-spi</module>
-    <module>content-spi-impl</module>
-    <module>api-spi-guice-binder</module>
-    <module>webservice</module>
-    <module>smart-cms-client-api</module>
-    <module>smart-cms-client-impl</module>
-    <module>webservice-resources</module>
-    <module>webservice-common</module>
-    <module>content-api-factory</module>
-    <module>content-api-impl-generic</module>
-    <module>content-type-xml</module>
-    <module>content-spi-uri-impl</module>
+    <module>api-modules</module>
+    <module>spi-modules</module>
+    <module>webservice-modules</module>
     <module>code-generation</module>
   </modules>
 </project>
