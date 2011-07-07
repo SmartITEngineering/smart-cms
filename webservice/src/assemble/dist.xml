@@ -37,7 +37,7 @@
   </dependencySets>
   <files>
     <file>
-      <source>${project.build.directory}/${project.artifactId}-classes.jar</source>
+      <source>${project.build.directory}/${project.build.finalName}-classes.jar</source>
       <destName>${project.artifactId}-${project.version}-classes.jar</destName>
       <outputDirectory>smart-cms-server/</outputDirectory>
     </file>
