@@ -47,16 +47,8 @@ The module is responsible for Implementing the SPI for the CMS.
       <artifactId>smart-hbase-dao</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.smartitengineering.smart-dao</groupId>
-      <artifactId>solr-dao</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.smartitengineering</groupId>
       <artifactId>smart-cache</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.smartitengineering.smart-dao</groupId>
-      <artifactId>solr-search-dao</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
@@ -65,10 +57,6 @@ The module is responsible for Implementing the SPI for the CMS.
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.smartitengineering.smart-async-events</groupId>
-      <artifactId>async-events-api</artifactId>
     </dependency>
     <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
