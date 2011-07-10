@@ -31,7 +31,7 @@
   <dependencies>
     <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
-      <artifactId>content-spi-impl</artifactId>
+      <artifactId>content-spi-hbase-impl</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

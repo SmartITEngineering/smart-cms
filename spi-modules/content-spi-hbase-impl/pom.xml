@@ -25,8 +25,8 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.smartitengineering.smart-cms</groupId>
-  <artifactId>content-spi-impl</artifactId>
-  <name>Content SPI Impl</name>
+  <artifactId>content-spi-hbase-impl</artifactId>
+  <name>Content SPI Impl - HBase Persistence</name>
   <description><![CDATA[
 The module is responsible for Implementing the SPI for the CMS.
 ]]>
