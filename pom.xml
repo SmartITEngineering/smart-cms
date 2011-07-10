@@ -94,6 +94,20 @@
     <developerConnection>scm:git:git@github.com:smart-it/smart-cms.git</developerConnection>
   </scm>
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>javancss-maven-plugin</artifactId>
+          <inherited>true</inherited>
+          <configuration>
+            <includes>
+              <include>**/*.java</include>
+            </includes>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -121,6 +135,10 @@
         <configuration>
           <excludePackageNames>test:testa:testb:testc:com.smartitengineering.demo.cms.dto</excludePackageNames>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>javancss-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </reporting>
