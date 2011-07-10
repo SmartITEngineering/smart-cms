@@ -113,6 +113,17 @@
       </plugin>
     </plugins>
   </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <excludePackageNames>test:testa:testb:testc:com.smartitengineering.demo.cms.dto</excludePackageNames>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
   <modules>
     <module>api-modules</module>
     <module>spi-modules</module>
