@@ -28,7 +28,7 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.PersistableContent;
-import com.smartitengineering.cms.spi.impl.Utils;
+import com.smartitengineering.cms.spi.impl.hbase.Utils;
 import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;

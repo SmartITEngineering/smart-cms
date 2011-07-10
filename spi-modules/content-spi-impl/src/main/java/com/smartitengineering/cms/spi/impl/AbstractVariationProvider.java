@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.impl.content;
+package com.smartitengineering.cms.spi.impl;
 
 import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
-import com.smartitengineering.cms.api.type.ContentType;
-import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
-import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.type.VariationDef;
+import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import java.util.Collection;
 import java.util.Iterator;
@@ -34,35 +34,35 @@ import org.slf4j.LoggerFactory;
  *
  * @author imyousuf
  */
-public class AbstractRepresentationProvider {
+public class AbstractVariationProvider {
 
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
-  protected RepresentationTemplate getTemplate(String repName, ContentType contentType, Content content) {
-    RepresentationDef representationDef = contentType.getRepresentationDefs().get(repName);
-    if (representationDef == null) {
+  protected VariationTemplate getTemplate(String varName, Content content, Field field) {
+    VariationDef variationDef = field.getFieldDef().getVariations().get(varName);
+    if (variationDef == null) {
       logger.info("Representation def is null!");
       return null;
     }
-    if (representationDef.getResourceUri().getType().equals(ResourceUri.Type.EXTERNAL)) {
+    if (variationDef.getResourceUri().getType().equals(ResourceUri.Type.EXTERNAL)) {
       logger.warn("External resource URI is not yet handled!");
       return null;
     }
     final WorkspaceId workspaceId = content.getContentId().getWorkspaceId();
-    RepresentationTemplate representationTemplate =
-                           SmartContentAPI.getInstance().getWorkspaceApi().getRepresentationTemplate(workspaceId, representationDef.
+    VariationTemplate variationTemplate =
+                      SmartContentAPI.getInstance().getWorkspaceApi().getVariationTemplate(workspaceId, variationDef.
         getResourceUri().getValue());
-    if (representationTemplate == null) {
+    if (variationTemplate == null) {
       //Lookup friendlies
       Collection<WorkspaceId> friends = SmartContentAPI.getInstance().getWorkspaceApi().getFriendlies(workspaceId);
       if (friends != null && !friends.isEmpty()) {
         Iterator<WorkspaceId> friendsIterator = friends.iterator();
-        while (representationTemplate == null && friendsIterator.hasNext()) {
-          representationTemplate = SmartContentAPI.getInstance().getWorkspaceApi().getRepresentationTemplate(friendsIterator.
-              next(), representationDef.getResourceUri().getValue());
+        while (variationTemplate == null && friendsIterator.hasNext()) {
+          variationTemplate = SmartContentAPI.getInstance().getWorkspaceApi().getVariationTemplate(
+              friendsIterator.next(), variationDef.getResourceUri().getValue());
         }
       }
     }
-    return representationTemplate;
+    return variationTemplate;
   }
 }

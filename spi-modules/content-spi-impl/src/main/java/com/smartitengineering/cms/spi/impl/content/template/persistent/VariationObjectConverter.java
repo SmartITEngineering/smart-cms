@@ -22,7 +22,7 @@ import com.google.inject.Inject;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
-import com.smartitengineering.cms.spi.impl.Utils;
+import com.smartitengineering.cms.spi.impl.hbase.Utils;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;

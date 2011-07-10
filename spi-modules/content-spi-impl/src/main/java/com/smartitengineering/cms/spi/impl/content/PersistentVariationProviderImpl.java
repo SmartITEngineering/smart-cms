@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.content;
 
+import com.smartitengineering.cms.spi.impl.AbstractVariationProvider;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.Variation;
 import com.google.inject.Inject;

@@ -51,7 +51,7 @@ import com.smartitengineering.cms.api.type.StringDataType;
 import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
-import com.smartitengineering.cms.spi.impl.Utils;
+import com.smartitengineering.cms.spi.impl.hbase.Utils;
 import com.smartitengineering.cms.spi.type.PersistableContentType;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.impl.AbstractObjectRowConverter;

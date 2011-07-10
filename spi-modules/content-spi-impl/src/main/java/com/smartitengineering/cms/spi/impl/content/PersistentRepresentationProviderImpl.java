@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.content;
 
+import com.smartitengineering.cms.spi.impl.AbstractRepresentationProvider;
 import com.smartitengineering.cms.spi.impl.content.template.persistent.PersistentRepresentation;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;

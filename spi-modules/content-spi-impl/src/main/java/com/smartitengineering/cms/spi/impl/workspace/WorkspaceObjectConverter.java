@@ -29,7 +29,7 @@ import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
-import com.smartitengineering.cms.spi.impl.Utils;
+import com.smartitengineering.cms.spi.impl.hbase.Utils;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableResourceTemplate;

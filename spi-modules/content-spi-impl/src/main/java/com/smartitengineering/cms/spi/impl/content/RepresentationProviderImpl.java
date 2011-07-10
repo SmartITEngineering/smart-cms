@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.content;
 
+import com.smartitengineering.cms.spi.impl.AbstractRepresentationProvider;
 import com.google.inject.Inject;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.Content;
