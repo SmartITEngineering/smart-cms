@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.content.template.persistent;
 
-import com.smartitengineering.cms.api.impl.Utils;
+import com.smartitengineering.cms.spi.impl.hbase.Utils;
 import com.smartitengineering.dao.impl.hbase.spi.Externalizable;
 import java.io.DataInput;
 import java.io.DataOutput;

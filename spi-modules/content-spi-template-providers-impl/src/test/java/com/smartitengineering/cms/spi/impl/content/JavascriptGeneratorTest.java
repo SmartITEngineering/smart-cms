@@ -25,8 +25,6 @@ import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.Representation;
 import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
-import com.smartitengineering.cms.api.factory.content.ContentLoader;
-import com.smartitengineering.cms.api.impl.content.RepresentationImpl;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.RepresentationDef;
@@ -40,8 +38,6 @@ import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.JavascriptRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.JavascriptValidatorGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.JavascriptVariationGenerator;
-import com.smartitengineering.util.bean.BeanFactoryRegistrar;
-import com.smartitengineering.util.bean.SimpleBeanFactory;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
@@ -66,19 +62,7 @@ public class JavascriptGeneratorTest {
 
   @BeforeClass
   public static void setupAPIAndSPI() throws ClassNotFoundException {
-    final ContentLoader mock = mockery.mock(ContentLoader.class);
-    mockery.checking(new Expectations() {
-
-      {
-        exactly(1).of(mock).createMutableRepresentation(this.<ContentId>with(Expectations.<ContentId>anything()));
-        will(returnValue(new RepresentationImpl(null)));
-      }
-    });
-    if (SmartContentAPI.getInstance() == null) {
-      SimpleBeanFactory simpleBeanFactory = new SimpleBeanFactory(Collections.<String, Object>singletonMap(
-          "apiContentLoader", mock));
-      BeanFactoryRegistrar.registerBeanFactory(SmartContentAPI.CONTEXT_NAME, simpleBeanFactory);
-    }
+    GroovyGeneratorTest.setupAPI(mockery);
   }
 
   @Test
@@ -120,7 +104,10 @@ public class JavascriptGeneratorTest {
         will(returnValue(GroovyGeneratorTest.MIME_TYPE));
       }
     });
-    Representation representation = generator.getRepresentation(template, content, REP_NAME, Collections.<String, String>emptyMap());
+    Assert.assertNotNull(SmartContentAPI.getInstance());
+    Assert.assertNotNull(SmartContentAPI.getInstance().getContentLoader());
+    Representation representation = generator.getRepresentation(template, content, REP_NAME,
+                                                                Collections.<String, String>emptyMap());
     Assert.assertNotNull(representation);
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getRepresentation()));
@@ -161,7 +148,8 @@ public class JavascriptGeneratorTest {
         will(returnValue(GroovyGeneratorTest.MIME_TYPE));
       }
     });
-    Variation representation = generator.getVariation(template, content, field, REP_NAME, Collections.<String, String>emptyMap());
+    Variation representation = generator.getVariation(template, content, field, REP_NAME, Collections.<String, String>
+        emptyMap());
     Assert.assertNotNull(representation);
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());

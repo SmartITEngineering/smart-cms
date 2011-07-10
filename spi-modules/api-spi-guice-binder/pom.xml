@@ -36,6 +36,26 @@
     </dependency>
     <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
+      <artifactId>content-spi-type-validators-impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.smartitengineering.smart-cms</groupId>
+      <artifactId>content-spi-common-impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.smartitengineering.smart-cms</groupId>
+      <artifactId>content-spi-solr-search-impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.smartitengineering.smart-cms</groupId>
+      <artifactId>content-spi-template-providers-impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.smartitengineering.smart-cms</groupId>
       <artifactId>content-spi-uri-impl</artifactId>
       <version>${project.version}</version>
     </dependency>

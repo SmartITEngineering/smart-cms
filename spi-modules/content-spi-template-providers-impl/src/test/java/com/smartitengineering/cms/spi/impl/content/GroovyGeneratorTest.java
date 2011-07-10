@@ -27,16 +27,20 @@ import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.impl.content.RepresentationImpl;
+import com.smartitengineering.cms.api.impl.content.VariationImpl;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
+import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
 import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.VelocityRepresentationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.VelocityVariationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.GroovyRepresentationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.GroovyValidatorGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.GroovyVariationGenerator;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.SimpleBeanFactory;
 import java.io.IOException;
@@ -55,37 +59,42 @@ import org.junit.Test;
  *
  * @author imyousuf
  */
-public class VelocityGeneratorTest {
+public class GroovyGeneratorTest {
 
   public static final String CONTENT = "content";
   private static final Mockery mockery = new JUnit3Mockery();
   public static final String REP_NAME = "test";
+  public static final String MIME_TYPE = "application/json";
 
   @BeforeClass
   public static void setupAPIAndSPI() throws ClassNotFoundException {
+    setupAPI(mockery);
+  }
+
+  public static void setupAPI(final Mockery mockery) throws ClassNotFoundException {
     final ContentLoader mock = mockery.mock(ContentLoader.class);
     mockery.checking(new Expectations() {
 
       {
-        exactly(1).of(mock).createMutableRepresentation(this.<ContentId>with(Expectations.<ContentId>anything()));
+        allowing(mock).createMutableRepresentation(this.<ContentId>with(Expectations.<ContentId>anything()));
         will(returnValue(new RepresentationImpl(null)));
+        allowing(mock).createMutableVariation(this.<ContentId>with(Expectations.<ContentId>anything()),
+                                              this.<FieldDef>with(Expectations.<FieldDef>anything()));
+        will(returnValue(new VariationImpl(null, null)));
       }
     });
-    if (SmartContentAPI.getInstance() == null) {
-      SimpleBeanFactory simpleBeanFactory = new SimpleBeanFactory(Collections.<String, Object>singletonMap(
-          "apiContentLoader", mock));
-      BeanFactoryRegistrar.registerBeanFactory(SmartContentAPI.CONTEXT_NAME, simpleBeanFactory);
-    }
+    SimpleBeanFactory simpleBeanFactory = new SimpleBeanFactory(Collections.<String, Object>singletonMap(
+        "apiContentLoader", mock));
+    BeanFactoryRegistrar.registerBeanFactory(SmartContentAPI.CONTEXT_NAME, simpleBeanFactory);
   }
 
   @Test
-  public void testVelocityRepGeneration() throws IOException {
-    TypeRepresentationGenerator generator = new VelocityRepresentationGenerator();
+  public void testGroovyRepGeneration() throws IOException {
+    TypeRepresentationGenerator generator = new GroovyRepresentationGenerator();
     final RepresentationTemplate template = mockery.mock(RepresentationTemplate.class);
     final Content content = mockery.mock(Content.class);
     final Field field = mockery.mock(Field.class);
     final FieldValue value = mockery.mock(FieldValue.class);
-    final Map<String, Field> fieldMap = mockery.mock(Map.class);
     final ContentType type = mockery.mock(ContentType.class);
     final Map<String, RepresentationDef> reps = mockery.mock(Map.class, "repMap");
     final RepresentationDef def = mockery.mock(RepresentationDef.class);
@@ -94,17 +103,16 @@ public class VelocityGeneratorTest {
       {
         exactly(1).of(template).getTemplate();
         will(returnValue(
-            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("scripts/velocity/test-template.vm"))));
+            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
+            "scripts/groovy/GroovyTestRepresentationGenerator.groovy"))));
         exactly(1).of(template).getName();
         will(returnValue(REP_NAME));
         exactly(1).of(value).getValue();
         will(returnValue(CONTENT));
         exactly(1).of(field).getValue();
         will(returnValue(value));
-        exactly(1).of(fieldMap).get(with(Expectations.<String>anything()));
+        exactly(1).of(content).getField(this.<String>with(Expectations.<String>anything()));
         will(returnValue(field));
-        exactly(1).of(content).getFields();
-        will(returnValue(fieldMap));
         exactly(1).of(content).getContentDefinition();
         will(returnValue(type));
         exactly(1).of(content).getContentId();
@@ -117,29 +125,31 @@ public class VelocityGeneratorTest {
         will(returnValue(GroovyGeneratorTest.MIME_TYPE));
       }
     });
-    Representation representation = generator.getRepresentation(template, content, REP_NAME, Collections.<String, String>emptyMap());
+    Representation representation = generator.getRepresentation(template, content, REP_NAME,
+                                                                Collections.<String, String>emptyMap());
     Assert.assertNotNull(representation);
     Assert.assertEquals(REP_NAME, representation.getName());
-    Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getRepresentation()));
     Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());
+    Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getRepresentation()));
   }
 
   @Test
-  public void testVelocityVarGeneration() throws IOException {
-    TypeVariationGenerator generator = new VelocityVariationGenerator();
+  public void testGroovyVarGeneration() throws IOException {
+    TypeVariationGenerator generator = new GroovyVariationGenerator();
     final VariationTemplate template = mockery.mock(VariationTemplate.class);
     final Field field = mockery.mock(Field.class, "varField");
     final FieldValue value = mockery.mock(FieldValue.class, "varFieldVal");
+    final Content content = mockery.mock(Content.class, "varContent");
     final FieldDef fieldDef = mockery.mock(FieldDef.class);
     final Map<String, VariationDef> vars = mockery.mock(Map.class, "varMap");
     final VariationDef def = mockery.mock(VariationDef.class);
-    final Content content = mockery.mock(Content.class, "varContent");
     mockery.checking(new Expectations() {
 
       {
         exactly(1).of(template).getTemplate();
         will(returnValue(
-            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("scripts/velocity/var-template.vm"))));
+            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
+            "scripts/groovy/GroovyTestVariationGenerator.groovy"))));
         exactly(1).of(template).getName();
         will(returnValue(REP_NAME));
         exactly(1).of(value).getValue();
@@ -158,10 +168,33 @@ public class VelocityGeneratorTest {
         will(returnValue(GroovyGeneratorTest.MIME_TYPE));
       }
     });
-    Variation representation = generator.getVariation(template, content, field, REP_NAME, Collections.<String, String>emptyMap());
+    Variation representation = generator.getVariation(template, content, field, REP_NAME, Collections.<String, String>
+        emptyMap());
     Assert.assertNotNull(representation);
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());
     Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getVariation()));
+  }
+
+  @Test
+  public void testGroovyValGeneration() throws IOException {
+    TypeFieldValidator generator = new GroovyValidatorGenerator();
+    final ValidatorTemplate template = mockery.mock(ValidatorTemplate.class);
+    final Field field = mockery.mock(Field.class, "valField");
+    final FieldValue value = mockery.mock(FieldValue.class, "valFieldVal");
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(1).of(template).getTemplate();
+        will(returnValue(
+            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
+            "scripts/groovy/GroovyTestValidatorGenerator.groovy"))));
+        exactly(1).of(value).getValue();
+        will(returnValue(CONTENT));
+        exactly(1).of(field).getValue();
+        will(returnValue(value));
+      }
+    });
+    Assert.assertFalse(generator.isValid(template, field, Collections.<String, String>emptyMap()));
   }
 }

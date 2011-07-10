@@ -24,23 +24,16 @@ import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.Representation;
 import com.smartitengineering.cms.api.content.Variation;
-import com.smartitengineering.cms.api.factory.SmartContentAPI;
-import com.smartitengineering.cms.api.factory.content.ContentLoader;
-import com.smartitengineering.cms.api.impl.content.RepresentationImpl;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
-import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
-import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
+import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
 import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.RubyRepresentationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.RubyValidatorGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.RubyVariationGenerator;
-import com.smartitengineering.util.bean.BeanFactoryRegistrar;
-import com.smartitengineering.util.bean.SimpleBeanFactory;
+import com.smartitengineering.cms.spi.impl.content.template.VelocityRepresentationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.VelocityVariationGenerator;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
@@ -57,7 +50,7 @@ import org.junit.Test;
  *
  * @author imyousuf
  */
-public class RubyGeneratorTest {
+public class VelocityGeneratorTest {
 
   public static final String CONTENT = "content";
   private static final Mockery mockery = new JUnit3Mockery();
@@ -65,38 +58,26 @@ public class RubyGeneratorTest {
 
   @BeforeClass
   public static void setupAPIAndSPI() throws ClassNotFoundException {
-    final ContentLoader mock = mockery.mock(ContentLoader.class);
-    mockery.checking(new Expectations() {
-
-      {
-        exactly(1).of(mock).createMutableRepresentation(this.<ContentId>with(Expectations.<ContentId>anything()));
-        will(returnValue(new RepresentationImpl(null)));
-      }
-    });
-    if (SmartContentAPI.getInstance() == null) {
-      SimpleBeanFactory simpleBeanFactory = new SimpleBeanFactory(Collections.<String, Object>singletonMap(
-          "apiContentLoader", mock));
-      BeanFactoryRegistrar.registerBeanFactory(SmartContentAPI.CONTEXT_NAME, simpleBeanFactory);
-    }
+    GroovyGeneratorTest.setupAPI(mockery);
   }
 
   @Test
-  public void testRubyRepGeneration() throws IOException {
-    RubyRepresentationGenerator generator = new RubyRepresentationGenerator();
+  public void testVelocityRepGeneration() throws IOException {
+    TypeRepresentationGenerator generator = new VelocityRepresentationGenerator();
     final RepresentationTemplate template = mockery.mock(RepresentationTemplate.class);
     final Content content = mockery.mock(Content.class);
     final Field field = mockery.mock(Field.class);
     final FieldValue value = mockery.mock(FieldValue.class);
+    final Map<String, Field> fieldMap = mockery.mock(Map.class);
     final ContentType type = mockery.mock(ContentType.class);
     final Map<String, RepresentationDef> reps = mockery.mock(Map.class, "repMap");
     final RepresentationDef def = mockery.mock(RepresentationDef.class);
-    final Map<String, Field> fieldMap = mockery.mock(Map.class);
     mockery.checking(new Expectations() {
 
       {
         exactly(1).of(template).getTemplate();
         will(returnValue(
-            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("scripts/ruby/test-script.rb"))));
+            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("scripts/velocity/test-template.vm"))));
         exactly(1).of(template).getName();
         will(returnValue(REP_NAME));
         exactly(1).of(value).getValue();
@@ -121,14 +102,15 @@ public class RubyGeneratorTest {
     });
     Representation representation = generator.getRepresentation(template, content, REP_NAME,
                                                                 Collections.<String, String>emptyMap());
+    Assert.assertNotNull(representation);
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getRepresentation()));
     Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());
   }
 
   @Test
-  public void testRubyVarGeneration() throws IOException {
-    TypeVariationGenerator generator = new RubyVariationGenerator();
+  public void testVelocityVarGeneration() throws IOException {
+    TypeVariationGenerator generator = new VelocityVariationGenerator();
     final VariationTemplate template = mockery.mock(VariationTemplate.class);
     final Field field = mockery.mock(Field.class, "varField");
     final FieldValue value = mockery.mock(FieldValue.class, "varFieldVal");
@@ -141,7 +123,7 @@ public class RubyGeneratorTest {
       {
         exactly(1).of(template).getTemplate();
         will(returnValue(
-            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("scripts/ruby/var-script.rb"))));
+            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("scripts/velocity/var-template.vm"))));
         exactly(1).of(template).getName();
         will(returnValue(REP_NAME));
         exactly(1).of(value).getValue();
@@ -166,26 +148,5 @@ public class RubyGeneratorTest {
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());
     Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getVariation()));
-  }
-
-  @Test
-  public void testRubyValGeneration() throws IOException {
-    TypeFieldValidator generator = new RubyValidatorGenerator();
-    final ValidatorTemplate template = mockery.mock(ValidatorTemplate.class);
-    final Field field = mockery.mock(Field.class, "valField");
-    final FieldValue value = mockery.mock(FieldValue.class, "valFieldVal");
-    mockery.checking(new Expectations() {
-
-      {
-        exactly(1).of(template).getTemplate();
-        will(returnValue(
-            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("scripts/ruby/val-script.rb"))));
-        exactly(1).of(value).getValue();
-        will(returnValue(CONTENT));
-        exactly(1).of(field).getValue();
-        will(returnValue(value));
-      }
-    });
-    Assert.assertFalse(generator.isValid(template, field, Collections.<String, String>emptyMap()));
   }
 }

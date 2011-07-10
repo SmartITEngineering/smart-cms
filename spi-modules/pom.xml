@@ -32,7 +32,11 @@
   <name>Smart CMS SPI Modules</name>
   <modules>
     <module>content-spi</module>
+    <module>content-spi-common-impl</module>
     <module>content-spi-impl</module>
+    <module>content-spi-type-validators-impl</module>
+    <module>content-spi-template-providers-impl</module>
+    <module>content-spi-solr-search-impl</module>
     <module>content-spi-uri-impl</module>
     <module>api-spi-guice-binder</module>
   </modules>
