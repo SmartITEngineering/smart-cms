@@ -554,7 +554,7 @@ public class SPIModule extends PrivateModule {
                                                                              ContentTypeDefinitionParser.class);
     parserBinder.addBinding(MediaType.APPLICATION_XML).to(XMLContentTypeDefinitionParser.class);
     bind(ContentTypeDefinitionParsers.class).to(
-        com.smartitengineering.cms.spi.impl.type.validator.ContentTypeDefinitionParsers.class);
+        com.smartitengineering.cms.spi.impl.ContentTypeDefinitionParsers.class);
     bind(LockHandler.class).to(DefaultLockHandler.class).in(Scopes.SINGLETON);
     bind(PersistableDomainFactory.class).to(PersistableDomainFactoryImpl.class).in(Scopes.SINGLETON);
     binder().expose(ContentTypeDefinitionParsers.class);

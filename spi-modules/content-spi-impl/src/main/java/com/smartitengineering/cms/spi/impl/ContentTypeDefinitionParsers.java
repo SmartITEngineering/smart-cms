@@ -1,4 +1,4 @@
-package com.smartitengineering.cms.spi.impl.type.validator;
+package com.smartitengineering.cms.spi.impl;
 
 /*
  *
