@@ -3,8 +3,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>smart-cms</artifactId>
-    <groupId>com.smartitengineering</groupId>
+    <groupId>com.smartitengineering.smart-cms</groupId>
+    <artifactId>api-modules</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
   <groupId>com.smartitengineering.smart-cms</groupId>

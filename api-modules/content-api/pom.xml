@@ -18,36 +18,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <project>
-		<parent>
-				<artifactId>smart-cms</artifactId>
-				<groupId>com.smartitengineering</groupId>
-				<version>0.1-SNAPSHOT</version>
-		</parent>
-		<modelVersion>4.0.0</modelVersion>
-		<groupId>com.smartitengineering.smart-cms</groupId>
-		<artifactId>content-api</artifactId>
-		<name>Content API</name>
-		<description><![CDATA[
+  <parent>
+    <groupId>com.smartitengineering.smart-cms</groupId>
+    <artifactId>api-modules</artifactId>
+    <version>0.1-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.smartitengineering.smart-cms</groupId>
+  <artifactId>content-api</artifactId>
+  <name>Content API</name>
+  <description><![CDATA[
 The module is responsible for defining a API for the CMS. It will not contain
 any implementation except for content type definition parsing.
 ]]>
-		</description>
-		<dependencies>
-				<dependency>
-						<groupId>com.smartitengineering.smart-util</groupId>
-						<artifactId>smart-bean-util</artifactId>
-				</dependency>
-        <dependency>
-						<groupId>com.smartitengineering</groupId>
-						<artifactId>smart-dao-queryparam</artifactId>
-				</dependency>
-        <dependency>
-						<groupId>com.smartitengineering.smart-dao</groupId>
-						<artifactId>smart-hbase-dao-spi</artifactId>
-				</dependency>
-				<dependency>
-						<groupId>junit</groupId>
-						<artifactId>junit</artifactId>
-				</dependency>
-		</dependencies>
+  </description>
+  <dependencies>
+    <dependency>
+      <groupId>com.smartitengineering.smart-util</groupId>
+      <artifactId>smart-bean-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.smartitengineering</groupId>
+      <artifactId>smart-dao-queryparam</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.smartitengineering.smart-dao</groupId>
+      <artifactId>smart-hbase-dao-spi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+  </dependencies>
 </project>
