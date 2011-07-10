@@ -29,16 +29,14 @@ import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.Filter;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.spi.impl.SearchBeanLoader;
 import com.smartitengineering.cms.spi.impl.content.search.ContentSearcherImpl;
 import com.smartitengineering.cms.spi.impl.events.SolrFieldNames;
-import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.cms.spi.type.ContentTypeSearcher;
 import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
-import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.queryparam.MatchMode;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
-import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,9 +62,7 @@ public class ContentTypeSearcherImpl implements ContentTypeSearcher {
   @Inject
   private CommonFreeTextSearchDao<ContentType> textSearchDao;
   @Inject
-  private CommonReadDao<PersistentContentType, ContentTypeId> readDao;
-  @Inject
-  private SchemaInfoProvider<PersistentContentType, ContentTypeId> schemaInfoProvider;
+  private SearchBeanLoader<ContentType, ContentTypeId> contentTypeLoader;
   @Inject
   @Named(REINDEX_LISTENER_NAME)
   private EventListener reindexListener;
@@ -76,10 +72,10 @@ public class ContentTypeSearcherImpl implements ContentTypeSearcher {
   @Override
   public void reIndex(ContentTypeId typeId) {
     if (typeId != null) {
-      PersistentContentType contentType = readDao.getById(typeId);
+      ContentType contentType = contentTypeLoader.loadById(typeId);
       if (contentType != null) {
         reindexListener.notify(SmartContentAPI.getInstance().getEventRegistrar().<ContentType>createEvent(
-            EventType.UPDATE, Type.CONTENT_TYPE, contentType.getMutableContentType()));
+            EventType.UPDATE, Type.CONTENT_TYPE, contentType));
       }
     }
   }
@@ -110,27 +106,27 @@ public class ContentTypeSearcherImpl implements ContentTypeSearcher {
           params.add(maxResultsParam);
           if (lastId != null) {
             try {
-              params.add(QueryParameterFactory.getGreaterThanPropertyParam("id", schemaInfoProvider.getRowIdFromId(
+              params.add(QueryParameterFactory.getGreaterThanPropertyParam("id", contentTypeLoader.getByteArrayFromId(
                   lastId)));
             }
             catch (Exception ex) {
               logger.warn("Could not add last id clause " + lastId.toString(), ex);
             }
           }
-          List<PersistentContentType> list = readDao.getList(params);
+          List<ContentType> list = contentTypeLoader.getQueryResult(params);
           if (list == null || list.isEmpty()) {
             hasMore = false;
           }
           else {
-            final PersistentContentType[] contents = new PersistentContentType[list.size()];
+            final ContentType[] contents = new ContentType[list.size()];
             int index = 0;
-            for (PersistentContentType content : list) {
+            for (ContentType content : list) {
               reindexListener.notify(SmartContentAPI.getInstance().getEventRegistrar().<ContentType>createEvent(
-                  EventType.UPDATE, Type.CONTENT_TYPE, content.getMutableContentType()));
+                  EventType.UPDATE, Type.CONTENT_TYPE, content));
               contents[index++] = content;
             }
 
-            lastId = contents[contents.length - 1].getId();
+            lastId = contents[contents.length - 1].getContentTypeID();
           }
         }
       }
@@ -235,7 +231,8 @@ public class ContentTypeSearcherImpl implements ContentTypeSearcher {
     if (logger.isInfoEnabled()) {
       logger.info("Query q = " + finalQuery.toString());
     }
-    final com.smartitengineering.common.dao.search.SearchResult<ContentType> searchResult = textSearchDao.detailedSearch(QueryParameterFactory.
+    final com.smartitengineering.common.dao.search.SearchResult<ContentType> searchResult =
+                                                                             textSearchDao.detailedSearch(QueryParameterFactory.
         getStringLikePropertyParam("q", finalQuery.toString()), QueryParameterFactory.getFirstResultParam(filter.
         getStartFrom()), QueryParameterFactory.getMaxResultsParam(filter.getMaxContents()));
     final Collection<ContentType> result;

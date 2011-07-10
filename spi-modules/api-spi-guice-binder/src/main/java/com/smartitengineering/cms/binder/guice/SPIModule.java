@@ -41,10 +41,12 @@ import com.smartitengineering.cms.spi.content.ContentSearcher;
 import com.smartitengineering.cms.spi.content.PersistentContentReader;
 import com.smartitengineering.cms.spi.content.UriProvider;
 import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
+import com.smartitengineering.cms.spi.impl.SearchBeanLoader;
 import com.smartitengineering.cms.spi.impl.content.ContentAdapterHelper;
 import com.smartitengineering.cms.spi.impl.content.ContentFieldsAdapterHelper;
 import com.smartitengineering.cms.spi.impl.content.ContentObjectConverter;
 import com.smartitengineering.cms.spi.impl.content.ContentPersistentService;
+import com.smartitengineering.cms.spi.impl.content.ContentSearchBeanLoader;
 import com.smartitengineering.cms.spi.impl.content.FieldsObjectConverter;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
 import com.smartitengineering.cms.spi.impl.content.PersistentContentFields;
@@ -60,6 +62,7 @@ import com.smartitengineering.cms.spi.impl.content.search.SearchFieldNameGenerat
 import com.smartitengineering.cms.spi.impl.type.ContentTypeAdapterHelper;
 import com.smartitengineering.cms.spi.impl.type.ContentTypeObjectConverter;
 import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
+import com.smartitengineering.cms.spi.impl.type.ContentTypeSearchBeanLoader;
 import com.smartitengineering.cms.spi.impl.type.guice.ContentTypeSchemaBaseConfigProvider;
 import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLSchemaBasedTypeValidator;
@@ -579,6 +582,11 @@ public class SPIModule extends PrivateModule {
     bind(Cache.class).annotatedWith(Names.named("defaultCache")).toInstance(cache);
     binder().expose(CacheManager.class);
     binder().expose(Cache.class).annotatedWith(Names.named("defaultCache"));
+
+    bind(new TypeLiteral<SearchBeanLoader<Content, ContentId>>() {
+    }).to(ContentSearchBeanLoader.class).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<SearchBeanLoader<ContentType, ContentTypeId>>() {
+    }).to(ContentTypeSearchBeanLoader.class).in(Scopes.SINGLETON);
   }
 
   static <T extends Serializable> BasicKey<T> getKeyInstance(String keyPrefix, String prefixSeparator) {

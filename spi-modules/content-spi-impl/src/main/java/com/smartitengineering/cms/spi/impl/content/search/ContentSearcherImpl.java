@@ -32,10 +32,9 @@ import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.content.ContentSearcher;
-import com.smartitengineering.cms.spi.impl.content.PersistentContent;
+import com.smartitengineering.cms.spi.impl.SearchBeanLoader;
 import com.smartitengineering.cms.spi.impl.events.SolrFieldNames;
 import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
-import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.queryparam.BasicCompoundQueryParameter;
 import com.smartitengineering.dao.common.queryparam.BiOperandQueryParameter;
 import com.smartitengineering.dao.common.queryparam.MatchMode;
@@ -47,7 +46,6 @@ import com.smartitengineering.dao.common.queryparam.QueryParameterCastHelper;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.dao.common.queryparam.StringLikeQueryParameter;
 import com.smartitengineering.dao.common.queryparam.UniOperandQueryParameter;
-import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import com.smartitengineering.events.async.api.EventSubscriber;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -75,9 +73,7 @@ public class ContentSearcherImpl implements ContentSearcher {
   @Inject
   private CommonFreeTextSearchDao<Content> textSearchDao;
   @Inject
-  private CommonReadDao<PersistentContent, ContentId> readDao;
-  @Inject
-  private SchemaInfoProvider<PersistentContent, ContentId> schemaInfoProvider;
+  private SearchBeanLoader<Content, ContentId> contentLoader;
   // Injected so that the quartz service starts
   @Inject(optional = true)
   private EventSubscriber subscriber;
@@ -309,10 +305,10 @@ public class ContentSearcherImpl implements ContentSearcher {
   @Override
   public void reIndex(ContentId contentId) {
     if (contentId != null) {
-      PersistentContent content = readDao.getById(contentId);
+      Content content = contentLoader.loadById(contentId);
       if (content != null) {
         reindexListener.notify(SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(
-            EventType.CREATE, Type.CONTENT, content.getMutableContent()));
+            EventType.CREATE, Type.CONTENT, content));
       }
     }
   }
@@ -351,14 +347,14 @@ public class ContentSearcherImpl implements ContentSearcher {
             params.add(maxResultsParam);
             if (lastId != null) {
               try {
-                params.add(QueryParameterFactory.getGreaterThanPropertyParam("id", schemaInfoProvider.getRowIdFromId(
+                params.add(QueryParameterFactory.getGreaterThanPropertyParam("id", contentLoader.getByteArrayFromId(
                     lastId)));
               }
               catch (Exception ex) {
                 logger.warn("Could not add last id clause " + lastId.toString(), ex);
               }
             }
-            List<PersistentContent> list = readDao.getList(params);
+            List<Content> list = contentLoader.getQueryResult(params);
             if (logger.isInfoEnabled()) {
               logger.info("Has More " + hasMore);
               logger.info("Content numbers in current iteration " + (list != null ? list.size() : -1));
@@ -367,17 +363,17 @@ public class ContentSearcherImpl implements ContentSearcher {
               hasMore = false;
             }
             else {
-              final PersistentContent[] contents = new PersistentContent[list.size()];
+              final Content[] contents = new Content[list.size()];
               int index = 0;
-              for (PersistentContent content : list) {
+              for (Content content : list) {
                 if (logger.isInfoEnabled()) {
-                  logger.info("Attempting to index " + content.getId());
+                  logger.info("Attempting to index " + content.getContentId());
                 }
                 reindexListener.notify(SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(
-                    EventType.UPDATE, Type.CONTENT, content.getMutableContent()));
+                    EventType.UPDATE, Type.CONTENT, content));
                 contents[index++] = content;
               }
-              lastId = contents[contents.length - 1].getId();
+              lastId = contents[contents.length - 1].getContentId();
             }
             if (logger.isInfoEnabled()) {
               logger.info("Has More " + hasMore);

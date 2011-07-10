@@ -34,9 +34,8 @@ import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.spi.SmartContentSPI;
-import com.smartitengineering.cms.spi.impl.content.PersistentContent;
+import com.smartitengineering.cms.spi.impl.SearchBeanLoader;
 import com.smartitengineering.cms.spi.impl.events.SolrFieldNames;
-import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
 import com.smartitengineering.dao.solr.MultivalueMap;
 import com.smartitengineering.dao.solr.impl.MultivalueMapImpl;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
@@ -57,7 +56,7 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
 
   protected static final String CONTENT = "content";
   @Inject
-  private SchemaInfoProvider<PersistentContent, ContentId> contentScehmaProvider;
+  private SearchBeanLoader<Content, ContentId> contentLoader;
   private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
@@ -203,7 +202,7 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
   protected Content convertFromT2F(MultivalueMap<String, Object> toBean) {
     try {
       byte[] contentId = StringUtils.getBytesUtf8(toBean.getFirst(SolrFieldNames.ID).toString());
-      ContentId id = contentScehmaProvider.getIdFromRowId(contentId);
+      ContentId id = contentLoader.getFromByteArray(contentId);
       return SmartContentAPI.getInstance().getContentLoader().loadContent(id);
     }
     catch (Exception ex) {
