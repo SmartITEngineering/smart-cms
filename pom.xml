@@ -90,8 +90,8 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git://github.com/smart-it/smart-cms.git</connection>
-    <developerConnection>scm:git:git@github.com:smart-it/smart-cms.git</developerConnection>
+    <connection>scm:git:git://github.com/SmartITEngineering/smart-cms.git</connection>
+    <developerConnection>scm:git:git@github.com:SmartITEngineering/smart-cms.git</developerConnection>
   </scm>
   <build>
     <pluginManagement>
