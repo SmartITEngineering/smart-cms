@@ -1,5 +1,6 @@
 package com.smartitengineering.demo.cms.dto;
 
+import com.embarcadero.edn.Customer;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -237,6 +238,22 @@ public class CodeGenerationTest {
     }
     Assert.assertEquals(size, nIds.size());
     sleep();
+  }
+
+  @Test
+  public void testPersistCustomer() {
+    Customer customer = new Customer();
+    final String id = "customer1@testdomain.com";
+    customer.setId(id);
+    customer.setAddress("Test address");
+    customer.setName("Test Customer 1");
+    Injector injector = Guice.createInjector(new com.embarcadero.edn.MasterModule());
+    CommonDao<Customer, String> dao = injector.getInstance(Key.get(new TypeLiteral<CommonDao<Customer, String>>() {
+    }));
+    Assert.assertNotNull(dao);
+    dao.save(customer);
+    Customer readCustomer = dao.getById(id);
+    Assert.assertNotNull(readCustomer);
   }
 
   @Test
