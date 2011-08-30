@@ -23,6 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.PrivateModule;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.MapBinder;
 import com.smartitengineering.cms.api.content.CompositeFieldValue;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
@@ -43,6 +44,7 @@ import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentType.DefinitionType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.repo.dao.impl.AbstractRepoAdapterHelper;
@@ -73,6 +75,7 @@ import com.sun.codemodel.JMod;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
 import com.sun.codemodel.JWhileLoop;
+import edu.emory.mathcs.backport.java.util.Collections;
 import nu.xom.Element;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -81,9 +84,12 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -203,105 +209,11 @@ public class PojoGeneratorMojo extends AbstractMojo {
     }
   }
 
-  protected Set<FieldDef> getAllComposedFields(CompositeDataType compositeDataType,
-                                               Set<? extends ContentType> types) {
-    Set<FieldDef> compositeFields = new LinkedHashSet<FieldDef>();
-    if (compositeDataType.getEmbeddedContentType() != null) {
-      ContentType currentType = getType(types, compositeDataType.getEmbeddedContentType().getTypeDef());
-      if (currentType != null) {
-        compositeFields.addAll(getAllFields(currentType, types).values());
-      }
-    }
-    compositeFields.addAll(compositeDataType.getOwnComposition());
-    return compositeFields;
-  }
-
-  protected Map<String, FieldDef> getAllFields(ContentType currentType, Set<? extends ContentType> types) {
-    Map<String, FieldDef> defs = new LinkedHashMap<String, FieldDef>();
-    boolean hasMore = true;
-    while (hasMore) {
-      Map<String, FieldDef> ownFields = currentType.getOwnFieldDefs();
-      for (Entry<String, FieldDef> ownField : ownFields.entrySet()) {
-        if (!defs.containsKey(ownField.getKey())) {
-          defs.put(ownField.getKey(), ownField.getValue());
-        }
-      }
-      if (currentType.getParent() != null) {
-        final ContentTypeId parent = currentType.getParent();
-        currentType = getType(types, parent);
-        hasMore = currentType != null;
-      }
-      else {
-        hasMore = false;
-      }
-    }
-    return defs;
-  }
-
-  protected ContentType getType(Set<? extends ContentType> types, final ContentTypeId id) {
-    for (ContentType type : types) {
-      if (type.getContentTypeID().equals(id)) {
-        return type;
-      }
-    }
-    return null;
-  }
-
-  protected JFieldVar initializeDao(final JDefinedClass typeDef, JDefinedClass helperClass, JCodeModel model) {
-    final String varClassName = typeDef.name();
-    String readDaoName = new StringBuilder(new StringBuilder().append(
-        ("" + varClassName.charAt(0)).toLowerCase()).append(varClassName.substring(1)).toString()).append(
-        "ReadDao").toString();
-    JFieldVar readDaoVar = helperClass.fields().get(readDaoName);
-    if (readDaoVar == null) {
-      readDaoVar = helperClass.field(JMod.PRIVATE, model.ref(CommonReadDao.class).narrow(typeDef).narrow(
-          String.class), readDaoName);
-      readDaoVar.annotate(Inject.class);
-    }
-    return readDaoVar;
-  }
-
-  protected Collection<MutableContentType> parseContentType(final WorkspaceId id, File file) throws
-      MojoExecutionException {
-    try {
-      final XmlParser parser = new XmlParser(id, new FileInputStream(file),
-                                             new XMLParserIntrospector() {
-
-        public MutableContentType createMutableContentType() {
-          return new ContentTypeImpl();
-        }
-
-        public void processMutableContentType(MutableContentType type, Element element) {
-        }
-      });
-      return parser.parse();
-    }
-    catch (Exception ex) {
-      throw new MojoExecutionException(ex.getMessage(), ex);
-    }
-  }
-
-  protected void generateCode(JCodeModel codeModel, Set<MutableContentType> types) throws Exception {
-    Map<ContentTypeId, JDefinedClass> classes = new LinkedHashMap<ContentTypeId, JDefinedClass>();
-    Map<ContentTypeId, JDefinedClass> helpers = new LinkedHashMap<ContentTypeId, JDefinedClass>();
-    Map<ContentTypeId, JDefinedClass> modules = new LinkedHashMap<ContentTypeId, JDefinedClass>();
-    // Create the classes
-    for (MutableContentType type : types) {
-      final ContentTypeId contentTypeID = type.getContentTypeID();
-      classes.put(contentTypeID, generateClassForType(type, codeModel));
-    }
-    // Set parent content types as appropriate
-    for (MutableContentType type : types) {
-      final JDefinedClass typeClass = classes.get(type.getContentTypeID());
-      if (type.getParent() != null) {
-        final JClass parentClass = classes.get(type.getParent());
-        typeClass._extends(parentClass);
-      }
-    }
-    // Create members and their accessors
-    for (MutableContentType type : types) {
-      generateFields(type.getOwnFieldDefs().values(), classes.get(type.getContentTypeID()), classes, codeModel);
-    }
+  protected void generateIoCClasses(JCodeModel codeModel,
+                                    Set<MutableContentType> types,
+                                    Map<ContentTypeId, JDefinedClass> classes,
+                                    Map<ContentTypeId, JDefinedClass> helpers,
+                                    Map<ContentTypeId, JDefinedClass> modules) throws JClassAlreadyExistsException {
     // Create helpers and google guice module for concrete type definitions
     JClass privateModuleClass = codeModel.ref(PrivateModule.class);
     // Initialize common classes for Google Guice bindings
@@ -397,10 +309,128 @@ public class PojoGeneratorMojo extends AbstractMojo {
             final JInvocation _new = workspaceApiInvocation.arg(wId[0]).arg(wId[1]);
             block.add(JExpr.invoke("bind").arg(workspaceIdClass.dotclass()).invoke("toInstance").arg(_new));
           }
+          //String TypeLiteral
+          final JDefinedClass stringType;
+          {
+            final JClass narrowedReadTypeLiteral = typeLiteral.narrow(String.class);
+            stringType = moduleClass._class("StringType");
+            stringType._extends(narrowedReadTypeLiteral);
+          }
+          //Traverse fields to make their DIs
+          {
+            Collection<FieldDef> defs = getAllFields(type, types).values();
+            generateAssociationIoCForFields(defs, codeModel, stringType, typeLiteral, moduleClass, block, types, classes,
+                                            type.getContentTypeID().getName(), new HashSet<ContentTypeId>());
+          }
         }
       }
     }
     generateMasterModule(modules, codeModel);
+  }
+
+  protected Set<FieldDef> getAllComposedFields(CompositeDataType compositeDataType,
+                                               Set<? extends ContentType> types) {
+    Set<FieldDef> compositeFields = new LinkedHashSet<FieldDef>();
+    if (compositeDataType.getEmbeddedContentType() != null) {
+      ContentType currentType = getType(types, compositeDataType.getEmbeddedContentType().getTypeDef());
+      if (currentType != null) {
+        compositeFields.addAll(getAllFields(currentType, types).values());
+      }
+    }
+    compositeFields.addAll(compositeDataType.getOwnComposition());
+    return compositeFields;
+  }
+
+  protected Map<String, FieldDef> getAllFields(ContentType currentType, Set<? extends ContentType> types) {
+    Map<String, FieldDef> defs = new LinkedHashMap<String, FieldDef>();
+    boolean hasMore = true;
+    while (hasMore) {
+      Map<String, FieldDef> ownFields = currentType.getOwnFieldDefs();
+      for (Entry<String, FieldDef> ownField : ownFields.entrySet()) {
+        if (!defs.containsKey(ownField.getKey())) {
+          defs.put(ownField.getKey(), ownField.getValue());
+        }
+      }
+      if (currentType.getParent() != null) {
+        final ContentTypeId parent = currentType.getParent();
+        currentType = getType(types, parent);
+        hasMore = currentType != null;
+      }
+      else {
+        hasMore = false;
+      }
+    }
+    return defs;
+  }
+
+  protected ContentType getType(Set<? extends ContentType> types, final ContentTypeId id) {
+    for (ContentType type : types) {
+      if (type.getContentTypeID().equals(id)) {
+        return type;
+      }
+    }
+    return null;
+  }
+
+  protected JFieldVar initializeDao(ContentTypeId typeId, JDefinedClass helperClass, JCodeModel model,
+                                    Map<ContentTypeId, JDefinedClass> classes) {
+    final JDefinedClass typeDef = classes.get(typeId);
+    final String varClassName = typeDef.name();
+    String readDaoName = new StringBuilder(new StringBuilder().append(
+        ("" + varClassName.charAt(0)).toLowerCase()).append(varClassName.substring(1)).toString()).append(
+        "ReadDaos").toString();
+    JFieldVar readDaoVar = helperClass.fields().get(readDaoName);
+    if (readDaoVar == null) {
+      readDaoVar = helperClass.field(JMod.PRIVATE, model.ref(Map.class).narrow(String.class).narrow(model.ref(
+          CommonReadDao.class).narrow(typeDef.wildcard()).narrow(
+          String.class)), readDaoName);
+      readDaoVar.annotate(Inject.class);
+    }
+    return readDaoVar;
+  }
+
+  protected Collection<MutableContentType> parseContentType(final WorkspaceId id, File file) throws
+      MojoExecutionException {
+    try {
+      final XmlParser parser = new XmlParser(id, new FileInputStream(file),
+                                             new XMLParserIntrospector() {
+
+        public MutableContentType createMutableContentType() {
+          return new ContentTypeImpl();
+        }
+
+        public void processMutableContentType(MutableContentType type, Element element) {
+        }
+      });
+      return parser.parse();
+    }
+    catch (Exception ex) {
+      throw new MojoExecutionException(ex.getMessage(), ex);
+    }
+  }
+
+  protected void generateCode(JCodeModel codeModel, Set<MutableContentType> types) throws Exception {
+    Map<ContentTypeId, JDefinedClass> classes = new LinkedHashMap<ContentTypeId, JDefinedClass>();
+    Map<ContentTypeId, JDefinedClass> helpers = new LinkedHashMap<ContentTypeId, JDefinedClass>();
+    Map<ContentTypeId, JDefinedClass> modules = new LinkedHashMap<ContentTypeId, JDefinedClass>();
+    // Create the classes
+    for (MutableContentType type : types) {
+      final ContentTypeId contentTypeID = type.getContentTypeID();
+      classes.put(contentTypeID, generateClassForType(type, codeModel));
+    }
+    // Set parent content types as appropriate
+    for (MutableContentType type : types) {
+      final JDefinedClass typeClass = classes.get(type.getContentTypeID());
+      if (type.getParent() != null) {
+        final JClass parentClass = classes.get(type.getParent());
+        typeClass._extends(parentClass);
+      }
+    }
+    // Create members and their accessors
+    for (MutableContentType type : types) {
+      generateFields(type.getOwnFieldDefs().values(), classes.get(type.getContentTypeID()), classes, codeModel);
+    }
+    generateIoCClasses(codeModel, types, classes, helpers, modules);
   }
 
   protected JDefinedClass generateHelper(final ContentType contentType, JCodeModel codeModel,
@@ -668,7 +698,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
           ContentDataType contentDataType = (ContentDataType) def.getValueDef();
           final JDefinedClass typeDef = classes.get(contentDataType.getTypeDef());
           if (typeDef != null) {
-            JFieldVar readDaoVar = initializeDao(typeDef, helperClass, model);
+            JFieldVar readDaoVar = initializeDao(contentDataType.getTypeDef(), helperClass, model, classes);
             if (readDaoVar != null) {
               final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).append(name.
                   substring(1)).toString();
@@ -681,7 +711,15 @@ public class PojoGeneratorMojo extends AbstractMojo {
               final JVar contentIdVal = setBlock.decl(contentIdRef, getVarName(prefix, "contentIdVal"), fieldVal.invoke(
                   "getValue"));
               JConditional idValCond = setBlock._if(contentIdVal.ne(JExpr._null()));
-              idValCond._then().add(toBean.invoke(setterName).arg(readDaoVar.invoke("getById").arg(
+              JBlock typeDaoBlock = idValCond._then();
+              String readDaoName = new StringBuilder(new StringBuilder().append(
+                  ("" + typeDef.name().charAt(0)).toLowerCase()).append(typeDef.name().substring(1)).toString()).append(
+                  "ReadDao").toString();
+              JVar typeDao = typeDaoBlock.decl(model.ref(CommonReadDao.class).narrow(typeDef.wildcard()).narrow(
+                  String.class), readDaoName, readDaoVar.invoke("get").arg(contentIdVal.invoke("getContent").invoke(
+                  "getContentDefinition").invoke("toString")));
+              JConditional daoValCond = typeDaoBlock._if(typeDao.ne(JExpr._null()));
+              daoValCond._then().add(toBean.invoke(setterName).arg(typeDao.invoke("getById").arg(
                   contentIdVal.invoke("toString"))));
             }
           }
@@ -738,13 +776,13 @@ public class PojoGeneratorMojo extends AbstractMojo {
               break;
             case CONTENT: {
               ContentDataType contentDataType = (ContentDataType) collectionDataType.getItemDataType();
-              final JDefinedClass narrowClass = classes.get(contentDataType.getTypeDef());
-              if (narrowClass != null) {
-                JFieldVar readDaoVar = initializeDao(narrowClass, helperClass, model);
+              final JDefinedClass typeDef = classes.get(contentDataType.getTypeDef());
+              if (typeDef != null) {
+                JFieldVar readDaoVar = initializeDao(contentDataType.getTypeDef(), helperClass, model, classes);
                 if (readDaoVar != null) {
-                  JVar resultVal = valBlock.decl(model.ref(Collection.class).narrow(narrowClass), getVarName(prefix,
-                                                                                                             "beanList"),
-                                                 JExpr._new(model.ref(ArrayList.class).narrow(narrowClass)));
+                  JVar resultVal = valBlock.decl(model.ref(Collection.class).narrow(typeDef), getVarName(prefix,
+                                                                                                         "beanList"),
+                                                 JExpr._new(model.ref(ArrayList.class).narrow(typeDef)));
                   final JClass narrowedCollection = model.ref(Collection.class).narrow(FieldValue.class);
                   JVar fieldVal = valBlock.decl(model.ref(FieldValue.class).narrow(narrowedCollection),
                                                 getVarName(prefix, "fieldVal"), field.invoke("getValue"));
@@ -766,7 +804,16 @@ public class PojoGeneratorMojo extends AbstractMojo {
                   final JVar contentIdVal = _then.decl(contentIdRef, getVarName(prefix, "contentIdVal"),
                                                        val.invoke("getValue"));
                   JConditional idValCond = _then._if(contentIdVal.ne(JExpr._null()));
-                  idValCond._then().add(resultVal.invoke("add").arg(readDaoVar.invoke("getById").arg(
+                  JBlock typeDaoBlock = idValCond._then();
+                  String readDaoName = new StringBuilder(new StringBuilder().append(
+                      ("" + typeDef.name().charAt(0)).toLowerCase()).append(typeDef.name().substring(1)).toString()).
+                      append(
+                      "ReadDao").toString();
+                  JVar typeDao = typeDaoBlock.decl(model.ref(CommonReadDao.class).narrow(typeDef.wildcard()).narrow(
+                      String.class), readDaoName, readDaoVar.invoke("get").arg(contentIdVal.invoke("getContent").invoke(
+                      "getContentDefinition").invoke("toString")));
+                  JConditional daoValCond = typeDaoBlock._if(typeDao.ne(JExpr._null()));
+                  daoValCond._then().add(resultVal.invoke("add").arg(typeDao.invoke("getById").arg(
                       contentIdVal.invoke("toString"))));
                   final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).
                       append(name.substring(1)).toString();
@@ -1236,5 +1283,109 @@ public class PojoGeneratorMojo extends AbstractMojo {
     for (JDefinedClass clazz : modules.values()) {
       block.invoke("install").arg(JExpr._new(clazz));
     }
+  }
+
+  private void generateAssociationIoCForFields(Collection<FieldDef> defs, JCodeModel model, JDefinedClass stringType,
+                                               JClass typeLiteral, JDefinedClass moduleClass, JBlock block,
+                                               Set<MutableContentType> types, Map<ContentTypeId, JDefinedClass> classes,
+                                               String namePrefix, final Set<ContentTypeId> idsConfigdFor) throws
+      JClassAlreadyExistsException {
+    for (FieldDef def : defs) {
+      final ContentDataType contentDataType;
+      final String probablePrefix = new StringBuilder(namePrefix).append(def.getName().substring(0, 1).toUpperCase()).
+          append(def.getName().substring(1)).toString();
+      switch (def.getValueDef().getType()) {
+        case CONTENT:
+          contentDataType = (ContentDataType) def.getValueDef();
+          break;
+        case COLLECTION:
+          CollectionDataType collectionDataType = (CollectionDataType) def.getValueDef();
+          if (collectionDataType.getItemDataType().getType().equals(FieldValueType.CONTENT)) {
+            contentDataType = (ContentDataType) collectionDataType.getItemDataType();
+          }
+          else if (collectionDataType.getItemDataType().getType().equals(FieldValueType.COMPOSITE)) {
+            CompositeDataType compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
+            generateAssociationIoCForFields(getAllComposedFields(compositeDataType, types), model, stringType,
+                                            typeLiteral, moduleClass, block, types, classes, probablePrefix,
+                                            idsConfigdFor);
+            contentDataType = null;
+          }
+          else {
+            contentDataType = null;
+          }
+          break;
+        case COMPOSITE:
+          CompositeDataType compositeDataType = (CompositeDataType) def.getValueDef();
+          generateAssociationIoCForFields(getAllComposedFields(compositeDataType, types), model, stringType, typeLiteral,
+                                          moduleClass, block, types, classes, probablePrefix, idsConfigdFor);
+        default:
+          contentDataType = null;
+          break;
+      }
+      if (contentDataType != null && !idsConfigdFor.contains(contentDataType.getTypeDef())) {
+        idsConfigdFor.add(contentDataType.getTypeDef());
+        JBlock mapBindingBlock = block.block();
+        JDefinedClass definedClass = classes.get(contentDataType.getTypeDef());
+        final JClass assocType = model.ref(CommonReadDao.class).narrow(definedClass.wildcard()).narrow(String.class);
+        final JClass narrowedReadTypeLiteral = typeLiteral.narrow(assocType);
+        final JDefinedClass assocDaoTypeLit = moduleClass._class(new StringBuilder(probablePrefix).append("DaoType").
+            toString());
+        assocDaoTypeLit._extends(narrowedReadTypeLiteral);
+        JVar mapBinderVar = mapBindingBlock.decl(model.ref(MapBinder.class).narrow(String.class).narrow(assocType),
+                                                 "mapBinder", model.ref(MapBinder.class).staticInvoke("newMapBinder").
+            arg(JExpr._this().invoke("binder")).arg(JExpr._new(stringType)).arg(JExpr._new(assocDaoTypeLit)));
+        Collection<ContentType> concreteInstances = findConcreteInstanceOf(contentDataType.getTypeDef(), types);
+        for (ContentType concreteInstance : concreteInstances) {
+          JDefinedClass concClass = classes.get(concreteInstance.getContentTypeID());
+          if (concClass == null) {
+            continue;
+          }
+          final JClass concType = model.ref(CommonReadDao.class).narrow(concClass).narrow(String.class);
+          final JClass narrowedConcReadTypeLiteral = typeLiteral.narrow(concType);
+          final String name = concreteInstance.getContentTypeID().getName();
+          final JDefinedClass concDaoTypeLit = moduleClass._class(new StringBuilder(probablePrefix).append(name.
+              substring(0, 1).toUpperCase()).append(name.substring(1)).append("DaoType").
+              toString());
+          concDaoTypeLit._extends(narrowedConcReadTypeLiteral);
+          mapBindingBlock.add(mapBinderVar.invoke("addBinding").arg(JExpr.lit(concreteInstance.getContentTypeID().
+              toString())).invoke("to").arg(JExpr._new(concDaoTypeLit)));
+        }
+      }
+    }
+  }
+
+  private Collection<ContentType> findConcreteInstanceOf(final ContentTypeId typeDef,
+                                                         final Collection<? extends ContentType> types) {
+    if (types == null || typeDef == null || types.isEmpty()) {
+      return Collections.emptyList();
+    }
+    final List<ContentType> instanceOfTypes = new ArrayList<ContentType>();
+    final Map<ContentTypeId, ContentType> typeMap = new HashMap<ContentTypeId, ContentType>();
+    for (ContentType type : types) {
+      typeMap.put(type.getContentTypeID(), type);
+    }
+    for (ContentType type : types) {
+      if (type.getDefinitionType().equals(DefinitionType.CONCRETE_TYPE)) {
+        boolean isInstanceOf = isInstanceOf(type, typeDef, typeMap);
+        if (isInstanceOf) {
+          instanceOfTypes.add(type);
+        }
+      }
+    }
+    return instanceOfTypes;
+  }
+
+  private boolean isInstanceOf(ContentType type, final ContentTypeId typeDef, Map<ContentTypeId, ContentType> types) {
+    boolean isInstanceOf = false;
+    if (type.getContentTypeID().equals(typeDef)) {
+      isInstanceOf = true;
+    }
+    if (!isInstanceOf) {
+      ContentTypeId parentId = type.getParent();
+      if (!isInstanceOf && parentId != null && types.get(parentId) != null) {
+        isInstanceOf = isInstanceOf(types.get(parentId), typeDef, types);
+      }
+    }
+    return isInstanceOf;
   }
 }
