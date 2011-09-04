@@ -30,6 +30,7 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.content.SearchResultImpl;
+import com.smartitengineering.cms.api.type.EnumDataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.Filter;
 import com.smartitengineering.cms.api.type.MutableCollectionDataType;
@@ -38,6 +39,7 @@ import com.smartitengineering.cms.api.type.MutableContentDataType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.type.MutableContentTypeId;
+import com.smartitengineering.cms.api.type.MutableEnumDataType;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
 import com.smartitengineering.cms.api.type.MutableOtherDataType;
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
@@ -403,5 +405,17 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       dataTypeImpl.getOwnMutableComposition().addAll(dataType.getOwnComposition());
     }
     return dataTypeImpl;
+  }
+
+  public MutableEnumDataType createMutableEnumDataType() {
+    return new EnumDataTypeImpl();
+  }
+
+  public MutableEnumDataType createMutableEnumDataType(EnumDataType dataType) {
+    MutableEnumDataType type = createMutableEnumDataType();
+    if (dataType != null && dataType.getChoices() != null) {
+      type.setChoices(dataType.getChoices());
+    }
+    return type;
   }
 }

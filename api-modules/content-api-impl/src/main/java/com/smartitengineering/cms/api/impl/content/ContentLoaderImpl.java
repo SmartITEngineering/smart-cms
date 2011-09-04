@@ -54,6 +54,7 @@ import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
+import com.smartitengineering.cms.api.type.EnumDataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
@@ -754,14 +755,29 @@ public class ContentLoaderImpl implements ContentLoader {
         FieldDef def = field.getFieldDef();
         switch (def.getValueDef().getType()) {
           case COLLECTION:
-            if (((CollectionDataType) def.getValueDef()).getItemDataType().getType().equals(FieldValueType.CONTENT)) {
-              DataType contentDataType = ((CollectionDataType) def.getValueDef()).getItemDataType();
+            final CollectionDataType collDataType = (CollectionDataType) def.getValueDef();
+            if (collDataType.getItemDataType().getType().equals(FieldValueType.CONTENT)) {
+              DataType contentDataType = collDataType.getItemDataType();
               for (FieldValue val : ((CollectionFieldValue) field.getValue()).getValue()) {
                 final boolean checkContentTypeValidity = checkContentTypeValidity(val, contentDataType);
                 if (!checkContentTypeValidity && logger.isWarnEnabled()) {
                   logger.warn("Content relation failed in " + field.getName());
                 }
                 valid = valid && checkContentTypeValidity;
+              }
+            }
+            else if (collDataType.getItemDataType().getType().equals(FieldValueType.ENUM)) {
+              EnumDataType enumDataType = (EnumDataType) collDataType.getItemDataType();
+              Collection<String> choices = enumDataType.getChoices();
+              for (FieldValue val : ((CollectionFieldValue) field.getValue()).getValue()) {
+                if (val instanceof StringFieldValue) {
+                  String strval = ((StringFieldValue) val).getValue();
+                  final boolean checkForEnumValidity = choices.contains(strval);
+                  if (!checkForEnumValidity && logger.isWarnEnabled()) {
+                    logger.warn("Enum value in collection failed for " + field.getName());
+                  }
+                  valid = valid && checkForEnumValidity;
+                }
               }
             }
             break;
@@ -771,6 +787,18 @@ public class ContentLoaderImpl implements ContentLoader {
               logger.warn("Content relation failed in " + field.getName());
             }
             valid = valid && checkContentTypeValidity;
+          }
+          break;
+          case ENUM: {
+            if (field.getValue() instanceof StringFieldValue) {
+              Collection<String> choices = ((EnumDataType) def.getValueDef()).getChoices();
+              String strval = ((StringFieldValue) field.getValue()).getValue();
+              final boolean checkForEnumValidity = choices.contains(strval);
+              if (!checkForEnumValidity && logger.isWarnEnabled()) {
+                logger.warn("Enum value failed for " + field.getName());
+              }
+              valid = valid && checkForEnumValidity;
+            }
           }
           break;
           default:

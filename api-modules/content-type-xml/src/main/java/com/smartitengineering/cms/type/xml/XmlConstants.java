@@ -42,6 +42,8 @@ public interface XmlConstants {
   public String DOUBLE = "double";
   public String BOOLEAN = "boolean";
   public String COMPOSITE = "composition";
+  public String ENUM = "enumeration";
+  public String ENUM_CHOICE = "choice";
   public String DATE_TIME = "datetime";
   public String ENCODING = "encoding";
   public String STRING = "string";

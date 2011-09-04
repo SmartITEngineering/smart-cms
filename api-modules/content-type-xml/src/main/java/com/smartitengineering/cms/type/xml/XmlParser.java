@@ -18,12 +18,12 @@
  */
 package com.smartitengineering.cms.type.xml;
 
-import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.impl.type.CollectionDataTypeImpl;
 import com.smartitengineering.cms.api.impl.type.CompositionDataTypeImpl;
 import com.smartitengineering.cms.api.impl.type.ContentDataTypeImpl;
 import com.smartitengineering.cms.api.impl.type.ContentStatusImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
+import com.smartitengineering.cms.api.impl.type.EnumDataTypeImpl;
 import com.smartitengineering.cms.api.impl.type.FieldDefImpl;
 import com.smartitengineering.cms.api.impl.type.OtherDataTypeImpl;
 import com.smartitengineering.cms.api.impl.type.RepresentationDefImpl;
@@ -45,6 +45,7 @@ import com.smartitengineering.cms.api.type.MutableCompositeDataType;
 import com.smartitengineering.cms.api.type.MutableContentDataType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
+import com.smartitengineering.cms.api.type.MutableEnumDataType;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
 import com.smartitengineering.cms.api.type.MutableOtherDataType;
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
@@ -387,6 +388,9 @@ public class XmlParser implements XmlConstants {
       else if (StringUtils.equalsIgnoreCase(localName, COMPOSITE)) {
         return parseCompositeDataType(rootElement, parent);
       }
+      else if (StringUtils.equalsIgnoreCase(localName, ENUM)) {
+        return parseEnumDataType(rootElement, parent);
+      }
       else {
         return DataType.INTEGER;
       }
@@ -602,5 +606,23 @@ public class XmlParser implements XmlConstants {
       compositeDataType.getOwnMutableComposition().addAll(fields);
     }
     return compositeDataType;
+  }
+
+  private DataType parseEnumDataType(Element rootElement, FieldDef parent) {
+    MutableEnumDataType enumDataType = new EnumDataTypeImpl();
+    Elements choicesElem = rootElement.getChildElements(ENUM_CHOICE, NAMESPACE);
+    if (choicesElem != null && choicesElem.size() > 0) {
+      int size = choicesElem.size();
+      List<String> list = new ArrayList<String>(size);
+      for (int i = 0; i < size; ++i) {
+        String choice = choicesElem.get(i).getValue();
+        list.add(choice);
+      }
+      enumDataType.setChoices(list);
+    }
+    else {
+      throw new IllegalStateException("There should be at least one choice for enumeration");
+    }
+    return enumDataType;
   }
 }

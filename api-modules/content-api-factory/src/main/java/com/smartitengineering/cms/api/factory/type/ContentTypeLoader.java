@@ -28,6 +28,7 @@ import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.type.EnumDataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.Filter;
 import com.smartitengineering.cms.api.type.MutableCollectionDataType;
@@ -36,6 +37,7 @@ import com.smartitengineering.cms.api.type.MutableContentDataType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.type.MutableContentTypeId;
+import com.smartitengineering.cms.api.type.MutableEnumDataType;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
 import com.smartitengineering.cms.api.type.MutableOtherDataType;
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
@@ -164,6 +166,10 @@ public interface ContentTypeLoader {
    * @return New content data type
    */
   public MutableContentDataType createMutableContentDataType();
+
+  public MutableEnumDataType createMutableEnumDataType();
+
+  public MutableEnumDataType createMutableEnumDataType(EnumDataType dataType);
 
   /**
    * Create a new editable content status

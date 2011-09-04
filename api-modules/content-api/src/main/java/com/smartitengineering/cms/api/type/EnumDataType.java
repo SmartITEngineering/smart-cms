@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2011  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,22 +18,18 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.util.Collection;
+
 /**
- * Constants representing specialized forms of {@link FieldDef}
+ * Represents special data type for enumeration.
  * @author imyousuf
  * @since 0.1
  */
-public enum FieldValueType {
+public interface EnumDataType extends DataType {
 
-  INTEGER,
-  LONG,
-  DOUBLE,
-  BOOLEAN,
-  DATE_TIME,
-  STRING,
-  CONTENT,
-  COLLECTION,
-  COMPOSITE,
-  ENUM,
-  OTHER
+  /**
+   * Retrieve the choices out of which, if value is present, a single value of a field must match exactly one.
+   * @return The choices available
+   */
+  Collection<String> getChoices();
 }
