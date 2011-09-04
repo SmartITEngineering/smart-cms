@@ -100,6 +100,14 @@
     <dynamicField name="*_STRING_is" type="text" indexed="true" stored="true" required="false"/>
     <dynamicField name="*_STRING_mis" type="text" indexed="true" stored="true" required="false" multiValued="true" />
 
+    <dynamicField name="*_ENUM_m" type="text" indexed="false" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_ENUM_i" type="text" indexed="true" stored="false" required="false"/>
+    <dynamicField name="*_ENUM_s" type="text" indexed="false" stored="true" required="false"/>
+    <dynamicField name="*_ENUM_mi" type="text" indexed="true" stored="false" required="false" multiValued="true" />
+    <dynamicField name="*_ENUM_ms" type="text" indexed="false" stored="true" required="false" multiValued="true" />
+    <dynamicField name="*_ENUM_is" type="text" indexed="true" stored="true" required="false"/>
+    <dynamicField name="*_ENUM_mis" type="text" indexed="true" stored="true" required="false" multiValued="true" />
+
     <dynamicField name="*_DATE_TIME_m" type="date" indexed="false" stored="false" required="false" multiValued="true" />
     <dynamicField name="*_DATE_TIME_i" type="date" indexed="true" stored="false" required="false"/>
     <dynamicField name="*_DATE_TIME_s" type="date" indexed="false" stored="true" required="false"/>
