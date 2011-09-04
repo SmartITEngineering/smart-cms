@@ -27,12 +27,14 @@ import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
+import com.smartitengineering.cms.api.type.EnumDataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableCollectionDataType;
 import com.smartitengineering.cms.api.type.MutableCompositeDataType;
 import com.smartitengineering.cms.api.type.MutableContentDataType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
+import com.smartitengineering.cms.api.type.MutableEnumDataType;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
 import com.smartitengineering.cms.api.type.MutableOtherDataType;
 import com.smartitengineering.cms.api.type.MutableRepresentationDef;
@@ -62,6 +64,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
@@ -78,6 +81,8 @@ import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
 /**
  *
@@ -127,12 +132,14 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   public final static byte[] CELL_FIELD_CONTENT_TYPE_ID = Bytes.toBytes("typeId");
   public final static byte[] CELL_FIELD_STRING_ENCODING = Bytes.toBytes("encoding");
   public final static byte[] CELL_FIELD_OTHER_MIME_TYPE = Bytes.toBytes("mimeType");
+  public final static byte[] CELL_FIELD_ENUM_CHOICES = Bytes.toBytes("enumChoices");
   public final static byte[] COLON = Bytes.toBytes(":");
   public static final String SPCL_FIELD_DATA_TYPE_PATTERN = ":(" + FieldValueType.COLLECTION.name() + "|" +
       FieldValueType.CONTENT.name() + "|" + FieldValueType.OTHER.name() + "|" + FieldValueType.STRING.name() + "|" +
       FieldValueType.COMPOSITE.name() + "):(.+)";
   public static final String COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX = ":COLLECTION:" + Bytes.toString(
       CELL_FIELD_COLLECTION_ITEM);
+  private final ObjectMapper mapper = new ObjectMapper();
 
   @Override
   protected String[] getTablesToAttainLock() {
@@ -385,6 +392,12 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         logger.debug("Working with OTHER Special data type");
         OtherDataType otherDataType = (OtherDataType) valueDef;
         put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_OTHER_MIME_TYPE), Bytes.toBytes(otherDataType.getMIMEType()));
+        break;
+      case ENUM:
+        logger.debug("Working with ENUM Special data type");
+        EnumDataType enumDataType = (EnumDataType) valueDef;
+        put.add(FAMILY_FIELDS, Bytes.add(prefix, CELL_FIELD_ENUM_CHOICES), Bytes.toBytes(mapper.writeValueAsString(
+            enumDataType.getChoices())));
         break;
     }
   }
@@ -924,6 +937,9 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       case COMPOSITE:
         mutableDataType = SmartContentAPI.getInstance().getContentTypeLoader().createMutableCompositeDataType();
         break;
+      case ENUM:
+        mutableDataType = SmartContentAPI.getInstance().getContentTypeLoader().createMutableEnumDataType();
+        break;
       case OTHER:
       default:
         mutableDataType =
@@ -1045,6 +1061,18 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
             otherDataType.setMIMEType(Bytes.toString(value));
           }
           break;
+        case ENUM: {
+          logger.debug("Parsing ENUM");
+          MutableEnumDataType enumDataType = (MutableEnumDataType) mutableDataType;
+          if (Arrays.equals(infoKey, CELL_FIELD_ENUM_CHOICES)) {
+            logger.debug("Parsing Enum Choices");
+            final String stringVal = Bytes.toString(value);
+            List<String> list = mapper.readValue(stringVal, new TypeReference<List<String>>() {
+            });
+            enumDataType.setChoices(list);
+          }
+          break;
+        }
       }
     }
     else {
