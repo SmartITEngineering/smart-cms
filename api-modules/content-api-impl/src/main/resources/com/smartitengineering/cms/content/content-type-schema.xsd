@@ -76,6 +76,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+  <xs:element name="choice" type="xs:string"/>
   <xs:element name="enumeration">
     <xs:complexType>
       <xs:sequence>

@@ -38,6 +38,7 @@ import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.content.ContentLoaderImpl;
 import com.smartitengineering.cms.api.type.CompositeDataType;
+import com.smartitengineering.cms.api.type.EnumDataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
@@ -490,6 +491,31 @@ public class XMLContentTypeDefnitionParserTest {
   }
 
   @Test
+  public void testParsingEnumFields() throws Exception {
+    Collection<WritableContentType> collection = init("content-type-def-shopping.xml");
+    Assert.assertEquals(6, collection.size());
+    Iterator<WritableContentType> iterator = collection.iterator();
+    boolean foundFieldDef = false;
+    while (iterator.hasNext()) {
+      WritableContentType type = iterator.next();
+      if (type.getContentTypeID().getName().equals("Product")) {
+        foundFieldDef = true;
+        FieldDef enumDef = type.getFieldDefs().get("enumTest");
+        Assert.assertNotNull(enumDef);
+        Assert.assertEquals(FieldValueType.ENUM, enumDef.getValueDef().getType());
+        Assert.assertTrue(enumDef.getValueDef() instanceof EnumDataType);
+        EnumDataType enumDataType = (EnumDataType) enumDef.getValueDef();
+        Collection<String> choices = enumDataType.getChoices();
+        Assert.assertEquals(3, choices.size());
+        Assert.assertTrue(choices.contains(String.valueOf(1)));
+        Assert.assertTrue(choices.contains(String.valueOf(2)));
+        Assert.assertTrue(choices.contains(String.valueOf(3)));
+      }
+    }
+    Assert.assertTrue(foundFieldDef);
+  }
+
+  @Test
   public void testParsingCompositeFields() throws Exception {
     Collection<WritableContentType> collection = init("content-type-def-wih-composition.xml");
     Assert.assertEquals(2, collection.size());
@@ -530,7 +556,9 @@ public class XMLContentTypeDefnitionParserTest {
   }
 
   protected Collection<WritableContentType> init() throws Exception {
-    return init("content-type-def-1.xml");
+    final Collection<WritableContentType> init = init("content-type-def-1.xml");
+    Assert.assertEquals(2, init.size());
+    return init;
   }
 
   protected Collection<WritableContentType> init(String classpathResource) throws Exception {
@@ -541,7 +569,6 @@ public class XMLContentTypeDefnitionParserTest {
                                                                                         MediaType.APPLICATION_XML);
     Assert.assertNotNull(collection);
     Assert.assertFalse(collection.isEmpty());
-    Assert.assertEquals(2, collection.size());
     return collection;
   }
 
