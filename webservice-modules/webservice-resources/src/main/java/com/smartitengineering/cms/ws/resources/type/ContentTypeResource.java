@@ -27,11 +27,13 @@ import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.DataType;
+import com.smartitengineering.cms.api.type.EnumDataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.OtherDataType;
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.CompositeFieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.ContentFieldDefImpl;
+import com.smartitengineering.cms.ws.common.domains.EnumFieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldDefImpl;
 import com.smartitengineering.cms.ws.common.domains.OtherFieldDefImpl;
 import com.smartitengineering.cms.ws.common.utils.SimpleFeedExtensions;
@@ -230,6 +232,15 @@ public class ContentTypeResource extends AbstractResource {
             ((ContentFieldDefImpl) itemFieldDef).setInstanceOfId(((ContentDataType) collectionDataType.getItemDataType()).
                 getTypeDef().toString());
             break;
+          case ENUM:
+            EnumDataType enumDataType = (EnumDataType) collectionDataType.getItemDataType();
+            EnumFieldDefImpl enumFieldDefImpl = new EnumFieldDefImpl();
+            itemFieldDef = enumFieldDefImpl;
+            if (logger.isInfoEnabled()) {
+              logger.info("Enum choices " + enumDataType.getChoices());
+            }
+            enumFieldDefImpl.setChoices(enumDataType.getChoices());
+            break;
           case COMPOSITE: {
             itemFieldDef = new CompositeFieldDefImpl();
             CompositeFieldDefImpl defImpl = (CompositeFieldDefImpl) itemFieldDef;
@@ -262,6 +273,16 @@ public class ContentTypeResource extends AbstractResource {
         ((ContentFieldDefImpl) def).setInstanceOfId(((ContentDataType) fieldDef.getValueDef()).getTypeDef().
             toString());
         break;
+      case ENUM: {
+        EnumDataType enumDataType = (EnumDataType) fieldDef.getValueDef();
+        EnumFieldDefImpl enumFieldDefImpl = new EnumFieldDefImpl();
+        def = enumFieldDefImpl;
+        if (logger.isInfoEnabled()) {
+          logger.info("Enum choices " + enumDataType.getChoices());
+        }
+        enumFieldDefImpl.setChoices(enumDataType.getChoices());
+        break;
+      }
       case COMPOSITE: {
         def = new CompositeFieldDefImpl();
         CompositeFieldDefImpl defImpl = (CompositeFieldDefImpl) def;

@@ -31,6 +31,7 @@ import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.type.EnumDataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
@@ -57,9 +58,12 @@ import com.smartitengineering.cms.client.api.WorkspaceValidatorResource;
 import com.smartitengineering.cms.client.api.WorkspaceValidatorsResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationsResource;
+import com.smartitengineering.cms.ws.common.domains.CollectionFieldDef;
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldValue;
+import com.smartitengineering.cms.ws.common.domains.CompositeFieldDef;
 import com.smartitengineering.cms.ws.common.domains.CompositeFieldValue;
 import com.smartitengineering.cms.ws.common.domains.Content;
+import com.smartitengineering.cms.ws.common.domains.EnumFieldDef;
 import com.smartitengineering.cms.ws.common.domains.Field;
 import com.smartitengineering.cms.ws.common.domains.FieldImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldValue;
@@ -90,6 +94,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -2449,6 +2454,108 @@ public class AppTest {
     Assert.assertNotNull(typeFeedResource);
     Assert.assertNotNull(typeFeedResource.getStatuses());
     Assert.assertFalse(typeFeedResource.getStatuses().isEmpty());
+  }
+
+  private WorkspaceFeedResource setupEnumWorkspace() {
+    RootResource resource = RootResourceImpl.getRoot(URI.create(ROOT_URI_STRING));
+    resource.get();
+    WorkspaceFeedResource feedResource;
+    try {
+      feedResource = resource.getTemplates().getWorkspaceResource("test", "enums");
+    }
+    catch (Exception ex) {
+      feedResource = null;
+      LOGGER.info("Exception getting feed resoruce", ex);
+    }
+    boolean valid = false;
+    if (feedResource == null) {
+      try {
+        Workspace workspace = resource.createWorkspace(new WorkspaceIdImpl("test", "enums"));
+        feedResource = resource.getTemplates().getWorkspaceResource(workspace.getId().getGlobalNamespace(), workspace.
+            getId().getName());
+        valid = true;
+      }
+      catch (Exception ex) {
+        LOGGER.error("Error creating test workspace for templates", ex);
+      }
+    }
+    else {
+      valid = true;
+    }
+    Assert.assertTrue(valid);
+    return feedResource;
+  }
+
+  @Test
+  public void testCreateEnumContentType() throws Exception {
+    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENUM CONTENT TYPE CREATION ~~~~~~~~~~~~~~~~~~~~~~~~~");
+    WorkspaceFeedResource feedResource = setupEnumWorkspace();
+    String contentTypeXml = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(
+        "enum/content-type-def-with-enum.xml"));
+    feedResource.getContentTypes().createContentType(contentTypeXml);
+    com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl id =
+                                                                  new com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl();
+    id.setGlobalNamespace(feedResource.getWorkspaceNamespace());
+    id.setName(feedResource.getWorkspaceName());
+    ContentTypeIdImpl idImpl = new ContentTypeIdImpl();
+    idImpl.setWorkspace(id);
+    idImpl.setNamespace("enum");
+    idImpl.setName("EnumTest");
+    ContentType type = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(idImpl);
+    Assert.assertNotNull(type);
+    Map<String, FieldDef> enumFieldDefs = type.getFieldDefs();
+    Assert.assertEquals(4, enumFieldDefs.size());
+    FieldDef directFieldDef = enumFieldDefs.get("directEnumField");
+    Assert.assertNotNull(directFieldDef);
+    LOGGER.info("+++++++++++++++++++++ Direct Enum CHOICES " +
+        ((EnumDataType) directFieldDef.getValueDef()).getChoices());
+    Assert.assertTrue(((EnumDataType) directFieldDef.getValueDef()).getChoices().contains("1"));
+    Assert.assertTrue(((EnumDataType) directFieldDef.getValueDef()).getChoices().contains("2"));
+    FieldDef collectiveFieldDef = enumFieldDefs.get("collectiveEnumField");
+    Assert.assertNotNull(collectiveFieldDef);
+    Assert.assertTrue(((EnumDataType) ((CollectionDataType) collectiveFieldDef.getValueDef()).getItemDataType()).
+        getChoices().contains("3"));
+    Assert.assertTrue(((EnumDataType) ((CollectionDataType) collectiveFieldDef.getValueDef()).getItemDataType()).
+        getChoices().contains("4"));
+    FieldDef compositedFieldDef = enumFieldDefs.get("compositedEnumField");
+    Assert.assertNotNull(compositedFieldDef);
+    Assert.assertTrue(((EnumDataType) ((CompositeDataType) compositedFieldDef.getValueDef()).getComposedFieldDefs().get(
+                       "enumField").getValueDef()).getChoices().contains("5"));
+    Assert.assertTrue(((EnumDataType) ((CompositeDataType) compositedFieldDef.getValueDef()).getComposedFieldDefs().get(
+                       "enumField").getValueDef()).getChoices().contains("6"));
+    Collection<ContentTypeFeedResource> typeFeeds = feedResource.getContentTypes().getContentTypeFeeds();
+    Assert.assertNotNull(typeFeeds);
+    Assert.assertEquals(1, typeFeeds.size());
+    ContentTypeFeedResource feed = typeFeeds.iterator().next();
+    Collection<com.smartitengineering.cms.ws.common.domains.FieldDef> defs = feed.getFieldDefs();
+    Assert.assertEquals(4, defs.size());
+    Map<String, com.smartitengineering.cms.ws.common.domains.FieldDef> wDefs =
+                                                                       new HashMap<String, com.smartitengineering.cms.ws.common.domains.FieldDef>();
+    for (com.smartitengineering.cms.ws.common.domains.FieldDef def : defs) {
+      wDefs.put(def.getName(), def);
+    }
+    com.smartitengineering.cms.ws.common.domains.FieldDef wDirectFieldDef = wDefs.get("directEnumField");
+    Assert.assertNotNull(wDirectFieldDef);
+    Assert.assertTrue(wDirectFieldDef instanceof EnumFieldDef);
+    Assert.assertTrue(((EnumFieldDef) wDirectFieldDef).getChoices().contains("1"));
+    Assert.assertTrue(((EnumFieldDef) wDirectFieldDef).getChoices().contains("2"));
+    com.smartitengineering.cms.ws.common.domains.FieldDef wCollectiveFieldDef = wDefs.get("collectiveEnumField");
+    Assert.assertNotNull(wCollectiveFieldDef);
+    Assert.assertNotNull(((CollectionFieldDef) wCollectiveFieldDef).getItemDef());
+    Assert.assertTrue(((CollectionFieldDef) wCollectiveFieldDef).getItemDef() instanceof EnumFieldDef);
+    Assert.assertTrue(
+        ((EnumFieldDef) ((CollectionFieldDef) wCollectiveFieldDef).getItemDef()).getChoices().contains("3"));
+    Assert.assertTrue(
+        ((EnumFieldDef) ((CollectionFieldDef) wCollectiveFieldDef).getItemDef()).getChoices().contains("4"));
+    com.smartitengineering.cms.ws.common.domains.FieldDef wCompositedFieldDef = wDefs.get("compositedEnumField");
+    Assert.assertNotNull(wCompositedFieldDef);
+    Assert.assertNotNull(((CompositeFieldDef) wCompositedFieldDef).getComposedFields().get("enumField"));
+    Assert.assertTrue(
+        ((CompositeFieldDef) wCompositedFieldDef).getComposedFields().get("enumField") instanceof EnumFieldDef);
+    Assert.assertTrue(((EnumFieldDef) ((CompositeFieldDef) wCompositedFieldDef).getComposedFields().get("enumField")).
+        getChoices().contains("5"));
+    Assert.assertTrue(((EnumFieldDef) ((CompositeFieldDef) wCompositedFieldDef).getComposedFields().get("enumField")).
+        getChoices().contains("6"));
   }
 
   public static class ConfigurationModule extends AbstractModule {

@@ -136,7 +136,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   public final static byte[] COLON = Bytes.toBytes(":");
   public static final String SPCL_FIELD_DATA_TYPE_PATTERN = ":(" + FieldValueType.COLLECTION.name() + "|" +
       FieldValueType.CONTENT.name() + "|" + FieldValueType.OTHER.name() + "|" + FieldValueType.STRING.name() + "|" +
-      FieldValueType.COMPOSITE.name() + "):(.+)";
+      FieldValueType.COMPOSITE.name() + "|" + FieldValueType.ENUM.name() + "):(.+)";
   public static final String COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX = ":COLLECTION:" + Bytes.toString(
       CELL_FIELD_COLLECTION_ITEM);
   private final ObjectMapper mapper = new ObjectMapper();
