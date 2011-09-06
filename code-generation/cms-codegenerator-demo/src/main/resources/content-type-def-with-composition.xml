@@ -26,7 +26,7 @@
 -->
 <contentTypes  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
                xmlns='http://www.smartitengineering.com/smart-cms/content/content-type-schema'
-               xsi:schemaLocation='http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../../../../content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd'>
+               xsi:schemaLocation='http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../../../../api-modules/content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd'>
   <contentType namespace="test">
     <name>Name</name>
     <defType>ABSTRACT_COMPONENT</defType>
@@ -592,6 +592,90 @@
           <index>true</index>
           <store>true</store>
         </search>
+      </field>
+    </fields>
+  </contentType>
+  <contentType namespace="enumeration">
+    <name>EnumTest</name>
+    <parameterizedDisplayNames>
+      <param>
+        <key>en-US</key>
+        <val>Address (en-US)</val>
+      </param>
+    </parameterizedDisplayNames>
+    <primaryField>zipCode</primaryField>
+    <fields>
+      <field>
+        <name>zipCode</name>
+        <displayName>Postal Code/Zip Code</displayName>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+        <required>true</required>
+        <search>
+          <index>true</index>
+          <store>true</store>
+        </search>
+      </field>
+      <field>
+        <name>directEnumField</name>
+        <value>
+          <enumeration>
+            <choice>ONE</choice>
+            <choice>TWO</choice>
+          </enumeration>
+        </value>
+      </field>
+      <field>
+        <name>collectiveEnumField</name>
+        <value>
+          <collection>
+            <simple-value>
+              <enumeration>
+                <choice>THREE</choice>
+                <choice>FOUR</choice>
+              </enumeration>
+            </simple-value>
+          </collection>
+        </value>
+      </field>
+      <field>
+        <name>compositedEnumField</name>
+        <value>
+          <composition>
+            <field>
+              <name>enumField</name>
+              <value>
+                <enumeration>
+                  <choice>FIVE</choice>
+                  <choice>SIX</choice>
+                </enumeration>
+              </value>
+            </field>
+          </composition>
+        </value>
+      </field>
+      <field>
+        <name>collectiveCompositedEnumField</name>
+        <value>
+          <collection>
+            <simple-value>
+              <composition>
+                <field>
+                  <name>enumField</name>
+                  <value>
+                    <enumeration>
+                      <choice>SEVEN</choice>
+                      <choice>EIGHT</choice>
+                    </enumeration>
+                  </value>
+                </field>
+              </composition>
+            </simple-value>
+          </collection>
+        </value>
       </field>
     </fields>
   </contentType>

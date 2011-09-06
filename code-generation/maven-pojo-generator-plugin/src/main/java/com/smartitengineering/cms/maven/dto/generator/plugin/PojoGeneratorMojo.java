@@ -43,6 +43,7 @@ import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentType.DefinitionType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.type.EnumDataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableContentType;
@@ -545,6 +546,17 @@ public class PojoGeneratorMojo extends AbstractMojo {
           fieldClass = byte[].class;
           jType = null;
           break;
+        case ENUM: {
+          JDefinedClass enumClass = definedClass._enum(JMod.PUBLIC | JMod.STATIC, getterSetterSuffix);
+          EnumDataType enumDataType = (EnumDataType) def.getValueDef();
+          Collection<String> choices = enumDataType.getChoices();
+          for (String choice : choices) {
+            enumClass.enumConstant(choice);
+          }
+          fieldClass = null;
+          jType = enumClass;
+          break;
+        }
         case COLLECTION:
           fieldClass = null;
           final String itemType;
@@ -574,6 +586,16 @@ public class PojoGeneratorMojo extends AbstractMojo {
             case OTHER:
               itemType = byte[].class.getName();
               break;
+            case ENUM: {
+              JDefinedClass enumClass = definedClass._enum(JMod.PUBLIC | JMod.STATIC, getterSetterSuffix);
+              EnumDataType enumDataType = (EnumDataType) collectionDataType.getItemDataType();
+              Collection<String> choices = enumDataType.getChoices();
+              for (String choice : choices) {
+                enumClass.enumConstant(choice);
+              }
+              itemType = enumClass.fullName();
+              break;
+            }
             case COMPOSITE: {
               CompositeDataType compositeDataType = (CompositeDataType) collectionDataType.getItemDataType();
               ContentDataType composedOfContent = compositeDataType.getEmbeddedContentType();
@@ -679,6 +701,19 @@ public class PojoGeneratorMojo extends AbstractMojo {
         case STRING:
           setField(valBlock, model, field, name, toBean, String.class, prefix);
           break;
+        case ENUM: {
+          final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).append(name.
+              substring(1)).toString();
+          final String setterName = new StringBuilder("set").append(getterSetterSuffix).toString();
+          final String fieldValVar = getVarName(prefix, new StringBuilder(name).append("Val").toString());
+          JClass enumClass = ((JClass) currentClass.fields().get(name).type());
+          JVar fieldVal = block.decl(model.ref(FieldValue.class).narrow(String.class), fieldValVar, field.invoke(
+              "getValue"));
+          JConditional valCond = block._if(fieldVal.ne(JExpr._null()));
+          JBlock setBlock = valCond._then();
+          setBlock.add(toBean.invoke(setterName).arg(enumClass.staticInvoke("valueOf").arg(fieldVal.invoke("getValue"))));
+          break;
+        }
         case DATE_TIME:
           setField(valBlock, model, field, name, toBean, Date.class, prefix);
           break;
@@ -759,6 +794,39 @@ public class PojoGeneratorMojo extends AbstractMojo {
             case STRING:
               setCollectionField(valBlock, model, field, String.class, name, toBean, prefix);
               break;
+            case ENUM: {
+              JClass itClass = (JClass) ((JClass) currentClass.fields().get(name).type()).getTypeParameters().get(0);
+              JVar resultVal = valBlock.decl(model.ref(Collection.class).narrow(itClass), getVarName(prefix,
+                                                                                                     "beanList"),
+                                             JExpr._new(model.ref(ArrayList.class).narrow(itClass)));
+              final JClass narrowedCollection = model.ref(Collection.class).narrow(FieldValue.class);
+              JVar fieldVal = valBlock.decl(model.ref(FieldValue.class).narrow(narrowedCollection),
+                                            getVarName(prefix, "fieldVal"), field.invoke("getValue"));
+              JConditional collectionValCond = valBlock._if(fieldVal.ne(JExpr._null()));
+              JBlock validValBlock = collectionValCond._then();
+              JVar collectionVal = validValBlock.decl(narrowedCollection, getVarName(prefix, "collectionVal"), fieldVal.
+                  invoke(
+                  "getValue"));
+              JConditional validCollectionCond = validValBlock._if(collectionVal.ne(JExpr._null()).cand(collectionVal.
+                  invoke(
+                  "isEmpty").not()));
+              JBlock iterateBlock = validCollectionCond._then();
+              JVar iterator = iterateBlock.decl(model.ref(Iterator.class).narrow(FieldValue.class),
+                                                getVarName(prefix, "iterator"),
+                                                collectionVal.invoke("iterator"));
+              JWhileLoop loop = iterateBlock._while(iterator.invoke("hasNext"));
+              JBlock loopBlock = loop.body();
+              JVar val = loopBlock.decl(model.ref(FieldValue.class).narrow(String.class), getVarName(prefix, "val"),
+                                        iterator.invoke("next"));
+              JConditional singleValCond = loopBlock._if(val.ne(JExpr._null()));
+              singleValCond._then().add(resultVal.invoke("add").arg(itClass.staticInvoke("valueOf").arg(val.invoke(
+                  "getValue"))));
+              final String getterSetterSuffix = new StringBuilder().append(("" + name.charAt(0)).toUpperCase()).append(name.
+                  substring(1)).toString();
+              final String setterName = new StringBuilder("set").append(getterSetterSuffix).toString();
+              valBlock.add(toBean.invoke(setterName).arg(resultVal));
+              break;
+            }
             case DATE_TIME:
               setCollectionField(valBlock, model, field, Date.class, name, toBean, prefix);
               break;
@@ -1021,6 +1089,21 @@ public class PojoGeneratorMojo extends AbstractMojo {
                          methodName, prefix);
           break;
         }
+        case ENUM: {
+          final String methodName = "createStringFieldValue";
+          final Class valClass = String.class;
+          JBlock nonNullBlock = block._if(fromBean.invoke(getterName).ne(JExpr._null()).cand(fieldDefs.invoke("get").arg(
+              name).ne(JExpr._null())))._then();
+          JVar mutableField = nonNullBlock.decl(model.ref(MutableField.class), getVarName(prefix, "mutableField"),
+                                                contentLoader.invoke("createMutableField").arg(JExpr._null()).arg(fieldDefs.
+              invoke("get").arg(name)));
+          JVar mutableFieldValue = nonNullBlock.decl(model.ref(MutableFieldValue.class).narrow(valClass),
+                                                     getVarName(prefix, "fieldVal"), contentLoader.invoke(methodName));
+          nonNullBlock.add(mutableFieldValue.invoke("setValue").arg(fromBean.invoke(getterName).invoke("name")));
+          nonNullBlock.add(mutableField.invoke("setValue").arg(mutableFieldValue));
+          nonNullBlock.add(wContent.invoke("setField").arg(mutableField));
+          break;
+        }
         case DATE_TIME: {
           final String methodName = "createDateTimeFieldValue";
           final Class valClass = Date.class;
@@ -1111,6 +1194,39 @@ public class PojoGeneratorMojo extends AbstractMojo {
               final Class valClass = String.class;
               setSimpleMultiField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
                                   methodName, prefix);
+              break;
+            }
+            case ENUM: {
+              final String methodName = "createStringFieldValue";
+              final Class valClass = String.class;
+              JBlock nonNullBlock = block._if(fromBean.invoke(getterName).ne(JExpr._null()).cand(fieldDefs.invoke("get").
+                  arg(
+                  name).ne(JExpr._null())))._then();
+              JVar mutableField = nonNullBlock.decl(model.ref(MutableField.class), getVarName(prefix, "mutableField"),
+                                                    contentLoader.invoke("createMutableField").arg(JExpr._null()).arg(fieldDefs.
+                  invoke("get").arg(name)));
+              JVar mutableFieldValue = nonNullBlock.decl(model.ref(MutableFieldValue.class).narrow(model.ref(
+                  Collection.class).
+                  narrow(model.ref(FieldValue.class))), getVarName(prefix, "fieldVals"), contentLoader.invoke(
+                  "createCollectionFieldValue"));
+              nonNullBlock.add(mutableField.invoke("setValue").arg(mutableFieldValue));
+              nonNullBlock.add(wContent.invoke("setField").arg(mutableField));
+              JVar collection = nonNullBlock.decl(model.ref(Collection.class).narrow(model.ref(FieldValue.class)),
+                                                  getVarName(
+                  prefix, "collectionVar"), JExpr._new(model.ref(ArrayList.class).narrow(FieldValue.class)));
+              nonNullBlock.add(mutableFieldValue.invoke("setValue").arg(collection));
+              final JForLoop forLoop = nonNullBlock._for();
+
+              JType itClass = ((JClass) currentClass.fields().get(name).type()).getTypeParameters().get(0);
+              JVar iterator_item = forLoop.init(model.ref(Iterator.class).narrow(itClass), getVarName(prefix, "i"),
+                                                fromBean.invoke(getterName).invoke("iterator"));
+              forLoop.test(iterator_item.invoke("hasNext"));
+              final JBlock forBody = forLoop.body();
+              JVar mutableItemFieldValue =
+                   forBody.decl(model.ref(MutableFieldValue.class).narrow(valClass),
+                                getVarName(prefix, "fieldVal"), contentLoader.invoke(methodName));
+              forBody.add(mutableItemFieldValue.invoke("setValue").arg(iterator_item.invoke("next").invoke("name")));
+              forBody.add(collection.invoke("add").arg(mutableItemFieldValue));
               break;
             }
             case DATE_TIME: {
