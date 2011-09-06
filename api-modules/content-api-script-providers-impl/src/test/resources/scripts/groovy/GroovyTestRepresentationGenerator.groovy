@@ -23,20 +23,7 @@
  */
 class GroovyTestRepresentationGenerator implements com.smartitengineering.cms.api.content.template.RepresentationGenerator {
 	public String getRepresentationForContent(com.smartitengineering.cms.api.content.Content content, Map<String, String> params) {
-    String strVal = content.getFields().get("fieldA").value.value.toString();
-    int max = 10;
-    if(params.containsKey("max")) {
-      try {
-        max = Integer.parseInt(params["max"]);
-      }
-      catch(Exception ex) {
-        ex.printStackTrace();
-      }
-    }
-    if(strVal.length() > max) {
-      return strVal.substring(0, max);
-    }
-    return strVal;
+    return content.getField("test").value.value.toString();
   }
 }
 

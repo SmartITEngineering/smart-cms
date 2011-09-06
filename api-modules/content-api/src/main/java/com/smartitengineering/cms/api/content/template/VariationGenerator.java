@@ -16,27 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.smartitengineering.cms.api.content.template;
+
+import com.smartitengineering.cms.api.content.Field;
+import java.util.Map;
 
 /**
  *
  * @author imyousuf
  */
-class GroovyTestRepresentationGenerator implements com.smartitengineering.cms.api.content.template.RepresentationGenerator {
-	public String getRepresentationForContent(com.smartitengineering.cms.api.content.Content content, Map<String, String> params) {
-    String strVal = content.getFields().get("fieldA").value.value.toString();
-    int max = 10;
-    if(params.containsKey("max")) {
-      try {
-        max = Integer.parseInt(params["max"]);
-      }
-      catch(Exception ex) {
-        ex.printStackTrace();
-      }
-    }
-    if(strVal.length() > max) {
-      return strVal.substring(0, max);
-    }
-    return strVal;
-  }
-}
+public interface VariationGenerator {
 
+  /**
+   * Generate the output of a variation template for a field
+   * @param field Field for which the variation is requested
+   * @param params Parameters from the content type definition
+   * @return May return any of String, InputStream, byte[]. Any other type of object would result invocation of
+   *          {@link Object#toString()}
+   */
+  Object getVariationForField(Field field, Map<String, String> params);
+}

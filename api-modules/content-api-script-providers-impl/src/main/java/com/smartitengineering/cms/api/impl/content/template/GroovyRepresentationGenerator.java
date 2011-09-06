@@ -16,27 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.smartitengineering.cms.api.impl.content.template;
+
+import com.smartitengineering.cms.api.exception.InvalidTemplateException;
+import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.content.template.RepresentationGenerator;
+import com.smartitengineering.cms.api.content.template.TypeRepresentationGenerator;
 
 /**
  *
  * @author imyousuf
  */
-class GroovyTestRepresentationGenerator implements com.smartitengineering.cms.api.content.template.RepresentationGenerator {
-	public String getRepresentationForContent(com.smartitengineering.cms.api.content.Content content, Map<String, String> params) {
-    String strVal = content.getFields().get("fieldA").value.value.toString();
-    int max = 10;
-    if(params.containsKey("max")) {
-      try {
-        max = Integer.parseInt(params["max"]);
-      }
-      catch(Exception ex) {
-        ex.printStackTrace();
-      }
-    }
-    if(strVal.length() > max) {
-      return strVal.substring(0, max);
-    }
-    return strVal;
+public class GroovyRepresentationGenerator extends AbstractTypeRepresentationGenerator implements
+    TypeRepresentationGenerator {
+
+  @Override
+  public RepresentationGenerator getGenerator(RepresentationTemplate template) throws InvalidTemplateException {
+    return GroovyObjectFactory.getInstance().getObjectFromScript(template.getTemplate(), RepresentationGenerator.class);
   }
 }
-

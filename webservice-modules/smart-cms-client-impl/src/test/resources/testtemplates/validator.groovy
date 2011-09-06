@@ -2,7 +2,7 @@
  *
  * @author imyousuf
  */
-class InternalValidator implements com.smartitengineering.cms.spi.content.template.FieldValidator {
+class InternalValidator implements com.smartitengineering.cms.api.content.template.FieldValidator {
 	public boolean isValidFieldValue(com.smartitengineering.cms.api.content.Field field, Map<String, String> params) {
     boolean valid = true;
     if(field.getFieldDef().getValueDef().getType() != com.smartitengineering.cms.api.type.FieldValueType.STRING) {

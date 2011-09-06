@@ -32,7 +32,7 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.spi.content.RepresentationProvider;
-import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
+import com.smartitengineering.cms.api.content.template.TypeRepresentationGenerator;
 import java.util.Date;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;

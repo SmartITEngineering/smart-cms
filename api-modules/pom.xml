@@ -35,6 +35,7 @@
     <module>content-api-factory</module>
     <module>content-api-impl-generic</module>
     <module>content-api-impl</module>
+    <module>content-api-script-providers-impl</module>
     <module>content-type-xml</module>
   </modules>
 </project>

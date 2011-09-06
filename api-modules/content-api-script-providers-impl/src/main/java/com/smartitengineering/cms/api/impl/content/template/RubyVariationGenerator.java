@@ -16,27 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.smartitengineering.cms.api.impl.content.template;
+
+import com.smartitengineering.cms.api.exception.InvalidTemplateException;
+import com.smartitengineering.cms.api.workspace.VariationTemplate;
+import com.smartitengineering.cms.api.content.template.VariationGenerator;
 
 /**
  *
  * @author imyousuf
  */
-class GroovyTestRepresentationGenerator implements com.smartitengineering.cms.api.content.template.RepresentationGenerator {
-	public String getRepresentationForContent(com.smartitengineering.cms.api.content.Content content, Map<String, String> params) {
-    String strVal = content.getFields().get("fieldA").value.value.toString();
-    int max = 10;
-    if(params.containsKey("max")) {
-      try {
-        max = Integer.parseInt(params["max"]);
-      }
-      catch(Exception ex) {
-        ex.printStackTrace();
-      }
-    }
-    if(strVal.length() > max) {
-      return strVal.substring(0, max);
-    }
-    return strVal;
+public class RubyVariationGenerator extends AbstractTypeVariationGenerator {
+
+  @Override
+  public VariationGenerator getGenerator(VariationTemplate template) throws InvalidTemplateException {
+    return JRubyObjectFactory.getInstance().getObjectFromScript(template.getTemplate(), VariationGenerator.class);
   }
 }
-

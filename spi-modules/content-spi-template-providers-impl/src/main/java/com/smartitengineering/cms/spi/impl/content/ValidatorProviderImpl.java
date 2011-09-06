@@ -28,7 +28,7 @@ import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.spi.content.ValidatorProvider;
-import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
+import com.smartitengineering.cms.api.content.template.TypeFieldValidator;
 import java.util.Collection;
 import java.util.Map;
 import org.slf4j.Logger;

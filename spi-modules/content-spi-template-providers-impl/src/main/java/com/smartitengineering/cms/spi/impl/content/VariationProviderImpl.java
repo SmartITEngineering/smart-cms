@@ -29,7 +29,7 @@ import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.spi.content.VariationProvider;
-import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
+import com.smartitengineering.cms.api.content.template.TypeVariationGenerator;
 import java.util.Date;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;

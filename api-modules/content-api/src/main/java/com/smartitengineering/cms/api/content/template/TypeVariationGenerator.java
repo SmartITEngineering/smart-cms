@@ -16,27 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.smartitengineering.cms.api.content.template;
+
+import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.content.Field;
+import com.smartitengineering.cms.api.content.MutableVariation;
+import com.smartitengineering.cms.api.exception.InvalidTemplateException;
+import com.smartitengineering.cms.api.workspace.VariationTemplate;
+import java.util.Map;
 
 /**
  *
  * @author imyousuf
  */
-class GroovyTestRepresentationGenerator implements com.smartitengineering.cms.api.content.template.RepresentationGenerator {
-	public String getRepresentationForContent(com.smartitengineering.cms.api.content.Content content, Map<String, String> params) {
-    String strVal = content.getFields().get("fieldA").value.value.toString();
-    int max = 10;
-    if(params.containsKey("max")) {
-      try {
-        max = Integer.parseInt(params["max"]);
-      }
-      catch(Exception ex) {
-        ex.printStackTrace();
-      }
-    }
-    if(strVal.length() > max) {
-      return strVal.substring(0, max);
-    }
-    return strVal;
-  }
-}
+public interface TypeVariationGenerator {
 
+  MutableVariation getVariation(VariationTemplate template, Content content, Field field, String variationName,
+                                Map<String, String> params);
+
+  VariationGenerator getGenerator(VariationTemplate template) throws InvalidTemplateException;
+}

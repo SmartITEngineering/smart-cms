@@ -2,7 +2,7 @@
  *
  * @author imyousuf
  */
-class InternalVariation implements com.smartitengineering.cms.spi.content.template.VariationGenerator {
+class InternalVariation implements com.smartitengineering.cms.api.content.template.VariationGenerator {
   public String getVariationForField(com.smartitengineering.cms.api.content.Field field, Map<String, String> params) {
     String strVal = field.value.value.toString();
     int max = 10;
