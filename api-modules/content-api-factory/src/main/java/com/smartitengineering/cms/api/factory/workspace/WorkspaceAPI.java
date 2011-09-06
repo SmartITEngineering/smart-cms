@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.factory.workspace;
 
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.content.template.ContentCoProcessor;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
@@ -76,6 +77,8 @@ public interface WorkspaceAPI {
   ContentCoProcessorTemplate putContentCoProcessorTemplate(WorkspaceId to, String name, TemplateType templateType, byte[] data);
 
   ContentCoProcessorTemplate getContentCoProcessorTemplate(WorkspaceId id, String name);
+  
+  ContentCoProcessor getContentCoProcessor(WorkspaceId id, String name);
 
   WorkspaceId getWorkspaceIdIfExists(String name);
 

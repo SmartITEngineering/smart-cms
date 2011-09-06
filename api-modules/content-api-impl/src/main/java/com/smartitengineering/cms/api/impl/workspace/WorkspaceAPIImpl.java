@@ -22,6 +22,8 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.content.template.ContentCoProcessor;
+import com.smartitengineering.cms.api.content.template.ContentCoProcessorGenerator;
 import com.smartitengineering.cms.api.event.Event;
 import com.smartitengineering.cms.api.event.Event.EventType;
 import com.smartitengineering.cms.api.event.Event.Type;
@@ -44,6 +46,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -60,6 +63,8 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
 
   private String globalNamespace;
   private final transient Logger logger = LoggerFactory.getLogger(getClass());
+  @Inject
+  private Map<TemplateType, ContentCoProcessorGenerator> contentCoProcessorGenerators;
 
   @Inject
   public void setGlobalNamespace(@Named("globalNamespace") String globalNamespace) {
@@ -488,5 +493,20 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
 
   public void removeAllContentCoProcessorTemplates(WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getWorkspaceService().removeAllContentCoProcessorTemplates(workspaceId);
+  }
+
+  public ContentCoProcessor getContentCoProcessor(WorkspaceId id, String name) {
+    ContentCoProcessorTemplate template = getContentCoProcessorTemplate(id, name);
+    if (template == null) {
+      return null;
+    }
+    ContentCoProcessorGenerator generator = contentCoProcessorGenerators.get(template.getTemplateType());
+    try {
+      return generator.getGenerator(template);
+    }
+    catch (Exception ex) {
+      logger.warn("Could not retrieve processor", ex);
+      return null;
+    }
   }
 }
