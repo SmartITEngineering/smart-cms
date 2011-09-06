@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI.ResourceSortCriteria;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ValidatorType;
+import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
@@ -239,5 +240,27 @@ public class WorkspaceServiceCacheImpl implements WorkspaceService {
     if (cacheProvider.containsKey(key)) {
       cacheProvider.expireFromCache(key);
     }
+  }
+
+  public ContentCoProcessorTemplate putContentCoProcessorTemplate(WorkspaceId workspaceId, String name,
+                                                                  TemplateType templateType, byte[] data) {
+    return primaryWorkspaceService.putContentCoProcessorTemplate(workspaceId, name, templateType, data);
+  }
+
+  public ContentCoProcessorTemplate getContentCoProcessorTemplate(WorkspaceId workspaceId, String name) {
+    return primaryWorkspaceService.getContentCoProcessorTemplate(workspaceId, name);
+  }
+
+  public void removeAllContentCoProcessorTemplates(WorkspaceId workspaceId) {
+    primaryWorkspaceService.removeAllContentCoProcessorTemplates(workspaceId);
+  }
+
+  public Collection<ContentCoProcessorTemplate> getContentCoProcessorsWithoutData(WorkspaceId id,
+                                                                                  ResourceSortCriteria criteria) {
+    return primaryWorkspaceService.getContentCoProcessorsWithoutData(id, criteria);
+  }
+
+  public void deleteContentCoProcessor(ContentCoProcessorTemplate template) {
+    primaryWorkspaceService.deleteContentCoProcessor(template);
   }
 }

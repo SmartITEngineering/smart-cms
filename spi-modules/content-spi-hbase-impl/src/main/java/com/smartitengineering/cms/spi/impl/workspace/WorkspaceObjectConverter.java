@@ -23,6 +23,7 @@ import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.type.ValidatorType;
+import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
@@ -31,6 +32,7 @@ import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.impl.hbase.Utils;
 import com.smartitengineering.cms.spi.impl.content.PersistentContent;
+import com.smartitengineering.cms.spi.workspace.PersistableContentCoProcessorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableResourceTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableValidatorTemplate;
@@ -64,6 +66,8 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
   public static final String TEMPLATETYPE = "templateType";
   public static final String VAR_DATA = "varData";
   public static final String VAR_INFO = "varInfo";
+  public static final String CCP_DATA = "ccpData";
+  public static final String CCP_INFO = "ccpInfo";
   public static final String VAL_DATA = "valData";
   public static final String VAL_INFO = "valInfo";
   public static final String CREATED = "created";
@@ -73,6 +77,8 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
   public static final byte[] FAMILY_REPRESENTATIONS_DATA = Bytes.toBytes(REP_DATA);
   public static final byte[] FAMILY_VARIATIONS_INFO = Bytes.toBytes(VAR_INFO);
   public static final byte[] FAMILY_VARIATIONS_DATA = Bytes.toBytes(VAR_DATA);
+  public static final byte[] FAMILY_CCP_INFO = Bytes.toBytes(CCP_INFO);
+  public static final byte[] FAMILY_CCP_DATA = Bytes.toBytes(CCP_DATA);
   public static final byte[] FAMILY_VALIDATORS_INFO = Bytes.toBytes(VAL_INFO);
   public static final byte[] FAMILY_VALIDATORS_DATA = Bytes.toBytes(VAL_DATA);
   public static final byte[] FAMILY_FRIENDLIES = Bytes.toBytes(FRIENDLIES);
@@ -111,10 +117,16 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
         populatePutWithResourceData(FAMILY_VARIATIONS_DATA, template, put);
       }
     }
+    if (instance.isContentCoProcessorPopulated() && !instance.getContentCoProcessorTemplates().isEmpty()) {
+      for (PersistableContentCoProcessorTemplate template : instance.getContentCoProcessorTemplates()) {
+        populatePutWithResource(FAMILY_CCP_INFO, template, put);
+        populatePutWithResourceData(FAMILY_CCP_DATA, template, put);
+      }
+    }
     if (instance.isValidatorsPopulated() && !instance.getValidatorTemplates().isEmpty()) {
       logger.info("Saving validators");
       for (PersistableValidatorTemplate template : instance.getValidatorTemplates()) {
-        if(logger.isInfoEnabled()) {
+        if (logger.isInfoEnabled()) {
           logger.info("Validator being saved is " + template.getName());
         }
         populatePutWithValidator(FAMILY_VALIDATORS_INFO, template, put);
@@ -199,8 +211,8 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
     /*
      * Delete whole workspace
      */
-    if (!(instance.isFriendliesPopulated() || instance.isRepresentationPopulated() || instance.isVariationPopulated() || instance.
-          isRootContentsPopulated())) {
+    if (!(instance.isFriendliesPopulated() || instance.isRepresentationPopulated() || instance.isVariationPopulated() ||
+          instance.isRootContentsPopulated())) {
       if (logger.isInfoEnabled()) {
         logger.info(new StringBuilder("Deleting whole workspace with ID: ").append(instance.getId()).toString());
       }
@@ -257,7 +269,31 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
           }
         }
       }
-      if (instance.isVariationPopulated()) {
+      if (instance.isContentCoProcessorPopulated()) {
+        /*
+         * Delete all ContentCoProcessors
+         */
+        if (instance.getContentCoProcessorTemplates().isEmpty()) {
+          logger.info("Delete all content co-processor templates");
+          delete.deleteFamily(FAMILY_CCP_INFO);
+          delete.deleteFamily(FAMILY_CCP_DATA);
+        }
+        /*
+         * Delete particular variation(s)
+         */
+        else {
+          logger.info("Delete selected content co-processor templates");
+          for (ContentCoProcessorTemplate template : instance.getContentCoProcessorTemplates()) {
+            if (logger.isDebugEnabled()) {
+              logger.debug(new StringBuilder("Deleting content co-processor template ").append(template.getName()).
+                  toString());
+            }
+            addResourceColumnsToDelete(FAMILY_CCP_INFO, delete, template);
+            addResourceDataColumnsToDelete(FAMILY_CCP_DATA, delete, template);
+          }
+        }
+      }
+      if (instance.isValidatorsPopulated()) {
         /*
          * Delete all validators
          */
@@ -405,6 +441,27 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
           populateResourceTemplateInfo(varName, template, varsByName.get(varName));
           populateResourceTemplateData(varName, template, varsDataByName.get(varName));
           persistentWorkspace.addVariationTemplate(template);
+        }
+      }
+    }
+    {
+      final NavigableMap<byte[], byte[]> ccpInfo = allFamilies.get(FAMILY_CCP_INFO);
+      final NavigableMap<byte[], byte[]> ccpData = allFamilies.get(FAMILY_CCP_DATA);
+      if (ccpInfo != null) {
+        persistentWorkspace.setVariationPopulated(true);
+        final Map<String, Map<String, byte[]>> ccpsByName = new LinkedHashMap<String, Map<String, byte[]>>();
+        Utils.organizeByPrefix(ccpInfo, ccpsByName, ':');
+        final Map<String, Map<String, byte[]>> ccpsDataByName = new LinkedHashMap<String, Map<String, byte[]>>();
+        if (ccpData != null) {
+          Utils.organizeByPrefix(ccpData, ccpsDataByName, ':');
+        }
+        for (String ccpName : ccpsByName.keySet()) {
+          PersistableContentCoProcessorTemplate template = SmartContentSPI.getInstance().getPersistableDomainFactory().
+              createPersistableContentCoProcessorTemplate();
+          template.setWorkspaceId(workspace.getId());
+          populateResourceTemplateInfo(ccpName, template, ccpsByName.get(ccpName));
+          populateResourceTemplateData(ccpName, template, ccpsDataByName.get(ccpName));
+          persistentWorkspace.addContentCoProcessorTemplate(template);
         }
       }
     }

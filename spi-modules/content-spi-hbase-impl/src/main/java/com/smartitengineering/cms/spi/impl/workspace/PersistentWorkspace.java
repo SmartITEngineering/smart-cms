@@ -21,6 +21,7 @@ package com.smartitengineering.cms.spi.impl.workspace;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.spi.workspace.PersistableContentCoProcessorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableValidatorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
@@ -42,6 +43,9 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
   private boolean validatorsPopulated;
   private boolean friendliesPopulated;
   private boolean rootContentsPopulated;
+  private boolean contentCoProcessorPopulated;
+  private final List<PersistableContentCoProcessorTemplate> contentCoProcessorTemplates =
+                                                            new ArrayList<PersistableContentCoProcessorTemplate>();
   private final List<PersistableRepresentationTemplate> representationTemplates =
                                                         new ArrayList<PersistableRepresentationTemplate>();
   private final List<PersistableVariationTemplate> variationTemplates = new ArrayList<PersistableVariationTemplate>();
@@ -73,6 +77,14 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
     return rootContentsPopulated;
   }
 
+  public boolean isContentCoProcessorPopulated() {
+    return contentCoProcessorPopulated;
+  }
+
+  public void setContentCoProcessorPopulated(boolean contentCoProcessorPopulated) {
+    this.contentCoProcessorPopulated = contentCoProcessorPopulated;
+  }
+
   public void setRootContentsPopulated(boolean rootContentsPopulated) {
     this.rootContentsPopulated = rootContentsPopulated;
   }
@@ -95,6 +107,25 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
 
   public void removeFriendly(WorkspaceId friendly) {
     friendlies.remove(friendly);
+  }
+  public List<PersistableContentCoProcessorTemplate> getContentCoProcessorTemplates() {
+    return Collections.unmodifiableList(contentCoProcessorTemplates);
+  }
+
+  public void setContentCoProcessorTemplates(Collection<? extends PersistableContentCoProcessorTemplate> collection) {
+    contentCoProcessorTemplates.clear();
+    if (collection == null || collection.isEmpty()) {
+      return;
+    }
+    contentCoProcessorTemplates.addAll(collection);
+  }
+
+  public void addContentCoProcessorTemplate(PersistableContentCoProcessorTemplate template) {
+    contentCoProcessorTemplates.add(template);
+  }
+
+  public void removeContentCoProcessorTemplate(PersistableContentCoProcessorTemplate template) {
+    contentCoProcessorTemplates.remove(template);
   }
 
   public List<PersistableRepresentationTemplate> getRepresentationTemplates() {
@@ -191,7 +222,7 @@ public class PersistentWorkspace extends AbstractGenericPersistentDTO<Persistent
 
   public void setValidatorTemplates(List<PersistableValidatorTemplate> templates) {
     validatorTemplates.clear();
-    if(templates != null && !templates.isEmpty()) {
+    if (templates != null && !templates.isEmpty()) {
       validatorTemplates.addAll(templates);
     }
   }

@@ -28,6 +28,7 @@ import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI.ResourceSortCriteria;
 import com.smartitengineering.cms.api.type.ValidatorType;
+import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
 import java.util.Collection;
 
 /**
@@ -64,17 +65,17 @@ public interface WorkspaceService {
 
   public VariationTemplate getVariationTemplate(WorkspaceId workspaceId, String name);
 
+  public void removeAllVariationTemplates(WorkspaceId workspaceId);
+
+  public Collection<VariationTemplate> getVariationsWithoutData(WorkspaceId id, ResourceSortCriteria criteria);
+
   public void deleteVariation(VariationTemplate template);
 
   public void removeAllFriendlies(WorkspaceId workspaceId);
 
   public void removeAllRepresentationTemplates(WorkspaceId workspaceId);
 
-  public void removeAllVariationTemplates(WorkspaceId workspaceId);
-
   public Collection<RepresentationTemplate> getRepresentationsWithoutData(WorkspaceId id, ResourceSortCriteria criteria);
-
-  public Collection<VariationTemplate> getVariationsWithoutData(WorkspaceId id, ResourceSortCriteria criteria);
 
   public Collection<ContentId> getRootContents(WorkspaceId workspaceId);
 
@@ -95,4 +96,16 @@ public interface WorkspaceService {
                                                                 ResourceSortCriteria resourceSortCriteria);
 
   public void removeAllValidatorTemplates(WorkspaceId workspaceId);
+
+  public ContentCoProcessorTemplate putContentCoProcessorTemplate(WorkspaceId workspaceId, String name,
+                                                                  TemplateType templateType, byte[] data);
+
+  public ContentCoProcessorTemplate getContentCoProcessorTemplate(WorkspaceId workspaceId, String name);
+
+  public void removeAllContentCoProcessorTemplates(WorkspaceId workspaceId);
+
+  public Collection<ContentCoProcessorTemplate> getContentCoProcessorsWithoutData(WorkspaceId id,
+                                                                                  ResourceSortCriteria criteria);
+
+  public void deleteContentCoProcessor(ContentCoProcessorTemplate template);
 }

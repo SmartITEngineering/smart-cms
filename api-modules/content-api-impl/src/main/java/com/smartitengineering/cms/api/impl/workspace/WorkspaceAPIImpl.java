@@ -26,6 +26,7 @@ import com.smartitengineering.cms.api.event.Event;
 import com.smartitengineering.cms.api.event.Event.EventType;
 import com.smartitengineering.cms.api.event.Event.Type;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
@@ -464,5 +465,28 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
       logger.debug("Returning " + result);
     }
     return result;
+  }
+
+  public void delete(ContentCoProcessorTemplate template) {
+    SmartContentSPI.getInstance().getWorkspaceService().deleteContentCoProcessor(template);
+  }
+
+  public ContentCoProcessorTemplate putContentCoProcessorTemplate(WorkspaceId to, String name, TemplateType templateType,
+                                                                  InputStream stream) throws IOException {
+    return putContentCoProcessorTemplate(to, name, templateType, IOUtils.toByteArray(stream));
+  }
+
+  public ContentCoProcessorTemplate putContentCoProcessorTemplate(WorkspaceId to, String name, TemplateType templateType,
+                                                                  byte[] data) {
+    return SmartContentSPI.getInstance().getWorkspaceService().putContentCoProcessorTemplate(to, name, templateType,
+                                                                                             data);
+  }
+
+  public ContentCoProcessorTemplate getContentCoProcessorTemplate(WorkspaceId id, String name) {
+    return SmartContentSPI.getInstance().getWorkspaceService().getContentCoProcessorTemplate(id, name);
+  }
+
+  public void removeAllContentCoProcessorTemplates(WorkspaceId workspaceId) {
+    SmartContentSPI.getInstance().getWorkspaceService().removeAllContentCoProcessorTemplates(workspaceId);
   }
 }

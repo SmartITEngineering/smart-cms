@@ -22,6 +22,7 @@ import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
@@ -32,6 +33,7 @@ import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
+import com.smartitengineering.cms.spi.workspace.PersistableContentCoProcessorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableResourceTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableValidatorTemplate;
@@ -310,8 +312,8 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     params.add(QueryParameterFactory.getPropProjectionParam(info));
     params.add(getIdParam(id));
     final PersistentWorkspace single = commonReadDao.getSingle(params);
-    List<? extends RepresentationTemplate> templates = new ArrayList(single == null ? Collections.<RepresentationTemplate>
-        emptyList() : single.getRepresentationTemplates());
+    List<? extends RepresentationTemplate> templates = new ArrayList(single == null ?
+        Collections.<RepresentationTemplate>emptyList() : single.getRepresentationTemplates());
     if (templates.isEmpty()) {
       return Collections.emptyList();
     }
@@ -501,6 +503,90 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
   public void removeAllValidatorTemplates(WorkspaceId workspaceId) {
     PersistentWorkspace workspace = getWorkspace(workspaceId);
     workspace.setValidatorsPopulated(true);
+    commonWriteDao.delete(workspace);
+  }
+
+  public ContentCoProcessorTemplate putContentCoProcessorTemplate(WorkspaceId workspaceId, String name,
+                                                                  TemplateType templateType, byte[] data) {
+    PersistentWorkspace workspace = getWorkspace(workspaceId);
+    PersistableContentCoProcessorTemplate template = SmartContentSPI.getInstance().getPersistableDomainFactory().
+        createPersistableContentCoProcessorTemplate();
+    workspace.addContentCoProcessorTemplate(template);
+    template.setName(name);
+    template.setTemplateType(templateType);
+    template.setWorkspaceId(workspaceId);
+    template.setTemplate(data);
+    ContentCoProcessorTemplate oldTemplate = getContentCoProcessorTemplate(workspaceId, name);
+    updateFields(template, oldTemplate);
+    workspace.setVariationPopulated(true);
+    commonWriteDao.update(workspace);
+    return template;
+  }
+
+  public ContentCoProcessorTemplate getContentCoProcessorTemplate(WorkspaceId workspaceId, String name) {
+    List<QueryParameter> params = new ArrayList<QueryParameter>();
+    final String info = WorkspaceObjectConverter.CCP_INFO;
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.TEMPLATETYPE).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.CREATED).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.LASTMODIFIED).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
+        append(WorkspaceObjectConverter.ENTITY_TAG).toString()));
+    params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(WorkspaceObjectConverter.CCP_DATA).append(
+        ':').append(name).toString()));
+    params.add(SELF_PARAM);
+    params.add(getIdParam(workspaceId));
+    final List<PersistableContentCoProcessorTemplate> list = commonReadDao.getSingle(params).
+        getContentCoProcessorTemplates();
+    if (list.isEmpty()) {
+      return null;
+    }
+    return list.get(0);
+  }
+
+  public void removeAllContentCoProcessorTemplates(WorkspaceId workspaceId) {
+    PersistentWorkspace workspace = getWorkspace(workspaceId);
+    workspace.setContentCoProcessorPopulated(true);
+    commonWriteDao.delete(workspace);
+  }
+
+  public Collection<ContentCoProcessorTemplate> getContentCoProcessorsWithoutData(WorkspaceId id,
+                                                                                  ResourceSortCriteria criteria) {
+    List<QueryParameter> params = new ArrayList<QueryParameter>();
+    final String info = WorkspaceObjectConverter.CCP_INFO;
+    params.add(QueryParameterFactory.getPropProjectionParam(info));
+    params.add(getIdParam(id));
+    final PersistentWorkspace single = commonReadDao.getSingle(params);
+    List<? extends ContentCoProcessorTemplate> templates = new ArrayList(single == null ?
+        Collections.<ContentCoProcessorTemplate>emptyList() : single.getContentCoProcessorTemplates());
+    if (templates.isEmpty()) {
+      return Collections.emptyList();
+    }
+    final Comparator<ResourceTemplate> comp;
+    if (ResourceSortCriteria.BY_DATE.equals(criteria)) {
+      comp = TEMPLATE_DATE_COMPARATOR;
+    }
+    else {
+      comp = TEMPLATE_NAME_COMPARATOR;
+    }
+    Collections.sort(templates, comp);
+    return Collections.unmodifiableCollection(templates);
+  }
+
+  public void deleteContentCoProcessor(ContentCoProcessorTemplate template) {
+    PersistentWorkspace workspace = getWorkspace(template.getWorkspaceId());
+    workspace.setVariationPopulated(true);
+    PersistableContentCoProcessorTemplate varTemplate = SmartContentSPI.getInstance().getPersistableDomainFactory().
+        createPersistableContentCoProcessorTemplate();
+    varTemplate.setCreatedDate(template.getCreatedDate());
+    varTemplate.setLastModifiedDate(template.getLastModifiedDate());
+    varTemplate.setWorkspaceId(template.getWorkspaceId());
+    varTemplate.setName(template.getName());
+    varTemplate.setTemplate(template.getTemplate());
+    varTemplate.setTemplateType(template.getTemplateType());
+    workspace.addContentCoProcessorTemplate(varTemplate);
     commonWriteDao.delete(workspace);
   }
 }
