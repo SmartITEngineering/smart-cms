@@ -25,19 +25,15 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.common.TemplateType;
-import com.smartitengineering.cms.api.content.template.ContentCoProcessorGenerator;
 import com.smartitengineering.cms.api.content.template.TypeFieldValidator;
 import com.smartitengineering.cms.api.content.template.TypeRepresentationGenerator;
 import com.smartitengineering.cms.api.content.template.TypeVariationGenerator;
-import com.smartitengineering.cms.api.impl.content.template.GroovyContentCoProcessorGenerator;
 import com.smartitengineering.cms.api.impl.content.template.GroovyRepresentationGenerator;
 import com.smartitengineering.cms.api.impl.content.template.GroovyValidatorGenerator;
 import com.smartitengineering.cms.api.impl.content.template.GroovyVariationGenerator;
-import com.smartitengineering.cms.api.impl.content.template.JavascriptContentCoProcessorGenerator;
 import com.smartitengineering.cms.api.impl.content.template.JavascriptRepresentationGenerator;
 import com.smartitengineering.cms.api.impl.content.template.JavascriptValidatorGenerator;
 import com.smartitengineering.cms.api.impl.content.template.JavascriptVariationGenerator;
-import com.smartitengineering.cms.api.impl.content.template.RubyContentCoProcessorGenerator;
 import com.smartitengineering.cms.api.impl.content.template.RubyRepresentationGenerator;
 import com.smartitengineering.cms.api.impl.content.template.RubyValidatorGenerator;
 import com.smartitengineering.cms.api.impl.content.template.RubyVariationGenerator;
@@ -144,12 +140,6 @@ public class SPITemplateEngineModule extends PrivateModule {
     typeVarGenBinder.addBinding(TemplateType.GROOVY).to(GroovyVariationGenerator.class);
     typeVarGenBinder.addBinding(TemplateType.JAVASCRIPT).to(JavascriptVariationGenerator.class);
     typeVarGenBinder.addBinding(TemplateType.VELOCITY).to(VelocityVariationGenerator.class);
-    MapBinder<TemplateType, ContentCoProcessorGenerator> ccpGenBinder =
-                                                         MapBinder.newMapBinder(binder(), TemplateType.class,
-                                                                                ContentCoProcessorGenerator.class);
-    ccpGenBinder.addBinding(TemplateType.RUBY).to(RubyContentCoProcessorGenerator.class).in(Singleton.class);
-    ccpGenBinder.addBinding(TemplateType.GROOVY).to(GroovyContentCoProcessorGenerator.class).in(Singleton.class);
-    ccpGenBinder.addBinding(TemplateType.JAVASCRIPT).to(JavascriptContentCoProcessorGenerator.class).in(Singleton.class);
     bind(new TypeLiteral<ObjectRowConverter<PersistentVariation>>() {
     }).to(VariationObjectConverter.class).in(Singleton.class);
     bind(new TypeLiteral<CommonReadDao<PersistentVariation, TemplateId>>() {

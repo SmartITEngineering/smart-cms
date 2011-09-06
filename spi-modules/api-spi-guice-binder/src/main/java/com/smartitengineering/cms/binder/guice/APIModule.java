@@ -19,13 +19,20 @@
 package com.smartitengineering.cms.binder.guice;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
+import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.content.template.ContentCoProcessorGenerator;
 import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.factory.event.EventRegistrar;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.impl.content.ContentLoaderImpl;
+import com.smartitengineering.cms.api.impl.content.template.GroovyContentCoProcessorGenerator;
+import com.smartitengineering.cms.api.impl.content.template.JavascriptContentCoProcessorGenerator;
+import com.smartitengineering.cms.api.impl.content.template.RubyContentCoProcessorGenerator;
 import com.smartitengineering.cms.api.impl.event.EventRegistrarImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeLoaderImpl;
 import java.util.Properties;
@@ -57,5 +64,11 @@ public class APIModule extends AbstractModule {
       logger.debug(new StringBuilder("Global Namespace ").append(globalNamespace).toString());
     }
     bind(String.class).annotatedWith(Names.named("globalNamespace")).toInstance(globalNamespace);
+    MapBinder<TemplateType, ContentCoProcessorGenerator> ccpGenBinder =
+                                                         MapBinder.newMapBinder(binder(), TemplateType.class,
+                                                                                ContentCoProcessorGenerator.class);
+    ccpGenBinder.addBinding(TemplateType.RUBY).to(RubyContentCoProcessorGenerator.class).in(Singleton.class);
+    ccpGenBinder.addBinding(TemplateType.GROOVY).to(GroovyContentCoProcessorGenerator.class).in(Singleton.class);
+    ccpGenBinder.addBinding(TemplateType.JAVASCRIPT).to(JavascriptContentCoProcessorGenerator.class).in(Singleton.class);
   }
 }
