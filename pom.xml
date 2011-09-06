@@ -132,8 +132,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <inherited>true</inherited>
         <configuration>
-          <excludePackageNames>test:testa:testb:testc:com.smartitengineering.demo.cms.dto</excludePackageNames>
+          <excludePackageNames>test:testa:testb:testc:com.smartitengineering.demo.cms.dto:com.embarcadero.edn:enumeration</excludePackageNames>
         </configuration>
       </plugin>
       <plugin>
