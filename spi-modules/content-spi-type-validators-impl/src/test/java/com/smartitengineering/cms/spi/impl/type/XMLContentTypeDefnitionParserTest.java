@@ -26,6 +26,8 @@ import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
+import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.content.template.ContentCoProcessorGenerator;
 import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
@@ -68,6 +70,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Properties;
+import org.apache.xalan.xsltc.compiler.Template;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Assert;
@@ -607,6 +610,10 @@ public class XMLContentTypeDefnitionParserTest {
       MapBinder<Class, PersistentService> serviceBinder = MapBinder.newMapBinder(binder(), Class.class,
                                                                                  PersistentService.class);
       serviceBinder.addBinding(WritableContentType.class).toInstance(mockery.mock(PersistentService.class));
+      MapBinder<TemplateType, ContentCoProcessorGenerator> ccpgBinder =
+                                                           MapBinder.newMapBinder(binder(), TemplateType.class,
+                                                                                  ContentCoProcessorGenerator.class);
+      ccpgBinder.addBinding(TemplateType.GROOVY).toInstance(mockery.mock(ContentCoProcessorGenerator.class));
       bind(com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar.class).to(
           PersistentServiceRegistrar.class);
     }
