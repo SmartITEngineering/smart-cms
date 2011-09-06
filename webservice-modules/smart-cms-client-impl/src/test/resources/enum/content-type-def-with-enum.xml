@@ -89,6 +89,26 @@
           </composition>
         </value>
       </field>
+      <field>
+        <name>collectiveCompositedEnumField</name>
+        <value>
+          <collection>
+            <simple-value>
+              <composition>
+                <field>
+                  <name>enumField</name>
+                  <value>
+                    <enumeration>
+                      <choice>7</choice>
+                      <choice>8</choice>
+                    </enumeration>
+                  </value>
+                </field>
+              </composition>
+            </simple-value>
+          </collection>
+        </value>
+      </field>
     </fields>
   </contentType>               
 </contentTypes>
