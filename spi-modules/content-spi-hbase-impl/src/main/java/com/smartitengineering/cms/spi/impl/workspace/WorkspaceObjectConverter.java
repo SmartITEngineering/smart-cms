@@ -212,7 +212,8 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
      * Delete whole workspace
      */
     if (!(instance.isFriendliesPopulated() || instance.isRepresentationPopulated() || instance.isVariationPopulated() ||
-          instance.isRootContentsPopulated())) {
+          instance.isRootContentsPopulated() || instance.isContentCoProcessorPopulated() || instance.
+          isValidatorsPopulated())) {
       if (logger.isInfoEnabled()) {
         logger.info(new StringBuilder("Deleting whole workspace with ID: ").append(instance.getId()).toString());
       }
