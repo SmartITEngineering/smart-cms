@@ -443,7 +443,7 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
   @Override
   public void deleteValidator(ValidatorTemplate template) {
     PersistentWorkspace workspace = getWorkspace(template.getWorkspaceId());
-    workspace.setVariationPopulated(true);
+    workspace.setValidatorsPopulated(true);
     PersistableValidatorTemplate valTemplate = SmartContentSPI.getInstance().getPersistableDomainFactory().
         createPersistableValidatorTemplate();
     valTemplate.setCreatedDate(template.getCreatedDate());
