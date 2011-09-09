@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Date;
 import junit.framework.TestCase;
 import org.apache.commons.io.IOUtils;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,7 +124,9 @@ public class ContentDeSerializationTest extends TestCase {
     mapper.writeValue(writer, content);
     logger.info("Expected string:\n" + CONTENT);
     logger.info("Output string:\n" + writer.toString());
-    assertEquals(CONTENT, writer.toString());
+    JsonNode enode =  mapper.readTree(CONTENT);
+    JsonNode onode =  mapper.readTree(writer.toString());
+    assertEquals(enode, onode);
   }
 
   public void testDeserializationWithReserialization() throws Exception {
@@ -131,7 +134,9 @@ public class ContentDeSerializationTest extends TestCase {
     mapper.writeValue(writer, mapper.readValue(IOUtils.toInputStream(CONTENT), ContentImpl.class));
     logger.info("Expected string:\n" + CONTENT);
     logger.info("Output string:\n" + writer.toString());
-    assertEquals(CONTENT, writer.toString());
+    JsonNode enode =  mapper.readTree(CONTENT);
+    JsonNode onode =  mapper.readTree(writer.toString());
+    assertEquals(enode, onode);
   }
 
   public void testCompositeField() throws Exception {
