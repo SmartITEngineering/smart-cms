@@ -69,15 +69,17 @@ public interface WorkspaceAPI {
   VariationTemplate putVariationTemplate(WorkspaceId to, String name, TemplateType templateType, byte[] data);
 
   VariationTemplate getVariationTemplate(WorkspaceId id, String name);
-  
+
   void delete(ContentCoProcessorTemplate template);
 
-  ContentCoProcessorTemplate putContentCoProcessorTemplate(WorkspaceId to, String name, TemplateType templateType, InputStream stream)      throws IOException;
+  ContentCoProcessorTemplate putContentCoProcessorTemplate(WorkspaceId to, String name, TemplateType templateType,
+                                                           InputStream stream) throws IOException;
 
-  ContentCoProcessorTemplate putContentCoProcessorTemplate(WorkspaceId to, String name, TemplateType templateType, byte[] data);
+  ContentCoProcessorTemplate putContentCoProcessorTemplate(WorkspaceId to, String name, TemplateType templateType,
+                                                           byte[] data);
 
   ContentCoProcessorTemplate getContentCoProcessorTemplate(WorkspaceId id, String name);
-  
+
   ContentCoProcessor getContentCoProcessor(WorkspaceId id, String name);
 
   WorkspaceId getWorkspaceIdIfExists(String name);
@@ -99,14 +101,13 @@ public interface WorkspaceAPI {
   public void removeAllRepresentationTemplates(WorkspaceId workspaceId);
 
   public void removeAllVariationTemplates(WorkspaceId workspaceId);
-  
+
   public void removeAllContentCoProcessorTemplates(WorkspaceId workspaceId);
 
   enum ResourceSortCriteria {
 
     BY_NAME,
-    BY_DATE,
-  }
+    BY_DATE,}
 
   public Collection<String> getRepresentationNames(WorkspaceId id);
 
@@ -119,6 +120,15 @@ public interface WorkspaceAPI {
   public Collection<String> getRepresentationNames(WorkspaceId id, ResourceSortCriteria criteria);
 
   public Collection<String> getVariationNames(WorkspaceId id, ResourceSortCriteria criteria);
+
+  public Collection<String> getContentCoProcessorNames(WorkspaceId id);
+
+  public Collection<String> getContentCoProcessorNames(WorkspaceId id, String startPoint, int count);
+
+  public Collection<String> getContentCoProcessorNames(WorkspaceId id, ResourceSortCriteria criteria);
+
+  public Collection<String> getContentCoProcessorNames(WorkspaceId id, ResourceSortCriteria criteria, String startPoint,
+                                                       int count);
 
   public Collection<String> getRepresentationNames(WorkspaceId id, ResourceSortCriteria criteria, String startPoint,
                                                    int count);

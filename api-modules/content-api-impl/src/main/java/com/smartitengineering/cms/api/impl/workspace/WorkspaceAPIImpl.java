@@ -509,4 +509,27 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
       return null;
     }
   }
+
+  public Collection<String> getContentCoProcessorNames(WorkspaceId id, ResourceSortCriteria criteria) {
+    final Collection<ContentCoProcessorTemplate> procsWithoutData = SmartContentSPI.getInstance().
+        getWorkspaceService().getContentCoProcessorsWithoutData(id, criteria);
+    return getResourceNames(procsWithoutData);
+  }
+
+  public Collection<String> getContentCoProcessorNames(WorkspaceId id, ResourceSortCriteria criteria, String startPoint,
+                                                       int count) {
+    if (count == 0 || startPoint == null) {
+      return Collections.emptyList();
+    }
+    List<String> list = new ArrayList<String>(getContentCoProcessorNames(id, criteria));
+    return cutList(list, startPoint, count);
+  }
+
+  public Collection<String> getContentCoProcessorNames(WorkspaceId id) {
+    return getContentCoProcessorNames(id, ResourceSortCriteria.BY_NAME);
+  }
+
+  public Collection<String> getContentCoProcessorNames(WorkspaceId id, String startPoint, int count) {
+    return getContentCoProcessorNames(id, ResourceSortCriteria.BY_NAME, startPoint, count);
+  }
 }

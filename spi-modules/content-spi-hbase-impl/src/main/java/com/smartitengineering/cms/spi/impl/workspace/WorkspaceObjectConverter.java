@@ -117,8 +117,15 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
         populatePutWithResourceData(FAMILY_VARIATIONS_DATA, template, put);
       }
     }
+    if (logger.isDebugEnabled()) {
+      logger.debug("ContentCoProcessor Populated " + instance.isContentCoProcessorPopulated() + ", checking " +
+          (instance.isContentCoProcessorPopulated() && !instance.getContentCoProcessorTemplates().isEmpty()));
+    }
     if (instance.isContentCoProcessorPopulated() && !instance.getContentCoProcessorTemplates().isEmpty()) {
       for (PersistableContentCoProcessorTemplate template : instance.getContentCoProcessorTemplates()) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("ContentCoProcessor template with name " + template.getName() + " being saved");
+        }
         populatePutWithResource(FAMILY_CCP_INFO, template, put);
         populatePutWithResourceData(FAMILY_CCP_DATA, template, put);
       }
@@ -449,14 +456,20 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
       final NavigableMap<byte[], byte[]> ccpInfo = allFamilies.get(FAMILY_CCP_INFO);
       final NavigableMap<byte[], byte[]> ccpData = allFamilies.get(FAMILY_CCP_DATA);
       if (ccpInfo != null) {
-        persistentWorkspace.setVariationPopulated(true);
+        persistentWorkspace.setContentCoProcessorPopulated(true);
         final Map<String, Map<String, byte[]>> ccpsByName = new LinkedHashMap<String, Map<String, byte[]>>();
         Utils.organizeByPrefix(ccpInfo, ccpsByName, ':');
         final Map<String, Map<String, byte[]>> ccpsDataByName = new LinkedHashMap<String, Map<String, byte[]>>();
+        if (logger.isDebugEnabled()) {
+          logger.debug("CCPs By Name " + ccpsByName);
+        }
         if (ccpData != null) {
           Utils.organizeByPrefix(ccpData, ccpsDataByName, ':');
         }
         for (String ccpName : ccpsByName.keySet()) {
+          if (logger.isDebugEnabled()) {
+            logger.debug("Populate CCP with name " + ccpName);
+          }
           PersistableContentCoProcessorTemplate template = SmartContentSPI.getInstance().getPersistableDomainFactory().
               createPersistableContentCoProcessorTemplate();
           template.setWorkspaceId(workspace.getId());

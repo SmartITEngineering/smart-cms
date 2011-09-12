@@ -79,6 +79,22 @@
       "filterOnLatestVersionOnly":true,
       "qualifierARangePrefix":false,
       "filterOnRowId":false
+    },
+    "ccpData": {
+      "columnFamilyAsString":"ccpData",
+      "columnQualifierAsString":"",
+      "filterOnIfMissing":false,
+      "filterOnLatestVersionOnly":true,
+      "qualifierARangePrefix":false,
+      "filterOnRowId":false
+    },
+    "ccpInfo": {
+      "columnFamilyAsString":"ccpInfo",
+      "columnQualifierAsString":"",
+      "filterOnIfMissing":false,
+      "filterOnLatestVersionOnly":true,
+      "qualifierARangePrefix":false,
+      "filterOnRowId":false
     }
   }
 }

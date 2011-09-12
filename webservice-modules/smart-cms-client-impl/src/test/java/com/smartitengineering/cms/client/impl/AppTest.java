@@ -49,6 +49,8 @@ import com.smartitengineering.cms.client.api.ContentsResource;
 import com.smartitengineering.cms.client.api.FieldResource;
 import com.smartitengineering.cms.client.api.RootResource;
 import com.smartitengineering.cms.client.api.UriTemplateResource;
+import com.smartitengineering.cms.client.api.WorkspaceContentCoProcessorResource;
+import com.smartitengineering.cms.client.api.WorkspaceContentCoProcessorsResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
@@ -2623,6 +2625,97 @@ public class AppTest {
         //Expected that creation fails
       }
     }
+  }
+
+  @Test
+  public void testCreateContentCoProcessor() throws Exception {
+
+    ResourceTemplateImpl template = new ResourceTemplateImpl();
+    String temp = "Template";
+    template.setName("rep");
+    final byte[] bytes = temp.getBytes();
+    template.setTemplate(bytes);
+    template.setTemplateType(TemplateType.JAVASCRIPT.toString());
+
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    WorkspaceContentCoProcessorsResource rsrcs = feedResource.getContentCoProcessors();
+    WorkspaceContentCoProcessorResource rsrc = rsrcs.createContentCoProcessor(
+        template);
+    Assert.assertEquals("rep", rsrc.get().getName());
+    Assert.assertEquals(temp, new String(rsrc.get().getTemplate()));
+    Assert.assertEquals(TemplateType.JAVASCRIPT.toString(), rsrc.get().getTemplateType());
+  }
+
+  @Test
+  public void testUpdateContentCoProcessor() throws Exception {
+    LOGGER.info(":::::::::::::: UPDATE CONTENT CO PROCESSOR RESOURCE TEST ::::::::::::::");
+    ResourceTemplateImpl template = new ResourceTemplateImpl();
+    String temp = "newTemplate";
+    final byte[] bytes = temp.getBytes();
+    template.setTemplate(bytes);
+    template.setTemplateType(TemplateType.RUBY.toString());
+
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+
+    Collection<WorkspaceContentCoProcessorResource> representationResources = feedResource.getContentCoProcessors().
+        getContentCoProcessorResources();
+    Assert.assertEquals(1, representationResources.size());
+    Iterator<WorkspaceContentCoProcessorResource> representationIterator = representationResources.iterator();
+    WorkspaceContentCoProcessorResource rsrc = representationIterator.next();
+
+    rsrc.update(template);
+    Assert.assertEquals("rep", rsrc.get().getName());
+    Assert.assertEquals(temp, new String(rsrc.get().getTemplate()));
+    Assert.assertEquals(TemplateType.RUBY.toString(), rsrc.get().getTemplateType());
+    resource.getWorkspaceFeeds();
+    WorkspaceContentCoProcessorResource secondRepresentationResource = resource.getWorkspaceFeeds().iterator().next().
+        getContentCoProcessors().getContentCoProcessorResources().iterator().next();
+    template.setTemplateType(TemplateType.VELOCITY.name());
+    secondRepresentationResource.update(template);
+    Assert.assertEquals(TemplateType.VELOCITY.name(), secondRepresentationResource.get().getTemplateType());
+    try {
+      rsrc.update(template);
+      Assert.fail("Should not have been able to update!");
+    }
+    catch (UniformInterfaceException ex) {
+      //Exception expected
+      rsrc.get();
+      rsrc.update(template);
+    }
+  }
+
+  @Test
+  public void testDeleteContentCoProcessor() throws Exception {
+    LOGGER.info(":::::::::::::: DELETE CONTENT CO PROCESSOR RESOURCE TEST ::::::::::::::");
+    ResourceTemplateImpl template = new ResourceTemplateImpl();
+    String temp = "Template2";
+    template.setName("rep2");
+    final byte[] bytes = temp.getBytes();
+    template.setTemplate(bytes);
+    template.setTemplateType(TemplateType.JAVASCRIPT.toString());
+    RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+    Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
+    Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
+    WorkspaceFeedResource feedResource = iterator.next();
+    final WorkspaceContentCoProcessorsResource procsResource = feedResource.getContentCoProcessors();
+
+    Collection<WorkspaceContentCoProcessorResource> rsrcs = procsResource.
+        getContentCoProcessorResources();
+    Assert.assertEquals(1, rsrcs.size());
+    procsResource.createContentCoProcessor(template);
+    Iterator<WorkspaceContentCoProcessorResource> representationIterator = rsrcs.iterator();
+    WorkspaceContentCoProcessorResource rsrc = representationIterator.next();
+
+    rsrc.delete(ClientResponse.Status.ACCEPTED);
+    Collection<WorkspaceContentCoProcessorResource> secRsrcs = resource.getWorkspaceFeeds().iterator().
+        next().getContentCoProcessors().getContentCoProcessorResources();
+    Assert.assertEquals(1, secRsrcs.size());
   }
 
   public static class ConfigurationModule extends AbstractModule {

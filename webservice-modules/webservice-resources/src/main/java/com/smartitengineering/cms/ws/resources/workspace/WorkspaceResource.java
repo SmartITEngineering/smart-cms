@@ -64,12 +64,14 @@ public class WorkspaceResource extends AbstractResource {
   public static final String PARAM_NAME = "wsName";
   public static final String PATH_FRIENDLIES = "friendlies";
   public static final String PATH_REPRESENTATIONS = "representations";
+  public static final String PATH_CONTENT_CO_PROCESSORS = "content-co-processors";
   public static final String PATH_VARIATIONS = "variations";
   public static final String PATH_VALIDATORS = "validators";
   public static final String PATH_SEARCH = "search";
   public static final String PATH_REINDEX = "reindex";
   public static final String REL_FRIENDLIES = "friendlies";
   public static final String REL_REPRESENTATIONS = "representations";
+  public static final String REL_CONTENT_CO_PROCESSORS = "contentCoProcessors";
   public static final String REL_VARIATIONS = "variations";
   public static final String REL_VALIDATORS = "validators";
   public static final String REL_CONTENT_TYPES = "content-types";
@@ -161,6 +163,10 @@ public class WorkspaceResource extends AbstractResource {
                                                                                                  workspaceName),
           REL_REPRESENTATIONS, MediaType.APPLICATION_ATOM_XML));
       feed.addLink(getLink(
+          getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_CONTENT_CO_PROCESSORS).build(namespace,
+                                                                                                       workspaceName),
+          REL_CONTENT_CO_PROCESSORS, MediaType.APPLICATION_ATOM_XML));
+      feed.addLink(getLink(
           getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_VARIATIONS).build(namespace, workspaceName),
           REL_VARIATIONS, MediaType.APPLICATION_ATOM_XML));
       feed.addLink(getLink(
@@ -210,6 +216,12 @@ public class WorkspaceResource extends AbstractResource {
     return new WorkspaceRepresentationsResource(workspace, count, getInjectables());
   }
 
+  @Path(PATH_CONTENT_CO_PROCESSORS)
+  public WorkspaceContentCoProcessorsResource getContentCoProcessorsResource(
+      @QueryParam("count") @DefaultValue("10") int count) {
+    return new WorkspaceContentCoProcessorsResource(workspace, count, getInjectables());
+  }
+
   @Path(PATH_VARIATIONS)
   public WorkspaceVariationsResource getVariationsResource(@QueryParam("count") @DefaultValue("10") int count) {
     return new WorkspaceVariationsResource(workspace, count, getInjectables());
@@ -223,6 +235,11 @@ public class WorkspaceResource extends AbstractResource {
   @Path(PATH_REPRESENTATIONS + "/name/{name}")
   public WorkspaceRepresentationResource getRepresentationsResource(@PathParam("name") String name) {
     return new WorkspaceRepresentationResource(name, workspace, getInjectables());
+  }
+
+  @Path(PATH_CONTENT_CO_PROCESSORS + "/name/{name}")
+  public WorkspaceContentCoProcessorResource getContentCoProcessorResource(@PathParam("name") String name) {
+    return new WorkspaceContentCoProcessorResource(name, workspace, getInjectables());
   }
 
   @Path(PATH_VARIATIONS + "/name/{name}")

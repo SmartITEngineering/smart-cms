@@ -18,36 +18,14 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.util.rest.client.Resource;
-import org.apache.abdera.model.Feed;
+import com.smartitengineering.cms.ws.common.domains.ResourceTemplate;
+import com.smartitengineering.util.rest.client.WritableResource;
 
 /**
  *
- * @author imyousuf
+ * @author kaisar
  */
-public interface WorkspaceFeedResource extends Resource<Feed> {
+public interface WorkspaceContentCoProcessorResource extends WritableResource<ResourceTemplate> {
 
-  WorkspaceFriendsResource getFriends();
-
-  WorkspaceRepresentationsResource getRepresentations();
-
-  WorkspaceValidatorsResource getValidators();
-
-  WorkspaceVariationsResource getVariations();
-  
-  WorkspaceContentCoProcessorsResource getContentCoProcessors();
-
-  ContentTypesResource getContentTypes();
-
-  ContentsResource getContents();
-
-  WorkspaceContentResouce getWorkspace();
-
-  String getSearchUri();
-
-  String getWorkspaceNamespace();
-
-  String getWorkspaceName();
-
-  ContentSearcherResource searchContent(String query);
+  void update(ResourceTemplate template);
 }

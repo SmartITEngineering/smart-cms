@@ -188,6 +188,10 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
   public RepresentationTemplate getRepresentationTemplate(WorkspaceId workspaceId, String name) {
     List<QueryParameter> params = new ArrayList<QueryParameter>();
     final String info = WorkspaceObjectConverter.REP_INFO;
+    if (logger.isDebugEnabled()) {
+      logger.debug("Sample column name " + new StringBuilder(info).append(':').append(name).append(':').
+          append(WorkspaceObjectConverter.TEMPLATETYPE).toString());
+    }
     params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
         append(WorkspaceObjectConverter.TEMPLATETYPE).toString()));
     params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
@@ -518,7 +522,7 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     template.setTemplate(data);
     ContentCoProcessorTemplate oldTemplate = getContentCoProcessorTemplate(workspaceId, name);
     updateFields(template, oldTemplate);
-    workspace.setVariationPopulated(true);
+    workspace.setContentCoProcessorPopulated(true);
     commonWriteDao.update(workspace);
     return template;
   }
@@ -526,6 +530,10 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
   public ContentCoProcessorTemplate getContentCoProcessorTemplate(WorkspaceId workspaceId, String name) {
     List<QueryParameter> params = new ArrayList<QueryParameter>();
     final String info = WorkspaceObjectConverter.CCP_INFO;
+    if (logger.isDebugEnabled()) {
+      logger.debug("Sample column name " + new StringBuilder(info).append(':').append(name).append(':').
+          append(WorkspaceObjectConverter.TEMPLATETYPE).toString());
+    }
     params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
         append(WorkspaceObjectConverter.TEMPLATETYPE).toString()));
     params.add(QueryParameterFactory.getPropProjectionParam(new StringBuilder(info).append(':').append(name).append(':').
@@ -538,9 +546,15 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
         ':').append(name).toString()));
     params.add(SELF_PARAM);
     params.add(getIdParam(workspaceId));
-    final List<PersistableContentCoProcessorTemplate> list = commonReadDao.getSingle(params).
-        getContentCoProcessorTemplates();
+    final PersistentWorkspace singleWs = commonReadDao.getSingle(params);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Loaded CCP " + singleWs.isContentCoProcessorPopulated());
+    }
+    final List<PersistableContentCoProcessorTemplate> list = singleWs.getContentCoProcessorTemplates();
     if (list.isEmpty()) {
+      if (logger.isWarnEnabled()) {
+        logger.warn("No content co processor with name " + name + " in " + workspaceId);
+      }
       return null;
     }
     return list.get(0);
@@ -559,6 +573,15 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     params.add(QueryParameterFactory.getPropProjectionParam(info));
     params.add(getIdParam(id));
     final PersistentWorkspace single = commonReadDao.getSingle(params);
+    if (logger.isDebugEnabled()) {
+      if (single == null) {
+        logger.debug("Query result is null!");
+      }
+      else {
+        logger.debug("Loaded CCP " + single.isContentCoProcessorPopulated() + " " +
+            single.getContentCoProcessorTemplates());
+      }
+    }
     List<? extends ContentCoProcessorTemplate> templates = new ArrayList(single == null ?
         Collections.<ContentCoProcessorTemplate>emptyList() : single.getContentCoProcessorTemplates());
     if (templates.isEmpty()) {
@@ -577,7 +600,7 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
 
   public void deleteContentCoProcessor(ContentCoProcessorTemplate template) {
     PersistentWorkspace workspace = getWorkspace(template.getWorkspaceId());
-    workspace.setVariationPopulated(true);
+    workspace.setContentCoProcessorPopulated(true);
     PersistableContentCoProcessorTemplate varTemplate = SmartContentSPI.getInstance().getPersistableDomainFactory().
         createPersistableContentCoProcessorTemplate();
     varTemplate.setCreatedDate(template.getCreatedDate());

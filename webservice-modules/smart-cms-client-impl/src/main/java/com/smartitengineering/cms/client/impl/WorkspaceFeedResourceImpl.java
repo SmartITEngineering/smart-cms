@@ -21,6 +21,7 @@ package com.smartitengineering.cms.client.impl;
 import com.smartitengineering.cms.client.api.ContentSearcherResource;
 import com.smartitengineering.cms.client.api.ContentTypesResource;
 import com.smartitengineering.cms.client.api.ContentsResource;
+import com.smartitengineering.cms.client.api.WorkspaceContentCoProcessorsResource;
 import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
@@ -61,25 +62,29 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
 
   @Override
   public WorkspaceFriendsResource getFriends() {
-    return new WorkspaceFriendsResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+    return new WorkspaceFriendsResourceImpl(this,
+                                            AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
         getLink("friendlies")));
   }
 
   @Override
   public WorkspaceRepresentationsResource getRepresentations() {
-    return new WorkspaceRepresentationsResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+    return new WorkspaceRepresentationsResourceImpl(this,
+                                                    AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
         getLink("representations")));
   }
 
   @Override
   public WorkspaceVariationsResource getVariations() {
-    return new WorkspaceVariationsResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+    return new WorkspaceVariationsResourceImpl(this,
+                                               AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
         getLink("variations")));
   }
 
   @Override
   public ContentTypesResource getContentTypes() {
-    return new ContentTypesResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+    return new ContentTypesResourceImpl(this,
+                                        AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
         getLink("content-types")));
   }
 
@@ -121,7 +126,8 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
 
   @Override
   public WorkspaceValidatorsResource getValidators() {
-    return new WorkspaceValidatorsResourceImpl(this, AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+    return new WorkspaceValidatorsResourceImpl(this,
+                                               AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
         getLink("validators")));
   }
 
@@ -133,5 +139,11 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
   @Override
   public String getWorkspaceName() {
     return getLastReadStateOfEntity().getSimpleExtension(SimpleFeedExtensions.WORKSPACE_NAME);
+  }
+
+  public WorkspaceContentCoProcessorsResource getContentCoProcessors() {
+    return new WorkspaceContentCoProcessorsResourceImpl(this,
+                                                        AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+        getLink("contentCoProcessors")));
   }
 }
