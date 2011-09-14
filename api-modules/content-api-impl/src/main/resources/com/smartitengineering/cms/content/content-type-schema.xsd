@@ -202,6 +202,13 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
       <xs:element ref="params" minOccurs="0" maxOccurs="1" />
     </xs:sequence>
   </xs:complexType>
+  <xs:complexType name="prioritizedResource">
+    <xs:sequence>
+      <xs:element ref="name" minOccurs="1" maxOccurs="1" />
+      <xs:element ref="uri" minOccurs="1" maxOccurs="1" />
+      <xs:element ref="params" minOccurs="0" maxOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
   <xs:element name="variation" type="resource" />
   <xs:element name="key" type="xs:string" />
   <xs:element name="val" type="xs:string" />
@@ -224,6 +231,36 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="representation" minOccurs="1" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="coprocessor" type="prioritizedResource" />
+  <xs:element name="coprocessors">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="coprocessor" minOccurs="1" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="read">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="coprocessors" minOccurs="1" maxOccurs="1" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="write">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="coprocessors" minOccurs="1" maxOccurs="1" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="content-co-processors">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="read" minOccurs="0" maxOccurs="1" />
+        <xs:element ref="write" minOccurs="0" maxOccurs="1" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -298,6 +335,7 @@ xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLS
         <xs:element ref="fields" minOccurs="1" />
         <xs:element ref="status" minOccurs="0" maxOccurs="1" />
         <xs:element ref="representations" minOccurs="0" maxOccurs="1" />
+        <xs:element ref="content-co-processors" minOccurs="0" maxOccurs="1" />
       </xs:sequence>
       <xs:attribute name="namespace" type="xs:string" use="required" />
     </xs:complexType>

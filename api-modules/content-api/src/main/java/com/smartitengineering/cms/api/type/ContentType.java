@@ -72,6 +72,8 @@ public interface ContentType {
 
   public Map<MediaType, String> getRepresentations();
 
+  public Map<ContentProcessingPhase, Collection<ContentCoProcessorDef>> getContentCoProcessorDefs();
+
   public String getEntityTagValue();
 
   public Map<String, String> getParameterizedDisplayNames();
@@ -105,5 +107,18 @@ public interface ContentType {
     public static DefinitionType getDefaufltType() {
       return CONCRETE_TYPE;
     }
+  }
+
+  enum ContentProcessingPhase {
+
+    /**
+     * This phase refers to after content is retrieved from persistent storage and converted to mutable content but yet
+     * not returned to invoker.
+     */
+    READ,
+    /**
+     * This phase refers to once a mutable content is formed but yet not sent to validation.
+     */
+    WRITE;
   }
 }

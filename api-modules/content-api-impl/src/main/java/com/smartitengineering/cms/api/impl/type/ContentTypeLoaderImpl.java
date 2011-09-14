@@ -30,11 +30,13 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.content.SearchResultImpl;
+import com.smartitengineering.cms.api.type.ContentCoProcessorDef;
 import com.smartitengineering.cms.api.type.EnumDataType;
 import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.Filter;
 import com.smartitengineering.cms.api.type.MutableCollectionDataType;
 import com.smartitengineering.cms.api.type.MutableCompositeDataType;
+import com.smartitengineering.cms.api.type.MutableContentCoProcessorDef;
 import com.smartitengineering.cms.api.type.MutableContentDataType;
 import com.smartitengineering.cms.api.type.MutableContentStatus;
 import com.smartitengineering.cms.api.type.MutableContentType;
@@ -308,6 +310,11 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
     typeImpl.setRepresentations(contentType.getRepresentations());
     typeImpl.setParameterizedDisplayNames(contentType.getParameterizedDisplayNames());
     typeImpl.setDefinitionType(contentType.getSelfDefinitionType());
+    for (Collection<ContentCoProcessorDef> defs : contentType.getContentCoProcessorDefs().values()) {
+      for (ContentCoProcessorDef def : defs) {
+        typeImpl.addContentCoProcessorDef(def);
+      }
+    }
   }
 
   @Override
@@ -417,5 +424,9 @@ public class ContentTypeLoaderImpl implements ContentTypeLoader {
       type.setChoices(dataType.getChoices());
     }
     return type;
+  }
+
+  public MutableContentCoProcessorDef createMutableContentCoProcessorDef() {
+    return new ContentCoProcessorDefImpl();
   }
 }

@@ -54,6 +54,12 @@ public interface MutableContentType
 
   public Collection<RepresentationDef> getMutableRepresentationDefs();
 
+  public Map<ContentProcessingPhase, Collection<ContentCoProcessorDef>> getMutableContentCoProcessorDefs();
+
+  public void addContentCoProcessorDef(ContentCoProcessorDef def);
+
+  public void removeContentCoProcessorDef(ContentCoProcessorDef def);
+
   public void setParent(ContentTypeId parentId);
 
   public void setDisplayName(String displayName);

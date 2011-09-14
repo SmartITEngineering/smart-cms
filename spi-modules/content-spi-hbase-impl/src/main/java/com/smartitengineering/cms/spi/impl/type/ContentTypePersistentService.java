@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
+import com.smartitengineering.cms.api.type.ContentCoProcessorDef;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
@@ -126,6 +127,11 @@ public class ContentTypePersistentService implements PersistentService<WritableC
     contentType.getMutableStatuses().addAll(bean.getMutableStatuses());
     contentType.setParameterizedDisplayNames(bean.getParameterizedDisplayNames());
     contentType.setDefinitionType(bean.getSelfDefinitionType());
+    for (Collection<ContentCoProcessorDef> defs : bean.getContentCoProcessorDefs().values()) {
+      for (ContentCoProcessorDef def : defs) {
+        contentType.addContentCoProcessorDef(def);
+      }
+    }
     return contentType;
   }
 }

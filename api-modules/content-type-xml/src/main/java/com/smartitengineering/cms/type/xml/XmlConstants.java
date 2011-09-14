@@ -71,6 +71,11 @@ public interface XmlConstants {
   public String VARIATION = "variation";
   public String REPRESENTATION = "representation";
   public String REPRESENTATIONS = "representations";
+  public String CONTENT_CO_PROCESSOR_DEFS = "content-co-processors";
+  public String CONTENT_CO_PROCESSOR_READ_PHASE = "read";
+  public String CONTENT_CO_PROCESSOR_WRITE_PHASE = "write";
+  public String CONTENT_CO_PROCESSORS = "coprocessors";
+  public String CONTENT_CO_PROCESSOR = "coprocessor";
   public String VARIATIONS = "variations";
   public String T_BOOLRAN = "tBoolean";
   public String INDEX = "index";

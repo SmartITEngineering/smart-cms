@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *
+ * This is a simple Content Management System (CMS)
+ * Copyright (C) 2009  Imran M Yousuf (imyousuf@smartitengineering.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!--
+    Document   : content-type-def-1.xml
+    Created on : September 25, 2009, 1:10 PM
+    Author     : imyousuf
+    Description:
+        Test content type definition.
+-->
+<contentTypes  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+               xmlns='http://www.smartitengineering.com/smart-cms/content/content-type-schema'
+               xsi:schemaLocation='http://www.smartitengineering.com/smart-cms/content/content-type-schema ../../../../../../api-modules/content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd'>
+  <contentType namespace="enum">
+    <name>ContentCoProcessorTest</name>
+    <parameterizedDisplayNames>
+      <param>
+        <key>en-US</key>
+        <val>Address (en-US)</val>
+      </param>
+    </parameterizedDisplayNames>
+    <primaryField>zipCode</primaryField>
+    <fields>
+      <field>
+        <name>zipCode</name>
+        <displayName>Postal Code/Zip Code</displayName>
+        <value>
+          <string>
+            <mimeType>text/plain</mimeType>
+          </string>
+        </value>
+        <required>true</required>
+        <search>
+          <index>true</index>
+          <store>true</store>
+        </search>
+      </field>
+      <field>
+        <name>directEnumField</name>
+        <value>
+          <enumeration>
+            <choice>1</choice>
+            <choice>2</choice>
+          </enumeration>
+        </value>
+      </field>
+      <field>
+        <name>collectiveEnumField</name>
+        <value>
+          <collection>
+            <simple-value>
+              <enumeration>
+                <choice>3</choice>
+                <choice>4</choice>
+              </enumeration>
+            </simple-value>
+          </collection>
+        </value>
+      </field>
+      <field>
+        <name>compositedEnumField</name>
+        <value>
+          <composition>
+            <field>
+              <name>enumField</name>
+              <value>
+                <enumeration>
+                  <choice>5</choice>
+                  <choice>6</choice>
+                </enumeration>
+              </value>
+            </field>
+          </composition>
+        </value>
+      </field>
+      <field>
+        <name>collectiveCompositedEnumField</name>
+        <value>
+          <collection>
+            <simple-value>
+              <composition>
+                <field>
+                  <name>enumField</name>
+                  <value>
+                    <enumeration>
+                      <choice>7</choice>
+                      <choice>8</choice>
+                    </enumeration>
+                  </value>
+                </field>
+              </composition>
+            </simple-value>
+          </collection>
+        </value>
+      </field>
+    </fields>
+    <content-co-processors>
+      <read>
+        <coprocessors>
+          <coprocessor>
+            <name>testr</name>
+            <uri>
+              <internal>
+                <name>test</name>
+              </internal>
+            </uri>
+            <params>
+              <param>
+                <key>k</key>
+                <val>v</val>
+              </param>
+            </params>
+          </coprocessor>
+          <coprocessor>
+            <name>testr1</name>
+            <uri>
+              <internal>
+                <name>test1</name>
+              </internal>
+            </uri>
+            <params>
+              <param>
+                <key>k1</key>
+                <val>v1</val>
+              </param>
+            </params>
+          </coprocessor>
+        </coprocessors>
+      </read>
+      <write>
+        <coprocessors>
+          <coprocessor>
+            <name>testw</name>
+            <uri>
+              <internal>
+                <name>test2</name>
+              </internal>
+            </uri>
+            <params>
+              <param>
+                <key>k2</key>
+                <val>v2</val>
+              </param>
+            </params>
+          </coprocessor>
+        </coprocessors>
+      </write>
+    </content-co-processors>
+  </contentType>               
+</contentTypes>

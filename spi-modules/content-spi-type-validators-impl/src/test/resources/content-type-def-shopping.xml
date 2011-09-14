@@ -279,5 +279,57 @@
       <statusName>draft</statusName>
       <statusName>published</statusName>
     </status>
+    <content-co-processors>
+      <read>
+        <coprocessors>
+          <coprocessor>
+            <name>testr</name>
+            <uri>
+              <internal>
+                <name>test</name>
+              </internal>
+            </uri>
+            <params>
+              <param>
+                <key>k</key>
+                <val>v</val>
+              </param>
+            </params>
+          </coprocessor>
+          <coprocessor>
+            <name>testr1</name>
+            <uri>
+              <internal>
+                <name>test1</name>
+              </internal>
+            </uri>
+            <params>
+              <param>
+                <key>k1</key>
+                <val>v1</val>
+              </param>
+            </params>
+          </coprocessor>
+        </coprocessors>
+      </read>
+      <write>
+        <coprocessors>
+          <coprocessor>
+            <name>testw</name>
+            <uri>
+              <internal>
+                <name>test2</name>
+              </internal>
+            </uri>
+            <params>
+              <param>
+                <key>k2</key>
+                <val>v2</val>
+              </param>
+            </params>
+          </coprocessor>
+        </coprocessors>
+      </write>
+    </content-co-processors>
   </contentType>
 </contentTypes>

@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.event.Event.Type;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;
+import com.smartitengineering.cms.api.type.ContentCoProcessorDef;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
@@ -33,9 +34,11 @@ import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.type.PersistableContentType;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -63,6 +66,9 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
   private String primaryFieldName;
   private final Map<MediaType, String> representations = new HashMap<MediaType, String>();
   private final Map<String, String> parameterizedDisplayNames = new LinkedHashMap<String, String>();
+  private final Map<ContentProcessingPhase, Collection<ContentCoProcessorDef>> procDefs =
+                                                                               new EnumMap<ContentProcessingPhase, Collection<ContentCoProcessorDef>>(
+      ContentProcessingPhase.class);
   private DefinitionType definitionType;
 
   @Override
@@ -445,5 +451,42 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
 
   public DefinitionType getSelfDefinitionType() {
     return definitionType;
+  }
+
+  public Map<ContentProcessingPhase, Collection<ContentCoProcessorDef>> getMutableContentCoProcessorDefs() {
+    return procDefs;
+  }
+
+  public Map<ContentProcessingPhase, Collection<ContentCoProcessorDef>> getContentCoProcessorDefs() {
+    final EnumMap<ContentProcessingPhase, Collection<ContentCoProcessorDef>> newMap =
+                                                                             new EnumMap<ContentProcessingPhase, Collection<ContentCoProcessorDef>>(
+        ContentProcessingPhase.class);
+    newMap.putAll(procDefs);
+    return newMap;
+  }
+
+  public void addContentCoProcessorDef(ContentCoProcessorDef def) {
+    ContentProcessingPhase phase = def.getPhase();
+    if (phase == null) {
+      throw new NullPointerException();
+    }
+    Collection<ContentCoProcessorDef> collection = procDefs.get(phase);
+    if (collection == null) {
+      collection = new ArrayList<ContentCoProcessorDef>();
+      procDefs.put(phase, collection);
+    }
+    collection.add(def);
+  }
+
+  public void removeContentCoProcessorDef(ContentCoProcessorDef def) {
+    ContentProcessingPhase phase = def.getPhase();
+    if (phase == null) {
+      throw new NullPointerException();
+    }
+    Collection<ContentCoProcessorDef> collection = procDefs.get(phase);
+    if (collection == null) {
+      return;
+    }
+    collection.remove(def);
   }
 }

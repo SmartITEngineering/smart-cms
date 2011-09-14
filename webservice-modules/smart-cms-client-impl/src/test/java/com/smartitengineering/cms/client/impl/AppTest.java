@@ -28,8 +28,10 @@ import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.CompositeDataType;
+import com.smartitengineering.cms.api.type.ContentCoProcessorDef;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.ContentType.ContentProcessingPhase;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.EnumDataType;
 import com.smartitengineering.cms.api.type.FieldDef;
@@ -2478,6 +2480,9 @@ public class AppTest {
         String contentTypeXml = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(
             "enum/content-type-def-with-enum.xml"));
         feedResource.getContentTypes().createContentType(contentTypeXml);
+        contentTypeXml = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(
+            "contentcoprocessors/content-type-def-with-enum.xml"));
+        feedResource.getContentTypes().createContentType(contentTypeXml);
         valid = true;
       }
       catch (Exception ex) {
@@ -2535,7 +2540,7 @@ public class AppTest {
                        "enumField").getValueDef()).getChoices().contains("8"));
     Collection<ContentTypeFeedResource> typeFeeds = feedResource.getContentTypes().getContentTypeFeeds();
     Assert.assertNotNull(typeFeeds);
-    Assert.assertEquals(1, typeFeeds.size());
+    Assert.assertEquals(2, typeFeeds.size());
     ContentTypeFeedResource feed = typeFeeds.iterator().next();
     Collection<com.smartitengineering.cms.ws.common.domains.FieldDef> defs = feed.getFieldDefs();
     Assert.assertEquals(5, defs.size());
@@ -2705,8 +2710,7 @@ public class AppTest {
     WorkspaceFeedResource feedResource = iterator.next();
     final WorkspaceContentCoProcessorsResource procsResource = feedResource.getContentCoProcessors();
 
-    Collection<WorkspaceContentCoProcessorResource> rsrcs = procsResource.
-        getContentCoProcessorResources();
+    Collection<WorkspaceContentCoProcessorResource> rsrcs = procsResource.getContentCoProcessorResources();
     Assert.assertEquals(1, rsrcs.size());
     procsResource.createContentCoProcessor(template);
     Iterator<WorkspaceContentCoProcessorResource> representationIterator = rsrcs.iterator();
@@ -2716,6 +2720,53 @@ public class AppTest {
     Collection<WorkspaceContentCoProcessorResource> secRsrcs = resource.getWorkspaceFeeds().iterator().
         next().getContentCoProcessors().getContentCoProcessorResources();
     Assert.assertEquals(1, secRsrcs.size());
+  }
+
+  @Test
+  public void testCreateContentTypeWithContentCoProcessors() {
+    WorkspaceFeedResource feedResource = setupEnumWorkspace();
+    com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl id =
+                                                                  new com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl();
+    id.setGlobalNamespace(feedResource.getWorkspaceNamespace());
+    id.setName(feedResource.getWorkspaceName());
+    ContentTypeIdImpl idImpl = new ContentTypeIdImpl();
+    idImpl.setWorkspace(id);
+    idImpl.setNamespace("enum");
+    idImpl.setName("ContentCoProcessorTest");
+    ContentType type = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(idImpl);
+    final Map<ContentProcessingPhase, Collection<ContentCoProcessorDef>> contentCoProcessorDefs =
+                                                                         type.getContentCoProcessorDefs();
+    Assert.assertNotNull(contentCoProcessorDefs);
+    Assert.assertFalse(contentCoProcessorDefs.isEmpty());
+    Assert.assertNotNull(contentCoProcessorDefs.get(ContentProcessingPhase.READ));
+    Assert.assertNotNull(contentCoProcessorDefs.get(ContentProcessingPhase.WRITE));
+    Assert.assertFalse(contentCoProcessorDefs.get(ContentProcessingPhase.READ).isEmpty());
+    Assert.assertFalse(contentCoProcessorDefs.get(ContentProcessingPhase.WRITE).isEmpty());
+    Assert.assertEquals(2, contentCoProcessorDefs.get(ContentProcessingPhase.READ).size());
+    Assert.assertEquals(1, contentCoProcessorDefs.get(ContentProcessingPhase.WRITE).size());
+    final Iterator<ContentCoProcessorDef> readItr =
+                                          contentCoProcessorDefs.get(ContentProcessingPhase.READ).iterator();
+    ContentCoProcessorDef def = readItr.next();
+    Assert.assertEquals("testr", def.getName());
+    Assert.assertNull(def.getMIMEType());
+    Assert.assertEquals(0, def.getPriority());
+    Assert.assertEquals(1, def.getParameters().size());
+    Assert.assertEquals("v", def.getParameters().get("k"));
+    Assert.assertEquals("test", def.getResourceUri().getValue());
+    def = readItr.next();
+    Assert.assertEquals("testr1", def.getName());
+    Assert.assertNull(def.getMIMEType());
+    Assert.assertEquals(1, def.getPriority());
+    Assert.assertEquals(1, def.getParameters().size());
+    Assert.assertEquals("v1", def.getParameters().get("k1"));
+    Assert.assertEquals("test1", def.getResourceUri().getValue());
+    def = contentCoProcessorDefs.get(ContentProcessingPhase.WRITE).iterator().next();
+    Assert.assertEquals("testw", def.getName());
+    Assert.assertNull(def.getMIMEType());
+    Assert.assertEquals(0, def.getPriority());
+    Assert.assertEquals(1, def.getParameters().size());
+    Assert.assertEquals("v2", def.getParameters().get("k2"));
+    Assert.assertEquals("test2", def.getResourceUri().getValue());
   }
 
   public static class ConfigurationModule extends AbstractModule {

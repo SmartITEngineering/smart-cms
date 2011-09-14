@@ -24,6 +24,8 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
+import com.smartitengineering.cms.api.type.ContentCoProcessorDef;
+import com.smartitengineering.cms.api.type.ContentType.ContentProcessingPhase;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.common.TemplateType;
@@ -69,8 +71,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
-import org.apache.xalan.xsltc.compiler.Template;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Assert;
@@ -513,6 +515,55 @@ public class XMLContentTypeDefnitionParserTest {
         Assert.assertTrue(choices.contains(String.valueOf(1)));
         Assert.assertTrue(choices.contains(String.valueOf(2)));
         Assert.assertTrue(choices.contains(String.valueOf(3)));
+      }
+    }
+    Assert.assertTrue(foundFieldDef);
+  }
+
+  @Test
+  public void testParsingContentCoProcessors() throws Exception {
+    System.out.println(":::::::::::::::::::::::::: TEST PARSING CONTENT CO PROCESSOR ::::::::::::::::::::::::::");
+    Collection<WritableContentType> collection = init("content-type-def-shopping.xml");
+    Assert.assertEquals(6, collection.size());
+    Iterator<WritableContentType> iterator = collection.iterator();
+    boolean foundFieldDef = false;
+    while (iterator.hasNext()) {
+      WritableContentType type = iterator.next();
+      if (type.getContentTypeID().getName().equals("Author")) {
+        foundFieldDef = true;
+        final Map<ContentProcessingPhase, Collection<ContentCoProcessorDef>> contentCoProcessorDefs =
+                                                                             type.getContentCoProcessorDefs();
+        Assert.assertNotNull(contentCoProcessorDefs);
+        Assert.assertFalse(contentCoProcessorDefs.isEmpty());
+        Assert.assertNotNull(contentCoProcessorDefs.get(ContentProcessingPhase.READ));
+        Assert.assertNotNull(contentCoProcessorDefs.get(ContentProcessingPhase.WRITE));
+        Assert.assertFalse(contentCoProcessorDefs.get(ContentProcessingPhase.READ).isEmpty());
+        Assert.assertFalse(contentCoProcessorDefs.get(ContentProcessingPhase.WRITE).isEmpty());
+        Assert.assertEquals(2, contentCoProcessorDefs.get(ContentProcessingPhase.READ).size());
+        Assert.assertEquals(1, contentCoProcessorDefs.get(ContentProcessingPhase.WRITE).size());
+        final Iterator<ContentCoProcessorDef> readItr =
+                                              contentCoProcessorDefs.get(ContentProcessingPhase.READ).iterator();
+        ContentCoProcessorDef def = readItr.next();
+        Assert.assertEquals("testr", def.getName());
+        Assert.assertNull(def.getMIMEType());
+        Assert.assertEquals(0, def.getPriority());
+        Assert.assertEquals(1, def.getParameters().size());
+        Assert.assertEquals("v", def.getParameters().get("k"));
+        Assert.assertEquals("test", def.getResourceUri().getValue());
+        def = readItr.next();
+        Assert.assertEquals("testr1", def.getName());
+        Assert.assertNull(def.getMIMEType());
+        Assert.assertEquals(1, def.getPriority());
+        Assert.assertEquals(1, def.getParameters().size());
+        Assert.assertEquals("v1", def.getParameters().get("k1"));
+        Assert.assertEquals("test1", def.getResourceUri().getValue());
+        def = contentCoProcessorDefs.get(ContentProcessingPhase.WRITE).iterator().next();
+        Assert.assertEquals("testw", def.getName());
+        Assert.assertNull(def.getMIMEType());
+        Assert.assertEquals(0, def.getPriority());
+        Assert.assertEquals(1, def.getParameters().size());
+        Assert.assertEquals("v2", def.getParameters().get("k2"));
+        Assert.assertEquals("test2", def.getResourceUri().getValue());
       }
     }
     Assert.assertTrue(foundFieldDef);
