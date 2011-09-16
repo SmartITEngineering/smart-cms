@@ -483,6 +483,9 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
 
   public ContentCoProcessorTemplate putContentCoProcessorTemplate(WorkspaceId to, String name, TemplateType templateType,
                                                                   byte[] data) {
+    if (templateType.equals(TemplateType.JASPER) || templateType.equals(TemplateType.VELOCITY)) {
+      throw new IllegalArgumentException("TemplateType not supported for content type co processor");
+    }
     return SmartContentSPI.getInstance().getWorkspaceService().putContentCoProcessorTemplate(to, name, templateType,
                                                                                              data);
   }
