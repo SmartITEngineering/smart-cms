@@ -76,6 +76,8 @@ import com.smartitengineering.cms.ws.common.domains.OtherFieldValueImpl;
 import com.smartitengineering.cms.ws.common.domains.ResourceTemplateImpl;
 import com.smartitengineering.cms.ws.common.domains.Workspace;
 import com.smartitengineering.cms.ws.common.domains.WorkspaceImpl.WorkspaceIdImpl;
+import com.smartitengineering.cms.ws.common.providers.JacksonJsonProvider;
+import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
 import com.smartitengineering.dao.hbase.ddl.HBaseTableGenerator;
 import com.smartitengineering.dao.hbase.ddl.config.json.ConfigurationJsonParser;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
@@ -88,6 +90,9 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.atom.abdera.impl.provider.entity.FeedProvider;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import java.io.File;
@@ -2681,9 +2686,9 @@ public class AppTest {
     resource.getWorkspaceFeeds();
     WorkspaceContentCoProcessorResource secondRepresentationResource = resource.getWorkspaceFeeds().iterator().next().
         getContentCoProcessors().getContentCoProcessorResources().iterator().next();
-    template.setTemplateType(TemplateType.VELOCITY.name());
+    template.setTemplateType(TemplateType.JAVASCRIPT.name());
     secondRepresentationResource.update(template);
-    Assert.assertEquals(TemplateType.VELOCITY.name(), secondRepresentationResource.get().getTemplateType());
+    Assert.assertEquals(TemplateType.JAVASCRIPT.name(), secondRepresentationResource.get().getTemplateType());
     try {
       rsrc.update(template);
       Assert.fail("Should not have been able to update!");
@@ -2813,6 +2818,11 @@ public class AppTest {
   @Test
   public void testCreateContentWithContentCoProcessors() throws Exception {
     WorkspaceFeedResource feedResource = setupContentCoProcessorExecWorkspace();
+    ClientConfig config = new DefaultClientConfig();
+    config.getClasses().add(JacksonJsonProvider.class);
+    config.getClasses().add(TextURIListProvider.class);
+    config.getClasses().add(FeedProvider.class);
+    Client client = Client.create(config);
     {
       final Properties properties = new Properties();
       properties.load(getClass().getClassLoader().getResourceAsStream(
@@ -2836,7 +2846,8 @@ public class AppTest {
                           lastReadStateOfEntity.getFieldsMap().get("directEnumFieldCopy").getValue().getValue());
       String dynaField = lastReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue();
       Thread.sleep(SLEEP_DURATION);
-      final Content reReadStateOfEntity = resourceImpl.get();
+      final Content reReadStateOfEntity = client.resource(resourceImpl.getUri()).accept(MediaType.APPLICATION_JSON).
+          header("Pragma", "no-cache").get(Content.class);
       Assert.assertEquals(dynaField, reReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue());
     }
     {
@@ -2862,7 +2873,8 @@ public class AppTest {
                           lastReadStateOfEntity.getFieldsMap().get("directEnumFieldCopy").getValue().getValue());
       String dynaField = lastReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue();
       Thread.sleep(SLEEP_DURATION);
-      final Content reReadStateOfEntity = resourceImpl.get();
+      final Content reReadStateOfEntity = client.resource(resourceImpl.getUri()).accept(MediaType.APPLICATION_JSON).
+          header("Pragma", "no-cache").get(Content.class);
       Assert.assertFalse(dynaField.equals(reReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue()));
     }
   }
