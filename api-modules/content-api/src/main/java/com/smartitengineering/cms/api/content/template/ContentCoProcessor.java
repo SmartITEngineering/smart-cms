@@ -18,7 +18,7 @@
  */
 package com.smartitengineering.cms.api.content.template;
 
-import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.content.MutableContent;
 import java.util.Map;
 
 /**
@@ -33,5 +33,5 @@ public interface ContentCoProcessor {
    * Process the content needed
    * @param content The content to process
    */
-  public void processContent(Content content, Map<String, String> params);
+  public void processContent(MutableContent content, Map<String, String> params);
 }

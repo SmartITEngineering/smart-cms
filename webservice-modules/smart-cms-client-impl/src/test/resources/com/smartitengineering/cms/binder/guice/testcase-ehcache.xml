@@ -3,22 +3,13 @@
        xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">
   <defaultCache eternal="false" maxElementsInMemory="1000" overflowToDisk="false"></defaultCache>
   <cache name="cmsCache"
-       maxElementsInMemory="50000"
+       maxElementsInMemory="500"
        eternal="false"
-       timeToIdleSeconds="300"
-       timeToLiveSeconds="600"
+       timeToIdleSeconds="1"
+       timeToLiveSeconds="1"
        overflowToDisk="false"
        diskPersistent="false"
        diskExpiryThreadIntervalSeconds="1">
           
-  </cache>
-  <cache name="fieldCache"
-       maxElementsInMemory="5000"
-       eternal="false"
-       timeToIdleSeconds="120"
-       timeToLiveSeconds="600"
-       overflowToDisk="false"
-       diskPersistent="false"
-       diskExpiryThreadIntervalSeconds="1">
   </cache>
 </ehcache>

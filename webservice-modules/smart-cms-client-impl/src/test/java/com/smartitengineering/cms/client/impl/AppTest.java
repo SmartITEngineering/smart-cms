@@ -2769,6 +2769,104 @@ public class AppTest {
     Assert.assertEquals("test2", def.getResourceUri().getValue());
   }
 
+  private WorkspaceFeedResource setupContentCoProcessorExecWorkspace() {
+    RootResource resource = RootResourceImpl.getRoot(URI.create(ROOT_URI_STRING));
+    resource.get();
+    WorkspaceFeedResource feedResource;
+    try {
+      feedResource = resource.getTemplates().getWorkspaceResource("test", "enums");
+    }
+    catch (Exception ex) {
+      feedResource = null;
+      LOGGER.info("Exception getting feed resoruce", ex);
+    }
+    boolean valid = false;
+    {
+      try {
+        final WorkspaceIdImpl workspaceId = new WorkspaceIdImpl("test", "enums");
+        if (feedResource == null) {
+
+          Workspace workspace = resource.createWorkspace(workspaceId);
+          feedResource = resource.getTemplates().getWorkspaceResource(workspace.getId().getGlobalNamespace(), workspace.
+              getId().getName());
+        }
+        String contentTypeXml = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(
+            "contentcoprocessors/content-type-def-with-enum-ext.xml"));
+        feedResource.getContentTypes().createContentType(contentTypeXml);
+        ResourceTemplateImpl template = new ResourceTemplateImpl();
+        template.setName("test");
+        template.setTemplate(IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
+            "contentcoprocessors/coprocessor.groovy")));
+        template.setTemplateType("GROOVY");
+        template.setWorkspaceId(workspaceId);
+        feedResource.getContentCoProcessors().createContentCoProcessor(template);
+        valid = true;
+      }
+      catch (Exception ex) {
+        LOGGER.error("Error creating test workspace for templates", ex);
+      }
+    }
+    Assert.assertTrue(valid);
+    return feedResource;
+  }
+
+  @Test
+  public void testCreateContentWithContentCoProcessors() throws Exception {
+    WorkspaceFeedResource feedResource = setupContentCoProcessorExecWorkspace();
+    {
+      final Properties properties = new Properties();
+      properties.load(getClass().getClassLoader().getResourceAsStream(
+          "contentcoprocessors/form-value-write.properties"));
+      Set<Object> formKeys = properties.keySet();
+      FormDataMultiPart multiPart = new FormDataMultiPart();
+      for (Object key : formKeys) {
+        multiPart.field(key.toString(), properties.getProperty(key.toString()));
+      }
+      ClientResponse response =
+                     feedResource.getContents().post(MediaType.MULTIPART_FORM_DATA, multiPart,
+                                                     ClientResponse.Status.CREATED,
+                                                     ClientResponse.Status.ACCEPTED, ClientResponse.Status.OK);
+      URI uri = response.getLocation();
+      ContentResourceImpl resourceImpl = new ContentResourceImpl(feedResource, uri);
+      final Content lastReadStateOfEntity = resourceImpl.getLastReadStateOfEntity();
+      Assert.assertNotNull(lastReadStateOfEntity);
+      Assert.assertNotNull(lastReadStateOfEntity.getFieldsMap().get("directEnumFieldCopy"));
+      Assert.assertNotNull(lastReadStateOfEntity.getFieldsMap().get("dynaField"));
+      Assert.assertEquals(lastReadStateOfEntity.getFieldsMap().get("directEnumField").getValue().getValue(),
+                          lastReadStateOfEntity.getFieldsMap().get("directEnumFieldCopy").getValue().getValue());
+      String dynaField = lastReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue();
+      Thread.sleep(SLEEP_DURATION);
+      final Content reReadStateOfEntity = resourceImpl.get();
+      Assert.assertEquals(dynaField, reReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue());
+    }
+    {
+      final Properties properties = new Properties();
+      properties.load(getClass().getClassLoader().getResourceAsStream(
+          "contentcoprocessors/form-value-read.properties"));
+      Set<Object> formKeys = properties.keySet();
+      FormDataMultiPart multiPart = new FormDataMultiPart();
+      for (Object key : formKeys) {
+        multiPart.field(key.toString(), properties.getProperty(key.toString()));
+      }
+      ClientResponse response =
+                     feedResource.getContents().post(MediaType.MULTIPART_FORM_DATA, multiPart,
+                                                     ClientResponse.Status.CREATED,
+                                                     ClientResponse.Status.ACCEPTED, ClientResponse.Status.OK);
+      URI uri = response.getLocation();
+      ContentResourceImpl resourceImpl = new ContentResourceImpl(feedResource, uri);
+      final Content lastReadStateOfEntity = resourceImpl.getLastReadStateOfEntity();
+      Assert.assertNotNull(lastReadStateOfEntity);
+      Assert.assertNotNull(lastReadStateOfEntity.getFieldsMap().get("directEnumFieldCopy"));
+      Assert.assertNotNull(lastReadStateOfEntity.getFieldsMap().get("dynaField"));
+      Assert.assertEquals(lastReadStateOfEntity.getFieldsMap().get("directEnumField").getValue().getValue(),
+                          lastReadStateOfEntity.getFieldsMap().get("directEnumFieldCopy").getValue().getValue());
+      String dynaField = lastReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue();
+      Thread.sleep(SLEEP_DURATION);
+      final Content reReadStateOfEntity = resourceImpl.get();
+      Assert.assertFalse(dynaField.equals(reReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue()));
+    }
+  }
+
   public static class ConfigurationModule extends AbstractModule {
 
     @Override

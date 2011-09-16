@@ -18,17 +18,20 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
+import com.smartitengineering.cms.api.type.ContentType.ContentProcessingPhase;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.Representation;
+import com.smartitengineering.cms.api.content.template.ContentCoProcessor;
 import com.smartitengineering.cms.api.event.Event;
 import com.smartitengineering.cms.api.event.Event.EventType;
 import com.smartitengineering.cms.api.event.Event.Type;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.impl.AbstractPersistableDomain;
+import com.smartitengineering.cms.api.type.ContentCoProcessorDef;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.FieldDef;
@@ -36,9 +39,13 @@ import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.PersistableContent;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.ObjectUtils;
 
@@ -70,6 +77,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
 
   @Override
   public void put() throws IOException {
+    triggerContentCoProcessors(ContentType.ContentProcessingPhase.WRITE);
     if (!isValid()) {
       logger.info("Content not in valid state!");
       //First get contents indexed before attempting to use this validity!
@@ -77,6 +85,30 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
       throw new IOException("Content is not in valid state!");
     }
     super.put();
+  }
+
+  protected void triggerContentCoProcessors(final ContentProcessingPhase phase) {
+    //Trigger content co processors
+    if (contentDef != null && contentId != null) {
+      Collection<ContentCoProcessorDef> defs = contentDef.getContentCoProcessorDefs().get(
+          phase);
+      if (defs != null && !defs.isEmpty()) {
+        List<ContentCoProcessorDef> list = new ArrayList<ContentCoProcessorDef>(defs);
+        Collections.sort(list, new Comparator<ContentCoProcessorDef>() {
+
+          public int compare(ContentCoProcessorDef o1, ContentCoProcessorDef o2) {
+            return o1.getPriority() - o2.getPriority();
+          }
+        });
+        for (ContentCoProcessorDef def : list) {
+          ContentCoProcessor processor = SmartContentAPI.getInstance().getWorkspaceApi().getContentCoProcessor(contentId.
+              getWorkspaceId(), def.getResourceUri().getValue());
+          if (processor != null) {
+            processor.processContent(this, def.getParameters());
+          }
+        }
+      }
+    }
   }
 
   @Override
@@ -158,6 +190,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
     if (map == null) {
       map = new LinkedHashMap<String, Field>(SmartContentSPI.getInstance().getContentReader().getFieldsForContent(
           contentId));
+      triggerContentCoProcessors(ContentType.ContentProcessingPhase.READ);
     }
     return map;
   }
