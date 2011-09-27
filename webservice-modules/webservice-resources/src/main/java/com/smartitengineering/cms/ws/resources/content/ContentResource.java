@@ -818,7 +818,7 @@ public class ContentResource extends AbstractResource {
 
   protected static void getDomainField(UriBuilder builder, Field field, String contentUri, FieldImpl fieldImpl) {
 
-    if (field != null) {
+    if (field != null && org.apache.commons.lang.StringUtils.isNotBlank(field.getName()) && field.getValue() != null) {
       fieldImpl.setName(field.getName());
       final FieldValueImpl value;
       final FieldValue contentFieldValue = field.getValue();
@@ -839,10 +839,23 @@ public class ContentResource extends AbstractResource {
       }
       fieldImpl.setValue(value);
     }
+    else {
+      if (LOGGER.isWarnEnabled()) {
+        String fieldError = ((field == null) ? "NULL Field" : ((org.apache.commons.lang.StringUtils.isBlank(field.
+                                                                getName()) ? "NULL Name" : ((field.getValue() == null) ?
+                                                                                            "NULL Value" :
+                                                                                            "Indeterministic error!"))));
+        if (!fieldError.contains("Name")) {
+          fieldError = new StringBuilder(fieldError).append(' ').append(field.getName()).toString();
+        }
+        LOGGER.warn("Invalid field! " + fieldError);
+      }
+    }
   }
 
   private static FieldValueImpl getFieldvalue(final UriBuilder builder, final DataType valueDef,
                                               final FieldValue contentFieldValue) {
+
     final FieldValueImpl value;
     switch (valueDef.getType()) {
       case CONTENT: {
