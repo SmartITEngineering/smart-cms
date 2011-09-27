@@ -903,7 +903,7 @@ public class ContentResource extends AbstractResource {
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Field " + field);
       if (field != null) {
-        LOGGER.info("Converting field " + field.getName() + " with value " + field.getValue().toString() +
+        LOGGER.info("Converting field " + field.getName() + " with value " + field.getValue() +
             " and URI " + contentUri);
       }
     }
