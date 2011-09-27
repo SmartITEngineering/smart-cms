@@ -19,19 +19,14 @@
 package com.smartitengineering.cms.spi.impl.content;
 
 import com.smartitengineering.cms.spi.impl.AbstractVariationProvider;
-import com.google.inject.Inject;
-import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.MutableVariation;
 import com.smartitengineering.cms.api.content.Variation;
-import com.smartitengineering.cms.api.exception.InvalidTemplateException;
-import com.smartitengineering.cms.api.type.VariationDef;
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.spi.content.VariationProvider;
-import com.smartitengineering.cms.api.content.template.TypeVariationGenerator;
 import java.util.Date;
-import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -40,36 +35,14 @@ import org.apache.commons.lang.StringUtils;
  */
 public class VariationProviderImpl extends AbstractVariationProvider implements VariationProvider {
 
-  @Inject
-  private Map<TemplateType, TypeVariationGenerator> generators;
-
   @Override
   public Variation getVariation(String varName, Content content, Field field) {
     if (StringUtils.isBlank(varName) || content == null || field == null) {
       logger.info("Variation name or content or field is null or blank!");
       return null;
     }
-    VariationDef variationDef = field.getFieldDef().getVariations().get(varName);
-    VariationTemplate variationTemplate = getTemplate(varName, content, field);
-    if (variationTemplate == null) {
-      logger.info("Representation template is null!");
-      return null;
-    }
-    TypeVariationGenerator generator = generators.get(variationTemplate.getTemplateType());
-    if (generator == null) {
-      logger.info("Representation generator is null!");
-      return null;
-    }
-    final MutableVariation variation = generator.getVariation(variationTemplate, content, field, varName, variationDef.
-        getParameters());
-    Date cLastModifiedDate = content.getLastModifiedDate();
-    Date tLastModifiedDate = variationTemplate.getLastModifiedDate();
-    if (cLastModifiedDate.before(tLastModifiedDate)) {
-      variation.setLastModifiedDate(tLastModifiedDate);
-    }
-    else {
-      variation.setLastModifiedDate(cLastModifiedDate);
-    }
+    final MutableVariation variation = getVariation(content, field, varName);
+    variation.setLastModifiedDate(new Date());
     return variation;
   }
 
@@ -79,17 +52,6 @@ public class VariationProviderImpl extends AbstractVariationProvider implements 
       logger.info("Representation template is null!");
       return false;
     }
-    TypeVariationGenerator generator = generators.get(variationTemplate.getTemplateType());
-    if (generator == null) {
-      logger.info("Representation generator is null!");
-      return false;
-    }
-    try {
-      return generator.getGenerator(variationTemplate) != null;
-    }
-    catch (InvalidTemplateException ex) {
-      logger.debug(ex.getMessage(), ex);
-      return false;
-    }
+    return SmartContentAPI.getInstance().getWorkspaceApi().getVariationGenerator(variationTemplate) != null;
   }
 }

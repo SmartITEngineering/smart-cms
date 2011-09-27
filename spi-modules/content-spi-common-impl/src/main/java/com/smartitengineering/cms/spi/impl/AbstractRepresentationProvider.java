@@ -19,14 +19,15 @@
 package com.smartitengineering.cms.spi.impl;
 
 import com.smartitengineering.cms.api.content.Content;
+import com.smartitengineering.cms.api.content.MutableRepresentation;
+import com.smartitengineering.cms.api.content.template.RepresentationGenerator;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
-import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
-import com.smartitengineering.cms.api.type.ResourceUri;
-import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
-import com.smartitengineering.cms.api.workspace.WorkspaceId;
-import java.util.Collection;
-import java.util.Iterator;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.Map;
+import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,31 +39,43 @@ public class AbstractRepresentationProvider {
 
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
-  protected RepresentationTemplate getTemplate(String repName, ContentType contentType, Content content) {
-    RepresentationDef representationDef = contentType.getRepresentationDefs().get(repName);
-    if (representationDef == null) {
-      logger.info("Representation def is null!");
-      return null;
+  protected MutableRepresentation getMutableRepresentation(RepresentationGenerator generator, Content content,
+                                                           Map<String, String> params, String representationName) throws
+      RuntimeException {
+    final Object representationForContent = generator.getRepresentationForContent(content, params);
+    final byte[] bytes;
+    if (representationForContent instanceof String) {
+      bytes = StringUtils.getBytesUtf8((String) representationForContent);
     }
-    if (representationDef.getResourceUri().getType().equals(ResourceUri.Type.EXTERNAL)) {
-      logger.warn("External resource URI is not yet handled!");
-      return null;
+    else if (representationForContent instanceof byte[]) {
+      bytes = (byte[]) representationForContent;
     }
-    final WorkspaceId workspaceId = content.getContentId().getWorkspaceId();
-    RepresentationTemplate representationTemplate =
-                           SmartContentAPI.getInstance().getWorkspaceApi().getRepresentationTemplate(workspaceId, representationDef.
-        getResourceUri().getValue());
-    if (representationTemplate == null) {
-      //Lookup friendlies
-      Collection<WorkspaceId> friends = SmartContentAPI.getInstance().getWorkspaceApi().getFriendlies(workspaceId);
-      if (friends != null && !friends.isEmpty()) {
-        Iterator<WorkspaceId> friendsIterator = friends.iterator();
-        while (representationTemplate == null && friendsIterator.hasNext()) {
-          representationTemplate = SmartContentAPI.getInstance().getWorkspaceApi().getRepresentationTemplate(friendsIterator.
-              next(), representationDef.getResourceUri().getValue());
-        }
+    else if (representationForContent instanceof InputStream) {
+      try {
+        bytes = IOUtils.toByteArray((InputStream) representationForContent);
+      }
+      catch (Exception ex) {
+        throw new RuntimeException(ex);
       }
     }
-    return representationTemplate;
+    else if (representationForContent instanceof Reader) {
+      try {
+        bytes = IOUtils.toByteArray((Reader) representationForContent);
+      }
+      catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+    else {
+      bytes = StringUtils.getBytesUtf8(representationForContent.toString());
+    }
+    MutableRepresentation representation =
+                          SmartContentAPI.getInstance().getContentLoader().createMutableRepresentation(content.
+        getContentId());
+    final RepresentationDef def = content.getContentDefinition().getRepresentationDefs().get(representationName);
+    representation.setName(representationName);
+    representation.setMimeType(def.getMIMEType());
+    representation.setRepresentation(bytes);
+    return representation;
   }
 }

@@ -22,24 +22,7 @@ import com.google.inject.PrivateModule;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
-import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
-import com.smartitengineering.cms.api.common.TemplateType;
-import com.smartitengineering.cms.api.content.template.TypeFieldValidator;
-import com.smartitengineering.cms.api.content.template.TypeRepresentationGenerator;
-import com.smartitengineering.cms.api.content.template.TypeVariationGenerator;
-import com.smartitengineering.cms.api.impl.content.template.GroovyRepresentationGenerator;
-import com.smartitengineering.cms.api.impl.content.template.GroovyValidatorGenerator;
-import com.smartitengineering.cms.api.impl.content.template.GroovyVariationGenerator;
-import com.smartitengineering.cms.api.impl.content.template.JavascriptRepresentationGenerator;
-import com.smartitengineering.cms.api.impl.content.template.JavascriptValidatorGenerator;
-import com.smartitengineering.cms.api.impl.content.template.JavascriptVariationGenerator;
-import com.smartitengineering.cms.api.impl.content.template.RubyRepresentationGenerator;
-import com.smartitengineering.cms.api.impl.content.template.RubyValidatorGenerator;
-import com.smartitengineering.cms.api.impl.content.template.RubyVariationGenerator;
-import com.smartitengineering.cms.api.impl.content.template.VelocityRepresentationGenerator;
-import com.smartitengineering.cms.api.impl.content.template.VelocityVariationGenerator;
-import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.spi.content.RepresentationProvider;
 import com.smartitengineering.cms.spi.content.ValidatorProvider;
 import com.smartitengineering.cms.spi.content.VariationProvider;
@@ -92,13 +75,6 @@ public class SPITemplateEngineModule extends PrivateModule {
     bind(RepresentationProvider.class).to(PersistentRepresentationProviderImpl.class);
     bind(RepresentationProvider.class).annotatedWith(Names.named("mainProvider")).to(RepresentationProviderImpl.class);
     binder().expose(RepresentationProvider.class);
-    MapBinder<TemplateType, TypeRepresentationGenerator> typeGenBinder =
-                                                         MapBinder.newMapBinder(binder(), TemplateType.class,
-                                                                                TypeRepresentationGenerator.class);
-    typeGenBinder.addBinding(TemplateType.RUBY).to(RubyRepresentationGenerator.class);
-    typeGenBinder.addBinding(TemplateType.GROOVY).to(GroovyRepresentationGenerator.class);
-    typeGenBinder.addBinding(TemplateType.JAVASCRIPT).to(JavascriptRepresentationGenerator.class);
-    typeGenBinder.addBinding(TemplateType.VELOCITY).to(VelocityRepresentationGenerator.class);
     bind(new TypeLiteral<ObjectRowConverter<PersistentRepresentation>>() {
     }).to(RepresentationObjectConverter.class).in(Singleton.class);
     bind(new TypeLiteral<CommonReadDao<PersistentRepresentation, TemplateId>>() {
@@ -133,13 +109,6 @@ public class SPITemplateEngineModule extends PrivateModule {
     bind(VariationProvider.class).to(PersistentVariationProviderImpl.class);
     bind(VariationProvider.class).annotatedWith(Names.named("mainProvider")).to(VariationProviderImpl.class);
     binder().expose(VariationProvider.class);
-    MapBinder<TemplateType, TypeVariationGenerator> typeVarGenBinder =
-                                                    MapBinder.newMapBinder(binder(), TemplateType.class,
-                                                                           TypeVariationGenerator.class);
-    typeVarGenBinder.addBinding(TemplateType.RUBY).to(RubyVariationGenerator.class);
-    typeVarGenBinder.addBinding(TemplateType.GROOVY).to(GroovyVariationGenerator.class);
-    typeVarGenBinder.addBinding(TemplateType.JAVASCRIPT).to(JavascriptVariationGenerator.class);
-    typeVarGenBinder.addBinding(TemplateType.VELOCITY).to(VelocityVariationGenerator.class);
     bind(new TypeLiteral<ObjectRowConverter<PersistentVariation>>() {
     }).to(VariationObjectConverter.class).in(Singleton.class);
     bind(new TypeLiteral<CommonReadDao<PersistentVariation, TemplateId>>() {
@@ -171,11 +140,5 @@ public class SPITemplateEngineModule extends PrivateModule {
      */
     bind(ValidatorProvider.class).to(ValidatorProviderImpl.class);
     binder().expose(ValidatorProvider.class);
-    MapBinder<ValidatorType, TypeFieldValidator> typeFieldValBinder =
-                                                 MapBinder.newMapBinder(binder(), ValidatorType.class,
-                                                                        TypeFieldValidator.class);
-    typeFieldValBinder.addBinding(ValidatorType.RUBY).to(RubyValidatorGenerator.class);
-    typeFieldValBinder.addBinding(ValidatorType.GROOVY).to(GroovyValidatorGenerator.class);
-    typeFieldValBinder.addBinding(ValidatorType.JAVASCRIPT).to(JavascriptValidatorGenerator.class);
   }
 }

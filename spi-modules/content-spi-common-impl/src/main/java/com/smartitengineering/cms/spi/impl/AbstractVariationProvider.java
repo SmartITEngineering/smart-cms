@@ -20,13 +20,15 @@ package com.smartitengineering.cms.spi.impl;
 
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.Field;
+import com.smartitengineering.cms.api.content.MutableVariation;
+import com.smartitengineering.cms.api.content.template.VariationGenerator;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
-import com.smartitengineering.cms.api.type.ResourceUri;
+import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.VariationDef;
-import com.smartitengineering.cms.api.workspace.VariationTemplate;
-import com.smartitengineering.cms.api.workspace.WorkspaceId;
-import java.util.Collection;
-import java.util.Iterator;
+import java.io.InputStream;
+import java.io.Reader;
+import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,31 +40,62 @@ public class AbstractVariationProvider {
 
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
-  protected VariationTemplate getTemplate(String varName, Content content, Field field) {
-    VariationDef variationDef = field.getFieldDef().getVariations().get(varName);
-    if (variationDef == null) {
-      logger.info("Representation def is null!");
+  protected MutableVariation getVariation(Content content, Field field, String variationName) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Parameters: " + content + " " + field + " " + variationName);
+    }
+    if (field == null) {
       return null;
     }
-    if (variationDef.getResourceUri().getType().equals(ResourceUri.Type.EXTERNAL)) {
-      logger.warn("External resource URI is not yet handled!");
+    final FieldDef fieldDef = field.getFieldDef();
+    if (fieldDef == null) {
       return null;
     }
-    final WorkspaceId workspaceId = content.getContentId().getWorkspaceId();
-    VariationTemplate variationTemplate =
-                      SmartContentAPI.getInstance().getWorkspaceApi().getVariationTemplate(workspaceId, variationDef.
-        getResourceUri().getValue());
-    if (variationTemplate == null) {
-      //Lookup friendlies
-      Collection<WorkspaceId> friends = SmartContentAPI.getInstance().getWorkspaceApi().getFriendlies(workspaceId);
-      if (friends != null && !friends.isEmpty()) {
-        Iterator<WorkspaceId> friendsIterator = friends.iterator();
-        while (variationTemplate == null && friendsIterator.hasNext()) {
-          variationTemplate = SmartContentAPI.getInstance().getWorkspaceApi().getVariationTemplate(
-              friendsIterator.next(), variationDef.getResourceUri().getValue());
-        }
+    final VariationDef varDef = fieldDef.getVariations().get(variationName);
+    if (varDef == null) {
+      return null;
+    }
+    VariationGenerator generator;
+    generator = SmartContentAPI.getInstance().getWorkspaceApi().getVariationGenerator(content.getContentId().
+        getWorkspaceId(), varDef.getResourceUri().getValue());
+    if (generator == null) {
+      if (logger.isInfoEnabled()) {
+        logger.info("Generator not available!");
+      }
+      return null;
+    }
+    final Object variationForField = generator.getVariationForField(field, varDef.getParameters());
+    final byte[] bytes;
+    if (variationForField instanceof String) {
+      bytes = StringUtils.getBytesUtf8((String) variationForField);
+    }
+    else if (variationForField instanceof byte[]) {
+      bytes = (byte[]) variationForField;
+    }
+    else if (variationForField instanceof InputStream) {
+      try {
+        bytes = IOUtils.toByteArray((InputStream) variationForField);
+      }
+      catch (Exception ex) {
+        throw new RuntimeException(ex);
       }
     }
-    return variationTemplate;
+    else if (variationForField instanceof Reader) {
+      try {
+        bytes = IOUtils.toByteArray((Reader) variationForField);
+      }
+      catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+    else {
+      bytes = StringUtils.getBytesUtf8(variationForField.toString());
+    }
+    MutableVariation variation = SmartContentAPI.getInstance().getContentLoader().createMutableVariation(content.
+        getContentId(), fieldDef);
+    variation.setName(variationName);
+    variation.setMimeType(varDef.getMIMEType());
+    variation.setVariation(bytes);
+    return variation;
   }
 }

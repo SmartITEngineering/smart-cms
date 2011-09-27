@@ -80,7 +80,8 @@ public class PersistentRepresentationProviderImpl extends AbstractRepresentation
     if (cachedRep != null) {
       update = true;
       Date cachedDate = cachedRep.getRepresentation().getLastModifiedDate();
-      RepresentationTemplate template = getTemplate(repName, contentType, content);
+      RepresentationTemplate template = SmartContentAPI.getInstance().getWorkspaceApi().getRepresentationTemplate(
+          content.getContentId().getWorkspaceId(), repName);
       Date lastModified = content.getLastModifiedDate();
       if (template != null) {
         final Date lastModifiedDate = template.getLastModifiedDate();

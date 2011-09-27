@@ -23,7 +23,11 @@ import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.template.ContentCoProcessor;
-import com.smartitengineering.cms.api.content.template.ContentCoProcessorGenerator;
+import com.smartitengineering.cms.api.content.template.FieldValidator;
+import com.smartitengineering.cms.api.content.template.RepresentationGenerator;
+import com.smartitengineering.cms.api.content.template.VariationGenerator;
+import com.smartitengineering.cms.api.exception.InvalidTemplateException;
+import com.smartitengineering.cms.spi.content.template.ContentCoProcessorGenerator;
 import com.smartitengineering.cms.api.event.Event;
 import com.smartitengineering.cms.api.event.Event.EventType;
 import com.smartitengineering.cms.api.event.Event.Type;
@@ -38,6 +42,9 @@ import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
+import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
+import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
+import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.AbstractMap.SimpleEntry;
@@ -45,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -65,6 +73,45 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   private final transient Logger logger = LoggerFactory.getLogger(getClass());
   @Inject
   private Map<TemplateType, ContentCoProcessorGenerator> contentCoProcessorGenerators;
+  @Inject
+  private Map<TemplateType, TypeRepresentationGenerator> representationGenerators;
+  @Inject
+  private Map<TemplateType, TypeVariationGenerator> variationGenerators;
+  @Inject
+  private Map<ValidatorType, TypeFieldValidator> validatorGenerators;
+
+  public Map<TemplateType, ContentCoProcessorGenerator> getContentCoProcessorGenerators() {
+    return contentCoProcessorGenerators;
+  }
+
+  public void setContentCoProcessorGenerators(
+      Map<TemplateType, ContentCoProcessorGenerator> contentCoProcessorGenerators) {
+    this.contentCoProcessorGenerators = contentCoProcessorGenerators;
+  }
+
+  public Map<TemplateType, TypeRepresentationGenerator> getRepresentationGenerators() {
+    return representationGenerators;
+  }
+
+  public void setRepresentationGenerators(Map<TemplateType, TypeRepresentationGenerator> representationGenerators) {
+    this.representationGenerators = representationGenerators;
+  }
+
+  public Map<ValidatorType, TypeFieldValidator> getValidatorGenerators() {
+    return validatorGenerators;
+  }
+
+  public void setValidatorGenerators(Map<ValidatorType, TypeFieldValidator> validatorGenerators) {
+    this.validatorGenerators = validatorGenerators;
+  }
+
+  public Map<TemplateType, TypeVariationGenerator> getVariationGenerators() {
+    return variationGenerators;
+  }
+
+  public void setVariationGenerators(Map<TemplateType, TypeVariationGenerator> variationGenerators) {
+    this.variationGenerators = variationGenerators;
+  }
 
   @Inject
   public void setGlobalNamespace(@Named("globalNamespace") String globalNamespace) {
@@ -499,18 +546,44 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   }
 
   public ContentCoProcessor getContentCoProcessor(WorkspaceId id, String name) {
-    ContentCoProcessorTemplate template = getContentCoProcessorTemplate(id, name);
+    return getContentCoProcessor(id, name, true);
+  }
+
+  public ContentCoProcessor getContentCoProcessor(WorkspaceId id, String name, boolean searchInFriendlies) {
+    ContentCoProcessorTemplate template = getContentCoProcessorTemplate(id, name, searchInFriendlies);
+    return getContentCoProcessor(template);
+  }
+
+  public FieldValidator getFieldValidator(WorkspaceId id, String name) {
+    return getFieldValidator(id, name, true);
+  }
+
+  public FieldValidator getFieldValidator(WorkspaceId id, String name, boolean searchInFriendlies) {
+    ValidatorTemplate template = getValidatorTemplate(id, name, searchInFriendlies);
     if (template == null) {
+      logger.info("Validator template is null, returning true!");
       return null;
     }
-    ContentCoProcessorGenerator generator = contentCoProcessorGenerators.get(template.getTemplateType());
-    try {
-      return generator.getGenerator(template);
-    }
-    catch (Exception ex) {
-      logger.warn("Could not retrieve processor", ex);
-      return null;
-    }
+    return getFieldValidator(template);
+  }
+
+  public RepresentationGenerator getRepresentationGenerator(WorkspaceId id, String name) {
+    return getRepresentationGenerator(id, name, true);
+  }
+
+  public RepresentationGenerator getRepresentationGenerator(WorkspaceId workspaceId, String name,
+                                                            boolean searchInFriendlies) {
+    RepresentationTemplate representationTemplate = getRepresentationTemplate(workspaceId, name, searchInFriendlies);
+    return getRepresentationGenerator(representationTemplate);
+  }
+
+  public VariationGenerator getVariationGenerator(WorkspaceId id, String name) {
+    return getVariationGenerator(id, name, true);
+  }
+
+  public VariationGenerator getVariationGenerator(WorkspaceId workspaceId, String name, boolean searchInFriendlies) {
+    VariationTemplate variationTemplate = getVariationTemplate(workspaceId, name, searchInFriendlies);
+    return getVariationGenerator(variationTemplate);
   }
 
   public Collection<String> getContentCoProcessorNames(WorkspaceId id, ResourceSortCriteria criteria) {
@@ -534,5 +607,137 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
 
   public Collection<String> getContentCoProcessorNames(WorkspaceId id, String startPoint, int count) {
     return getContentCoProcessorNames(id, ResourceSortCriteria.BY_NAME, startPoint, count);
+  }
+
+  public ContentCoProcessorTemplate getContentCoProcessorTemplate(WorkspaceId id, String name,
+                                                                  boolean searchInFriendlies) {
+    ContentCoProcessorTemplate template = getContentCoProcessorTemplate(id, name);
+    if (searchInFriendlies && template == null) {
+      //Lookup friendlies
+      Collection<WorkspaceId> friends = SmartContentAPI.getInstance().getWorkspaceApi().getFriendlies(id);
+      if (friends != null && !friends.isEmpty()) {
+        Iterator<WorkspaceId> friendsIterator = friends.iterator();
+        while (template == null && friendsIterator.hasNext()) {
+          template = SmartContentAPI.getInstance().getWorkspaceApi().getContentCoProcessorTemplate(
+              friendsIterator.next(), name);
+        }
+      }
+    }
+    return template;
+  }
+
+  public RepresentationTemplate getRepresentationTemplate(WorkspaceId workspaceId, String name,
+                                                          boolean searchInFriendlies) {
+    RepresentationTemplate representationTemplate =
+                           SmartContentAPI.getInstance().getWorkspaceApi().getRepresentationTemplate(workspaceId, name);
+    if (searchInFriendlies && representationTemplate == null) {
+      //Lookup friendlies
+      Collection<WorkspaceId> friends = SmartContentAPI.getInstance().getWorkspaceApi().getFriendlies(workspaceId);
+      if (friends != null && !friends.isEmpty()) {
+        Iterator<WorkspaceId> friendsIterator = friends.iterator();
+        while (representationTemplate == null && friendsIterator.hasNext()) {
+          representationTemplate = SmartContentAPI.getInstance().getWorkspaceApi().getRepresentationTemplate(friendsIterator.
+              next(), name);
+        }
+      }
+    }
+    return representationTemplate;
+  }
+
+  public ValidatorTemplate getValidatorTemplate(WorkspaceId id, String name, boolean searchInFriendlies) {
+    ValidatorTemplate template =
+                      SmartContentAPI.getInstance().getWorkspaceApi().getValidatorTemplate(id, name);
+    if (searchInFriendlies && template == null) {
+      //Lookup friendlies
+      Collection<WorkspaceId> friends = SmartContentAPI.getInstance().getWorkspaceApi().getFriendlies(id);
+      if (friends != null && !friends.isEmpty()) {
+        Iterator<WorkspaceId> friendsIterator = friends.iterator();
+        while (template == null && friendsIterator.hasNext()) {
+          template = SmartContentAPI.getInstance().getWorkspaceApi().getValidatorTemplate(friendsIterator.next(), name);
+        }
+      }
+    }
+    return template;
+  }
+
+  public VariationTemplate getVariationTemplate(WorkspaceId workspaceId, String name, boolean searchInFriendlies) {
+    VariationTemplate variationTemplate =
+                      SmartContentAPI.getInstance().getWorkspaceApi().getVariationTemplate(workspaceId, name);
+    if (searchInFriendlies && variationTemplate == null) {
+      //Lookup friendlies
+      Collection<WorkspaceId> friends = SmartContentAPI.getInstance().getWorkspaceApi().getFriendlies(workspaceId);
+      if (friends != null && !friends.isEmpty()) {
+        Iterator<WorkspaceId> friendsIterator = friends.iterator();
+        while (variationTemplate == null && friendsIterator.hasNext()) {
+          variationTemplate = SmartContentAPI.getInstance().getWorkspaceApi().getVariationTemplate(
+              friendsIterator.next(), name);
+        }
+      }
+    }
+    return variationTemplate;
+  }
+
+  public ContentCoProcessor getContentCoProcessor(ContentCoProcessorTemplate template) {
+    if (template == null) {
+      return null;
+    }
+    ContentCoProcessorGenerator generator = contentCoProcessorGenerators.get(template.getTemplateType());
+    try {
+      return generator.getGenerator(template);
+    }
+    catch (Exception ex) {
+      logger.warn("Could not retrieve processor", ex);
+      return null;
+    }
+  }
+
+  public RepresentationGenerator getRepresentationGenerator(RepresentationTemplate representationTemplate) {
+    if (representationTemplate == null) {
+      return null;
+    }
+    TypeRepresentationGenerator generator = representationGenerators.get(representationTemplate.getTemplateType());
+    if (generator == null) {
+      return null;
+    }
+    try {
+      return generator.getGenerator(representationTemplate);
+    }
+    catch (Exception ex) {
+      logger.warn("Could not generate representation generator", ex);
+      return null;
+    }
+
+  }
+
+  public VariationGenerator getVariationGenerator(VariationTemplate variationTemplate) {
+    if (variationTemplate == null) {
+      return null;
+    }
+    TypeVariationGenerator generator = variationGenerators.get(variationTemplate.getTemplateType());
+    if (generator == null) {
+      return null;
+    }
+    try {
+      return generator.getGenerator(variationTemplate);
+    }
+    catch (Exception ex) {
+      logger.warn("Could not generate variation generator", ex);
+      return null;
+    }
+  }
+
+  public FieldValidator getFieldValidator(ValidatorTemplate template) {
+    TypeFieldValidator generator = validatorGenerators.get(template.getTemplateType());
+    if (generator == null) {
+      logger.info("Validator generator is null, returning true!");
+      return null;
+    }
+    try {
+      return generator.getValidator(template);
+    }
+    catch (InvalidTemplateException ex) {
+      logger.error("Not a valid validator template!");
+      return null;
+    }
   }
 }

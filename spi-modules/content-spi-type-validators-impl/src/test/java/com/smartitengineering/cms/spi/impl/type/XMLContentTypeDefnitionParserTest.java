@@ -29,7 +29,6 @@ import com.smartitengineering.cms.api.type.ContentType.ContentProcessingPhase;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.common.TemplateType;
-import com.smartitengineering.cms.api.content.template.ContentCoProcessorGenerator;
 import com.smartitengineering.cms.api.exception.InvalidReferenceException;
 import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
@@ -51,8 +50,13 @@ import com.smartitengineering.cms.api.type.MutableRepresentationDef;
 import com.smartitengineering.cms.api.type.MutableResourceUri;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceUri.Type;
+import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.spi.SmartContentSPI;
+import com.smartitengineering.cms.spi.content.template.ContentCoProcessorGenerator;
+import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
+import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
+import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
 import com.smartitengineering.cms.spi.impl.PersistentServiceRegistrar;
 import com.smartitengineering.cms.spi.impl.ContentTypeDefinitionParsers;
 import com.smartitengineering.cms.spi.impl.type.validator.TypeValidators;
@@ -667,6 +671,18 @@ public class XMLContentTypeDefnitionParserTest {
       ccpgBinder.addBinding(TemplateType.GROOVY).toInstance(mockery.mock(ContentCoProcessorGenerator.class));
       bind(com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar.class).to(
           PersistentServiceRegistrar.class);
+      MapBinder<ValidatorType, TypeFieldValidator> valBinder =
+                                                   MapBinder.newMapBinder(binder(), ValidatorType.class,
+                                                                          TypeFieldValidator.class);
+      valBinder.addBinding(ValidatorType.GROOVY).toInstance(mockery.mock(TypeFieldValidator.class));
+      MapBinder<TemplateType, TypeVariationGenerator> varBinder =
+                                                      MapBinder.newMapBinder(binder(), TemplateType.class,
+                                                                             TypeVariationGenerator.class);
+      varBinder.addBinding(TemplateType.GROOVY).toInstance(mockery.mock(TypeVariationGenerator.class));
+      MapBinder<TemplateType, TypeRepresentationGenerator> repBinder =
+                                                           MapBinder.newMapBinder(binder(), TemplateType.class,
+                                                                                  TypeRepresentationGenerator.class);
+      repBinder.addBinding(TemplateType.GROOVY).toInstance(mockery.mock(TypeRepresentationGenerator.class));
     }
   }
 }

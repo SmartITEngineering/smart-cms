@@ -18,19 +18,15 @@
  */
 package com.smartitengineering.cms.spi.impl.content;
 
-import com.google.inject.Inject;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.Field;
-import com.smartitengineering.cms.api.exception.InvalidTemplateException;
+import com.smartitengineering.cms.api.content.template.FieldValidator;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.type.ValidatorDef;
-import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.spi.content.ValidatorProvider;
-import com.smartitengineering.cms.api.content.template.TypeFieldValidator;
 import java.util.Collection;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +37,6 @@ import org.slf4j.LoggerFactory;
 public class ValidatorProviderImpl implements ValidatorProvider {
 
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
-  @Inject
-  private Map<ValidatorType, TypeFieldValidator> generators;
 
   @Override
   public boolean isValidField(Content content, Field field) {
@@ -60,26 +54,19 @@ public class ValidatorProviderImpl implements ValidatorProvider {
         logger.info("Validator def is null, returning true!");
         continue;
       }
-      if (validatorDef.getUri().getType().equals(ResourceUri.Type.EXTERNAL)) {
+      final ResourceUri uri = validatorDef.getUri();
+      if (uri.getType().equals(ResourceUri.Type.EXTERNAL)) {
         logger.warn("External resource URI is not yet handled! Returning true");
         continue;
       }
-      ValidatorTemplate validatorTemplate =
-                        SmartContentAPI.getInstance().getWorkspaceApi().getValidatorTemplate(content.getContentId().
-          getWorkspaceId(), validatorDef.getUri().getValue());
-      if (validatorTemplate == null) {
+      FieldValidator validator =
+                     SmartContentAPI.getInstance().getWorkspaceApi().getFieldValidator(content.getContentId().
+          getWorkspaceId(), uri.getValue());
+      if (validator == null) {
         logger.info("Validator template is null, returning true!");
         continue;
       }
-      TypeFieldValidator generator = generators.get(validatorTemplate.getTemplateType());
-      if (generator == null) {
-        logger.info("Validator generator is null, returning true!");
-        continue;
-      }
-      if (logger.isInfoEnabled()) {
-        logger.info("Using custom validators with parameters " + validatorDef.getParameters());
-      }
-      valid = valid && generator.isValid(validatorTemplate, field, validatorDef.getParameters());
+      valid = valid && validator.isValidFieldValue(field, validatorDef.getParameters());
     }
     return valid;
   }
@@ -90,17 +77,6 @@ public class ValidatorProviderImpl implements ValidatorProvider {
       logger.info("Validator template is null!");
       return false;
     }
-    TypeFieldValidator generator = generators.get(template.getTemplateType());
-    if (generator == null) {
-      logger.info("Validator generator is null!");
-      return false;
-    }
-    try {
-      return generator.getValidator(template) != null;
-    }
-    catch (InvalidTemplateException ex) {
-      logger.debug(ex.getMessage(), ex);
-      return false;
-    }
+    return SmartContentAPI.getInstance().getWorkspaceApi().getFieldValidator(template) != null;
   }
 }

@@ -21,6 +21,9 @@ package com.smartitengineering.cms.api.factory.workspace;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.template.ContentCoProcessor;
+import com.smartitengineering.cms.api.content.template.FieldValidator;
+import com.smartitengineering.cms.api.content.template.RepresentationGenerator;
+import com.smartitengineering.cms.api.content.template.VariationGenerator;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
@@ -81,6 +84,38 @@ public interface WorkspaceAPI {
   ContentCoProcessorTemplate getContentCoProcessorTemplate(WorkspaceId id, String name);
 
   ContentCoProcessor getContentCoProcessor(WorkspaceId id, String name);
+
+  public ContentCoProcessorTemplate getContentCoProcessorTemplate(WorkspaceId id, String name,
+                                                                  boolean searchInFriendlies);
+
+  public RepresentationTemplate getRepresentationTemplate(WorkspaceId workspaceId, String name,
+                                                          boolean searchInFriendlies);
+
+  public ValidatorTemplate getValidatorTemplate(WorkspaceId id, String name, boolean searchInFriendlies);
+
+  public VariationTemplate getVariationTemplate(WorkspaceId workspaceId, String name, boolean searchInFriendlies);
+
+  RepresentationGenerator getRepresentationGenerator(WorkspaceId id, String name);
+
+  VariationGenerator getVariationGenerator(WorkspaceId id, String name);
+
+  FieldValidator getFieldValidator(WorkspaceId id, String name);
+
+  ContentCoProcessor getContentCoProcessor(ContentCoProcessorTemplate template);
+
+  RepresentationGenerator getRepresentationGenerator(RepresentationTemplate template);
+
+  VariationGenerator getVariationGenerator(VariationTemplate template);
+
+  FieldValidator getFieldValidator(ValidatorTemplate template);
+
+  ContentCoProcessor getContentCoProcessor(WorkspaceId id, String name, boolean searchInFriendlies);
+
+  RepresentationGenerator getRepresentationGenerator(WorkspaceId id, String name, boolean searchInFriendlies);
+
+  VariationGenerator getVariationGenerator(WorkspaceId id, String name, boolean searchInFriendlies);
+
+  FieldValidator getFieldValidator(WorkspaceId id, String name, boolean searchInFriendlies);
 
   WorkspaceId getWorkspaceIdIfExists(String name);
 

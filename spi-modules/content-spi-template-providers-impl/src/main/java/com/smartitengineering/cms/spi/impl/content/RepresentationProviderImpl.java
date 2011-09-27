@@ -19,22 +19,18 @@
 package com.smartitengineering.cms.spi.impl.content;
 
 import com.smartitengineering.cms.spi.impl.AbstractRepresentationProvider;
-import com.google.inject.Inject;
-import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.MutableRepresentation;
 import com.smartitengineering.cms.api.content.Representation;
-import com.smartitengineering.cms.api.exception.InvalidTemplateException;
+import com.smartitengineering.cms.api.content.template.RepresentationGenerator;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.spi.content.RepresentationProvider;
-import com.smartitengineering.cms.api.content.template.TypeRepresentationGenerator;
 import java.util.Date;
-import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -42,9 +38,6 @@ import org.apache.commons.lang.StringUtils;
  * @author imyousuf
  */
 public class RepresentationProviderImpl extends AbstractRepresentationProvider implements RepresentationProvider {
-
-  @Inject
-  private Map<TemplateType, TypeRepresentationGenerator> generators;
 
   @Override
   public Representation getRepresentation(String repName, ContentTypeId contentTypeId, ContentId contentId) {
@@ -66,26 +59,15 @@ public class RepresentationProviderImpl extends AbstractRepresentationProvider i
       return null;
     }
     RepresentationDef def = contentType.getRepresentationDefs().get(repName);
-    RepresentationTemplate representationTemplate = getTemplate(repName, contentType, content);
-    if (representationTemplate == null) {
-      logger.info("Representation template is null!");
-      return null;
-    }
-    TypeRepresentationGenerator generator = generators.get(representationTemplate.getTemplateType());
+    RepresentationGenerator generator = SmartContentAPI.getInstance().getWorkspaceApi().getRepresentationGenerator(content.
+        getContentId().getWorkspaceId(), def.getResourceUri().getValue());
     if (generator == null) {
       logger.info("Representation generator is null!");
       return null;
     }
-    final MutableRepresentation representation = generator.getRepresentation(representationTemplate, content, repName,
-                                                                             def.getParameters());
-    final Date cLastModifiedDate = content.getLastModifiedDate();
-    final Date tLastModifiedDate = representationTemplate.getLastModifiedDate();
-    if (cLastModifiedDate.before(tLastModifiedDate)) {
-      representation.setLastModifiedDate(tLastModifiedDate);
-    }
-    else {
-      representation.setLastModifiedDate(cLastModifiedDate);
-    }
+    final MutableRepresentation representation = getMutableRepresentation(generator, content, def.getParameters(),
+                                                                          repName);
+    representation.setLastModifiedDate(new Date());
     return representation;
   }
 
@@ -95,17 +77,12 @@ public class RepresentationProviderImpl extends AbstractRepresentationProvider i
       logger.info("Representation template is null!");
       return false;
     }
-    TypeRepresentationGenerator generator = generators.get(representationTemplate.getTemplateType());
+    RepresentationGenerator generator = SmartContentAPI.getInstance().getWorkspaceApi().getRepresentationGenerator(
+        representationTemplate);
     if (generator == null) {
       logger.info("Representation generator is null!");
       return false;
     }
-    try {
-      return generator.getGenerator(representationTemplate) != null;
-    }
-    catch (InvalidTemplateException ex) {
-      logger.debug(ex.getMessage(), ex);
-      return false;
-    }
+    return true;
   }
 }

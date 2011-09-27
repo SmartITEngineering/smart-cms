@@ -70,7 +70,8 @@ public class PersistentVariationProviderImpl extends AbstractVariationProvider i
     if (cachedVar != null) {
       update = true;
       Date cachedDate = cachedVar.getVariation().getLastModifiedDate();
-      VariationTemplate template = getTemplate(varName, content, field);
+      VariationTemplate template = SmartContentAPI.getInstance().getWorkspaceApi().getVariationTemplate(content.
+          getContentId().getWorkspaceId(), varName);
       Date lastModified = content.getLastModifiedDate();
       if (template != null) {
         final Date lastModifiedDate = template.getLastModifiedDate();
