@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2011  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,45 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.event;
+package com.smartitengineering.cms.api.common;
+
+import java.io.Serializable;
 
 /**
  *
  * @author imyousuf
  */
-public interface Event<T> {
-
-  Type getEventSourceType();
-
-  EventType getEventType();
-
-  T getSource();
-
-  enum EventType {
-
-    CREATE,
-    UPDATE,
-    DELETE
-  }
-
-  enum Type {
-
-    CONTENT,
-    CONTENT_TYPE,
-    WORKSPACE,
-    REPRESENTATION,
-    VARIATION,
-    REPRESENTATION_TEMPLATE,
-    VARIATION_TEMPLATE,
-    VALIDATION_TEMPLATE,
-    CONTENT_CO_PROCESSOR_TEMPLATE,
-    ALL_REPRESENTATION_TEMPLATES,
-    ALL_VARIATION_TEMPLATES,
-    ALL_VALIDATION_TEMPLATES,
-    ALL_CONTENT_CO_PROCESSOR_TEMPLATES,
-    FRIENDLY,
-    ALL_FRIENDLIES,
-    ROOT_CONTENT,
-    ALL_ROOT_CONTENTS,
-  }
+public interface CacheableResource extends Serializable {
 }

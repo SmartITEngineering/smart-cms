@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.content.template;
 
+import com.smartitengineering.cms.api.common.CacheableResource;
 import com.smartitengineering.cms.api.content.Field;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ import java.util.Map;
  *
  * @author imyousuf
  */
-public interface VariationGenerator {
+public interface VariationGenerator extends CacheableResource {
 
   /**
    * Generate the output of a variation template for a field

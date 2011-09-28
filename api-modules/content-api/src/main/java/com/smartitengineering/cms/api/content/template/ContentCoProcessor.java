@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.content.template;
 
+import com.smartitengineering.cms.api.common.CacheableResource;
 import com.smartitengineering.cms.api.content.MutableContent;
 import java.util.Map;
 
@@ -27,7 +28,7 @@ import java.util.Map;
  * @author imyousuf
  * @since 0.1
  */
-public interface ContentCoProcessor {
+public interface ContentCoProcessor extends CacheableResource {
 
   /**
    * Process the content needed

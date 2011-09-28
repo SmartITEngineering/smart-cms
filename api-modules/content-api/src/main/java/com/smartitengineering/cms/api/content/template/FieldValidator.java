@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.content.template;
 
+import com.smartitengineering.cms.api.common.CacheableResource;
 import com.smartitengineering.cms.api.content.Field;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ import java.util.Map;
  *
  * @author imyousuf
  */
-public interface FieldValidator {
+public interface FieldValidator extends CacheableResource {
 
   boolean isValidFieldValue(Field field, Map<String, String> params);
 }

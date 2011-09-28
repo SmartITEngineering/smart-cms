@@ -20,8 +20,10 @@ package com.smartitengineering.cms.spi.impl.type;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
+import com.smartitengineering.cms.api.common.CacheableResource;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.type.ContentCoProcessorDef;
@@ -40,6 +42,7 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.content.ContentLoaderImpl;
+import com.smartitengineering.cms.api.impl.type.WorkspaceResourceCacheKey;
 import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.EnumDataType;
 import com.smartitengineering.cms.api.type.FieldDef;
@@ -69,6 +72,7 @@ import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.type.ContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.TypeValidator;
+import com.smartitengineering.dao.common.cache.CacheServiceProvider;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -654,6 +658,10 @@ public class XMLContentTypeDefnitionParserTest {
       bind(LockHandler.class).toInstance(handler);
       final PersistentContentTypeReader mockReader = mockery.mock(PersistentContentTypeReader.class);
       bind(PersistentContentTypeReader.class).toInstance(mockReader);
+      final TypeLiteral<CacheServiceProvider<WorkspaceResourceCacheKey, CacheableResource>> csp =
+                                                                                            new TypeLiteral<CacheServiceProvider<WorkspaceResourceCacheKey, CacheableResource>>() {
+      };
+      bind(csp).toInstance(mockery.mock(CacheServiceProvider.class));
       mockery.checking(new Expectations() {
 
         {

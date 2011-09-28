@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.impl.workspace;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.smartitengineering.cms.api.common.CacheableResource;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.template.ContentCoProcessor;
@@ -39,12 +40,17 @@ import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
+import com.smartitengineering.cms.api.impl.type.WorkspaceResourceCacheKey;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
 import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
+import com.smartitengineering.dao.common.cache.CacheServiceProvider;
+import com.smartitengineering.dao.common.cache.Lock;
+import com.smartitengineering.dao.common.cache.Mutex;
+import com.smartitengineering.dao.common.cache.impl.CacheAPIFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.AbstractMap.SimpleEntry;
@@ -79,6 +85,9 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   private Map<TemplateType, TypeVariationGenerator> variationGenerators;
   @Inject
   private Map<ValidatorType, TypeFieldValidator> validatorGenerators;
+  @Inject
+  private CacheServiceProvider<WorkspaceResourceCacheKey, CacheableResource> resourcesCache;
+  protected final Mutex<WorkspaceResourceCacheKey> mutex = CacheAPIFactory.<WorkspaceResourceCacheKey>getMutex();
 
   public Map<TemplateType, ContentCoProcessorGenerator> getContentCoProcessorGenerators() {
     return contentCoProcessorGenerators;
@@ -196,6 +205,12 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
     Event<RepresentationTemplate> event = SmartContentAPI.getInstance().getEventRegistrar().<RepresentationTemplate>
         createEvent(EventType.UPDATE, Type.REPRESENTATION_TEMPLATE, putRepresentationTemplate);
     SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
+    if (resourcesCache != null) {
+      WorkspaceResourceCacheKey key = new WorkspaceResourceCacheKey(to,
+                                                                    WorkspaceResourceCacheKey.WorkspaceResourceType.REPRESENTATION_GEN,
+                                                                    name);
+      resourcesCache.expireFromCache(key);
+    }
     return putRepresentationTemplate;
   }
 
@@ -213,6 +228,12 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
     Event<VariationTemplate> event = SmartContentAPI.getInstance().getEventRegistrar().<VariationTemplate>
         createEvent(EventType.UPDATE, Type.VARIATION_TEMPLATE, putVariationTemplate);
     SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
+    if (resourcesCache != null) {
+      WorkspaceResourceCacheKey key = new WorkspaceResourceCacheKey(to,
+                                                                    WorkspaceResourceCacheKey.WorkspaceResourceType.VARIATION_GEN,
+                                                                    name);
+      resourcesCache.expireFromCache(key);
+    }
     return putVariationTemplate;
   }
 
@@ -429,6 +450,12 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
     Event<ValidatorTemplate> event = SmartContentAPI.getInstance().getEventRegistrar().<ValidatorTemplate>
         createEvent(EventType.UPDATE, Type.VALIDATION_TEMPLATE, validatorTemplate);
     SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
+    if (resourcesCache != null) {
+      WorkspaceResourceCacheKey key = new WorkspaceResourceCacheKey(to,
+                                                                    WorkspaceResourceCacheKey.WorkspaceResourceType.VALIDATION_SCR,
+                                                                    name);
+      resourcesCache.expireFromCache(key);
+    }
     return validatorTemplate;
   }
 
@@ -521,6 +548,9 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
 
   public void delete(ContentCoProcessorTemplate template) {
     SmartContentSPI.getInstance().getWorkspaceService().deleteContentCoProcessor(template);
+    Event<ContentCoProcessorTemplate> event = SmartContentAPI.getInstance().getEventRegistrar().<ContentCoProcessorTemplate>
+        createEvent(EventType.DELETE, Type.CONTENT_CO_PROCESSOR_TEMPLATE, template);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
   }
 
   public ContentCoProcessorTemplate putContentCoProcessorTemplate(WorkspaceId to, String name, TemplateType templateType,
@@ -533,8 +563,18 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
     if (templateType.equals(TemplateType.JASPER) || templateType.equals(TemplateType.VELOCITY)) {
       throw new IllegalArgumentException("TemplateType not supported for content type co processor");
     }
-    return SmartContentSPI.getInstance().getWorkspaceService().putContentCoProcessorTemplate(to, name, templateType,
-                                                                                             data);
+    final ContentCoProcessorTemplate temp = SmartContentSPI.getInstance().getWorkspaceService().
+        putContentCoProcessorTemplate(to, name, templateType, data);
+    Event<ContentCoProcessorTemplate> event = SmartContentAPI.getInstance().getEventRegistrar().<ContentCoProcessorTemplate>
+        createEvent(EventType.UPDATE, Type.CONTENT_CO_PROCESSOR_TEMPLATE, temp);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
+    if (resourcesCache != null) {
+      WorkspaceResourceCacheKey key = new WorkspaceResourceCacheKey(to,
+                                                                    WorkspaceResourceCacheKey.WorkspaceResourceType.CONTENT_CO_PROCESSOR_GEN,
+                                                                    name);
+      resourcesCache.expireFromCache(key);
+    }
+    return temp;
   }
 
   public ContentCoProcessorTemplate getContentCoProcessorTemplate(WorkspaceId id, String name) {
@@ -543,47 +583,110 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
 
   public void removeAllContentCoProcessorTemplates(WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getWorkspaceService().removeAllContentCoProcessorTemplates(workspaceId);
+    Event<WorkspaceId> event = SmartContentAPI.getInstance().getEventRegistrar().<WorkspaceId>
+        createEvent(EventType.DELETE, Type.ALL_CONTENT_CO_PROCESSOR_TEMPLATES, workspaceId);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
   }
 
   public ContentCoProcessor getContentCoProcessor(WorkspaceId id, String name) {
     return getContentCoProcessor(id, name, true);
   }
 
-  public ContentCoProcessor getContentCoProcessor(WorkspaceId id, String name, boolean searchInFriendlies) {
-    ContentCoProcessorTemplate template = getContentCoProcessorTemplate(id, name, searchInFriendlies);
-    return getContentCoProcessor(template);
+  public ContentCoProcessor getContentCoProcessor(final WorkspaceId id, final String name,
+                                                  final boolean searchInFriendlies) {
+    if (id == null || StringUtils.isBlank(name)) {
+      logger.warn("Null workspace id or blank name!");
+      return null;
+    }
+    WorkspaceResourceCacheKey key = new WorkspaceResourceCacheKey(id,
+                                                                  WorkspaceResourceCacheKey.WorkspaceResourceType.CONTENT_CO_PROCESSOR_GEN,
+                                                                  name);
+    CacheThroughReader<ContentCoProcessor> reader = new CacheThroughReader<ContentCoProcessor>(key,
+                                                                                               new Lookup<ContentCoProcessor>() {
+
+      public ContentCoProcessor get() {
+
+        ContentCoProcessorTemplate template = getContentCoProcessorTemplate(id, name, searchInFriendlies);
+        return getContentCoProcessor(template);
+      }
+    });
+    return reader.read();
   }
 
   public FieldValidator getFieldValidator(WorkspaceId id, String name) {
     return getFieldValidator(id, name, true);
   }
 
-  public FieldValidator getFieldValidator(WorkspaceId id, String name, boolean searchInFriendlies) {
-    ValidatorTemplate template = getValidatorTemplate(id, name, searchInFriendlies);
-    if (template == null) {
-      logger.info("Validator template is null, returning true!");
+  public FieldValidator getFieldValidator(final WorkspaceId id, final String name, final boolean searchInFriendlies) {
+    if (id == null || StringUtils.isBlank(name)) {
+      logger.warn("Null workspace id or blank name!");
       return null;
     }
-    return getFieldValidator(template);
+    WorkspaceResourceCacheKey key = new WorkspaceResourceCacheKey(id,
+                                                                  WorkspaceResourceCacheKey.WorkspaceResourceType.VALIDATION_SCR,
+                                                                  name);
+    CacheThroughReader<FieldValidator> reader = new CacheThroughReader<FieldValidator>(key,
+                                                                                       new Lookup<FieldValidator>() {
+
+      public FieldValidator get() {
+
+        ValidatorTemplate template = getValidatorTemplate(id, name, searchInFriendlies);
+        if (template == null) {
+          logger.info("Validator template is null, returning true!");
+          return null;
+        }
+        return getFieldValidator(template);
+      }
+    });
+    return reader.read();
   }
 
   public RepresentationGenerator getRepresentationGenerator(WorkspaceId id, String name) {
     return getRepresentationGenerator(id, name, true);
   }
 
-  public RepresentationGenerator getRepresentationGenerator(WorkspaceId workspaceId, String name,
-                                                            boolean searchInFriendlies) {
-    RepresentationTemplate representationTemplate = getRepresentationTemplate(workspaceId, name, searchInFriendlies);
-    return getRepresentationGenerator(representationTemplate);
+  public RepresentationGenerator getRepresentationGenerator(final WorkspaceId workspaceId, final String name,
+                                                            final boolean searchInFriendlies) {
+    if (workspaceId == null || StringUtils.isBlank(name)) {
+      logger.warn("Null workspace id or blank name!");
+      return null;
+    }
+    WorkspaceResourceCacheKey key = new WorkspaceResourceCacheKey(workspaceId,
+                                                                  WorkspaceResourceCacheKey.WorkspaceResourceType.REPRESENTATION_GEN,
+                                                                  name);
+    CacheThroughReader<RepresentationGenerator> reader = new CacheThroughReader<RepresentationGenerator>(key,
+                                                                                                         new Lookup<RepresentationGenerator>() {
+
+      public RepresentationGenerator get() {
+        RepresentationTemplate representationTemplate = getRepresentationTemplate(workspaceId, name, searchInFriendlies);
+        return getRepresentationGenerator(representationTemplate);
+      }
+    });
+    return reader.read();
   }
 
   public VariationGenerator getVariationGenerator(WorkspaceId id, String name) {
     return getVariationGenerator(id, name, true);
   }
 
-  public VariationGenerator getVariationGenerator(WorkspaceId workspaceId, String name, boolean searchInFriendlies) {
-    VariationTemplate variationTemplate = getVariationTemplate(workspaceId, name, searchInFriendlies);
-    return getVariationGenerator(variationTemplate);
+  public VariationGenerator getVariationGenerator(final WorkspaceId workspaceId, final String name,
+                                                  final boolean searchInFriendlies) {
+    if (workspaceId == null || StringUtils.isBlank(name)) {
+      logger.warn("Null workspace id or blank name!");
+      return null;
+    }
+    WorkspaceResourceCacheKey key = new WorkspaceResourceCacheKey(workspaceId,
+                                                                  WorkspaceResourceCacheKey.WorkspaceResourceType.VARIATION_GEN,
+                                                                  name);
+    CacheThroughReader<VariationGenerator> reader = new CacheThroughReader<VariationGenerator>(key,
+                                                                                               new Lookup<VariationGenerator>() {
+
+      public VariationGenerator get() {
+        VariationTemplate variationTemplate = getVariationTemplate(workspaceId, name, searchInFriendlies);
+        return getVariationGenerator(variationTemplate);
+      }
+    });
+    return reader.read();
   }
 
   public Collection<String> getContentCoProcessorNames(WorkspaceId id, ResourceSortCriteria criteria) {
@@ -738,6 +841,54 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
     catch (InvalidTemplateException ex) {
       logger.error("Not a valid validator template!");
       return null;
+    }
+  }
+
+  public interface Lookup<T> {
+
+    T get();
+  }
+
+  public class CacheThroughReader<T extends CacheableResource> {
+
+    private final Lookup<T> lookup;
+    private final WorkspaceResourceCacheKey key;
+
+    public CacheThroughReader(WorkspaceResourceCacheKey key, Lookup<T> lookup) {
+      this.lookup = lookup;
+      this.key = key;
+    }
+
+    public T read() {
+      if (resourcesCache == null) {
+        return lookup.get();
+      }
+      final Lock<WorkspaceResourceCacheKey> lock;
+      try {
+        lock = mutex.acquire(key);
+      }
+      catch (Exception ex) {
+        logger.warn("Error retrieving lock", ex);
+        throw new IllegalStateException(ex);
+      }
+      try {
+        CacheableResource cachedResource = resourcesCache.retrieveFromCache(key);
+        if (cachedResource != null) {
+          return (T) cachedResource;
+        }
+        else {
+          T result = lookup.get();
+          resourcesCache.putToCache(key, result);
+          return result;
+        }
+      }
+      catch (Exception ex) {
+        logger.warn("Error in doing cache through read", ex);
+        return null;
+      }
+      finally {
+        mutex.release(lock);
+      }
     }
   }
 }
