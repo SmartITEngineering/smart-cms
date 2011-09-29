@@ -40,7 +40,6 @@ import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
-import com.smartitengineering.cms.api.impl.type.WorkspaceResourceCacheKey;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
@@ -88,6 +87,14 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   @Inject
   private CacheServiceProvider<WorkspaceResourceCacheKey, CacheableResource> resourcesCache;
   protected final Mutex<WorkspaceResourceCacheKey> mutex = CacheAPIFactory.<WorkspaceResourceCacheKey>getMutex();
+
+  public CacheServiceProvider<WorkspaceResourceCacheKey, CacheableResource> getResourcesCache() {
+    return resourcesCache;
+  }
+
+  public void setResourcesCache(CacheServiceProvider<WorkspaceResourceCacheKey, CacheableResource> resourcesCache) {
+    this.resourcesCache = resourcesCache;
+  }
 
   public Map<TemplateType, ContentCoProcessorGenerator> getContentCoProcessorGenerators() {
     return contentCoProcessorGenerators;
@@ -861,6 +868,7 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
 
     public T read() {
       if (resourcesCache == null) {
+        logger.info("Avoiding cache through read as cache is null!");
         return lookup.get();
       }
       final Lock<WorkspaceResourceCacheKey> lock;

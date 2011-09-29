@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.impl.type;
+package com.smartitengineering.cms.api.impl.workspace;
 
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import java.io.Serializable;
@@ -50,8 +50,40 @@ public class WorkspaceResourceCacheKey implements Serializable {
   }
 
   @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final WorkspaceResourceCacheKey other = (WorkspaceResourceCacheKey) obj;
+    if (this.workspaceId != other.workspaceId &&
+        (this.workspaceId == null || !this.workspaceId.equals(other.workspaceId))) {
+      return false;
+    }
+    if (this.type != other.type) {
+      return false;
+    }
+    if ((this.localName == null) ? (other.localName != null) : !this.localName.equals(other.localName)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 97 * hash + (this.workspaceId != null ? this.workspaceId.hashCode() : 0);
+    hash = 97 * hash + (this.type != null ? this.type.hashCode() : 0);
+    hash = 97 * hash + (this.localName != null ? this.localName.hashCode() : 0);
+    return hash;
+  }
+
+  @Override
   public String toString() {
-    return new StringBuilder().append(workspaceId).append(':').append(type).append(':').append(localName).toString();
+    return new StringBuilder().append(workspaceId.toString()).append(':').append(type).append(':').append(localName).
+        toString();
   }
 
   public static enum WorkspaceResourceType {

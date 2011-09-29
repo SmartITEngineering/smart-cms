@@ -42,7 +42,7 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.content.ContentLoaderImpl;
-import com.smartitengineering.cms.api.impl.type.WorkspaceResourceCacheKey;
+import com.smartitengineering.cms.api.impl.workspace.WorkspaceResourceCacheKey;
 import com.smartitengineering.cms.api.type.CompositeDataType;
 import com.smartitengineering.cms.api.type.EnumDataType;
 import com.smartitengineering.cms.api.type.FieldDef;

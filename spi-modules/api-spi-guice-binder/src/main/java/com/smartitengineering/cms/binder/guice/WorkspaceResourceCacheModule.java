@@ -22,7 +22,7 @@ import com.google.inject.PrivateModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.common.CacheableResource;
-import com.smartitengineering.cms.api.impl.type.WorkspaceResourceCacheKey;
+import com.smartitengineering.cms.api.impl.workspace.WorkspaceResourceCacheKey;
 import com.smartitengineering.dao.common.cache.BasicKey;
 import com.smartitengineering.dao.common.cache.CacheServiceProvider;
 import com.smartitengineering.dao.common.cache.impl.ehcache.EhcacheCacheServiceProviderImpl;
