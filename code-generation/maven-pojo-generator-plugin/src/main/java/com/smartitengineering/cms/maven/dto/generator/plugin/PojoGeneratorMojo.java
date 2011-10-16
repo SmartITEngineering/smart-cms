@@ -1308,7 +1308,8 @@ public class PojoGeneratorMojo extends AbstractMojo {
               JVar compositeFieldDefs = nonNullBlock.decl(model.ref(Map.class).narrow(String.class).narrow(
                   FieldDef.class), getVarName(prefix, "compositeFieldDefs"),
                                                           JExpr.invoke(JExpr.cast(model.ref(CompositeDataType.class),
-                                                                                  fieldDef.invoke("getValueDef")),
+                                                                                  JExpr.invoke(JExpr.cast(model.ref(
+                  CollectionDataType.class), fieldDef.invoke("getValueDef")), "getItemDataType")),
                                                                        "getComposedFieldDefs"));
               JVar mutableField = nonNullBlock.decl(model.ref(MutableField.class), getVarName(prefix, "mutableField"),
                                                     contentLoader.invoke("createMutableField").arg(JExpr._null()).arg(
