@@ -37,6 +37,7 @@ import com.smartitengineering.cms.api.impl.DomainIdInstanceProviderImpl;
 import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.workspace.Sequence;
 import com.smartitengineering.cms.spi.content.ContentSearcher;
 import com.smartitengineering.cms.spi.content.PersistentContentReader;
 import com.smartitengineering.cms.spi.content.UriProvider;
@@ -73,6 +74,9 @@ import com.smartitengineering.cms.spi.impl.type.search.ContentTypeIdentifierQuer
 import com.smartitengineering.cms.spi.impl.type.search.ContentTypeSearcherImpl;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.impl.uri.UriProviderImpl;
+import com.smartitengineering.cms.spi.impl.workspace.PersistentSequence;
+import com.smartitengineering.cms.spi.impl.workspace.SequenceId;
+import com.smartitengineering.cms.spi.impl.workspace.SequenceObjectConverter;
 import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
@@ -99,15 +103,19 @@ import com.smartitengineering.dao.common.cache.dao.CacheableDao;
 import com.smartitengineering.dao.common.cache.impl.CacheAPIFactory;
 import com.smartitengineering.dao.impl.hbase.CommonDao;
 import com.smartitengineering.dao.impl.hbase.spi.AsyncExecutorService;
+import com.smartitengineering.dao.impl.hbase.spi.CellConfig;
 import com.smartitengineering.dao.impl.hbase.spi.DomainIdInstanceProvider;
 import com.smartitengineering.dao.impl.hbase.spi.FilterConfigs;
 import com.smartitengineering.dao.impl.hbase.spi.LockAttainer;
 import com.smartitengineering.dao.impl.hbase.spi.MergeService;
 import com.smartitengineering.dao.impl.hbase.spi.ObjectRowConverter;
+import com.smartitengineering.dao.impl.hbase.spi.RowCellIncrementor;
 import com.smartitengineering.dao.impl.hbase.spi.SchemaInfoProvider;
+import com.smartitengineering.dao.impl.hbase.spi.impl.CellConfigImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.DiffBasedMergeService;
 import com.smartitengineering.dao.impl.hbase.spi.impl.LockAttainerImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.MixedExecutorServiceImpl;
+import com.smartitengineering.dao.impl.hbase.spi.impl.RowCellIncrementorImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderBaseConfig;
 import com.smartitengineering.dao.impl.hbase.spi.impl.SchemaInfoProviderImpl;
 import com.smartitengineering.dao.impl.hbase.spi.impl.guice.GenericBaseConfigProvider;
@@ -534,6 +542,57 @@ public class SPIModule extends PrivateModule {
     }).to(ContentFieldsAdapterHelper.class).in(Scopes.SINGLETON);
     /**
      * Persistent fields end
+     */
+    /**
+     * Persistent sequence start
+     */
+    bind(new TypeLiteral<Class<SequenceId>>() {
+    }).toInstance(SequenceId.class);
+    bind(new TypeLiteral<ObjectRowConverter<PersistentSequence>>() {
+    }).to(SequenceObjectConverter.class).in(Singleton.class);
+    bind(new TypeLiteral<CommonReadDao<PersistentSequence, SequenceId>>() {
+    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentSequence, SequenceId>>() {
+    }).in(Singleton.class);
+    binder().expose(new TypeLiteral<CommonReadDao<PersistentSequence, SequenceId>>() {
+    });
+    bind(new TypeLiteral<CommonWriteDao<PersistentSequence>>() {
+    }).to(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentSequence, SequenceId>>() {
+    }).in(Singleton.class);
+    binder().expose(new TypeLiteral<CommonWriteDao<PersistentSequence>>() {
+    });
+    bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentSequence, SequenceId>>() {
+    }).to(new TypeLiteral<CommonDao<PersistentSequence, SequenceId>>() {
+    }).in(Singleton.class);
+    final TypeLiteral<SchemaInfoProvider<PersistentSequence, SequenceId>> seqSchema =
+                                                                          new TypeLiteral<SchemaInfoProvider<PersistentSequence, SequenceId>>() {
+    };
+    bind(seqSchema).to(new TypeLiteral<SchemaInfoProviderImpl<PersistentSequence, SequenceId>>() {
+    }).in(Singleton.class);
+    bind(new TypeLiteral<MergeService<PersistentSequence, SequenceId>>() {
+    }).to(new TypeLiteral<DiffBasedMergeService<PersistentSequence, SequenceId>>() {
+    });
+    bind(new TypeLiteral<LockAttainer<PersistentSequence, SequenceId>>() {
+    }).to(new TypeLiteral<LockAttainerImpl<PersistentSequence, SequenceId>>() {
+    }).in(Scopes.SINGLETON);
+    binder().expose(seqSchema);
+    bind(new TypeLiteral<FilterConfigs<PersistentSequence>>() {
+    }).toProvider(new GenericFilterConfigsProvider<PersistentSequence>(
+        "com/smartitengineering/cms/spi/impl/workspace/SequenceFilterConfigs.json")).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<SchemaInfoProviderBaseConfig<PersistentSequence>>() {
+    }).toProvider(new GenericBaseConfigProvider<PersistentSequence>(
+        "com/smartitengineering/cms/spi/impl/workspace/SequenceSchemaBaseConfig.json")).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<RowCellIncrementor<Sequence, PersistentSequence, SequenceId>>() {
+    }).to(new TypeLiteral<RowCellIncrementorImpl<Sequence, PersistentSequence, SequenceId>>() {
+    });
+    binder().expose(new TypeLiteral<RowCellIncrementor<Sequence, PersistentSequence, SequenceId>>() {
+    });
+    CellConfigImpl<Sequence> cellConfig = new CellConfigImpl<Sequence>();
+    cellConfig.setFamily(SequenceObjectConverter.FAMILY_SELF_STR);
+    cellConfig.setQualifier(SequenceObjectConverter.CELL_VALUE_STR);
+    bind(new TypeLiteral<CellConfig<Sequence>>() {
+    }).toInstance(cellConfig);
+    /**
+     * Persistent sequence end
      */
     bind(PersistentContentReader.class).to(ContentPersistentService.class);
     binder().expose(PersistentContentReader.class);
