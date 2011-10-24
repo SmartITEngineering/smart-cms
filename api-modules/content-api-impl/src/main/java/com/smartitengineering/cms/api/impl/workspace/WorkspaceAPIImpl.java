@@ -29,6 +29,7 @@ import com.smartitengineering.cms.api.content.template.RepresentationGenerator;
 import com.smartitengineering.cms.api.content.template.VariationGenerator;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.Sequence;
+import com.smartitengineering.cms.api.workspace.SequenceId;
 import com.smartitengineering.cms.spi.content.template.ContentCoProcessorGenerator;
 import com.smartitengineering.cms.api.event.Event;
 import com.smartitengineering.cms.api.event.Event.EventType;
@@ -883,6 +884,25 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
                                                                                                     Type.SEQUENCE,
                                                                                                     sequence);
     SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
+  }
+
+  public SequenceId createSequenceId(WorkspaceId workspaceId, String name) {
+    SequenceIdImpl impl = new SequenceIdImpl();
+    impl.setName(name);
+    impl.setWorkspaceId(workspaceId);
+    return impl;
+  }
+
+  public Collection<Sequence> getSequencesForWorkspace(WorkspaceId workspaceId) {
+    return SmartContentSPI.getInstance().getWorkspaceService().getSequencesForWorkspace(workspaceId);
+  }
+
+  public void reIndex(WorkspaceId workspaceId) {
+    SmartContentSPI.getInstance().getWorkspaceService().reIndex(workspaceId);
+  }
+
+  public void reIndex(SequenceId seqId) {
+    SmartContentSPI.getInstance().getWorkspaceService().reIndex(seqId);
   }
 
   public interface Lookup<T> {

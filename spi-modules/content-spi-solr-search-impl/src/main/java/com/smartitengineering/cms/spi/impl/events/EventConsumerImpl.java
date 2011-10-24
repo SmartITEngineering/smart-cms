@@ -29,6 +29,8 @@ import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.workspace.Sequence;
+import com.smartitengineering.cms.api.workspace.SequenceId;
 import com.smartitengineering.dao.solr.SolrWriteDao;
 import com.smartitengineering.events.async.api.EventConsumer;
 import java.io.BufferedReader;
@@ -54,6 +56,8 @@ public class EventConsumerImpl implements EventConsumer {
   private EventListener<Content> contentListener;
   @Inject
   private EventListener<ContentType> contentTypeListener;
+  @Inject
+  private EventListener<Sequence> sequenceListener;
   @Inject
   private SolrWriteDao solrWriteDao;
   private final transient Logger logger = LoggerFactory.getLogger(getClass());
@@ -127,6 +131,30 @@ public class EventConsumerImpl implements EventConsumer {
                                                                                                               sourceType,
                                                                                                               contentType);
           contentTypeListener.notify(event);
+        }
+        break;
+        case SEQUENCE: {
+          final SequenceId seqId =
+                           (SequenceId) new ObjectInputStream(new ByteArrayInputStream(decodedIdString)).readObject();
+          Sequence sequence = seqId.getSequence();
+          if (sequence == null && EventType.DELETE.equals(type)) {
+            sequence = (Sequence) Proxy.newProxyInstance(Sequence.class.getClassLoader(), new Class[]{
+                  Sequence.class}, new InvocationHandler() {
+
+              @Override
+              public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                if (method.getName().equals("getSequenceId")) {
+                  return seqId;
+                }
+                return null;
+              }
+            });
+          }
+          final Event<Sequence> event =
+                                SmartContentAPI.getInstance().getEventRegistrar().<Sequence>createEvent(type,
+                                                                                                        sourceType,
+                                                                                                        sequence);
+          sequenceListener.notify(event);
         }
         break;
         default:

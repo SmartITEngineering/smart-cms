@@ -16,25 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.workspace;
+package com.smartitengineering.cms.spi.impl.workspace.search;
+
+import com.smartitengineering.cms.api.workspace.Sequence;
+import com.smartitengineering.cms.spi.impl.events.SolrFieldNames;
+import com.smartitengineering.common.dao.search.solr.spi.ObjectIdentifierQuery;
 
 /**
  *
  * @author imyousuf
  */
-public interface Sequence {
+public class SequenceIdentifierQueryImpl implements ObjectIdentifierQuery<Sequence> {
 
-  long getCurrentValue();
+  private static final String TYPE_ID = new StringBuilder(SolrFieldNames.TYPE).append(": \"").append(
+      SequenceHelper.SEQUENCE).append("\" AND id: \"").toString();
 
-  String getName();
-
-  WorkspaceId getWorkspace();
-  
-  SequenceId getSequenceId();
-
-  long change(long delta);
-
-  long increment();
-
-  long decrement();
+  @Override
+  public String getQuery(Sequence object) {
+    return new StringBuilder(TYPE_ID).append(object.getSequenceId().toString()).append('"').toString();
+  }
 }

@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.workspace;
 
+import com.smartitengineering.cms.api.workspace.SequenceId;
 import com.smartitengineering.domain.AbstractGenericPersistentDTO;
 
 /**

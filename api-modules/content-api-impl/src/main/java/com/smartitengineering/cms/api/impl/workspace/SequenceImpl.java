@@ -18,6 +18,8 @@
  */
 package com.smartitengineering.cms.api.impl.workspace;
 
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.workspace.SequenceId;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.workspace.PersistableSequence;
@@ -99,5 +101,9 @@ public class SequenceImpl implements PersistableSequence {
     hash = 67 * hash + (this.name != null ? this.name.hashCode() : 0);
     hash = 67 * hash + (this.workspace != null ? this.workspace.hashCode() : 0);
     return hash;
+  }
+
+  public SequenceId getSequenceId() {
+    return SmartContentAPI.getInstance().getWorkspaceApi().createSequenceId(workspace, name);
   }
 }

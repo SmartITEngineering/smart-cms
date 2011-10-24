@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.event.Event;
 import com.smartitengineering.cms.api.event.Event.Type;
 import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.workspace.Sequence;
 import com.smartitengineering.events.async.api.EventPublisher;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
@@ -46,7 +47,8 @@ public class EventPublicationListener implements EventListener {
 
   @Override
   public boolean accepts(Event event) {
-    return event.getEventSourceType().equals(Type.CONTENT) || event.getEventSourceType().equals(Type.CONTENT_TYPE);
+    return event.getEventSourceType().equals(Type.CONTENT) || event.getEventSourceType().equals(Type.CONTENT_TYPE) ||
+        event.getEventSourceType().equals(Type.SEQUENCE);
   }
 
   @Override
@@ -61,6 +63,9 @@ public class EventPublicationListener implements EventListener {
       }
       else if (event.getEventSourceType().equals(Type.CONTENT_TYPE)) {
         stream.writeObject(((ContentType) event.getSource()).getContentTypeID());
+      }
+      else if (event.getEventSourceType().equals(Type.SEQUENCE)) {
+        stream.writeObject(((Sequence) event.getSource()).getSequenceId());
       }
       else {
         logger.warn("Unrecognized event source type!");

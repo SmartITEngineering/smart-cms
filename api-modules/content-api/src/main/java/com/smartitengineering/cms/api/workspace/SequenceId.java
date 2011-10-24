@@ -18,23 +18,20 @@
  */
 package com.smartitengineering.cms.api.workspace;
 
+import com.smartitengineering.dao.impl.hbase.spi.Externalizable;
+
 /**
  *
  * @author imyousuf
  */
-public interface Sequence {
+public interface SequenceId extends Externalizable, Comparable<SequenceId> {
 
-  long getCurrentValue();
+  public WorkspaceId getWorkspaceId();
 
-  String getName();
+  public String getName();
 
-  WorkspaceId getWorkspace();
-  
-  SequenceId getSequenceId();
+  @Override
+  public String toString();
 
-  long change(long delta);
-
-  long increment();
-
-  long decrement();
+  public Sequence getSequence();
 }

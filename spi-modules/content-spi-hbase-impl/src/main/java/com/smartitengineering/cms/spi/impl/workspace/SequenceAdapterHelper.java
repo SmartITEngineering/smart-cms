@@ -18,7 +18,9 @@
  */
 package com.smartitengineering.cms.spi.impl.workspace;
 
+import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.workspace.Sequence;
+import com.smartitengineering.cms.api.workspace.SequenceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.workspace.PersistableSequence;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
@@ -36,9 +38,8 @@ public class SequenceAdapterHelper extends AbstractAdapterHelper<Sequence, Persi
 
   @Override
   protected void mergeFromF2T(Sequence fromBean, PersistentSequence toBean) {
-    SequenceId id = new SequenceId();
-    id.setName(fromBean.getName());
-    id.setWorkspaceId(fromBean.getWorkspace());
+    SequenceId id = SmartContentAPI.getInstance().getWorkspaceApi().createSequenceId(fromBean.getWorkspace(), fromBean.
+        getName());
     toBean.setId(id);
     toBean.setCurrentValue(fromBean.getCurrentValue());
   }

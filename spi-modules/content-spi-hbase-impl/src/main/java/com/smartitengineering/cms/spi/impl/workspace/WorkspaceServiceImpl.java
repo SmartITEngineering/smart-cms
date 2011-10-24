@@ -32,6 +32,7 @@ import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI.ResourceSortCriteria;
 import com.smartitengineering.cms.api.type.ValidatorType;
+import com.smartitengineering.cms.api.workspace.SequenceId;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
@@ -42,6 +43,7 @@ import com.smartitengineering.cms.spi.workspace.PersistableSequence;
 import com.smartitengineering.cms.spi.workspace.PersistableValidatorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
+import com.smartitengineering.cms.spi.workspace.SequenceSearcher;
 import com.smartitengineering.cms.spi.workspace.WorkspaceService;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
@@ -75,14 +77,11 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
   protected CommonWriteDao<PersistentSequence> commonSeqWriteDao;
   @Inject
   protected RowCellIncrementor<Sequence, PersistentSequence, SequenceId> sequenceModifier;
-  private final GenericAdapter<Sequence, PersistentSequence> sequenceAdapter;
+  @Inject
+  protected SequenceSearcher sequenceSearcher;
+  @Inject
+  private GenericAdapter<Sequence, PersistentSequence> sequenceAdapter;
 
-  {
-    GenericAdapterImpl<Sequence, PersistentSequence> sequenceAdapterImpl =
-                                                     new GenericAdapterImpl<Sequence, PersistentSequence>();
-    sequenceAdapterImpl.setHelper(new SequenceAdapterHelper());
-    sequenceAdapter = sequenceAdapterImpl;
-  }
   private static final Comparator<ResourceTemplate> TEMPLATE_DATE_COMPARATOR = new Comparator<ResourceTemplate>() {
 
     @Override
@@ -671,9 +670,19 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
   }
 
   protected SequenceId getSequenceId(String name, WorkspaceId workspaceId) {
-    SequenceId sequenceId = new SequenceId();
-    sequenceId.setName(name);
-    sequenceId.setWorkspaceId(workspaceId);
+    SequenceId sequenceId = SmartContentAPI.getInstance().getWorkspaceApi().createSequenceId(workspaceId, name);
     return sequenceId;
+  }
+
+  public Collection<Sequence> getSequencesForWorkspace(WorkspaceId workspaceId) {
+    return sequenceSearcher.getSequencesForWorkspace(workspaceId);
+  }
+
+  public void reIndex(WorkspaceId workspaceId) {
+    sequenceSearcher.reIndex(workspaceId);
+  }
+
+  public void reIndex(SequenceId seqId) {
+    sequenceSearcher.reIndex(seqId);
   }
 }

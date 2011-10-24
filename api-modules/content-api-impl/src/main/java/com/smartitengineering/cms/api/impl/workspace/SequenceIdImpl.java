@@ -16,12 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.spi.impl.workspace;
+package com.smartitengineering.cms.api.impl.workspace;
 
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.impl.Utils;
+import com.smartitengineering.cms.api.workspace.Sequence;
+import com.smartitengineering.cms.api.workspace.SequenceId;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
-import com.smartitengineering.cms.spi.impl.hbase.Utils;
-import com.smartitengineering.dao.impl.hbase.spi.Externalizable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -34,7 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author imyousuf
  */
-public class SequenceId implements Externalizable, Comparable<SequenceId> {
+public class SequenceIdImpl implements SequenceId {
 
   private WorkspaceId workspaceId;
   private String name;
@@ -97,5 +98,9 @@ public class SequenceId implements Externalizable, Comparable<SequenceId> {
       return 0;
     }
     return toString().compareTo(o.toString());
+  }
+
+  public Sequence getSequence() {
+    return SmartContentAPI.getInstance().getWorkspaceApi().getSequence(workspaceId, name);
   }
 }

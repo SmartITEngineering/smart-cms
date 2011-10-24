@@ -38,6 +38,7 @@ import com.smartitengineering.cms.api.impl.PersistableDomainFactoryImpl;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.workspace.Sequence;
+import com.smartitengineering.cms.api.workspace.SequenceId;
 import com.smartitengineering.cms.spi.content.ContentSearcher;
 import com.smartitengineering.cms.spi.content.PersistentContentReader;
 import com.smartitengineering.cms.spi.content.UriProvider;
@@ -75,8 +76,13 @@ import com.smartitengineering.cms.spi.impl.type.search.ContentTypeSearcherImpl;
 import com.smartitengineering.cms.spi.impl.type.validator.XMLContentTypeDefinitionParser;
 import com.smartitengineering.cms.spi.impl.uri.UriProviderImpl;
 import com.smartitengineering.cms.spi.impl.workspace.PersistentSequence;
-import com.smartitengineering.cms.spi.impl.workspace.SequenceId;
+import com.smartitengineering.cms.spi.impl.workspace.SequenceAdapterHelper;
 import com.smartitengineering.cms.spi.impl.workspace.SequenceObjectConverter;
+import com.smartitengineering.cms.spi.impl.workspace.SequenceSearchBeanLoader;
+import com.smartitengineering.cms.spi.impl.workspace.search.SequenceEventListener;
+import com.smartitengineering.cms.spi.impl.workspace.search.SequenceHelper;
+import com.smartitengineering.cms.spi.impl.workspace.search.SequenceIdentifierQueryImpl;
+import com.smartitengineering.cms.spi.impl.workspace.search.SequenceSearcherImpl;
 import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
@@ -88,6 +94,7 @@ import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.type.SearchFieldNameGenerator;
 import com.smartitengineering.cms.spi.type.TypeValidator;
 import com.smartitengineering.cms.spi.type.TypeValidators;
+import com.smartitengineering.cms.spi.workspace.SequenceSearcher;
 import com.smartitengineering.common.dao.search.CommonFreeTextPersistentDao;
 import com.smartitengineering.common.dao.search.CommonFreeTextPersistentTxDao;
 import com.smartitengineering.common.dao.search.CommonFreeTextSearchDao;
@@ -347,6 +354,8 @@ public class SPIModule extends PrivateModule {
     }).in(Singleton.class);
     bind(new TypeLiteral<EventListener<Content>>() {
     }).to(ContentEventListener.class).in(Singleton.class);
+    bind(new TypeLiteral<EventListener<Sequence>>() {
+    }).to(SequenceEventListener.class).in(Singleton.class);
     bind(new TypeLiteral<EventListener<ContentType>>() {
     }).to(ContentTypeEventListener.class).in(Singleton.class);
     if (enableAsyncEvent) {
@@ -358,6 +367,10 @@ public class SPIModule extends PrivateModule {
           Singleton.class);
       bind(new TypeLiteral<EventListener>() {
       }).annotatedWith(Names.named(ContentTypeSearcherImpl.REINDEX_LISTENER_NAME)).to(EventPublicationListener.class).
+          in(
+          Singleton.class);
+      bind(new TypeLiteral<EventListener>() {
+      }).annotatedWith(Names.named(SequenceSearcherImpl.REINDEX_LISTENER_NAME)).to(EventPublicationListener.class).
           in(
           Singleton.class);
       bind(new TypeLiteral<Collection<EventListener>>() {
@@ -375,11 +388,15 @@ public class SPIModule extends PrivateModule {
       });
       listenerBinder.addBinding().to(ContentEventListener.class).in(Singleton.class);
       listenerBinder.addBinding().to(ContentTypeEventListener.class).in(Singleton.class);
+      listenerBinder.addBinding().to(SequenceEventListener.class).in(Singleton.class);
       bind(new TypeLiteral<EventListener>() {
       }).annotatedWith(Names.named(ContentSearcherImpl.REINDEX_LISTENER_NAME)).to(ContentEventListener.class).in(
           Singleton.class);
       bind(new TypeLiteral<EventListener>() {
       }).annotatedWith(Names.named(ContentTypeSearcherImpl.REINDEX_LISTENER_NAME)).to(ContentTypeEventListener.class).
+          in(Singleton.class);
+      bind(new TypeLiteral<EventListener>() {
+      }).annotatedWith(Names.named(SequenceSearcherImpl.REINDEX_LISTENER_NAME)).to(SequenceEventListener.class).
           in(Singleton.class);
       bind(new TypeLiteral<Collection<EventListener>>() {
       }).to(new TypeLiteral<Set<EventListener>>() {
@@ -402,6 +419,13 @@ public class SPIModule extends PrivateModule {
       }).in(Scopes.SINGLETON);
       bind(new TypeLiteral<CommonFreeTextPersistentTxDao<ContentType>>() {
       }).to(new TypeLiteral<SolrFreeTextPersistentTxDao<ContentType>>() {
+      }).in(Scopes.SINGLETON);
+
+      bind(new TypeLiteral<CommonFreeTextPersistentDao<Sequence>>() {
+      }).to(new TypeLiteral<CommonFreeTextPersistentTxDao<Sequence>>() {
+      }).in(Scopes.SINGLETON);
+      bind(new TypeLiteral<CommonFreeTextPersistentTxDao<Sequence>>() {
+      }).to(new TypeLiteral<SolrFreeTextPersistentTxDao<Sequence>>() {
       }).in(Scopes.SINGLETON);
 
       ConnectionConfig config = new ConnectionConfig();
@@ -439,6 +463,14 @@ public class SPIModule extends PrivateModule {
       }).in(Scopes.SINGLETON);
       bind(typeLit).annotatedWith(Names.named("primaryFreeTextPersistentDao")).to(new TypeLiteral<SolrFreeTextPersistentDao<ContentType>>() {
       }).in(Scopes.SINGLETON);
+
+      TypeLiteral<CommonFreeTextPersistentDao<Sequence>> seqLit =
+                                                         new TypeLiteral<CommonFreeTextPersistentDao<Sequence>>() {
+      };
+      bind(seqLit).to(new TypeLiteral<CommonAsyncFreeTextPersistentDaoImpl<Sequence>>() {
+      }).in(Scopes.SINGLETON);
+      bind(seqLit).annotatedWith(Names.named("primaryFreeTextPersistentDao")).to(new TypeLiteral<SolrFreeTextPersistentDao<Sequence>>() {
+      }).in(Scopes.SINGLETON);
     }
     bind(new TypeLiteral<ObjectIdentifierQuery<Content>>() {
     }).to(ContentIdentifierQueryImpl.class).in(Scopes.SINGLETON);
@@ -460,6 +492,17 @@ public class SPIModule extends PrivateModule {
     }).to(ContentTypeHelper.class).in(Scopes.SINGLETON);
     bind(new TypeLiteral<CommonFreeTextSearchDao<ContentType>>() {
     }).to(new TypeLiteral<SolrFreeTextSearchDao<ContentType>>() {
+    }).in(Scopes.SINGLETON);
+
+    bind(new TypeLiteral<ObjectIdentifierQuery<Sequence>>() {
+    }).to(SequenceIdentifierQueryImpl.class).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<GenericAdapter<Sequence, MultivalueMap<String, Object>>>() {
+    }).to(new TypeLiteral<GenericAdapterImpl<Sequence, MultivalueMap<String, Object>>>() {
+    }).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<AbstractAdapterHelper<Sequence, MultivalueMap<String, Object>>>() {
+    }).to(SequenceHelper.class).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<CommonFreeTextSearchDao<Sequence>>() {
+    }).to(new TypeLiteral<SolrFreeTextSearchDao<Sequence>>() {
     }).in(Scopes.SINGLETON);
 
     bind(ContentSearcher.class).to(ContentSearcherImpl.class).in(Scopes.SINGLETON);
@@ -591,6 +634,17 @@ public class SPIModule extends PrivateModule {
     cellConfig.setQualifier(SequenceObjectConverter.CELL_VALUE_STR);
     bind(new TypeLiteral<CellConfig<Sequence>>() {
     }).toInstance(cellConfig);
+    bind(new TypeLiteral<GenericAdapter<Sequence, PersistentSequence>>() {
+    }).to(new TypeLiteral<GenericAdapterImpl<Sequence, PersistentSequence>>() {
+    }).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<AbstractAdapterHelper<Sequence, PersistentSequence>>() {
+    }).to(SequenceAdapterHelper.class).in(Scopes.SINGLETON);
+    binder().expose(new TypeLiteral<GenericAdapter<Sequence, PersistentSequence>>() {
+    });
+    bind(SequenceSearcher.class).to(SequenceSearcherImpl.class).in(Scopes.SINGLETON);
+    binder().expose(SequenceSearcher.class);
+    bind(new TypeLiteral<SearchBeanLoader<Sequence, SequenceId>>() {
+    }).to(SequenceSearchBeanLoader.class).in(Scopes.SINGLETON);
     /**
      * Persistent sequence end
      */

@@ -30,6 +30,7 @@ import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI.ResourceSor
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
 import com.smartitengineering.cms.api.workspace.Sequence;
+import com.smartitengineering.cms.api.workspace.SequenceId;
 import java.util.Collection;
 
 /**
@@ -117,4 +118,10 @@ public interface WorkspaceService {
   public void deleteSequence(WorkspaceId workspaceId, String name);
 
   public long modifySequenceValue(Sequence sequence, long delta);
+
+  public Collection<Sequence> getSequencesForWorkspace(WorkspaceId workspaceId);
+
+  public void reIndex(WorkspaceId workspaceId);
+
+  public void reIndex(SequenceId seqId);
 }

@@ -29,6 +29,7 @@ import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
 import com.smartitengineering.cms.api.workspace.Sequence;
+import com.smartitengineering.cms.api.workspace.SequenceId;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
@@ -211,4 +212,12 @@ public interface WorkspaceAPI {
   public Sequence getSequence(WorkspaceId workspaceId, String name);
 
   public void deleteSequence(WorkspaceId workspaceId, String name);
+
+  public Collection<Sequence> getSequencesForWorkspace(WorkspaceId workspaceId);
+
+  public void reIndex(WorkspaceId workspaceId);
+
+  public void reIndex(SequenceId seqId);
+
+  public SequenceId createSequenceId(WorkspaceId workspaceId, String name);
 }

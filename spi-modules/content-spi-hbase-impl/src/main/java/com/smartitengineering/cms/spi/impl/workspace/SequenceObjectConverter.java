@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.workspace;
 
+import com.smartitengineering.cms.api.workspace.SequenceId;
 import com.smartitengineering.dao.impl.hbase.spi.ExecutorService;
 import com.smartitengineering.dao.impl.hbase.spi.impl.AbstractObjectRowConverter;
 import org.apache.hadoop.hbase.client.Delete;

@@ -16,25 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.smartitengineering.cms.api.workspace;
+package com.smartitengineering.cms.spi.workspace;
+
+import com.smartitengineering.cms.api.workspace.Sequence;
+import com.smartitengineering.cms.api.workspace.SequenceId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import java.util.Collection;
 
 /**
  *
  * @author imyousuf
  */
-public interface Sequence {
+public interface SequenceSearcher {
 
-  long getCurrentValue();
+  void reIndex(SequenceId seqId);
 
-  String getName();
+  void reIndex(WorkspaceId workspaceId);
 
-  WorkspaceId getWorkspace();
-  
-  SequenceId getSequenceId();
-
-  long change(long delta);
-
-  long increment();
-
-  long decrement();
+  Collection<Sequence> getSequencesForWorkspace(WorkspaceId id);
 }
