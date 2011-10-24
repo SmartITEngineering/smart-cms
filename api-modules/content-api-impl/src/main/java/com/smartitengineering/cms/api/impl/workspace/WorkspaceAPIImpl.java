@@ -864,10 +864,6 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
 
   public long modifySequenceValue(Sequence sequence, long delta) {
     final long newSequence = SmartContentSPI.getInstance().getWorkspaceService().modifySequenceValue(sequence, delta);
-    Event<Sequence> event = SmartContentAPI.getInstance().getEventRegistrar().<Sequence>createEvent(EventType.UPDATE,
-                                                                                                    Type.SEQUENCE,
-                                                                                                    sequence);
-    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
     return newSequence;
   }
 
