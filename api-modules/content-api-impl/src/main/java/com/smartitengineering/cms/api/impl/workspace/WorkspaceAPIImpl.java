@@ -853,11 +853,21 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   }
 
   public Sequence putSequence(WorkspaceId workspaceId, String name, long initialValue) {
-    return SmartContentSPI.getInstance().getWorkspaceService().create(workspaceId, name, initialValue);
+    final Sequence created = SmartContentSPI.getInstance().getWorkspaceService().create(workspaceId, name, initialValue);
+    Event<Sequence> event = SmartContentAPI.getInstance().getEventRegistrar().<Sequence>createEvent(EventType.CREATE,
+                                                                                                    Type.SEQUENCE,
+                                                                                                    created);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
+    return created;
   }
 
   public long modifySequenceValue(Sequence sequence, long delta) {
-    return SmartContentSPI.getInstance().getWorkspaceService().modifySequenceValue(sequence, delta);
+    final long newSequence = SmartContentSPI.getInstance().getWorkspaceService().modifySequenceValue(sequence, delta);
+    Event<Sequence> event = SmartContentAPI.getInstance().getEventRegistrar().<Sequence>createEvent(EventType.UPDATE,
+                                                                                                    Type.SEQUENCE,
+                                                                                                    sequence);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
+    return newSequence;
   }
 
   public Sequence getSequence(WorkspaceId workspaceId, String name) {
@@ -865,7 +875,14 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   }
 
   public void deleteSequence(WorkspaceId workspaceId, String name) {
-    SmartContentSPI.getInstance().getWorkspaceService().deleteSequence(workspaceId, name);
+    Sequence sequence = getSequence(workspaceId, name);
+    if (sequence != null) {
+      SmartContentSPI.getInstance().getWorkspaceService().deleteSequence(workspaceId, name);
+    }
+    Event<Sequence> event = SmartContentAPI.getInstance().getEventRegistrar().<Sequence>createEvent(EventType.DELETE,
+                                                                                                    Type.SEQUENCE,
+                                                                                                    sequence);
+    SmartContentAPI.getInstance().getEventRegistrar().notifyEventAsynchronously(event);
   }
 
   public interface Lookup<T> {

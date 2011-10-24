@@ -42,6 +42,7 @@ public interface Event<T> {
     CONTENT,
     CONTENT_TYPE,
     WORKSPACE,
+    SEQUENCE,
     REPRESENTATION,
     VARIATION,
     REPRESENTATION_TEMPLATE,
