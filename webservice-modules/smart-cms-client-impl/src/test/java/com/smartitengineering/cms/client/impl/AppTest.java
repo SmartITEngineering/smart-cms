@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.event.Event.EventType;
 import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
+import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.CompositeDataType;
@@ -39,6 +40,7 @@ import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.type.VariationDef;
+import com.smartitengineering.cms.api.workspace.Sequence;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.binder.guice.Initializer;
 import com.smartitengineering.cms.client.api.ContainerResource;
@@ -126,6 +128,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -2876,6 +2879,152 @@ public class AppTest {
       final Content reReadStateOfEntity = client.resource(resourceImpl.getUri()).accept(MediaType.APPLICATION_JSON).
           header("Pragma", "no-cache").get(Content.class);
       Assert.assertFalse(dynaField.equals(reReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue()));
+    }
+  }
+
+  private WorkspaceFeedResource setupSequenceWorkspace() {
+    RootResource resource = RootResourceImpl.getRoot(URI.create(ROOT_URI_STRING));
+    resource.get();
+    WorkspaceFeedResource feedResource;
+    try {
+      feedResource = resource.getTemplates().getWorkspaceResource("test", "sequences");
+    }
+    catch (Exception ex) {
+      feedResource = null;
+      LOGGER.info("Exception getting feed resoruce", ex);
+    }
+    boolean valid = false;
+    {
+      try {
+        final WorkspaceIdImpl workspaceId = new WorkspaceIdImpl("test", "sequences");
+        if (feedResource == null) {
+          Workspace workspace = resource.createWorkspace(workspaceId);
+          feedResource = resource.getTemplates().getWorkspaceResource(workspace.getId().getGlobalNamespace(), workspace.
+              getId().getName());
+        }
+        valid = true;
+      }
+      catch (Exception ex) {
+        LOGGER.error("Error creating test workspace for templates", ex);
+      }
+    }
+    Assert.assertTrue(valid);
+    return feedResource;
+  }
+
+  @Test
+  public void testCreateSequences() {
+    WorkspaceFeedResource resource = setupSequenceWorkspace();
+    final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
+    com.smartitengineering.cms.api.workspace.Workspace workspace = workspaceApi.createWorkspaceId(resource.
+        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspae();
+    Sequence sequence = workspaceApi.putSequence(workspace.getId(), TEST, PORT);
+    Assert.assertNotNull(sequence);
+    Assert.assertEquals(workspace.getId(), sequence.getWorkspace());
+    Assert.assertEquals(TEST, sequence.getName());
+    Assert.assertEquals(PORT, sequence.getCurrentValue());
+    sleep();
+  }
+
+  @Test
+  public void testGetSequence() {
+    WorkspaceFeedResource resource = setupSequenceWorkspace();
+    final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
+    com.smartitengineering.cms.api.workspace.Workspace workspace = workspaceApi.createWorkspaceId(resource.
+        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspae();
+    Sequence sequence = workspaceApi.getSequence(workspace.getId(), TEST);
+    Assert.assertNotNull(sequence);
+    Assert.assertEquals(workspace.getId(), sequence.getWorkspace());
+    Assert.assertEquals(TEST, sequence.getName());
+    Assert.assertEquals(PORT, sequence.getCurrentValue());
+    Collection<Sequence> sequences = workspaceApi.getSequencesForWorkspace(workspace.getId());
+    Assert.assertNotNull(sequences);
+    Assert.assertEquals(1, sequences.size());
+    sequence = sequences.iterator().next();
+    Assert.assertNotNull(sequence);
+    Assert.assertEquals(workspace.getId(), sequence.getWorkspace());
+    Assert.assertEquals(TEST, sequence.getName());
+    Assert.assertEquals(PORT, sequence.getCurrentValue());
+  }
+
+  @Test
+  public void testBasicSequenceModifications() {
+    WorkspaceFeedResource resource = setupSequenceWorkspace();
+    final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
+    com.smartitengineering.cms.api.workspace.Workspace workspace = workspaceApi.createWorkspaceId(resource.
+        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspae();
+    Sequence sequence = workspaceApi.getSequence(workspace.getId(), TEST);
+    long newVal = workspaceApi.modifySequenceValue(sequence, 1);
+    Assert.assertEquals(PORT + 1, newVal);
+    newVal = workspaceApi.modifySequenceValue(sequence, -2);
+    Assert.assertEquals(PORT - 1, newVal);
+    newVal = workspaceApi.modifySequenceValue(sequence, 1);
+    Assert.assertEquals(PORT, newVal);
+  }
+
+  @Test
+  public void testSingleJVMMultiThreadedSequenceModifications() {
+    WorkspaceFeedResource resource = setupSequenceWorkspace();
+    final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
+    com.smartitengineering.cms.api.workspace.Workspace workspace = workspaceApi.createWorkspaceId(resource.
+        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspae();
+    final Sequence sequence = workspaceApi.getSequence(workspace.getId(), TEST);
+    final ConcurrentHashSet<Long> vals = new ConcurrentHashSet<Long>();
+    Runnable runnable = new Runnable() {
+
+      public void run() {
+        for (int i = 0; i < 100; ++i) {
+          long newVal = workspaceApi.modifySequenceValue(sequence, 1);
+          Assert.assertTrue(vals.add(newVal));
+        }
+      }
+    };
+    long start = System.currentTimeMillis();
+    Collection<Thread> threads = new ArrayList<Thread>();
+    for (int i = 0; i < 10; ++i) {
+      Thread thread = new Thread(runnable);
+      thread.start();
+      threads.add(thread);
+    }
+    try {
+      for (Thread thread : threads) {
+        thread.join();
+      }
+    }
+    catch (Exception ex) {
+      LOGGER.error("Could wait for thread to end!", ex);
+      throw new IllegalArgumentException(ex);
+    }
+    long end = System.currentTimeMillis();
+    sleep();
+    Sequence lsequence = workspaceApi.getSequence(workspace.getId(), TEST);
+    Assert.assertEquals(PORT + 1000, lsequence.getCurrentValue());
+    LOGGER.info("Duration for 1000 increments " + (end - start) + "ms");
+  }
+
+  @Test
+  public void testDeleteSequence() {
+    WorkspaceFeedResource resource = setupSequenceWorkspace();
+    final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
+    com.smartitengineering.cms.api.workspace.Workspace workspace = workspaceApi.createWorkspaceId(resource.
+        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspae();
+    Sequence sequence = workspaceApi.getSequence(workspace.getId(), TEST);
+    Assert.assertNotNull(sequence);
+    workspaceApi.deleteSequence(workspace.getId(), TEST);
+    sequence = workspaceApi.getSequence(workspace.getId(), TEST);
+    Assert.assertNull(sequence);
+    sleep();
+    Collection<Sequence> sequences = workspaceApi.getSequencesForWorkspace(workspace.getId());
+    Assert.assertNotNull(sequences);
+    Assert.assertEquals(0, sequences.size());
+  }
+
+  protected void sleep() {
+    try {
+      Thread.sleep(SLEEP_DURATION);
+    }
+    catch (Exception ex) {
+      LOGGER.error("Error sleeping", ex);
     }
   }
 

@@ -52,7 +52,6 @@ import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.dao.impl.hbase.spi.RowCellIncrementor;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
-import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

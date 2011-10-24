@@ -23,7 +23,9 @@ import com.smartitengineering.dao.impl.hbase.spi.DomainIdInstanceProvider;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.impl.content.ContentIdImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
+import com.smartitengineering.cms.api.impl.workspace.SequenceIdImpl;
 import com.smartitengineering.cms.api.type.ContentTypeId;
+import com.smartitengineering.cms.api.workspace.SequenceId;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 
 /**
@@ -43,6 +45,9 @@ public class DomainIdInstanceProviderImpl implements DomainIdInstanceProvider {
     }
     if (WorkspaceId.class.isAssignableFrom(clazz)) {
       object = new WorkspaceIdImpl();
+    }
+    if (SequenceId.class.isAssignableFrom(clazz)) {
+      object = new SequenceIdImpl();
     }
     return (IdType) object;
   }
