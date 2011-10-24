@@ -355,22 +355,24 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
       logger.info("Primary Field Def present: " + primaryFieldName + " " + (getPrimaryFieldDef() != null));
       logger.info("Primary Field Def: " + getPrimaryFieldDef());
     }
+    final DefinitionType myDefType = getDefinitionType();
     if (getParent() != null && getParent().getContentType() != null) {
       DefinitionType parentType = getParent().getContentType().getDefinitionType();
       if (parentType.equals(DefinitionType.ABSTRACT_COMPONENT) || parentType.equals(DefinitionType.CONCRETE_COMPONENT)) {
-        final DefinitionType myDefType = getDefinitionType();
         if (myDefType.equals(DefinitionType.ABSTRACT_TYPE) || myDefType.equals(DefinitionType.CONCRETE_TYPE)) {
           logger.warn("Parent definition is of component, but this is of type!");
           return false;
         }
       }
       else {
-        final DefinitionType myDefType = getDefinitionType();
         if (myDefType.equals(DefinitionType.ABSTRACT_COMPONENT) || myDefType.equals(DefinitionType.CONCRETE_COMPONENT)) {
           logger.warn("Parent definition is of type, but this is of component!");
           return false;
         }
       }
+    }
+    if (myDefType.equals(DefinitionType.ABSTRACT_COMPONENT) || myDefType.equals(DefinitionType.ABSTRACT_TYPE)) {
+      return true;
     }
     return getPrimaryFieldDef() != null && !getStatuses().isEmpty();
   }
