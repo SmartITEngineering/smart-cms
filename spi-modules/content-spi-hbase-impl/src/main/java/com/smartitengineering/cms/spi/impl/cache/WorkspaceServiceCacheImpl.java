@@ -27,6 +27,7 @@ import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.Sequence;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
@@ -262,5 +263,21 @@ public class WorkspaceServiceCacheImpl implements WorkspaceService {
 
   public void deleteContentCoProcessor(ContentCoProcessorTemplate template) {
     primaryWorkspaceService.deleteContentCoProcessor(template);
+  }
+
+  public Sequence create(WorkspaceId workspaceId, String name, long initialValue) {
+    return primaryWorkspaceService.create(workspaceId, name, initialValue);
+  }
+
+  public long modifySequenceValue(Sequence sequence, long delta) {
+    return primaryWorkspaceService.modifySequenceValue(sequence, delta);
+  }
+
+  public Sequence getSequence(WorkspaceId workspaceId, String name) {
+    return primaryWorkspaceService.getSequence(workspaceId, name);
+  }
+
+  public void deleteSequence(WorkspaceId workspaceId, String name) {
+    primaryWorkspaceService.deleteSequence(workspaceId, name);
   }
 }

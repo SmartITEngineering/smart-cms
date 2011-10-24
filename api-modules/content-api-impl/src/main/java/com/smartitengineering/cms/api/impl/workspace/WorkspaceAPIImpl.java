@@ -28,6 +28,7 @@ import com.smartitengineering.cms.api.content.template.FieldValidator;
 import com.smartitengineering.cms.api.content.template.RepresentationGenerator;
 import com.smartitengineering.cms.api.content.template.VariationGenerator;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
+import com.smartitengineering.cms.api.workspace.Sequence;
 import com.smartitengineering.cms.spi.content.template.ContentCoProcessorGenerator;
 import com.smartitengineering.cms.api.event.Event;
 import com.smartitengineering.cms.api.event.Event.EventType;
@@ -849,6 +850,22 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
       logger.error("Not a valid validator template!");
       return null;
     }
+  }
+
+  public Sequence putSequence(WorkspaceId workspaceId, String name, long initialValue) {
+    return SmartContentSPI.getInstance().getWorkspaceService().create(workspaceId, name, initialValue);
+  }
+
+  public long modifySequenceValue(Sequence sequence, long delta) {
+    return SmartContentSPI.getInstance().getWorkspaceService().modifySequenceValue(sequence, delta);
+  }
+
+  public Sequence getSequence(WorkspaceId workspaceId, String name) {
+    return SmartContentSPI.getInstance().getWorkspaceService().getSequence(workspaceId, name);
+  }
+
+  public void deleteSequence(WorkspaceId workspaceId, String name) {
+    SmartContentSPI.getInstance().getWorkspaceService().deleteSequence(workspaceId, name);
   }
 
   public interface Lookup<T> {

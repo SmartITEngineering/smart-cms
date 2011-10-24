@@ -29,6 +29,7 @@ import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI.ResourceSortCriteria;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
+import com.smartitengineering.cms.api.workspace.Sequence;
 import java.util.Collection;
 
 /**
@@ -108,4 +109,12 @@ public interface WorkspaceService {
                                                                                   ResourceSortCriteria criteria);
 
   public void deleteContentCoProcessor(ContentCoProcessorTemplate template);
+
+  public Sequence create(WorkspaceId workspaceId, String name, long initialValue);
+
+  public Sequence getSequence(WorkspaceId workspaceId, String name);
+
+  public void deleteSequence(WorkspaceId workspaceId, String name);
+
+  public long modifySequenceValue(Sequence sequence, long delta);
 }

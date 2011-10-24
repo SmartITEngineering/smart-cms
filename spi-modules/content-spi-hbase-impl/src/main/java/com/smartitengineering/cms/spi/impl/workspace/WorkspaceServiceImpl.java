@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.spi.impl.workspace;
 
+import com.google.inject.Inject;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
@@ -25,6 +26,7 @@ import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
+import com.smartitengineering.cms.api.workspace.Sequence;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
@@ -36,19 +38,26 @@ import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.workspace.PersistableContentCoProcessorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableResourceTemplate;
+import com.smartitengineering.cms.spi.workspace.PersistableSequence;
 import com.smartitengineering.cms.spi.workspace.PersistableValidatorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
 import com.smartitengineering.cms.spi.workspace.WorkspaceService;
+import com.smartitengineering.dao.common.CommonReadDao;
+import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.dao.common.queryparam.MatchMode;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
+import com.smartitengineering.dao.impl.hbase.spi.RowCellIncrementor;
+import com.smartitengineering.util.bean.adapter.GenericAdapter;
+import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +69,20 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
 
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
   public static final QueryParameter<Void> SELF_PARAM = QueryParameterFactory.getPropProjectionParam("workspace");
+  @Inject
+  protected CommonReadDao<PersistentSequence, SequenceId> commonSeqReadDao;
+  @Inject
+  protected CommonWriteDao<PersistentSequence> commonSeqWriteDao;
+  @Inject
+  protected RowCellIncrementor<Sequence, PersistentSequence, SequenceId> sequenceModifier;
+  private final GenericAdapter<Sequence, PersistentSequence> sequenceAdapter;
+
+  {
+    GenericAdapterImpl<Sequence, PersistentSequence> sequenceAdapterImpl =
+                                                     new GenericAdapterImpl<Sequence, PersistentSequence>();
+    sequenceAdapterImpl.setHelper(new SequenceAdapterHelper());
+    sequenceAdapter = sequenceAdapterImpl;
+  }
   private static final Comparator<ResourceTemplate> TEMPLATE_DATE_COMPARATOR = new Comparator<ResourceTemplate>() {
 
     @Override
@@ -611,5 +634,46 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     varTemplate.setTemplateType(template.getTemplateType());
     workspace.addContentCoProcessorTemplate(varTemplate);
     commonWriteDao.delete(workspace);
+  }
+
+  public Sequence create(WorkspaceId workspaceId, String name, long initialValue) {
+    PersistableSequence sequence =
+                        SmartContentSPI.getInstance().getPersistableDomainFactory().createPersistableSequence();
+    sequence.setCurrentValue(initialValue);
+    sequence.setName(name);
+    sequence.setWorkspace(workspaceId);
+    commonSeqWriteDao.save(sequenceAdapter.convert(sequence));
+    return sequence;
+  }
+
+  public Sequence getSequence(WorkspaceId workspaceId, String name) {
+    SequenceId sequenceId = getSequenceId(name, workspaceId);
+    PersistentSequence sequence = commonSeqReadDao.getById(sequenceId);
+    if (sequence != null) {
+      return sequenceAdapter.convertInversely(sequence);
+    }
+    return null;
+  }
+
+  public long modifySequenceValue(Sequence sequence, long delta) {
+    if (sequence == null || StringUtils.isBlank(sequence.getName()) || sequence.getWorkspace() == null) {
+      throw new IllegalArgumentException("Sequence or sequence's name/workspace id can't be null!");
+    }
+    return sequenceModifier.incrementAndGet(sequenceAdapter.convert(sequence).getId(), delta);
+  }
+
+  public void deleteSequence(WorkspaceId workspaceId, String name) {
+    SequenceId sequenceId = getSequenceId(name, workspaceId);
+    PersistentSequence sequence = commonSeqReadDao.getById(sequenceId);
+    if (sequence != null) {
+      commonSeqWriteDao.delete(sequence);
+    }
+  }
+
+  protected SequenceId getSequenceId(String name, WorkspaceId workspaceId) {
+    SequenceId sequenceId = new SequenceId();
+    sequenceId.setName(name);
+    sequenceId.setWorkspaceId(workspaceId);
+    return sequenceId;
   }
 }

@@ -28,6 +28,7 @@ import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
+import com.smartitengineering.cms.api.workspace.Sequence;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
@@ -202,4 +203,12 @@ public interface WorkspaceAPI {
                                               int count);
 
   public String getEntityTagValueForValidatorTemplate(ValidatorTemplate validatorTemplate);
+
+  public Sequence putSequence(WorkspaceId workspaceId, String name, long initialValue);
+
+  public long modifySequenceValue(Sequence sequence, long delta);
+
+  public Sequence getSequence(WorkspaceId workspaceId, String name);
+
+  public void deleteSequence(WorkspaceId workspaceId, String name);
 }

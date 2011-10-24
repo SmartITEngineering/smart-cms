@@ -1,0 +1,5 @@
+{
+  "schemaNamespace": "com.smartitengineering.cms.spi.impl.workspace",
+  "mainTableName": "cms_sequences",
+  "transactionalDomain": "false"
+}

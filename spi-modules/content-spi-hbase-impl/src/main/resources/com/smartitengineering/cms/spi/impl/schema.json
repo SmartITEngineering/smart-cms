@@ -38,6 +38,14 @@
     ]
   },
   {
+    "tableName": "cms_sequences",
+    "columnFamilyConfigurations": [
+      {
+        "familyName": "self"
+      }
+    ]
+  },
+  {
     "tableName": "cms_content",
     "columnFamilyConfigurations": [
       {

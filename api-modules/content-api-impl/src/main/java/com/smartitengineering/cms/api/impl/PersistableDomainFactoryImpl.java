@@ -22,6 +22,7 @@ import com.smartitengineering.cms.api.impl.content.ContentImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
 import com.smartitengineering.cms.api.impl.workspace.ContentCoProcessorTemplateImpl;
 import com.smartitengineering.cms.api.impl.workspace.RepresentationTemplateImpl;
+import com.smartitengineering.cms.api.impl.workspace.SequenceImpl;
 import com.smartitengineering.cms.api.impl.workspace.ValidatorTemplateImpl;
 import com.smartitengineering.cms.api.impl.workspace.VariationTemplateImpl;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceImpl;
@@ -30,6 +31,7 @@ import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
 import com.smartitengineering.cms.spi.type.PersistableContentType;
 import com.smartitengineering.cms.spi.workspace.PersistableContentCoProcessorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
+import com.smartitengineering.cms.spi.workspace.PersistableSequence;
 import com.smartitengineering.cms.spi.workspace.PersistableValidatorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
@@ -74,5 +76,9 @@ public class PersistableDomainFactoryImpl implements PersistableDomainFactory {
 
   public PersistableContentCoProcessorTemplate createPersistableContentCoProcessorTemplate() {
     return new ContentCoProcessorTemplateImpl();
+  }
+
+  public PersistableSequence createPersistableSequence() {
+    return new SequenceImpl();
   }
 }

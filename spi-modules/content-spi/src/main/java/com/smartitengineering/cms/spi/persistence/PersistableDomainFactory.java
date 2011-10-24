@@ -22,6 +22,7 @@ import com.smartitengineering.cms.spi.content.PersistableContent;
 import com.smartitengineering.cms.spi.type.PersistableContentType;
 import com.smartitengineering.cms.spi.workspace.PersistableContentCoProcessorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
+import com.smartitengineering.cms.spi.workspace.PersistableSequence;
 import com.smartitengineering.cms.spi.workspace.PersistableValidatorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableVariationTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
@@ -39,10 +40,12 @@ public interface PersistableDomainFactory {
   PersistableWorkspace createPersistentWorkspace();
 
   PersistableRepresentationTemplate createPersistableRepresentationTemplate();
-  
+
   PersistableContentCoProcessorTemplate createPersistableContentCoProcessorTemplate();
 
   PersistableVariationTemplate createPersistableVariationTemplate();
 
   PersistableValidatorTemplate createPersistableValidatorTemplate();
+
+  PersistableSequence createPersistableSequence();
 }
