@@ -26,6 +26,7 @@ import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ConnectionConfig;
 import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
 import com.sun.jersey.api.client.Client;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -37,9 +38,11 @@ import javax.ws.rs.core.MediaType;
 import junit.framework.Assert;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
+import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.webapp.WebAppClassLoader;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -56,7 +59,8 @@ import test.di.MasterModule;
  */
 public class CodeGenerationTest {
 
-  private static final HBaseTestingUtility TEST_UTIL = new HBaseTestingUtility();
+  private static final MiniZooKeeperCluster ZOO_KEEPER_CLUSTER = new MiniZooKeeperCluster();
+  private static HBaseTestingUtility TEST_UTIL;
   private static final Logger LOGGER = LoggerFactory.getLogger(CodeGenerationTest.class);
   public static final int SLEEP_DURATION = 3000;
   private static final int PORT = 10080;
@@ -75,6 +79,12 @@ public class CodeGenerationTest {
     System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
                        "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
     try {
+      ZOO_KEEPER_CLUSTER.setClientPort(2181);
+      File file = new File("./target/zk-server/");
+      file.mkdirs();
+      ZOO_KEEPER_CLUSTER.startup(file);
+      TEST_UTIL = new HBaseTestingUtility();
+      TEST_UTIL.setZkCluster(ZOO_KEEPER_CLUSTER);
       TEST_UTIL.startMiniCluster();
     }
     catch (Exception ex) {
@@ -112,6 +122,10 @@ public class CodeGenerationTest {
     System.setProperty("solr.solr.home", "./target/sample-conf/");
     Handler solr = new WebAppContext("./target/solr/", "/solr");
     handlerList.addHandler(solr);
+    WebAppContext hub = new WebAppContext("./target/hub/", "/hub");
+    final WebAppClassLoader webAppClassLoader = new WebAppClassLoader(hub);
+    hub.setClassLoader(webAppClassLoader);
+    handlerList.addHandler(hub);
     jettyServer.setHandler(handlerList);
     jettyServer.setSendDateHeader(true);
     jettyServer.start();
@@ -122,7 +136,7 @@ public class CodeGenerationTest {
     System.setProperty(ApplicationWideClientFactoryImpl.TRACE, "true");
 
     Client client = CacheableClient.create();
-    client.resource("http://localhost:7090/api/channels/test").header(HttpHeaders.CONTENT_TYPE,
+    client.resource("http://localhost:10080/hub/api/channels/test").header(HttpHeaders.CONTENT_TYPE,
                                                                       MediaType.APPLICATION_JSON).put(
         "{\"name\":\"test\"}");
     LOGGER.info("Created test channel!");
@@ -167,8 +181,24 @@ public class CodeGenerationTest {
 
   @AfterClass
   public static void globalTearDown() throws Exception {
-    jettyServer.stop();
-    TEST_UTIL.shutdownMiniCluster();
+    try {
+      jettyServer.stop();
+    }
+    catch (Exception ex) {
+      LOGGER.warn(ex.getMessage(), ex);
+    }
+    try {
+      TEST_UTIL.shutdownMiniCluster();
+    }
+    catch (Exception ex) {
+      LOGGER.warn(ex.getMessage(), ex);
+    }
+    try {
+      ZOO_KEEPER_CLUSTER.shutdown();
+    }
+    catch (Exception ex) {
+      LOGGER.warn(ex.getMessage(), ex);
+    }
   }
 
   @Test

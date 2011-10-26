@@ -124,11 +124,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.mutable.MutableInt;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
+import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.util.ConcurrentHashSet;
+import org.eclipse.jetty.webapp.WebAppClassLoader;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -148,7 +150,8 @@ public class AppTest {
   public static final String ROOT_URI_STRING = "http://localhost:" + PORT + "/cms/";
   public static final String TEST = "test";
   public static final String TEST_NS = "testNS";
-  private static final HBaseTestingUtility TEST_UTIL = new HBaseTestingUtility();
+  private static final MiniZooKeeperCluster ZOO_KEEPER_CLUSTER = new MiniZooKeeperCluster();
+  private static HBaseTestingUtility TEST_UTIL;
   private static final Logger LOGGER = LoggerFactory.getLogger(AppTest.class);
   private static Server jettyServer;
 
@@ -161,6 +164,12 @@ public class AppTest {
     System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
                        "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
     try {
+      ZOO_KEEPER_CLUSTER.setClientPort(2181);
+      File file = new File("./target/zk-server/");
+      file.mkdirs();
+      ZOO_KEEPER_CLUSTER.startup(file);
+      TEST_UTIL = new HBaseTestingUtility();
+      TEST_UTIL.setZkCluster(ZOO_KEEPER_CLUSTER);
       TEST_UTIL.startMiniCluster();
     }
     catch (Exception ex) {
@@ -191,6 +200,10 @@ public class AppTest {
     System.setProperty("solr.solr.home", "./target/sample-conf/");
     Handler solr = new WebAppContext("./target/solr/", "/solr");
     handlerList.addHandler(solr);
+    WebAppContext hub = new WebAppContext("./target/hub/", "/hub");
+    final WebAppClassLoader webAppClassLoader = new WebAppClassLoader(hub);
+    hub.setClassLoader(webAppClassLoader);
+    handlerList.addHandler(hub);
     final String webapp = "./src/test/webapp/";
     if (!new File(webapp).exists()) {
       throw new IllegalStateException("WebApp file/dir does not exist!");
@@ -207,7 +220,7 @@ public class AppTest {
     System.setProperty(ApplicationWideClientFactoryImpl.TRACE, "true");
 
     Client client = CacheableClient.create();
-    client.resource("http://localhost:9090/api/channels/test").header(HttpHeaders.CONTENT_TYPE,
+    client.resource("http://localhost:10080/hub/api/channels/test").header(HttpHeaders.CONTENT_TYPE,
                                                                       MediaType.APPLICATION_JSON).put(
         "{\"name\":\"test\"}");
     LOGGER.info("Created test channel!");
@@ -215,8 +228,24 @@ public class AppTest {
 
   @AfterClass
   public static void globalTearDown() throws Exception {
-    TEST_UTIL.shutdownMiniCluster();
-    jettyServer.stop();
+    try {
+      jettyServer.stop();
+    }
+    catch (Exception ex) {
+      LOGGER.warn(ex.getMessage(), ex);
+    }
+    try {
+      TEST_UTIL.shutdownMiniCluster();
+    }
+    catch (Exception ex) {
+      LOGGER.warn(ex.getMessage(), ex);
+    }
+    try {
+      ZOO_KEEPER_CLUSTER.shutdown();
+    }
+    catch (Exception ex) {
+      LOGGER.warn(ex.getMessage(), ex);
+    }
   }
 
   @Test
