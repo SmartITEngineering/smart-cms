@@ -79,7 +79,7 @@ public class UriTemplatesResource extends AbstractResource {
           templateBuilder = getContentUri();
           final String contentUrlTemplate = templateBuilder.toString();
           UrlBuilder contentBuilder = UrlBuilder.getBuilder().rel(REL_CONTENT).template(contentUrlTemplate).
-              type(javax.ws.rs.core.MediaType.APPLICATION_ATOM_XML);
+              type(javax.ws.rs.core.MediaType.APPLICATION_JSON);
           templateBuilder = getFriendlyContentTypeUri();
           final String friendlyContentTypeUrlTemplate = templateBuilder.toString();
           UrlBuilder friendlyContentTypeBuilder = UrlBuilder.getBuilder().rel(REL_FRIENDLY_CONTENT_TYPE).template(
