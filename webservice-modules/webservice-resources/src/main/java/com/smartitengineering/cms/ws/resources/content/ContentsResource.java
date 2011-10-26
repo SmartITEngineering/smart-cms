@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.ws.common.domains.Content;
 import com.smartitengineering.cms.ws.resources.content.searcher.ContentSearcherResource;
+import com.smartitengineering.cms.ws.resources.workspace.WorkspaceResource;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import java.io.UnsupportedEncodingException;
@@ -46,7 +47,7 @@ import org.apache.commons.codec.binary.StringUtils;
  *
  * @author imyousuf
  */
-@Path("/c/{wsNS}/{wsName}")
+@Path("/c/{" + WorkspaceResource.PARAM_NAMESPACE + "}/{" + WorkspaceResource.PARAM_NAME + "}")
 public class ContentsResource extends AbstractResource {
 
   private final Workspace workspace;
@@ -56,7 +57,8 @@ public class ContentsResource extends AbstractResource {
   public static final String PATH_TO_SEARCH = "search";
   public static final String PATH_TO_IMPORT = "import";
 
-  public ContentsResource(@PathParam("wsNS") String namespace, @PathParam("wsName") String name) {
+  public ContentsResource(@PathParam(WorkspaceResource.PARAM_NAMESPACE) String namespace, @PathParam(
+      WorkspaceResource.PARAM_NAME) String name) {
     final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
     workspace = workspaceApi.getWorkspace(workspaceApi.createWorkspaceId(namespace, name));
     if (workspace == null) {
