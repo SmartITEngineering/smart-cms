@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public class FieldDefImpl implements FieldDef {
 
-  private String name, type;
+  private String name, type, displayName;
   private boolean required;
   private Map<String, String> parameters;
   private Map<String, String> parameterizedDisplayNames;
@@ -44,6 +44,14 @@ public class FieldDefImpl implements FieldDef {
   @Override
   public boolean isRequired() {
     return required;
+  }
+
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   public void setName(String name) {

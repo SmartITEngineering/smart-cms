@@ -36,6 +36,8 @@ import org.codehaus.jackson.map.annotate.JsonTypeIdResolver;
 public interface FieldDef {
 
   String getName();
+  
+  String getDisplayName();
 
   String getType();
 

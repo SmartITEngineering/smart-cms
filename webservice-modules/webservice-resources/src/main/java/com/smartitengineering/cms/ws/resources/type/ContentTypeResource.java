@@ -304,6 +304,7 @@ public class ContentTypeResource extends AbstractResource {
         break;
     }
     def.setName(fieldDef.getName());
+    def.setDisplayName(fieldDef.getDisplayName());
     def.setRequired(fieldDef.isRequired());
     def.setParameters(fieldDef.getParameters());
     def.setType(fieldDef.getValueDef().getType().name());
