@@ -860,7 +860,7 @@ public class ContentResource extends AbstractResource {
     switch (valueDef.getType()) {
       case CONTENT: {
         FieldValueImpl valueImpl = new FieldValueImpl();
-        valueImpl.setValue(ContentResource.getContentUri(builder, ((ContentFieldValue) contentFieldValue).getValue()).
+        valueImpl.setValue(ContentResource.getContentUri(builder.clone(), ((ContentFieldValue) contentFieldValue).getValue()).
             toASCIIString());
         value = valueImpl;
         break;
@@ -885,7 +885,7 @@ public class ContentResource extends AbstractResource {
         final Map<String, FieldDef> composedFieldDefs = ((CompositeDataType) valueDef).getComposedFieldDefs();
         for (Entry<String, Field> composeeField : composedFields.entrySet()) {
           valueImpl.getValues().put(composeeField.getKey(),
-                                    convertToDomainField(builder, composedFieldDefs.get(composeeField.getKey()),
+                                    convertToDomainField(builder.clone(), composedFieldDefs.get(composeeField.getKey()),
                                                          composedFields, ""));
         }
         value = valueImpl;
