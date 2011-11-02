@@ -36,6 +36,7 @@ import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.DataType;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.OtherDataType;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.VariationDef;
@@ -316,6 +317,7 @@ public class ContentResource extends AbstractResource {
               formFields(compositeDataType.getComposedFieldDefs(), composites, composedFields);
               CompositeFieldValueImpl valueImpl = new CompositeFieldValueImpl();
               valueImpl.setValuesAsCollection(composedFields);
+              valueImpl.setType(FieldValueType.COMPOSITE.name());
               fieldImpl.setValue(valueImpl);
             }
             break;
@@ -323,12 +325,13 @@ public class ContentResource extends AbstractResource {
           case COLLECTION: {
             CollectionDataType collectionFieldDef = (CollectionDataType) fieldDef.getValue().getValueDef();
             CollectionFieldValueImpl fieldValueImpl = new CollectionFieldValueImpl();
+            fieldValueImpl.setType(FieldValueType.COLLECTION.name());
             switch (collectionFieldDef.getItemDataType().getType()) {
               case COMPOSITE: {
                 boolean hasCompositeValue = false;
                 Map<String, Map<String, List<FormDataBodyPart>>> compositesCollection =
                                                                  new HashMap<String, Map<String, List<FormDataBodyPart>>>();
-                final String prefixPattern = new StringBuilder(fieldDef.getKey()).append("\\.([a-z0-9]+)\\..+").
+                final String prefixPattern = new StringBuilder(fieldDef.getKey()).append("\\.([0-9]+)\\..+").
                     toString();
                 Pattern pattern = Pattern.compile(prefixPattern);
                 for (String key : bodyParts.keySet()) {
@@ -355,6 +358,7 @@ public class ContentResource extends AbstractResource {
                     formFields(compositeDataType.getComposedFieldDefs(), cols.getValue(), composedFields);
                     CompositeFieldValueImpl valueImpl = new CompositeFieldValueImpl();
                     valueImpl.setValuesAsCollection(composedFields);
+                    valueImpl.setType(FieldValueType.COMPOSITE.name());
                     fieldValueImpl.getValues().add(valueImpl);
                   }
                 }
