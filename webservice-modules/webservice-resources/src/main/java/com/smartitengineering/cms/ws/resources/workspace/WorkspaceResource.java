@@ -67,9 +67,11 @@ public class WorkspaceResource extends AbstractResource {
   public static final String PATH_CONTENT_CO_PROCESSORS = "content-co-processors";
   public static final String PATH_VARIATIONS = "variations";
   public static final String PATH_VALIDATORS = "validators";
+  public static final String PATH_SEQUENCES = "sequences";
   public static final String PATH_SEARCH = "search";
   public static final String PATH_REINDEX = "reindex";
   public static final String REL_FRIENDLIES = "friendlies";
+  public static final String REL_SEQUENCES = "sequences";
   public static final String REL_REPRESENTATIONS = "representations";
   public static final String REL_CONTENT_CO_PROCESSORS = "contentCoProcessors";
   public static final String REL_VARIATIONS = "variations";
@@ -173,6 +175,9 @@ public class WorkspaceResource extends AbstractResource {
           getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_VALIDATORS).build(namespace, workspaceName),
           REL_VALIDATORS, MediaType.APPLICATION_ATOM_XML));
       feed.addLink(getLink(
+          getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_SEQUENCES).build(namespace, workspaceName),
+          REL_SEQUENCES, MediaType.APPLICATION_ATOM_XML));
+      feed.addLink(getLink(
           getAbsoluteURIBuilder().path(WorkspaceResource.class).path(PATH_SEARCH).build(namespace, workspaceName),
           REL_SEARCH, com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
       feed.addLink(getLink(
@@ -230,6 +235,11 @@ public class WorkspaceResource extends AbstractResource {
   @Path(PATH_VALIDATORS)
   public WorkspaceValidatorsResource getValidatorsResource(@QueryParam("count") @DefaultValue("10") int count) {
     return new WorkspaceValidatorsResource(workspace, count, getInjectables());
+  }
+
+  @Path(PATH_SEQUENCES)
+  public WorkspaceSequencesResource getSequencesResource() {
+    return new WorkspaceSequencesResource(workspace, getInjectables());
   }
 
   @Path(PATH_REPRESENTATIONS + "/name/{name}")
