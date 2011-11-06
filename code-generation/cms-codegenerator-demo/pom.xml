@@ -109,6 +109,33 @@
       </plugin>
       <plugin>
         <groupId>com.smartitengineering.smart-cms</groupId>
+        <artifactId>cms-tools-plugin</artifactId>
+        <version>${project.version}</version>
+        <configuration>
+          <outputDirectory>${project.build.directory}/cms-tools/</outputDirectory>
+          <solrHomeDirectory>../../solr/sample-conf/</solrHomeDirectory>
+          <solrArtifact>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr</artifactId>
+            <version>${solr.version}</version>
+            <type>war</type>
+          </solrArtifact>
+          <eventHubArtifact>
+            <groupId>com.smartitengineering.event</groupId>
+            <artifactId>hub-db</artifactId>
+            <version>${hub.version}</version>
+            <type>war</type>
+          </eventHubArtifact>
+          <cmsWebServiceArtifact>
+            <groupId>com.smartitengineering.smart-cms</groupId>
+            <artifactId>webservice</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+          </cmsWebServiceArtifact>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.smartitengineering.smart-cms</groupId>
         <artifactId>maven-pojo-generator-plugin</artifactId>
         <version>${project.version}</version>
         <configuration>
