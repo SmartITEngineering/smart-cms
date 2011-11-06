@@ -36,6 +36,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -44,11 +46,13 @@ import javax.ws.rs.core.Response;
 public class WorkspaceSequenceResource extends AbstractResource {
 
   private final Sequence sequence;
+  private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   public WorkspaceSequenceResource(Workspace workspace, String sequenceName, ServerResourceInjectables injectables) {
     super(injectables);
     this.sequence = SmartContentAPI.getInstance().getWorkspaceApi().getSequence(workspace.getId(), sequenceName);
     if (this.sequence == null) {
+      logger.warn("No sequence with name " + sequenceName);
       throw new WebApplicationException(Response.Status.NOT_FOUND);
     }
   }
@@ -61,7 +65,7 @@ public class WorkspaceSequenceResource extends AbstractResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response getSequence() {
-    return Response.ok(Collections.singletonMap("value", sequence.getCurrentValue())).build();
+    return Response.ok(Collections.singletonMap("value", Long.toString(sequence.getCurrentValue()))).build();
   }
 
   @DELETE
@@ -77,10 +81,11 @@ public class WorkspaceSequenceResource extends AbstractResource {
 
   @POST
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  @Produces(MediaType.APPLICATION_JSON)
   public Response changeSequence(@DefaultValue("1") @FormParam("delta") long delta) {
     long newVal = SmartContentAPI.getInstance().getWorkspaceApi().modifySequenceValue(sequence, delta);
     Map<String, Long> currentValue = new HashMap<String, Long>();
     currentValue.put("value", sequence.getCurrentValue());
-    return Response.status(Response.Status.OK).entity(Collections.singletonMap("value", newVal)).build();
+    return Response.status(Response.Status.OK).entity(Collections.singletonMap("value", Long.toString(newVal))).build();
   }
 }

@@ -26,6 +26,7 @@ import com.smartitengineering.cms.client.api.WorkspaceContentResouce;
 import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
 import com.smartitengineering.cms.client.api.WorkspaceRepresentationsResource;
+import com.smartitengineering.cms.client.api.WorkspaceSequencesResource;
 import com.smartitengineering.cms.client.api.WorkspaceValidatorsResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationsResource;
 import com.smartitengineering.cms.ws.common.utils.SimpleFeedExtensions;
@@ -145,5 +146,11 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
     return new WorkspaceContentCoProcessorsResourceImpl(this,
                                                         AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
         getLink("contentCoProcessors")));
+  }
+
+  public WorkspaceSequencesResource getSequences() {
+    return new WorkspaceSequencesResourceImpl(this,
+                                              AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().
+        getLink("sequences")));
   }
 }

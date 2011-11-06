@@ -60,6 +60,8 @@ import com.smartitengineering.cms.client.api.WorkspaceFeedResource;
 import com.smartitengineering.cms.client.api.WorkspaceFriendsResource;
 import com.smartitengineering.cms.client.api.WorkspaceRepresentationResource;
 import com.smartitengineering.cms.client.api.WorkspaceRepresentationsResource;
+import com.smartitengineering.cms.client.api.WorkspaceSequenceResource;
+import com.smartitengineering.cms.client.api.WorkspaceSequencesResource;
 import com.smartitengineering.cms.client.api.WorkspaceValidatorResource;
 import com.smartitengineering.cms.client.api.WorkspaceValidatorsResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationResource;
@@ -221,7 +223,7 @@ public class AppTest {
 
     Client client = CacheableClient.create();
     client.resource("http://localhost:10080/hub/api/channels/test").header(HttpHeaders.CONTENT_TYPE,
-                                                                      MediaType.APPLICATION_JSON).put(
+                                                                           MediaType.APPLICATION_JSON).put(
         "{\"name\":\"test\"}");
     LOGGER.info("Created test channel!");
   }
@@ -3046,6 +3048,49 @@ public class AppTest {
     Collection<Sequence> sequences = workspaceApi.getSequencesForWorkspace(workspace.getId());
     Assert.assertNotNull(sequences);
     Assert.assertEquals(0, sequences.size());
+  }
+
+  @Test
+  public void testCreateSequencesViaWebService() {
+    WorkspaceFeedResource resource = setupSequenceWorkspace();
+    final WorkspaceSequencesResource sequences = resource.getSequences();
+    Assert.assertNotNull(sequences);
+    sequences.createSequence(TEST, PORT);
+    sleep();
+    sequences.get();
+    Collection<WorkspaceSequenceResource> seqs = sequences.getSequences();
+    Assert.assertEquals(1, seqs.size());
+    WorkspaceSequenceResource seq = sequences.getSequenceByName(TEST);
+    Assert.assertEquals(TEST, seq.getName());
+    Assert.assertEquals(PORT, seq.getCurrentValue());
+  }
+
+  @Test
+  public void testUpdateSequenceViaWebService() {
+    WorkspaceFeedResource resource = setupSequenceWorkspace();
+    final WorkspaceSequencesResource sequences = resource.getSequences();
+    Assert.assertNotNull(sequences);
+    WorkspaceSequenceResource seq = sequences.getSequenceByName(TEST);
+    Assert.assertNotNull(seq);
+    long newVal = seq.update(1);
+    Assert.assertEquals(TEST, seq.getName());
+    Assert.assertEquals(PORT + 1, newVal);
+  }
+
+  @Test
+  public void testDeleteSequenceViaWebService() {
+    WorkspaceFeedResource resource = setupSequenceWorkspace();
+    final WorkspaceSequencesResource sequences = resource.getSequences();
+    Assert.assertNotNull(sequences);
+    WorkspaceSequenceResource seq = sequences.getSequenceByName(TEST);
+    Assert.assertNotNull(seq);
+    seq.delete(ClientResponse.Status.ACCEPTED);
+    try {
+      seq = sequences.getSequenceByName(TEST);
+    }
+    catch (Exception ex) {
+      //Expected
+    }
   }
 
   protected void sleep() {

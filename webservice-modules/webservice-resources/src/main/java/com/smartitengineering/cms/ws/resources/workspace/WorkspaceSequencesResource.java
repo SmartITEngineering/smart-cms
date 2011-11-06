@@ -33,6 +33,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -48,7 +49,8 @@ import org.apache.abdera.model.Link;
  */
 public class WorkspaceSequencesResource extends AbstractResource {
 
-  public static final String PATH_TO_SEQUENCE = "{sequenceName}";
+  public static final String PARAM_SEQUENCE_NAME = "sequenceName";
+  public static final String PATH_TO_SEQUENCE = "{" + PARAM_SEQUENCE_NAME + "}";
   private final Workspace workspace;
 
   public WorkspaceSequencesResource(Workspace workspace, ServerResourceInjectables injectables) {
@@ -66,16 +68,15 @@ public class WorkspaceSequencesResource extends AbstractResource {
     for (Sequence sequence : sequences) {
       feed.addEntry(getEntry(sequence.getName(), sequence.getName(), new Date(),
                              getLink(getSequenceUri(getRelativeURIBuilder(), sequence), Link.REL_SELF,
-                                     MediaType.APPLICATION_ATOM_XML)));
+                                     MediaType.APPLICATION_JSON)));
     }
     builder.entity(feed);
     return builder.build();
   }
 
-  @GET
   @Path(PATH_TO_SEQUENCE)
-  public WorkspaceSequenceResource getSequence() {
-    WorkspaceSequenceResource sequenceResource = new WorkspaceSequenceResource(workspace, PATH_TO_SEQUENCE,
+  public WorkspaceSequenceResource getSequence(@PathParam(PARAM_SEQUENCE_NAME) String seqName) {
+    WorkspaceSequenceResource sequenceResource = new WorkspaceSequenceResource(workspace, seqName,
                                                                                getInjectables());
     return sequenceResource;
   }

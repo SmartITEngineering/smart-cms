@@ -1,7 +1,7 @@
 /*
  *
  * This is a simple Content Management System (CMS)
- * Copyright (C) 2010  Imran M Yousuf (imyousuf@smartitengineering.com)
+ * Copyright (C) 2011  Imran M Yousuf (imyousuf@smartitengineering.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,38 +18,19 @@
  */
 package com.smartitengineering.cms.client.api;
 
-import com.smartitengineering.util.rest.client.Resource;
+import com.smartitengineering.util.rest.client.WritableResource;
+import java.util.Collection;
 import org.apache.abdera.model.Feed;
 
 /**
  *
  * @author imyousuf
  */
-public interface WorkspaceFeedResource extends Resource<Feed> {
+public interface WorkspaceSequencesResource extends WritableResource<Feed> {
 
-  WorkspaceFriendsResource getFriends();
+  Collection<WorkspaceSequenceResource> getSequences();
 
-  WorkspaceRepresentationsResource getRepresentations();
+  WorkspaceSequenceResource getSequenceByName(String name);
 
-  WorkspaceValidatorsResource getValidators();
-
-  WorkspaceVariationsResource getVariations();
-
-  WorkspaceContentCoProcessorsResource getContentCoProcessors();
-
-  WorkspaceSequencesResource getSequences();
-
-  ContentTypesResource getContentTypes();
-
-  ContentsResource getContents();
-
-  WorkspaceContentResouce getWorkspace();
-
-  String getSearchUri();
-
-  String getWorkspaceNamespace();
-
-  String getWorkspaceName();
-
-  ContentSearcherResource searchContent(String query);
+  void createSequence(String name, long initialValue);
 }
