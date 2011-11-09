@@ -99,7 +99,6 @@
           </cmsWebServiceArtifact>
           <!-- Other configurations and their default expressions -->
           <!--
-          <jettyPort>10080</jettyPort>
           <zooKeeperPort>2181</zooKeeperPort>
           <embeddedPort>40404</embeddedPort>
           <hbaseVersion>${hbase.version}</hbaseVersion>
