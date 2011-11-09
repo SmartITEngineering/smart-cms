@@ -19,31 +19,14 @@ import com.smartitengineering.dao.common.queryparam.MatchMode;
 import com.smartitengineering.dao.common.queryparam.Order;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
-import com.smartitengineering.dao.hbase.ddl.HBaseTableGenerator;
-import com.smartitengineering.dao.hbase.ddl.config.json.ConfigurationJsonParser;
-import com.smartitengineering.util.bean.guice.GuiceUtil;
 import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ConnectionConfig;
-import com.smartitengineering.util.rest.client.jersey.cache.CacheableClient;
-import com.sun.jersey.api.client.Client;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import junit.framework.Assert;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseTestingUtility;
-import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.webapp.WebAppClassLoader;
-import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -59,87 +42,19 @@ import test.di.MasterModule;
  */
 public class CodeGenerationTest {
 
-  private static final MiniZooKeeperCluster ZOO_KEEPER_CLUSTER = new MiniZooKeeperCluster();
-  private static HBaseTestingUtility TEST_UTIL;
   private static final Logger LOGGER = LoggerFactory.getLogger(CodeGenerationTest.class);
   public static final int SLEEP_DURATION = 3000;
-  private static final int PORT = 10080;
-  public static final String DEFAULT_NS = "com.smartitengineering";
-  public static final String ROOT_URI_STRING = "http://localhost:" + PORT + "/cms/";
-  public static final String TEST = "test";
-  public static final String TEST_NS = "testNS";
-  private static Server jettyServer;
 
   @BeforeClass
   public static void globalSetup() throws Exception {
-    /*
-     * Start HBase and initialize tables
-     */
-    //-Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl
-    System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
-                       "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
-    try {
-      ZOO_KEEPER_CLUSTER.setClientPort(2181);
-      File file = new File("./target/zk-server/");
-      file.mkdirs();
-      ZOO_KEEPER_CLUSTER.startup(file);
-      TEST_UTIL = new HBaseTestingUtility();
-      TEST_UTIL.setZkCluster(ZOO_KEEPER_CLUSTER);
-      TEST_UTIL.startMiniCluster();
-    }
-    catch (Exception ex) {
-      LOGGER.error(ex.getMessage(), ex);
-    }
     /**
-     * Generate the HBase tables if necessary, skips if table exists.
-     * Initialize guice modules as specified in the configuration properties
-     * In a web app these can reside within a context listener
+     * Initialize CMS
      */
-    new HBaseTableGenerator(ConfigurationJsonParser.getConfigurations(CodeGenerationTest.class.getClassLoader().
-        getResourceAsStream("com/smartitengineering/cms/spi/impl/schema.json")), TEST_UTIL.getConfiguration(), true).
-        generateTables();
-
-    /*
-     * The following additional DI is to provide the test HBase connection so that it does not search for
-     * connection configuration in classpath
-     */
-    Properties properties = new Properties();
-    properties.setProperty(GuiceUtil.CONTEXT_NAME_PROP,
-                           "com.smartitengineering.dao.impl.hbase,com.smartitengineering.user.client");
-    properties.setProperty(GuiceUtil.IGNORE_MISSING_DEP_PROP, Boolean.TRUE.toString());
-    properties.setProperty(GuiceUtil.MODULES_LIST_PROP, ConfigurationModule.class.getName());
-    GuiceUtil.getInstance(properties).register();
     Initializer.init();
-
-    /*
-     * Start web application container
-     */
-    jettyServer = new Server(PORT);
-    HandlerList handlerList = new HandlerList();
-    /*
-     * The following is for solr for later, when this is to be used it
-     */
-    System.setProperty("solr.solr.home", "./target/sample-conf/");
-    Handler solr = new WebAppContext("./target/solr/", "/solr");
-    handlerList.addHandler(solr);
-    WebAppContext hub = new WebAppContext("./target/hub/", "/hub");
-    final WebAppClassLoader webAppClassLoader = new WebAppClassLoader(hub);
-    hub.setClassLoader(webAppClassLoader);
-    handlerList.addHandler(hub);
-    jettyServer.setHandler(handlerList);
-    jettyServer.setSendDateHeader(true);
-    jettyServer.start();
-
     /*
      * Setup client properties
      */
     System.setProperty(ApplicationWideClientFactoryImpl.TRACE, "true");
-
-    Client client = CacheableClient.create();
-    client.resource("http://localhost:10080/hub/api/channels/test").header(HttpHeaders.CONTENT_TYPE,
-                                                                      MediaType.APPLICATION_JSON).put(
-        "{\"name\":\"test\"}");
-    LOGGER.info("Created test channel!");
     /*
      * Setup workspaces
      */
@@ -181,24 +96,6 @@ public class CodeGenerationTest {
 
   @AfterClass
   public static void globalTearDown() throws Exception {
-    try {
-      jettyServer.stop();
-    }
-    catch (Exception ex) {
-      LOGGER.warn(ex.getMessage(), ex);
-    }
-    try {
-      TEST_UTIL.shutdownMiniCluster();
-    }
-    catch (Exception ex) {
-      LOGGER.warn(ex.getMessage(), ex);
-    }
-    try {
-      ZOO_KEEPER_CLUSTER.shutdown();
-    }
-    catch (Exception ex) {
-      LOGGER.warn(ex.getMessage(), ex);
-    }
   }
 
   @Test
@@ -348,12 +245,11 @@ public class CodeGenerationTest {
 
     @Override
     protected void configure() {
-      bind(Configuration.class).toInstance(TEST_UTIL.getConfiguration());
       ConnectionConfig config = new ConnectionConfig();
       config.setBasicUri("");
       config.setContextPath("/");
       config.setHost("localhost");
-      config.setPort(PORT);
+      config.setPort(10080);
       bind(ConnectionConfig.class).toInstance(config);
     }
   }

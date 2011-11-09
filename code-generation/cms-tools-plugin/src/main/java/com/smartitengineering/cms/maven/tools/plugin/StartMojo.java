@@ -29,6 +29,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -53,6 +55,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 /**
  * Goal which starts the tools
  *
+ * @author imyousuf
  * @goal start
  */
 public class StartMojo
@@ -399,12 +402,18 @@ public class StartMojo
         while (true) {
           Socket socket = serverSocket.accept();
           InputStream inputStream = socket.getInputStream();
+          Writer writer = new OutputStreamWriter(socket.getOutputStream());
           BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
           String firstLine = reader.readLine();
-          reader.close();
           if (StringUtils.isNotBlank(firstLine)) {
             if ("stop".equalsIgnoreCase(firstLine.split(" ")[0])) {
               getLog().info("Received STOP signal!");
+              stopAll();
+              writer.write("done\n");
+              writer.flush();
+              Thread.sleep(1000);
+              reader.close();
+              writer.close();
               socket.close();
               serverSocket.close();
               break;
@@ -416,6 +425,9 @@ public class StartMojo
         getLog().warn(ex.getMessage(), ex);
         throw new IllegalStateException(ex);
       }
+    }
+
+    protected void stopAll() {
       try {
         jettyServer.stop();
       }
