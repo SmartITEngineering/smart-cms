@@ -86,20 +86,26 @@
             <groupId>org.apache.solr</groupId>
             <artifactId>solr</artifactId>
             <version>${solr.version}</version>
-            <type>war</type>
           </solrArtifact>
           <eventHubArtifact>
             <groupId>com.smartitengineering.event</groupId>
             <artifactId>hub-db</artifactId>
             <version>${hub.version}</version>
-            <type>war</type>
           </eventHubArtifact>
           <cmsWebServiceArtifact>
             <groupId>com.smartitengineering.smart-cms</groupId>
             <artifactId>webservice</artifactId>
             <version>${project.version}</version>
-            <type>war</type>
           </cmsWebServiceArtifact>
+          <!-- Other configurations and their default expressions -->
+          <!--
+          <jettyPort>10080</jettyPort>
+          <zooKeeperPort>2181</zooKeeperPort>
+          <embeddedPort>40404</embeddedPort>
+          <hbaseVersion>${hbase.version}</hbaseVersion>
+          <hadoopVersion>${hadoop.version}</hadoopVersion>
+          <jerseyVersion>${jersey.version}</jerseyVersion>
+          -->
         </configuration>
         <executions>
           <execution>
@@ -109,6 +115,7 @@
               <goal>start</goal>
             </goals>
             <configuration>
+              <!-- By default it is set to false, which means manual invokation would result a running CMS container -->
               <daemonMode>true</daemonMode>
             </configuration>
           </execution>
@@ -184,8 +191,6 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit.version>4.8.2</junit.version>
-    <jetty.port>7090</jetty.port>
-    <jetty.stop.port>7999</jetty.stop.port>
     <hub.version>0.1-hbase-SNAPSHOT</hub.version>
   </properties>
 </project>

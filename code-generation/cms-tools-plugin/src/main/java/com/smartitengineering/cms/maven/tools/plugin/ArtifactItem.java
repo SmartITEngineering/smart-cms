@@ -46,17 +46,12 @@ public class ArtifactItem {
    */
   private String version = null;
   /**
-   * Type of Artifact (War,Jar,etc)
-   * 
-   * @parameter
-   */
-  private String type = "jar";
-  /**
    * Classifier for Artifact (tests,sources,etc)
    * 
    * @parameter
    */
   private String classifier;
+  private String type = "war";
 
   public String getArtifactId() {
     return artifactId;
