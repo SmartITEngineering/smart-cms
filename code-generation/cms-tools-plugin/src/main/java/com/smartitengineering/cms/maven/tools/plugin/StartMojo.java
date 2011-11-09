@@ -97,7 +97,7 @@ public class StartMojo
    * @required
    */
   private boolean daemonMode;
-  private Integer jettyPort;
+  private Integer jettyPort = 10080;
   /**
    * Embedded ZooKeeper port
    * @parameter expression="2181"
