@@ -38,6 +38,7 @@
     <module>content-spi-template-providers-impl</module>
     <module>content-spi-solr-search-impl</module>
     <module>content-spi-uri-impl</module>
+    <module>content-spi-dist-lock-impl</module>
     <module>api-spi-guice-binder</module>
   </modules>
 </project>
