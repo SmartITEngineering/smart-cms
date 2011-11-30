@@ -40,14 +40,15 @@ import org.slf4j.LoggerFactory;
  */
 public class ZooKeeperLockHandler implements LockHandler, Watcher {
 
-  private final ZooKeeper zooKeeper;
   private final transient Logger logger = LoggerFactory.getLogger(getClass());
-  private final String rootNode;
+  protected final ZKConfig config;
 
   @Inject
   public ZooKeeperLockHandler(@Named("zkConnectString") final String connectString,
                               @Named("zkRootNode") final String rootNode,
+                              @Named("zkNodeId") final String nodeId,
                               @Named("zkTimeout") final int timeout) {
+    final ZooKeeper zooKeeper;
     try {
       zooKeeper = new ZooKeeper(connectString, timeout, this);
     }
@@ -55,12 +56,14 @@ public class ZooKeeperLockHandler implements LockHandler, Watcher {
       logger.error("Could not intialize ZooKeeper connection!");
       throw new IllegalStateException(ex);
     }
+    final String srootNode;
     if (rootNode.startsWith("/")) {
-      this.rootNode = rootNode;
+      srootNode = rootNode;
     }
     else {
-      this.rootNode = new StringBuilder("/").append(rootNode).toString();
+      srootNode = new StringBuilder("/").append(rootNode).toString();
     }
+    config = new ZKConfig(zooKeeper, srootNode, nodeId);
     logger.info("Connected to ZooKeeper server");
     try {
       initializeRootNode();
@@ -72,12 +75,38 @@ public class ZooKeeperLockHandler implements LockHandler, Watcher {
     logger.info("Created root node");
   }
 
+  public ZKConfig getConfig() {
+    return config;
+  }
+
   public Lock register(Key key) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    ZKLock lock = getLock(key);
+    return lock;
   }
 
   public void unregister(Key key) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    ZKLock lock = getLock(key);
+    String node = lock.getNode();
+    if (lock.isLockOwned()) {
+      lock.unlock();
+    }
+  }
+
+  protected void createNodeIfNotExists(String node, boolean retry, byte... data) throws KeeperException,
+                                                                                        InterruptedException {
+    final ZooKeeper zooKeeper = config.getZooKeeper();
+    final Stat stat = zooKeeper.exists(node, false);
+    if (stat == null) {
+      zooKeeper.create(node, data == null ? new byte[]{} : data, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+    }
+    else if (data != null && data.length > 0) {
+      zooKeeper.setData(node, data, stat.getVersion());
+    }
+  }
+
+  protected ZKLock getLock(Key key) {
+    ZKLock lock = new ZKLock(config, key);
+    return lock;
   }
 
   public void process(WatchedEvent event) {
@@ -85,9 +114,7 @@ public class ZooKeeperLockHandler implements LockHandler, Watcher {
   }
 
   private void initializeRootNode() throws KeeperException, InterruptedException {
-    final Stat stat = zooKeeper.exists(rootNode, false);
-    if (stat == null) {
-      zooKeeper.create(rootNode, new byte[]{}, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-    }
+    String node = config.getRootNode();
+    createNodeIfNotExists(node, false);
   }
 }
