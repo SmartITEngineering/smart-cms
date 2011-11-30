@@ -28,9 +28,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.lang.StringUtils;
@@ -85,22 +87,40 @@ public class LocalLockRegistrarImpl implements LocalLockRegistrar {
     }, localLockTimeout, localLockTimeout);
   }
 
-  public String lock(Key key, LockTimeoutListener listener) {
-    lock.lock();
-    try {
-      if (!lockMap.containsKey(key)) {
-        final String id = String.valueOf(longFactory.incrementAndGet());
-        LockDetails details = new LockDetails((System.currentTimeMillis() + localLockTimeout), id, listener);
-        lockMap.put(key, details);
+  public String lock(Key key, LockTimeoutListener listener, long waitTime) {
+    long availableWaitTime = waitTime;
+    while (true) {
+      lock.lock();
+      try {
+        if (!lockMap.containsKey(key)) {
+          final String id = String.valueOf(longFactory.incrementAndGet());
+          LockDetails details = new LockDetails((System.currentTimeMillis() + localLockTimeout), id, listener);
+          lockMap.put(key, details);
+        }
+      }
+      catch (Exception ex) {
+        logger.warn(ex.getMessage(), ex);
+      }
+      finally {
+        lock.unlock();
+      }
+      if (availableWaitTime > 0) {
+        return null;
+      }
+      else {
+        long startTime = 0;
+        try {
+          synchronized (this) {
+            startTime = System.currentTimeMillis();
+            wait(waitTime);
+          }
+        }
+        catch (Exception ex) {
+          logger.warn(ex.getMessage(), ex);
+        }
+        availableWaitTime = availableWaitTime - (System.currentTimeMillis() - startTime);
       }
     }
-    catch (Exception ex) {
-      logger.warn(ex.getMessage(), ex);
-    }
-    finally {
-      lock.unlock();
-    }
-    return null;
   }
 
   public boolean unlock(Key key, String lockId) {
@@ -112,6 +132,9 @@ public class LocalLockRegistrarImpl implements LocalLockRegistrar {
       if (lockMap.containsKey(key)) {
         if (lockId.equals(lockMap.get(key).getLockId())) {
           lockMap.remove(key);
+          synchronized (this) {
+            notifyAll();
+          }
           return true;
         }
       }
