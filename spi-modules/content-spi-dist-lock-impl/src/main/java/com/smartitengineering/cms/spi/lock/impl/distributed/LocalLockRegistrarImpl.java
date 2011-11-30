@@ -94,6 +94,7 @@ public class LocalLockRegistrarImpl implements LocalLockRegistrar {
           final String id = String.valueOf(longFactory.incrementAndGet());
           LockDetails details = new LockDetails((System.currentTimeMillis() + localLockTimeout), id, listener);
           lockMap.put(key, details);
+          return id;
         }
       }
       catch (Exception ex) {
@@ -102,7 +103,7 @@ public class LocalLockRegistrarImpl implements LocalLockRegistrar {
       finally {
         lock.unlock();
       }
-      if (availableWaitTime > 0) {
+      if (availableWaitTime <= 0) {
         return null;
       }
       else {
@@ -110,7 +111,7 @@ public class LocalLockRegistrarImpl implements LocalLockRegistrar {
         try {
           synchronized (this) {
             startTime = System.currentTimeMillis();
-            wait(waitTime);
+            wait(availableWaitTime);
           }
         }
         catch (Exception ex) {

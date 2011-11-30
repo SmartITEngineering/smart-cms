@@ -80,11 +80,20 @@ public class ZKLock implements Lock, Watcher, LockTimeoutListener {
   }
 
   public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Attempting to attain lock with wait option of " + time + " " + unit.name());
+    }
+    if (isLockOwned()) {
+      return true;
+    }
     lock.lock();
     try {
       final LocalLockRegistrar registrar = config.getRegistrar();
       long waitInMilliSeconds = time > 0 ? TimeUnit.MILLISECONDS.convert(time, unit) : time;
       String lockId = registrar.lock(key, this, waitInMilliSeconds);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Attained local lock " + lockId);
+      }
       try {
         if (StringUtils.isNotBlank(lockId)) {
           String node = getNode();
@@ -93,6 +102,7 @@ public class ZKLock implements Lock, Watcher, LockTimeoutListener {
                         Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
           keeper.exists(node, this);
           localLockId = lockId;
+          return true;
         }
       }
       catch (KeeperException ke) {
@@ -135,6 +145,7 @@ public class ZKLock implements Lock, Watcher, LockTimeoutListener {
           config.getRegistrar().unlock(key, localLockId);
           throw new IllegalStateException("Lock is owned but remote lock is not owned! Released local lock!");
         }
+        localLockId = null;
       }
       catch (Exception ex) {
         logger.error(ex.getMessage(), ex);

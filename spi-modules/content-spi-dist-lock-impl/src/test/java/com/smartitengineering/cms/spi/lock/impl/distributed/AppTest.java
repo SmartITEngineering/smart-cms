@@ -18,6 +18,8 @@
  */
 package com.smartitengineering.cms.spi.lock.impl.distributed;
 
+import com.smartitengineering.cms.api.factory.write.Lock;
+import com.smartitengineering.cms.spi.lock.Key;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +45,13 @@ public class AppTest {
   private static NIOServerCnxn.Factory standaloneServerFactory;
   private static final int CLIENT_PORT = 3882;
   private static final int CONNECTION_TIMEOUT = 30000;
+  private final String connectString = "localhost:" + CLIENT_PORT;
+  private final Key key = new Key() {
+
+    public String getKeyStringRep() {
+      return "random-key-1";
+    }
+  };
 
   @BeforeClass
   public static void startZooKeeperServer() {
@@ -146,7 +155,7 @@ public class AppTest {
 
   @Test
   public void testInitialization() throws Exception {
-    final String connectString = "localhost:" + CLIENT_PORT;
+
     ZooKeeper zooKeeper = new ZooKeeper(connectString, CONNECTION_TIMEOUT, new Watcher() {
 
       public void process(WatchedEvent event) {
@@ -160,5 +169,76 @@ public class AppTest {
                                                             localLockRegistrarImpl);
     stat = zooKeeper.exists(ROOT_NODE, false);
     Assert.assertNotNull(stat);
+  }
+
+  @Test
+  public void testSimpleLocking() throws Exception {
+    final LocalLockRegistrarImpl localLockRegistrarImpl1 = new LocalLockRegistrarImpl();
+    localLockRegistrarImpl1.initTimeoutChecking();
+    ZooKeeperLockHandler handler1 = new ZooKeeperLockHandler(connectString, ROOT_NODE, "node1", CONNECTION_TIMEOUT,
+                                                             localLockRegistrarImpl1);
+    Lock lock1 = handler1.getLock(key);
+    Assert.assertNotNull(lock1);
+    Assert.assertTrue(lock1.tryLock());
+    Assert.assertTrue(lock1.isLockOwned());
+    lock1.unlock();
+    Assert.assertFalse(lock1.isLockOwned());
+  }
+
+  @Test
+  public void testRepeatativeLocking() throws Exception {
+    final LocalLockRegistrarImpl localLockRegistrarImpl1 = new LocalLockRegistrarImpl();
+    localLockRegistrarImpl1.initTimeoutChecking();
+    ZooKeeperLockHandler handler1 = new ZooKeeperLockHandler(connectString, ROOT_NODE, "node1", CONNECTION_TIMEOUT,
+                                                             localLockRegistrarImpl1);
+    Lock lock2 = handler1.getLock(key);
+    Assert.assertNotNull(lock2);
+    Assert.assertTrue(lock2.tryLock());
+    Assert.assertTrue(lock2.tryLock());
+    lock2.unlock();
+  }
+
+  @Test
+  public void testSignleJVMLocking() throws Exception {
+    final LocalLockRegistrarImpl localLockRegistrarImpl1 = new LocalLockRegistrarImpl();
+    localLockRegistrarImpl1.initTimeoutChecking();
+    ZooKeeperLockHandler handler1 = new ZooKeeperLockHandler(connectString, ROOT_NODE, "node1", CONNECTION_TIMEOUT,
+                                                             localLockRegistrarImpl1);
+    Lock lock1 = handler1.getLock(key);
+    Lock lock2 = handler1.getLock(key);
+    Assert.assertNotNull(lock1);
+    Assert.assertNotNull(lock2);
+    Assert.assertTrue(lock1.tryLock());
+    Assert.assertTrue(lock1.isLockOwned());
+    Assert.assertFalse(lock2.tryLock());
+    lock1.unlock();
+    Assert.assertFalse(lock1.isLockOwned());
+    Assert.assertTrue(lock2.tryLock());
+    Assert.assertTrue(lock2.tryLock());
+    lock2.unlock();
+    Assert.assertFalse(lock2.isLockOwned());
+  }
+
+  @Test
+  public void testMultiJVMLocking() throws Exception {
+    final LocalLockRegistrarImpl localLockRegistrarImpl1 = new LocalLockRegistrarImpl();
+    localLockRegistrarImpl1.initTimeoutChecking();
+    ZooKeeperLockHandler handler1 = new ZooKeeperLockHandler(connectString, ROOT_NODE, "node1", CONNECTION_TIMEOUT,
+                                                             localLockRegistrarImpl1);
+    Lock lock1 = handler1.getLock(key);
+    //Simulate multi-jvm
+    final LocalLockRegistrarImpl localLockRegistrarImpl2 = new LocalLockRegistrarImpl();
+    localLockRegistrarImpl2.initTimeoutChecking();
+    ZooKeeperLockHandler handler2 = new ZooKeeperLockHandler(connectString, ROOT_NODE, "node2", CONNECTION_TIMEOUT,
+                                                             localLockRegistrarImpl2);
+    Lock lock3 = handler2.getLock(key);
+    Assert.assertTrue(lock1.tryLock());
+    Assert.assertFalse(lock3.tryLock());
+    Assert.assertFalse(lock3.isLockOwned());
+    lock1.unlock();
+    Assert.assertFalse(lock1.isLockOwned());
+    Assert.assertTrue(lock3.tryLock());
+    lock3.unlock();
+    Assert.assertFalse(lock3.isLockOwned());
   }
 }

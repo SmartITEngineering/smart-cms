@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.spi.lock.impl.distributed;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.factory.write.Lock;
 import com.smartitengineering.cms.spi.lock.Key;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author imyousuf
  */
+@Singleton
 public class ZooKeeperLockHandler implements LockHandler, Watcher {
 
   private final transient Logger logger = LoggerFactory.getLogger(getClass());
