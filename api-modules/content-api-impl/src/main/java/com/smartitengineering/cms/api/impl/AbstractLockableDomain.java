@@ -36,7 +36,6 @@ public abstract class AbstractLockableDomain
                Key {
 
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
-
   protected Lock lock;
 
   /**

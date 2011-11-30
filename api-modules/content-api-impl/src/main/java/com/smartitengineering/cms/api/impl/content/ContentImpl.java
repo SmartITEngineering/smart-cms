@@ -234,10 +234,8 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   @Override
   public String getKeyStringRep() {
     StringBuilder builder = new StringBuilder();
-    if (isPersisted()) {
-      WorkspaceId workspaceId = contentId.getWorkspaceId();
-      builder.append(workspaceId.getGlobalNamespace()).append(':').append(workspaceId.getName()).append(':').
-          append(new String(contentId.getId()));
+    if (contentId != null) {
+      builder.append("content:").append(contentId.toString());
     }
     return builder.toString();
   }

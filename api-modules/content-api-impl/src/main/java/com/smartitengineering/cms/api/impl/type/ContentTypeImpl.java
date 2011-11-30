@@ -231,11 +231,7 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
   public String getKeyStringRep() {
     StringBuilder keyString = new StringBuilder();
     if (contentTypeId != null) {
-      WorkspaceId workspaceId = contentTypeId.getWorkspace();
-      if (workspaceId != null) {
-        keyString.append(workspaceId.getGlobalNamespace()).append(':').append(workspaceId.getName()).append(':');
-      }
-      keyString.append(contentTypeId.getNamespace()).append(':').append(contentTypeId.getName());
+      keyString.append("content-type:").append(contentTypeId.toString());
     }
     return keyString.toString();
   }
