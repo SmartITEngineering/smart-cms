@@ -24,9 +24,7 @@ import com.smartitengineering.cms.spi.lock.Key;
  *
  * @author imyousuf
  */
-public interface LocalLockRegistrar {
+public interface LockTimeoutListener {
 
-  String lock(Key key, LockTimeoutListener listener);
-
-  boolean unlock(Key key, String lockId);
+  void lockTimedOut(Key key);
 }

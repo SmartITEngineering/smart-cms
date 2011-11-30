@@ -46,8 +46,7 @@ public class LocalLockRegistrarImpl implements LocalLockRegistrar {
 
   private final AtomicLong longFactory = new AtomicLong(0);
   private final ReentrantLock lock = new ReentrantLock();
-  private final Map<Key, String> lockMap = new HashMap<Key, String>();
-  private final Map<Key, Long> timeoutMap = new HashMap<Key, Long>();
+  private final Map<Key, LockDetails> lockMap = new HashMap<Key, LockDetails>();
   private final Timer timer = new Timer();
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
   @Inject
@@ -61,14 +60,14 @@ public class LocalLockRegistrarImpl implements LocalLockRegistrar {
       @Override
       public void run() {
         lock.lock();
-        List<Entry<Key, String>> removables = new ArrayList<Entry<Key, String>>();
+        List<Entry<Key, LockDetails>> removables = new ArrayList<Entry<Key, LockDetails>>();
         try {
           long currentTime = System.currentTimeMillis();
 
-          final Set<Entry<Key, Long>> entrySet = timeoutMap.entrySet();
-          for (Entry<Key, Long> entry : entrySet) {
-            if (currentTime >= entry.getValue().longValue()) {
-              removables.add(new SimpleEntry<Key, String>(entry.getKey(), lockMap.get(entry.getKey())));
+          final Set<Entry<Key, LockDetails>> entrySet = lockMap.entrySet();
+          for (Entry<Key, LockDetails> entry : entrySet) {
+            if (currentTime >= entry.getValue().getTimeoutTime()) {
+              removables.add(new SimpleEntry<Key, LockDetails>(entry.getKey(), lockMap.get(entry.getKey())));
             }
           }
         }
@@ -78,20 +77,21 @@ public class LocalLockRegistrarImpl implements LocalLockRegistrar {
         finally {
           lock.unlock();
         }
-        for (Entry<Key, String> removable : removables) {
-          unlock(removable.getKey(), removable.getValue());
+        for (Entry<Key, LockDetails> removable : removables) {
+          unlock(removable.getKey(), removable.getValue().getLockId());
+          removable.getValue().getListener().lockTimedOut(removable.getKey());
         }
       }
     }, localLockTimeout, localLockTimeout);
   }
 
-  public String lock(Key key) {
+  public String lock(Key key, LockTimeoutListener listener) {
     lock.lock();
     try {
       if (!lockMap.containsKey(key)) {
         final String id = String.valueOf(longFactory.incrementAndGet());
-        lockMap.put(key, id);
-        timeoutMap.put(key, (System.currentTimeMillis() + localLockTimeout));
+        LockDetails details = new LockDetails((System.currentTimeMillis() + localLockTimeout), id, listener);
+        lockMap.put(key, details);
       }
     }
     catch (Exception ex) {
@@ -110,9 +110,8 @@ public class LocalLockRegistrarImpl implements LocalLockRegistrar {
     lock.lock();
     try {
       if (lockMap.containsKey(key)) {
-        if (lockId.equals(lockMap.get(key))) {
+        if (lockId.equals(lockMap.get(key).getLockId())) {
           lockMap.remove(key);
-          timeoutMap.remove(key);
           return true;
         }
       }
@@ -124,5 +123,30 @@ public class LocalLockRegistrarImpl implements LocalLockRegistrar {
       lock.unlock();
     }
     return false;
+  }
+
+  private static class LockDetails {
+
+    private final long timeoutTime;
+    private final String lockId;
+    private final LockTimeoutListener listener;
+
+    public LockDetails(long timeoutTime, String lockId, LockTimeoutListener listener) {
+      this.timeoutTime = timeoutTime;
+      this.lockId = lockId;
+      this.listener = listener;
+    }
+
+    public LockTimeoutListener getListener() {
+      return listener;
+    }
+
+    public String getLockId() {
+      return lockId;
+    }
+
+    public long getTimeoutTime() {
+      return timeoutTime;
+    }
   }
 }
