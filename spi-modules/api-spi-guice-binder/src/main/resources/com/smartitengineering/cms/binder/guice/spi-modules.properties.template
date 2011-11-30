@@ -29,3 +29,13 @@ com.smartitengineering.cms.event.storeFolder=/tmp/cms/
 com.smartitengineering.cms.event.storeFileName=cmsPollUri.txt
 com.smartitengineering.cms.solr.socketTimeout=1000
 com.smartitengineering.cms.solr.connectionTimeout=100
+# Following properties configure distributed locking
+com.smartitengineering.cms.distributedLocking.enabled=true
+# com.smartitengineering.cms.distributedLocking.localLockTimeout=120000
+com.smartitengineering.cms.distributedLocking.zkConnectString=localhost:3882
+# Must be unique per Smart CMS cluster
+com.smartitengineering.cms.distributedLocking.zkRootNode=/smart-cms
+# Should be unique for each node in a Smart CMS cluster
+com.smartitengineering.cms.distributedLocking.zkNodeId=node-1
+# Should me smaller than localLockTimeout
+com.smartitengineering.cms.distributedLocking.zkTimeout=90000

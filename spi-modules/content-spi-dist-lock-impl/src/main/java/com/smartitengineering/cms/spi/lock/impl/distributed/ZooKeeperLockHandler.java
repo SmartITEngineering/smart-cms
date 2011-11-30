@@ -89,7 +89,6 @@ public class ZooKeeperLockHandler implements LockHandler, Watcher {
 
   public void unregister(Key key) {
     ZKLock lock = getLock(key);
-    String node = lock.getNode();
     if (lock.isLockOwned()) {
       lock.unlock();
     }

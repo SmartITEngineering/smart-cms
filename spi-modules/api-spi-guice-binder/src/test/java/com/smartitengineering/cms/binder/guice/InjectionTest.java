@@ -25,61 +25,98 @@ import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
+import com.smartitengineering.cms.spi.lock.impl.distributed.AppTest;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
-import junit.framework.TestCase;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import org.apache.commons.lang.StringUtils;
+import org.apache.zookeeper.server.NIOServerCnxn;
+import org.apache.zookeeper.server.ZooKeeperServer;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-public class InjectionTest extends TestCase {
+public class InjectionTest {
 
-  @Override
-  protected void setUp() throws Exception {
+  private static NIOServerCnxn.Factory standaloneServerFactory;
+  private static final int CLIENT_PORT = 3882;
+  private static final int CONNECTION_TIMEOUT = 30000;
+
+  @BeforeClass
+  public static void setUpTests() throws Exception {
     Initializer.init();
+    try {
+      File snapDir = new File("./target/zk/");
+      snapDir.mkdirs();
+      ZooKeeperServer server = new ZooKeeperServer(snapDir, snapDir, 2000);
+      standaloneServerFactory = new NIOServerCnxn.Factory(new InetSocketAddress(CLIENT_PORT));
+      standaloneServerFactory.startup(server);
+      if (!AppTest.waitForServerUp(CLIENT_PORT, CONNECTION_TIMEOUT)) {
+        throw new IOException("Waiting for startup of standalone server");
+      }
+    }
+    catch (Exception ex) {
+      throw new IllegalStateException(ex);
+    }
   }
 
+  @AfterClass
+  public static void tearDownTests() throws Exception {
+    standaloneServerFactory.shutdown();
+    if (!AppTest.waitForServerDown(CLIENT_PORT, CONNECTION_TIMEOUT)) {
+      throw new IllegalStateException("Waiting for shutdown of standalone server");
+    }
+  }
+
+  @Test
   public void testApi() {
-    assertNotNull(SmartContentAPI.getInstance().getContentLoader());
-    assertNotNull(SmartContentAPI.getInstance().getContentTypeLoader());
-    assertNotNull(SmartContentAPI.getInstance().getWorkspaceApi());
-    assertNotNull(SmartContentAPI.getInstance().getEventRegistrar());
+    Assert.assertNotNull(SmartContentAPI.getInstance().getContentLoader());
+    Assert.assertNotNull(SmartContentAPI.getInstance().getContentTypeLoader());
+    Assert.assertNotNull(SmartContentAPI.getInstance().getWorkspaceApi());
+    Assert.assertNotNull(SmartContentAPI.getInstance().getEventRegistrar());
   }
 
+  @Test
   public void testSpi() {
-    assertNotNull(SmartContentSPI.getInstance().getTypeValidators());
-    assertEquals(1, SmartContentSPI.getInstance().getTypeValidators().getValidators().size());
-    assertNotNull(SmartContentSPI.getInstance().getTypeValidators().getValidators().get(MediaType.APPLICATION_XML));
-    assertNotNull(SmartContentSPI.getInstance().getContentTypeDefinitionParsers());
-    assertNotNull(SmartContentSPI.getInstance().getPersistentServiceRegistrar());
+    Assert.assertNotNull(SmartContentSPI.getInstance().getTypeValidators());
+    Assert.assertEquals(1, SmartContentSPI.getInstance().getTypeValidators().getValidators().size());
+    Assert.assertNotNull(SmartContentSPI.getInstance().getTypeValidators().getValidators().get(MediaType.APPLICATION_XML));
+    Assert.assertNotNull(SmartContentSPI.getInstance().getContentTypeDefinitionParsers());
+    Assert.assertNotNull(SmartContentSPI.getInstance().getPersistentServiceRegistrar());
     final PersistentContentTypeReader contentTypeReader = SmartContentSPI.getInstance().getContentTypeReader();
-    assertNotNull(contentTypeReader);
-    assertNotNull(SmartContentSPI.getInstance().getContentReader());
-    assertNotNull(SmartContentSPI.getInstance().getPersistentServiceRegistrar().getPersistentService(
+    Assert.assertNotNull(contentTypeReader);
+    Assert.assertNotNull(SmartContentSPI.getInstance().getContentReader());
+    Assert.assertNotNull(SmartContentSPI.getInstance().getPersistentServiceRegistrar().getPersistentService(
         WriteableContent.class));
-    assertNotNull(SmartContentSPI.getInstance().getWorkspaceService());
-    assertNotNull(SmartContentSPI.getInstance().getRepresentationProvider());
-    assertNotNull(SmartContentSPI.getInstance().getVariationProvider());
-    assertNotNull(SmartContentSPI.getInstance().getValidatorProvider());
-    assertNotNull(SmartContentSPI.getInstance().getContentSearcher());
-    assertNotNull(SmartContentSPI.getInstance().getContentTypeSearcher());
+    Assert.assertNotNull(SmartContentSPI.getInstance().getWorkspaceService());
+    Assert.assertNotNull(SmartContentSPI.getInstance().getRepresentationProvider());
+    Assert.assertNotNull(SmartContentSPI.getInstance().getVariationProvider());
+    Assert.assertNotNull(SmartContentSPI.getInstance().getValidatorProvider());
+    Assert.assertNotNull(SmartContentSPI.getInstance().getContentSearcher());
+    Assert.assertNotNull(SmartContentSPI.getInstance().getContentTypeSearcher());
     final PersistentService<WritableContentType> persistentService =
                                                  SmartContentSPI.getInstance().getPersistentService(
         WritableContentType.class);
     if (ContentTypePersistentService.class.isAssignableFrom(persistentService.getClass())) {
       ContentTypePersistentService service = (ContentTypePersistentService) persistentService;
-      assertNotNull(service.getCommonReadDao());
-      assertNotNull(service.getCommonWriteDao());
-      assertSame(service.getCommonReadDao(), service.getCommonWriteDao());
+      Assert.assertNotNull(service.getCommonReadDao());
+      Assert.assertNotNull(service.getCommonWriteDao());
+      Assert.assertSame(service.getCommonReadDao(), service.getCommonWriteDao());
     }
     else {
-      fail("Could cast to expected instance!");
+      Assert.fail("Could cast to expected instance!");
     }
-    assertNotNull(persistentService);
-    assertSame(contentTypeReader, persistentService);
-    assertTrue(StringUtils.isNotBlank(SmartContentSPI.getInstance().getSchemaLocationForContentTypeXml()));
+    Assert.assertNotNull(persistentService);
+    Assert.assertSame(contentTypeReader, persistentService);
+    Assert.assertTrue(StringUtils.isNotBlank(SmartContentSPI.getInstance().getSchemaLocationForContentTypeXml()));
   }
 
+  @Test
   public void testPersistenceServiceLookup() {
     ContentTypeImpl typeImpl = new ContentTypeImpl();
-    assertNotNull(typeImpl.getService());
+    Assert.assertNotNull(typeImpl.getService());
   }
 }

@@ -36,6 +36,11 @@
     </dependency>
     <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
+      <artifactId>content-spi-dist-lock-impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.smartitengineering.smart-cms</groupId>
       <artifactId>content-spi-type-validators-impl</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -106,5 +111,15 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.smartitengineering.smart-cms</groupId>
+      <artifactId>content-spi-dist-lock-impl</artifactId>
+      <version>${project.version}</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+  <properties>
+    <junit.version>4.8.2</junit.version>
+  </properties>
 </project>

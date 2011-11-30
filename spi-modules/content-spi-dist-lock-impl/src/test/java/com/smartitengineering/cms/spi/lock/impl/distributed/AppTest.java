@@ -79,7 +79,7 @@ public class AppTest {
   }
 
   // XXX: From o.a.zk.t.ClientBase
-  private static boolean waitForServerUp(int port, long timeout) {
+  public static boolean waitForServerUp(int port, long timeout) {
     long start = System.currentTimeMillis();
     while (true) {
       try {
@@ -122,7 +122,7 @@ public class AppTest {
   }
 
   // XXX: From o.a.zk.t.ClientBase
-  private static boolean waitForServerDown(int port, long timeout) {
+  public static boolean waitForServerDown(int port, long timeout) {
     long start = System.currentTimeMillis();
     while (true) {
       try {

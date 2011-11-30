@@ -84,6 +84,9 @@ import com.smartitengineering.cms.spi.impl.workspace.search.SequenceHelper;
 import com.smartitengineering.cms.spi.impl.workspace.search.SequenceIdentifierQueryImpl;
 import com.smartitengineering.cms.spi.impl.workspace.search.SequenceSearcherImpl;
 import com.smartitengineering.cms.spi.lock.LockHandler;
+import com.smartitengineering.cms.spi.lock.impl.distributed.LocalLockRegistrar;
+import com.smartitengineering.cms.spi.lock.impl.distributed.LocalLockRegistrarImpl;
+import com.smartitengineering.cms.spi.lock.impl.distributed.ZooKeeperLockHandler;
 import com.smartitengineering.cms.spi.persistence.PersistableDomainFactory;
 import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.cms.spi.persistence.PersistentServiceRegistrar;
@@ -174,9 +177,10 @@ public class SPIModule extends PrivateModule {
   private final String solrUri, uriPrefix, cacheConfigRsrc, cacheName, hubUri, atomFeedUri, cronExpression;
   private final String eventHubContextPath, eventHubBaseUri;
   private final String uriStoreFolder, uriStoreFileName;
+  private final String zkConnectString, zkRootNode, zkNodeId;
   private final long waitTime, saveInterval, updateInterval, deleteInterval;
-  private final int solrSocketTimeout, solrConnectionTimeout;
-  private final boolean enableAsyncEvent, enableEventConsumption;
+  private final int solrSocketTimeout, solrConnectionTimeout, localLockTimeout, zkTimeout;
+  private final boolean enableAsyncEvent, enableEventConsumption, distributedLockingEnabled;
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   public SPIModule(Properties properties) {
@@ -215,8 +219,24 @@ public class SPIModule extends PrivateModule {
       eventHubBaseUri = properties.getProperty("com.smartitengineering.cms.event.baseUri", "/api");
       uriStoreFolder = properties.getProperty("com.smartitengineering.cms.event.storeFolder", "./target/cms/");
       uriStoreFileName = properties.getProperty("com.smartitengineering.cms.event.storeFileName", "cmsPollUri.txt");
+      distributedLockingEnabled = Boolean.parseBoolean(properties.getProperty(
+          "com.smartitengineering.cms.distributedLocking.enabled"));
+      localLockTimeout = NumberUtils.toInt(properties.getProperty(
+          "com.smartitengineering.cms.distributedLocking.localLockTimeout"), -1);
+      zkTimeout = NumberUtils.toInt(properties.getProperty("com.smartitengineering.cms.distributedLocking.zkTimeout"),
+                                    90000);
+      zkConnectString = properties.getProperty("com.smartitengineering.cms.distributedLocking.zkConnectString",
+                                               "localhost:3882");
+      zkRootNode = properties.getProperty("com.smartitengineering.cms.distributedLocking.zkRootNode", "/smart-cms");
+      zkNodeId = properties.getProperty("com.smartitengineering.cms.distributedLocking.zkNodeId", "node-1");
     }
     else {
+      distributedLockingEnabled = true;
+      localLockTimeout = -1;
+      zkTimeout = 90000;
+      zkConnectString = "localhost:3882";
+      zkRootNode = "/smart-cms";
+      zkNodeId = "node-1";
       schemaLocationForContentType = DEFAULT_LOCATION;
       solrUri = DEFAULT_SOLR_URI;
       waitTime = 10l;
@@ -671,7 +691,20 @@ public class SPIModule extends PrivateModule {
     parserBinder.addBinding(MediaType.APPLICATION_XML).to(XMLContentTypeDefinitionParser.class);
     bind(ContentTypeDefinitionParsers.class).to(
         com.smartitengineering.cms.spi.impl.ContentTypeDefinitionParsers.class);
-    bind(LockHandler.class).to(DefaultLockHandler.class).in(Scopes.SINGLETON);
+    if (distributedLockingEnabled) {
+      bind(LockHandler.class).to(ZooKeeperLockHandler.class).in(Scopes.SINGLETON);
+      bind(LocalLockRegistrar.class).to(LocalLockRegistrarImpl.class).in(Scopes.SINGLETON);
+      if (localLockTimeout > 0) {
+        bind(int.class).annotatedWith(Names.named("localLockTimeout")).toInstance(localLockTimeout);
+      }
+      bind(int.class).annotatedWith(Names.named("zkTimeout")).toInstance(zkTimeout);
+      bind(String.class).annotatedWith(Names.named("zkConnectString")).toInstance(zkConnectString);
+      bind(String.class).annotatedWith(Names.named("zkRootNode")).toInstance(zkRootNode);
+      bind(String.class).annotatedWith(Names.named("zkNodeId")).toInstance(zkNodeId);
+    }
+    else {
+      bind(LockHandler.class).to(DefaultLockHandler.class).in(Scopes.SINGLETON);
+    }
     bind(PersistableDomainFactory.class).to(PersistableDomainFactoryImpl.class).in(Scopes.SINGLETON);
     binder().expose(ContentTypeDefinitionParsers.class);
     binder().expose(LockHandler.class);
