@@ -47,7 +47,8 @@ public class ZooKeeperLockHandler implements LockHandler, Watcher {
   public ZooKeeperLockHandler(@Named("zkConnectString") final String connectString,
                               @Named("zkRootNode") final String rootNode,
                               @Named("zkNodeId") final String nodeId,
-                              @Named("zkTimeout") final int timeout) {
+                              @Named("zkTimeout") final int timeout,
+                              final LocalLockRegistrar registrar) {
     final ZooKeeper zooKeeper;
     try {
       zooKeeper = new ZooKeeper(connectString, timeout, this);
@@ -63,7 +64,7 @@ public class ZooKeeperLockHandler implements LockHandler, Watcher {
     else {
       srootNode = new StringBuilder("/").append(rootNode).toString();
     }
-    config = new ZKConfig(zooKeeper, srootNode, nodeId);
+    config = new ZKConfig(zooKeeper, srootNode, nodeId, registrar);
     logger.info("Connected to ZooKeeper server");
     try {
       initializeRootNode();

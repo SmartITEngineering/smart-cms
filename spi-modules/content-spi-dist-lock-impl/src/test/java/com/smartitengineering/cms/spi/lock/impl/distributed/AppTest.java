@@ -154,7 +154,8 @@ public class AppTest {
     });
     Stat stat = zooKeeper.exists(ROOT_NODE, false);
     Assert.assertNull(stat);
-    ZooKeeperLockHandler handler = new ZooKeeperLockHandler(connectString, ROOT_NODE, "node1", CONNECTION_TIMEOUT);
+    ZooKeeperLockHandler handler = new ZooKeeperLockHandler(connectString, ROOT_NODE, "node1", CONNECTION_TIMEOUT,
+                                                            new LocalLockRegistrarImpl());
     stat = zooKeeper.exists(ROOT_NODE, false);
     Assert.assertNotNull(stat);
   }

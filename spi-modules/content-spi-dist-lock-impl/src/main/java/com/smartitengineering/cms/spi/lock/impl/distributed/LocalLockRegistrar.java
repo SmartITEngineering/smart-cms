@@ -18,39 +18,15 @@
  */
 package com.smartitengineering.cms.spi.lock.impl.distributed;
 
-import org.apache.zookeeper.ZooKeeper;
+import com.smartitengineering.cms.spi.lock.Key;
 
 /**
  *
  * @author imyousuf
  */
-public class ZKConfig {
+public interface LocalLockRegistrar {
 
-  private final ZooKeeper zooKeeper;
-  private final String rootNode;
-  private final String nodeId;
-  private final LocalLockRegistrar registrar;
+  String lock(Key key);
 
-  public ZKConfig(ZooKeeper zooKeeper, String rootNode, String nodeId, LocalLockRegistrar registrar) {
-    this.zooKeeper = zooKeeper;
-    this.rootNode = rootNode;
-    this.nodeId = nodeId;
-    this.registrar = registrar;
-  }
-
-  public LocalLockRegistrar getRegistrar() {
-    return registrar;
-  }
-
-  public String getNodeId() {
-    return nodeId;
-  }
-
-  public String getRootNode() {
-    return rootNode;
-  }
-
-  public ZooKeeper getZooKeeper() {
-    return zooKeeper;
-  }
+  boolean unlock(Key key, String lockId);
 }
