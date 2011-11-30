@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 import junit.framework.Assert;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
@@ -240,5 +241,123 @@ public class AppTest {
     Assert.assertTrue(lock3.tryLock());
     lock3.unlock();
     Assert.assertFalse(lock3.isLockOwned());
+  }
+
+  @Test
+  public void testSignleJVMWaitLocking() throws Exception {
+    final LocalLockRegistrarImpl localLockRegistrarImpl1 = new LocalLockRegistrarImpl();
+    localLockRegistrarImpl1.initTimeoutChecking();
+    ZooKeeperLockHandler handler1 = new ZooKeeperLockHandler(connectString, ROOT_NODE, "node1", CONNECTION_TIMEOUT,
+                                                             localLockRegistrarImpl1);
+    Lock lock1 = handler1.getLock(key);
+    final Lock lock2 = handler1.getLock(key);
+    Assert.assertNotNull(lock1);
+    Assert.assertNotNull(lock2);
+    Assert.assertTrue(lock1.tryLock());
+    Assert.assertTrue(lock1.isLockOwned());
+    new Thread(new Runnable() {
+
+      public void run() {
+        lock2.lock();
+      }
+    }).start();
+    Assert.assertFalse(lock2.isLockOwned());
+    Thread.sleep(1000);
+    lock1.unlock();
+    Assert.assertFalse(lock1.isLockOwned());
+    Thread.sleep(100);
+    Assert.assertTrue(lock2.isLockOwned());
+    lock2.unlock();
+    Assert.assertTrue(lock1.tryLock());
+    new Thread(new Runnable() {
+
+      public void run() {
+        try {
+          Assert.assertFalse(lock2.tryLock(300, TimeUnit.MILLISECONDS));
+        }
+        catch (Exception ex) {
+          Assert.fail("Should not arise!");
+        }
+      }
+    }).start();
+    Assert.assertFalse(lock2.isLockOwned());
+    Thread.sleep(350);
+    lock1.unlock();
+    Assert.assertTrue(lock1.tryLock());
+    new Thread(new Runnable() {
+
+      public void run() {
+        try {
+          Assert.assertTrue(lock2.tryLock(300, TimeUnit.MILLISECONDS));
+          lock2.unlock();
+        }
+        catch (Exception ex) {
+          Assert.fail("Should not arise!");
+        }
+      }
+    }).start();
+    Assert.assertFalse(lock2.isLockOwned());
+    Thread.sleep(150);
+    lock1.unlock();
+  }
+
+  @Test
+  public void testMultiJVMWaitLocking() throws Exception {
+    final LocalLockRegistrarImpl localLockRegistrarImpl1 = new LocalLockRegistrarImpl();
+    localLockRegistrarImpl1.initTimeoutChecking();
+    ZooKeeperLockHandler handler1 = new ZooKeeperLockHandler(connectString, ROOT_NODE, "node1", CONNECTION_TIMEOUT,
+                                                             localLockRegistrarImpl1);
+    Lock lock1 = handler1.getLock(key);
+    //Simulate multi-jvm
+    final LocalLockRegistrarImpl localLockRegistrarImpl2 = new LocalLockRegistrarImpl();
+    localLockRegistrarImpl2.initTimeoutChecking();
+    ZooKeeperLockHandler handler2 = new ZooKeeperLockHandler(connectString, ROOT_NODE, "node2", CONNECTION_TIMEOUT,
+                                                             localLockRegistrarImpl2);
+    final Lock lock3 = handler2.getLock(key);
+    Assert.assertTrue(lock1.tryLock());
+    new Thread(new Runnable() {
+
+      public void run() {
+        lock3.lock();
+      }
+    }).start();
+    Assert.assertFalse(lock3.isLockOwned());
+    Thread.sleep(1000);
+    lock1.unlock();
+    Assert.assertFalse(lock1.isLockOwned());
+    Thread.sleep(100);
+    Assert.assertTrue(lock3.isLockOwned());
+    lock3.unlock();
+    Assert.assertTrue(lock1.tryLock());
+    new Thread(new Runnable() {
+
+      public void run() {
+        try {
+          Assert.assertFalse(lock3.tryLock(300, TimeUnit.MILLISECONDS));
+        }
+        catch (Exception ex) {
+          Assert.fail("Should not arise!");
+        }
+      }
+    }).start();
+    Assert.assertFalse(lock3.isLockOwned());
+    Thread.sleep(350);
+    lock1.unlock();
+    Assert.assertTrue(lock1.tryLock());
+    new Thread(new Runnable() {
+
+      public void run() {
+        try {
+          Assert.assertTrue(lock3.tryLock(300, TimeUnit.MILLISECONDS));
+          lock3.unlock();
+        }
+        catch (Exception ex) {
+          Assert.fail("Should not arise!");
+        }
+      }
+    }).start();
+    Assert.assertFalse(lock3.isLockOwned());
+    Thread.sleep(150);
+    lock1.unlock();
   }
 }

@@ -61,11 +61,15 @@ public class ZKLock implements Lock, Watcher, LockTimeoutListener {
   }
 
   public void lock() {
+    boolean locked = false;
     try {
-      tryLock(1, TimeUnit.DAYS);
+      locked = tryLock(1, TimeUnit.DAYS);
     }
     catch (Exception ex) {
       logger.warn(ex.getMessage(), ex);
+    }
+    if (!locked) {
+      throw new IllegalStateException("Could not attain lock!");
     }
   }
 
@@ -88,44 +92,77 @@ public class ZKLock implements Lock, Watcher, LockTimeoutListener {
     }
     lock.lock();
     try {
-      final LocalLockRegistrar registrar = config.getRegistrar();
-      long waitInMilliSeconds = time > 0 ? TimeUnit.MILLISECONDS.convert(time, unit) : time;
-      String lockId = registrar.lock(key, this, waitInMilliSeconds);
-      if (logger.isDebugEnabled()) {
-        logger.debug("Attained local lock " + lockId);
-      }
-      try {
-        if (StringUtils.isNotBlank(lockId)) {
-          String node = getNode();
-          ZooKeeper keeper = config.getZooKeeper();
-          keeper.create(node, org.apache.commons.codec.binary.StringUtils.getBytesUtf8(config.getNodeId()),
-                        Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-          keeper.exists(node, this);
-          localLockId = lockId;
-          return true;
-        }
-      }
-      catch (KeeperException ke) {
-        registrar.unlock(key, lockId);
-        if (ke.code() == KeeperException.Code.NODEEXISTS) {
-          logger.debug("Lock alrady exists!");
-          return false;
-        }
-        else {
-          logger.error(ke.getMessage(), ke);
-          throw new IllegalStateException(ke);
-        }
-      }
-      catch (Exception ex) {
-        registrar.unlock(key, lockId);
-        logger.error(ex.getMessage(), ex);
-        throw new IllegalStateException(ex);
-      }
+      final long waitInMilliSeconds = time > 0 ? TimeUnit.MILLISECONDS.convert(time, unit) : time;
+      final long start = System.currentTimeMillis();
+      String lockId = config.getRegistrar().lock(key, this, waitInMilliSeconds);
+      final long availableMillisForRemoteLock = waitInMilliSeconds - (System.currentTimeMillis() - start);
+      return tryRemoteLock(lockId, availableMillisForRemoteLock);
     }
     finally {
       lock.unlock();
     }
-    return false;
+  }
+
+  protected boolean tryRemoteLock(String lockId, final long availableMillisForRemoteLock) throws IllegalStateException,
+                                                                                                 InterruptedException {
+    final LocalLockRegistrar registrar = config.getRegistrar();
+    final ZooKeeper keeper = config.getZooKeeper();
+    final String node = getNode();
+    if (logger.isDebugEnabled()) {
+      logger.debug("Attained local lock " + lockId);
+    }
+    try {
+      if (StringUtils.isNotBlank(lockId)) {
+        keeper.create(node, org.apache.commons.codec.binary.StringUtils.getBytesUtf8(config.getNodeId()),
+                      Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+        keeper.exists(node, this);
+        localLockId = lockId;
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    catch (KeeperException ke) {
+      if (ke.code() == KeeperException.Code.NODEEXISTS) {
+        logger.debug("Lock alrady exists!");
+        if (availableMillisForRemoteLock > 0) {
+          synchronized (ZKLock.this) {
+            try {
+              keeper.exists(node, new Watcher() {
+
+                public void process(WatchedEvent event) {
+                  if (event.getType().equals(Event.EventType.NodeDeleted)) {
+                    synchronized (ZKLock.this) {
+                      ZKLock.this.notifyAll();
+                    }
+                  }
+                }
+              });
+            }
+            catch (Exception ex) {
+            }
+            final long remoteStart = System.currentTimeMillis();
+            ZKLock.this.wait(availableMillisForRemoteLock);
+            return tryRemoteLock(lockId, availableMillisForRemoteLock - (System.currentTimeMillis() - remoteStart));
+          }
+
+        }
+        else {
+          registrar.unlock(key, lockId);
+          return false;
+        }
+      }
+      else {
+        logger.error(ke.getMessage(), ke);
+        throw new IllegalStateException(ke);
+      }
+    }
+    catch (Exception ex) {
+      registrar.unlock(key, lockId);
+      logger.error(ex.getMessage(), ex);
+      throw new IllegalStateException(ex);
+    }
   }
 
   public void unlock() {
