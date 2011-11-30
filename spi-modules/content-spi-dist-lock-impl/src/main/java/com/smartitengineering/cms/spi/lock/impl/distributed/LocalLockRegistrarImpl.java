@@ -28,11 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Queue;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.lang.StringUtils;
@@ -51,9 +49,9 @@ public class LocalLockRegistrarImpl implements LocalLockRegistrar {
   private final Map<Key, LockDetails> lockMap = new HashMap<Key, LockDetails>();
   private final Timer timer = new Timer();
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
-  @Inject
+  @Inject(optional = true)
   @Named("localLockTimeout")
-  private int localLockTimeout;
+  private int localLockTimeout = 2 * 60 * 1000;
 
   @Inject
   public void initTimeoutChecking() {
