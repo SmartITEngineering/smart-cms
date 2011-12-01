@@ -20,6 +20,7 @@ package com.smartitengineering.cms.spi.type;
 
 import com.smartitengineering.cms.api.common.MediaType;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
+import com.smartitengineering.cms.api.factory.write.Lock;
 import java.util.Date;
 import java.util.Map;
 
@@ -40,4 +41,6 @@ public interface PersistableContentType extends WritableContentType {
   public void setRepresentations(Map<MediaType, String> reps);
 
   public void setEntityTagValue(String entityTagValue);
+
+  public void setLock(Lock lock);
 }

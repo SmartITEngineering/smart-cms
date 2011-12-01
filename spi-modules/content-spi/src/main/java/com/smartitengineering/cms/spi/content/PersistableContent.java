@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.spi.content;
 
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
+import com.smartitengineering.cms.api.factory.write.Lock;
 import java.util.Date;
 
 /**
@@ -32,4 +33,6 @@ public interface PersistableContent extends WriteableContent {
   public void setLastModifiedDate(Date lastModifiedDate);
 
   public void setEntityTagValue(String eTagValue);
+
+  public void setLock(Lock lock);
 }

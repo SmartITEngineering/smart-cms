@@ -241,6 +241,41 @@ public class CodeGenerationTest {
     sleep();
   }
 
+  @Test
+  public void testLocking() {
+    Injector injector = Guice.createInjector(new MasterModule(), new ServiceModule());
+    Assert.assertNotNull(injector);
+    PersonService service = injector.getInstance(PersonService.class);
+    Assert.assertNotNull(service);
+    Person person = new Person();
+    person.setNationalId(123123123);
+    Name name = new ExtName();
+    name.setFirstName("Imran");
+    name.setLastName("Yousuf");
+    name.setMiddleInitial("M");
+    person.setName(name);
+    service.save(person);
+    sleep();
+    Assert.assertNotNull(person.getId());
+    Person rPerson = service.getById(person.getId());
+    Assert.assertNotNull(rPerson);
+    int newNatId = 222;
+    Assert.assertFalse(rPerson.isLockOwned());
+    rPerson.lock();
+    Assert.assertTrue(rPerson.isLockOwned());
+    try {
+      rPerson.setNationalId(newNatId);
+      service.update(rPerson);
+      Assert.assertTrue(rPerson.isLockOwned());
+    }
+    finally {
+      rPerson.unlock();
+    }
+    Assert.assertFalse(rPerson.isLockOwned());
+    rPerson = service.getById(person.getId());
+    Assert.assertEquals(newNatId, rPerson.getNationalId().intValue());
+  }
+
   public static class ConfigurationModule extends AbstractModule {
 
     @Override

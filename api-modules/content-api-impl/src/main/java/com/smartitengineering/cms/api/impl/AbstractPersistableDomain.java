@@ -201,7 +201,7 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
      * do the actual job while it focuses on attaining lock and unlocking it
      * once task is done; lock will be attempted to be attained or unlocked
      * if and only if it is already not attained. For this it will use
-     * {@link AbstractLockableDomain#isLockAttained()}
+     * {@link AbstractLockableDomain#isLockOwned()}
      * @return Whatever is required by invoker.
      * @throws IOException If waiting for lock is disabled and lock could not
      *											be attained or if there is any error in the
@@ -209,10 +209,10 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
      */
     public V perform()
         throws IOException {
-      boolean attainLock = isLockOwned();
+      boolean attainLock = !isLockOwned();
       if (attainLock) {
         if (!waitToAttain && !tryLock()) {
-          throw new IOException("Lock could be attained!");
+          throw new IOException("Lock could not be attained!");
         }
         else {
           lock();

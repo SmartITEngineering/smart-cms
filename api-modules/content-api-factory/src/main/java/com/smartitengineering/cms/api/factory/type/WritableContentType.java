@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.factory.type;
 
+import com.smartitengineering.cms.api.factory.write.Lock;
 import com.smartitengineering.cms.api.factory.write.PersistentWriter;
 import com.smartitengineering.cms.api.type.MutableContentType;
 
@@ -26,4 +27,6 @@ import com.smartitengineering.cms.api.type.MutableContentType;
  * @author imyousuf
  */
 public interface WritableContentType extends PersistentWriter, MutableContentType {
+
+  public Lock getLock();
 }

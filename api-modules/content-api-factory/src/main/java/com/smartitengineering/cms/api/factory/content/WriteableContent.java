@@ -20,6 +20,7 @@ package com.smartitengineering.cms.api.factory.content;
 
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.MutableContent;
+import com.smartitengineering.cms.api.factory.write.Lock;
 import com.smartitengineering.cms.api.factory.write.PersistentWriter;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 
@@ -28,6 +29,8 @@ import com.smartitengineering.cms.api.workspace.WorkspaceId;
  * @author imyousuf
  */
 public interface WriteableContent extends MutableContent, PersistentWriter {
+
+  public Lock getLock();
 
   public void createContentId(WorkspaceId workspace);
 

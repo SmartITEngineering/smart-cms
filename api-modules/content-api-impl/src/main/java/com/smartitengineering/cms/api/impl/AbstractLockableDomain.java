@@ -45,6 +45,14 @@ public abstract class AbstractLockableDomain
     lock = LockManager.register(this);
   }
 
+  public Lock getLock() {
+    return lock;
+  }
+
+  public void setLock(Lock lock) {
+    this.lock = lock;
+  }
+
   @Override
   protected void finalize()
       throws Throwable {

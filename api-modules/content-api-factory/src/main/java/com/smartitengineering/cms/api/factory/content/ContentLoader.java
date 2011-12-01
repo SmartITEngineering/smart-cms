@@ -44,6 +44,7 @@ import com.smartitengineering.cms.api.content.CompositeFieldValue;
 import com.smartitengineering.cms.api.content.MutableCompositeFieldValue;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.content.Variation;
+import com.smartitengineering.cms.api.factory.write.Lock;
 import com.smartitengineering.cms.api.type.CompositeDataType.EmbeddedContentDataType;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentType;
@@ -117,6 +118,10 @@ public interface ContentLoader {
   WriteableContent createContent(ContentType contentType);
 
   WriteableContent getWritableContent(Content content);
+
+  WriteableContent getWritableContent(Content content, Lock encapsulatingLock);
+
+  WriteableContent getWritableContent(Content content, Lock encapsulatingLock, boolean supressChecking);
 
   Content loadContent(ContentId contentId);
 

@@ -122,6 +122,9 @@ public abstract class AbstractRepoAdapterHelper<T extends AbstractRepositoryDoma
     toBean.setLastModificationDate(fromBean.getLastModifiedDate());
     toBean.setEntityValue(fromBean.getEntityTagValue());
     mergeContentIntoBean(fromBean, toBean);
+    //Set lock
+    WriteableContent writableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(fromBean);
+    toBean.setLock(writableContent.getLock());
   }
 
   @Override
@@ -135,7 +138,7 @@ public abstract class AbstractRepoAdapterHelper<T extends AbstractRepositoryDoma
     else {
       Content pContent = contentLoader.loadContent(getContentId(toBean.getId(), getWorkspaceId(toBean).toString()));
       if (pContent != null) {
-        content = contentLoader.getWritableContent(pContent);
+        content = contentLoader.getWritableContent(pContent, toBean.getLock());
       }
       else {
         content = contentLoader.createContent(getContentTypeId().getContentType());

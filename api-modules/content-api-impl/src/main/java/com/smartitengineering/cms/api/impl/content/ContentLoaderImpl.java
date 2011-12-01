@@ -46,6 +46,7 @@ import com.smartitengineering.cms.api.content.OtherFieldValue;
 import com.smartitengineering.cms.api.common.SearchResult;
 import com.smartitengineering.cms.api.content.StringFieldValue;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
+import com.smartitengineering.cms.api.factory.write.Lock;
 import com.smartitengineering.cms.api.impl.type.CompositionDataTypeImpl.EmbeddedContentDataTypeImpl;
 import com.smartitengineering.cms.api.type.CollectionDataType;
 import com.smartitengineering.cms.api.type.CompositeDataType;
@@ -336,12 +337,35 @@ public class ContentLoaderImpl implements ContentLoader {
 
   @Override
   public WriteableContent getWritableContent(Content content) {
-    return getWritableContent(content, false);
+    if (content instanceof WriteableContent) {
+      return (WriteableContent) content;
+    }
+    else {
+      return getWritableContent(content, false);
+    }
   }
 
   @Override
   public WriteableContent getWritableContent(Content content, boolean supressChecking) {
-    PersistableContent mutableContent = SmartContentSPI.getInstance().getPersistableDomainFactory().
+    return getWritableContent(content, null, supressChecking);
+  }
+
+  public WriteableContent getWritableContent(Content content, Lock encapsulatingLock) {
+    if (content instanceof PersistableContent) {
+      final PersistableContent mutableContent = (PersistableContent) content;
+      if (encapsulatingLock != null) {
+        mutableContent.setLock(encapsulatingLock);
+      }
+      return mutableContent;
+    }
+    else {
+      return getWritableContent(content, encapsulatingLock, false);
+    }
+  }
+
+  public WriteableContent getWritableContent(Content content, Lock encapsulatingLock, boolean supressChecking) {
+    final PersistableContent mutableContent;
+    mutableContent = SmartContentSPI.getInstance().getPersistableDomainFactory().
         createPersistableContent(supressChecking);
     mutableContent.setContentDefinition(content.getContentDefinition());
     mutableContent.setContentId(content.getContentId());
@@ -352,7 +376,11 @@ public class ContentLoaderImpl implements ContentLoader {
     for (Field field : content.getFields().values()) {
       mutableContent.setField(field);
     }
+    if (encapsulatingLock != null) {
+      mutableContent.setLock(encapsulatingLock);
+    }
     return mutableContent;
+
   }
 
   @Override
