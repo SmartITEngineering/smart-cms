@@ -52,8 +52,8 @@ public class PersistentContentFields extends AbstractGenericPersistentDTO<Persis
   }
 
   public boolean isValid() {
-    if (logger.isInfoEnabled()) {
-      logger.info("Fields " + this.fields);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Fields " + this.fields);
     }
     return !this.fields.isEmpty();
   }

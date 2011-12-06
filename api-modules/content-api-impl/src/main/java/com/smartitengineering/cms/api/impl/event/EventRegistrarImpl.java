@@ -48,8 +48,8 @@ public class EventRegistrarImpl implements EventRegistrar {
 
   @Inject(optional = true)
   public void setInitialListeners(Collection<EventListener> listeners) {
-    if (logger.isInfoEnabled()) {
-      logger.info("Injected Listeners " + listeners);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Injected Listeners " + listeners);
     }
     if (listeners == null || listeners.isEmpty()) {
       return;

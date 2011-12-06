@@ -322,18 +322,22 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
 
   @Override
   public FieldDef getPrimaryFieldDef() {
-    if (logger.isInfoEnabled()) {
-      logger.info("Trying to get primary field for type " + getContentTypeID().toString());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Trying to get primary field for type " + getContentTypeID().toString());
     }
     if (StringUtils.isBlank(primaryFieldName)) {
-      logger.info("Trying to get primary field from parent!");
+      if (logger.isDebugEnabled()) {
+        logger.debug("Trying to get primary field from parent!");
+        logger.debug("Parent type id " + parentTypeId);
+      }
       if (parentTypeId != null) {
-        logger.info("Parent type id " + parentTypeId.toString());
         ContentType parantType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(parentTypeId);
-        logger.info("Parent type " + parantType);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Parent type " + parantType);
+        }
         if (parantType != null) {
-          if (logger.isInfoEnabled()) {
-            logger.info("Parent primary field name: " + parantType.getPrimaryFieldName());
+          if (logger.isDebugEnabled()) {
+            logger.debug("Parent primary field name: " + parantType.getPrimaryFieldName());
           }
           return parantType.getPrimaryFieldDef();
         }
@@ -346,9 +350,9 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
   }
 
   private boolean isValid() {
-    if (logger.isInfoEnabled()) {
-      logger.info("Primary Field Def present: " + primaryFieldName + " " + (getPrimaryFieldDef() != null));
-      logger.info("Primary Field Def: " + getPrimaryFieldDef());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Primary Field Def present: " + primaryFieldName + " " + (getPrimaryFieldDef() != null));
+      logger.debug("Primary Field Def: " + getPrimaryFieldDef());
     }
     final DefinitionType myDefType = getDefinitionType();
     if (getParent() != null && getParent().getContentType() != null) {

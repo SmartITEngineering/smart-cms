@@ -41,8 +41,8 @@ public class AbstractVariationProvider {
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
   protected MutableVariation getVariation(Content content, Field field, String variationName) {
-    if (logger.isInfoEnabled()) {
-      logger.info("Parameters: " + content + " " + field + " " + variationName);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Parameters: " + content + " " + field + " " + variationName);
     }
     if (field == null) {
       return null;

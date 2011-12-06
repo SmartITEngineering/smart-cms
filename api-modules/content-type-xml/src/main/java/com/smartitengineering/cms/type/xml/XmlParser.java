@@ -142,23 +142,23 @@ public class XmlParser implements XmlConstants {
         for (Entry<ContentProcessingPhase, List<MutableContentCoProcessorDef>> entry : ccpDefs.entrySet()) {
           for (MutableContentCoProcessorDef def : entry.getValue()) {
             def.setPhase(entry.getKey());
-            if (logger.isInfoEnabled()) {
-              logger.info("^^^^^^^^^^^^^^ Adding content co processor to " + contentTypeId);
+            if (logger.isDebugEnabled()) {
+              logger.debug("^^^^^^^^^^^^^^ Adding content co processor to " + contentTypeId);
             }
             mutableContent.addContentCoProcessorDef(def);
           }
         }
         contentTypeId = parseContentTypeId(contentTypeElement, PARENT, workspaceId);
         String primaryFieldName = parseOptionalStringElement(contentTypeElement, PRIMARY_FIELD);
-        if (logger.isInfoEnabled()) {
-          logger.info("Primary field parsed: " + primaryFieldName);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Primary field parsed: " + primaryFieldName);
         }
         if (StringUtils.isNotBlank(primaryFieldName)) {
           mutableContent.setPrimaryFieldName(primaryFieldName);
         }
         String defType = parseOptionalStringElement(contentTypeElement, DEF_TYPE);
-        if (logger.isInfoEnabled()) {
-          logger.info("Def type parsed: " + defType);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Def type parsed: " + defType);
         }
         if (StringUtils.isNotBlank(defType)) {
           mutableContent.setDefinitionType(ContentType.DefinitionType.valueOf(defType));
@@ -301,8 +301,8 @@ public class XmlParser implements XmlConstants {
     if (elems.size() > 0) {
       final Element contentTypeElement = elems.get(0);
       final WorkspaceId parsedWorkspaceId = parseWorkspaeId(contentTypeElement, WORKSPACE);
-      if (logger.isInfoEnabled()) {
-        logger.info(parsedWorkspaceId == null ? "Parsed Workspace is NULL" : "Parsed Workspace is NOT NULL");
+      if (logger.isDebugEnabled()) {
+        logger.debug(parsedWorkspaceId == null ? "Parsed Workspace is NULL" : "Parsed Workspace is NOT NULL");
       }
       ContentTypeId contentTypeId = getContentTypeId(parsedWorkspaceId == null ? workspaceId : parsedWorkspaceId,
                                                      parseMandatoryStringElement(contentTypeElement, TYPE_NS),
@@ -333,8 +333,8 @@ public class XmlParser implements XmlConstants {
   protected ContentDataType parseContent(Element rootElement) {
     MutableContentDataType type = new ContentDataTypeImpl();
     for (int i = 0; i < rootElement.getChildElements().size(); i++) {
-      if (logger.isInfoEnabled()) {
-        logger.info("Config name for content data type: " + rootElement.getChildElements().get(i).getLocalName());
+      if (logger.isDebugEnabled()) {
+        logger.debug("Config name for content data type: " + rootElement.getChildElements().get(i).getLocalName());
       }
       if (StringUtils.equalsIgnoreCase(rootElement.getChildElements().get(i).getLocalName(), DEFINITION)) {
         type.setTypeDef(parseContentTypeId(rootElement, DEFINITION, workspaceId));
@@ -344,8 +344,8 @@ public class XmlParser implements XmlConstants {
       }
       if (StringUtils.equalsIgnoreCase(rootElement.getChildElements().get(i).getLocalName(), AVAILABLE_FOR_SEARCH)) {
         final String availStrVal = parseOptionalStringElement(rootElement, AVAILABLE_FOR_SEARCH);
-        if (logger.isInfoEnabled()) {
-          logger.info("Available For Search " + availStrVal);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Available For Search " + availStrVal);
         }
         type.setAvailableForSearch(Boolean.parseBoolean(availStrVal));
       }
@@ -426,8 +426,8 @@ public class XmlParser implements XmlConstants {
   }
 
   protected FieldDef parseFieldDef(Element rootElement, FieldDef parent) {
-    if (logger.isInfoEnabled()) {
-      logger.info("Field definition " + rootElement.toXML());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Field definition " + rootElement.toXML());
     }
     MutableFieldDef fieldDef = new FieldDefImpl();
     fieldDef.setParentContainer(parent);
@@ -666,8 +666,8 @@ public class XmlParser implements XmlConstants {
         result.put(ContentProcessingPhase.WRITE, writeProcs);
       }
     }
-    if (logger.isInfoEnabled()) {
-      logger.info("Returning co processors " + result);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Returning co processors " + result);
     }
     return result;
   }
@@ -681,16 +681,16 @@ public class XmlParser implements XmlConstants {
     if (elems.size() > 0) {
       MutableContentCoProcessorDef coProc;
       Elements elements = elems.get(0).getChildElements(CONTENT_CO_PROCESSOR, NAMESPACE);
-      if (logger.isInfoEnabled()) {
-        logger.info(elements.size() + " Co processors");
+      if (logger.isDebugEnabled()) {
+        logger.debug(elements.size() + " Co processors");
       }
       for (int i = 0; i < elements.size(); i++) {
         coProc = parseContentCoProcessor(elements.get(i));
         coProc.setPriority(i);
         procs.add(coProc);
       }
-      if (logger.isInfoEnabled()) {
-        logger.info("Returning with " + procs.size() + " co processors");
+      if (logger.isDebugEnabled()) {
+        logger.debug("Returning with " + procs.size() + " co processors");
       }
       return procs;
     }

@@ -214,7 +214,7 @@ public class ContentTypeSearcherResource extends AbstractResource {
       filter.setFriendliesIncluded(includeFriendlies);
     }
     else {
-      logger.info(String.valueOf(":::VAULE OF Inclue Friendlies is true"));
+      logger.debug(String.valueOf(":::VAULE OF Inclue Friendlies is true"));
       filter.setFriendliesIncluded(true);
     }
     if (creationDate != null) {
@@ -224,16 +224,16 @@ public class ContentTypeSearcherResource extends AbstractResource {
       filter.setLastModifiedDateFilter(ContentSearcherResource.formatDate(lastModifiedDate));
     }
 
-    if (logger.isInfoEnabled()) {
-      logger.info(":::Workspace ID : " + workspaceId + " " + filter.getWorkspaceId());
-      logger.info(":::Parent ID : " + parentId + " " + filter.getChildOf());
-      logger.info(":::START FROM : " + String.valueOf(start));
-      logger.info(":::NUMBER OF ITEM : " + String.valueOf(count));
-      logger.info(String.valueOf(":::VAULE OF DISJUNCTION : " + disjunction));
-      logger.info(":::CREATION DATE : " + creationDate + " " + filter.getCreationDateFilter());
-      logger.info(":::LAST MODIFIED DATE : " + lastModifiedDate + " " + filter.getLastModifiedDateFilter());
-      logger.info(String.valueOf(":::VAULE OF Inclue Friendlies : " + includeFriendlies));
-      logger.info("Instance of " + contentTypeId + " " + filter.getInstanceOfContentTypeFilters());
+    if (logger.isDebugEnabled()) {
+      logger.debug(":::Workspace ID : " + workspaceId + " " + filter.getWorkspaceId());
+      logger.debug(":::Parent ID : " + parentId + " " + filter.getChildOf());
+      logger.debug(":::START FROM : " + String.valueOf(start));
+      logger.debug(":::NUMBER OF ITEM : " + String.valueOf(count));
+      logger.debug(":::VAULE OF DISJUNCTION : " + disjunction);
+      logger.debug(":::CREATION DATE : " + creationDate + " " + filter.getCreationDateFilter());
+      logger.debug(":::LAST MODIFIED DATE : " + lastModifiedDate + " " + filter.getLastModifiedDateFilter());
+      logger.debug(":::VAULE OF Inclue Friendlies : " + includeFriendlies);
+      logger.debug("Instance of " + contentTypeId + " " + filter.getInstanceOfContentTypeFilters());
     }
     return filter;
   }
@@ -316,8 +316,8 @@ public class ContentTypeSearcherResource extends AbstractResource {
     descBuilder.description("Search the content repository for contents!");
     StringBuilder templateBuilder = getSearchUri(true);
     final String urlTemplate = templateBuilder.toString();
-    if (logger.isInfoEnabled()) {
-      logger.info("Template URL: " + urlTemplate);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Template URL: " + urlTemplate);
     }
     UrlBuilder xmlBuilder = UrlBuilder.getBuilder().rel(RelEnum.RESULTS).indexOffset(start).template(urlTemplate).type(
         MediaType.APPLICATION_ATOM_XML);

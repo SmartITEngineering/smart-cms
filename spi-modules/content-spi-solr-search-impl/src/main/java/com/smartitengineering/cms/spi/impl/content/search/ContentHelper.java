@@ -93,8 +93,8 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
 
   protected void indexFields(final Content mutableContent, MultivalueMap<String, Object> toBean, final String prefix,
                              Set<ContentId> indexedContents, final char separator) {
-    if (logger.isInfoEnabled()) {
-      logger.info("Indexing contents with prefix " + prefix + " and separator " + separator);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Indexing contents with prefix " + prefix + " and separator " + separator);
     }
     if (indexedContents.contains(mutableContent.getContentId())) {
       return;
@@ -106,8 +106,8 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
 
   protected void indexFields(Map<String, Field> fields, final String prefix, final char separator,
                              MultivalueMap<String, Object> toBean, Set<ContentId> indexedContents) {
-    if (logger.isInfoEnabled()) {
-      logger.info("Indexing fields" + fields + " with prefix " + prefix + " and separator " + separator);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Indexing fields" + fields + " with prefix " + prefix + " and separator " + separator);
     }
     for (Entry<String, Field> entry : fields.entrySet()) {
       FieldDef def = entry.getValue().getFieldDef();
@@ -138,8 +138,8 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
 
   protected void addFieldValue(MultivalueMap<String, Object> toBean, String indexFieldName, Field field,
                                final String prefix, Set<ContentId> indexedContents, final char separator) {
-    if (logger.isInfoEnabled()) {
-      logger.info("Indexing field value " + field.getName() + " with prefix " + prefix + " and separator " + separator);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Indexing field value " + field.getName() + " with prefix " + prefix + " and separator " + separator);
     }
     if (field == null || field.getValue() == null || field.getValue().getValue() == null) {
       return;
@@ -154,8 +154,8 @@ public class ContentHelper extends AbstractAdapterHelper<Content, MultivalueMap<
   protected void addSimpleValue(final FieldValue def, DataType fieldDataType, MultivalueMap<String, Object> toBean,
                                 FieldDef fieldDef, String indexFieldName, final Object value, final String prefix,
                                 final char separator, Set<ContentId> indexedContents) {
-    if (logger.isInfoEnabled()) {
-      logger.info("Indexing simple value " + fieldDataType.getType() + " with prefix " + prefix + " and separator " +
+    if (logger.isDebugEnabled()) {
+      logger.debug("Indexing simple value " + fieldDataType.getType() + " with prefix " + prefix + " and separator " +
           separator);
     }
     final FieldValueType valueDef = def.getDataType();

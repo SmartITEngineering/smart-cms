@@ -453,10 +453,10 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     params.add(SELF_PARAM);
     params.add(getIdParam(workspaceId));
     final PersistentWorkspace single = commonReadDao.getSingle(params);
-    if (logger.isInfoEnabled()) {
-      logger.info("Workspace ID " + single.getId().toString());
-      logger.info("Validators " + single.isValidatorsPopulated());
-      logger.info("Validators " + single.getValidatorTemplates());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Workspace ID " + single.getId().toString());
+      logger.debug("Validators " + single.isValidatorsPopulated());
+      logger.debug("Validators " + single.getValidatorTemplates());
     }
     final List<PersistableValidatorTemplate> list = single.getValidatorTemplates();
     if (list.isEmpty()) {

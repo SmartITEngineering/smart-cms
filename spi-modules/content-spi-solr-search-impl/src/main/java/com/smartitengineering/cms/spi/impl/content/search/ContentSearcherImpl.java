@@ -177,8 +177,8 @@ public class ContentSearcherImpl implements ContentSearcher {
     if (query.length() > 0) {
       finalQuery.append(conjunctionSeperator).append('(').append(query.toString()).append(')');
     }
-    if (logger.isInfoEnabled()) {
-      logger.info("Query q = " + finalQuery.toString());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Query q = " + finalQuery.toString());
     }
     final QueryParameter sortParam;
     if (orderParam != null) {
@@ -316,7 +316,7 @@ public class ContentSearcherImpl implements ContentSearcher {
   @Override
   public void reIndex(final WorkspaceId workspaceId) {
     if (logger.isInfoEnabled()) {
-      logger.info("Re-Indexing " + workspaceId);
+      logger.info(new StringBuilder("Re-Indexing ").append(workspaceId).toString());
     }
     executorService.submit(new Runnable() {
 
@@ -335,10 +335,10 @@ public class ContentSearcherImpl implements ContentSearcher {
           boolean hasMore = true;
           ContentId lastId = null;
           List<QueryParameter> params = new ArrayList<QueryParameter>();
-          logger.info("Beginning iteration over contents");
+          logger.debug("Beginning iteration over contents");
           while (hasMore) {
-            if (logger.isInfoEnabled()) {
-              logger.info("Trying with Last ID " + lastId);
+            if (logger.isDebugEnabled()) {
+              logger.debug("Trying with Last ID " + lastId);
             }
             params.clear();
             if (param != null) {
@@ -355,9 +355,9 @@ public class ContentSearcherImpl implements ContentSearcher {
               }
             }
             List<Content> list = contentLoader.getQueryResult(params);
-            if (logger.isInfoEnabled()) {
-              logger.info("Has More " + hasMore);
-              logger.info("Content numbers in current iteration " + (list != null ? list.size() : -1));
+            if (logger.isDebugEnabled()) {
+              logger.debug("Has More " + hasMore);
+              logger.debug("Content numbers in current iteration " + (list != null ? list.size() : -1));
             }
             if (list == null || list.isEmpty()) {
               hasMore = false;
@@ -366,8 +366,8 @@ public class ContentSearcherImpl implements ContentSearcher {
               final Content[] contents = new Content[list.size()];
               int index = 0;
               for (Content content : list) {
-                if (logger.isInfoEnabled()) {
-                  logger.info("Attempting to index " + content.getContentId());
+                if (logger.isDebugEnabled()) {
+                  logger.debug("Attempting to index " + content.getContentId());
                 }
                 reindexListener.notify(SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(
                     EventType.UPDATE, Type.CONTENT, content));
@@ -375,11 +375,11 @@ public class ContentSearcherImpl implements ContentSearcher {
               }
               lastId = contents[contents.length - 1].getContentId();
             }
-            if (logger.isInfoEnabled()) {
-              logger.info("Has More " + hasMore);
-              logger.info("Content numbers in current iteration " + (list != null ? list.size() : -1));
-              logger.info("Last ID " + lastId);
-              logger.info("Going for next iteration " + hasMore);
+            if (logger.isDebugEnabled()) {
+              logger.debug("Has More " + hasMore);
+              logger.debug("Content numbers in current iteration " + (list != null ? list.size() : -1));
+              logger.debug("Last ID " + lastId);
+              logger.debug("Going for next iteration " + hasMore);
             }
           }
         }

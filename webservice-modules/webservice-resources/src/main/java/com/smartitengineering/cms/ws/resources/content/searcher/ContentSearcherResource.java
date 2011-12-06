@@ -100,8 +100,8 @@ public class ContentSearcherResource extends AbstractResource {
     descBuilder.description("Search the content repository for contents!");
     StringBuilder templateBuilder = getSearchUri(true);
     final String urlTemplate = templateBuilder.toString();
-    if (logger.isInfoEnabled()) {
-      logger.info("Template URL: " + urlTemplate);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Template URL: " + urlTemplate);
     }
     UrlBuilder xmlBuilder = UrlBuilder.getBuilder().rel(RelEnum.RESULTS).indexOffset(start).template(urlTemplate).type(
         MediaType.APPLICATION_ATOM_XML);
@@ -343,29 +343,30 @@ public class ContentSearcherResource extends AbstractResource {
     if (fieldQuery != null && !fieldQuery.isEmpty()) {
       filter.addFieldFilter(parseFieldQuery(fieldQuery));
     }
-    logger.info(":::WORKSPACE ID : " + workspaceId);
+    if (logger.isDebugEnabled()) {
+      logger.debug(":::WORKSPACE ID : " + workspaceId);
+      logger.debug(":::START FROM : " + String.valueOf(start));
+      logger.debug(":::NUMBER OF ITEM : " + String.valueOf(count));
+      logger.debug(":::VAULE OF DISJUNCTION : " + disjunction);
+      logger.debug(":::VAULE OF Inclue Friendlies : " + includeFriendlies);
+      logger.debug(":::CREATION DATE : " + creationDate);
+      logger.debug(":::LAST MODIFIED DATE : " + lastModifiedDate);
+    }
     if (StringUtils.isNotBlank(workspaceId)) {
       filter.setWorkspaceId(parseWorkspaceId(workspaceId));
     }
-    logger.info(":::START FROM : " + String.valueOf(start));
     filter.setStartFrom(start);
-    logger.info(":::NUMBER OF ITEM : " + String.valueOf(count));
     filter.setMaxContents(count);
-    logger.info(String.valueOf(":::VAULE OF DISJUNCTION : " + disjunction));
     filter.setDisjunction(disjunction);
     if (includeFriendlies != null) {
-      logger.info(String.valueOf(":::VAULE OF Inclue Friendlies : " + includeFriendlies));
       filter.setFriendliesIncluded(includeFriendlies);
     }
     else {
-      logger.info(String.valueOf(":::VAULE OF Inclue Friendlies is true"));
       filter.setFriendliesIncluded(true);
     }
-    logger.info(":::CREATION DATE : " + creationDate);
     if (creationDate != null) {
       filter.setCreationDateFilter(formatDate(creationDate));
     }
-    logger.info(":::LAST MODIFIED DATE : " + lastModifiedDate);
     if (lastModifiedDate != null) {
       filter.setLastModifiedDateFilter(formatDate(lastModifiedDate));
     }
@@ -393,7 +394,9 @@ public class ContentSearcherResource extends AbstractResource {
       if (StringUtils.isBlank(strContentStatus)) {
         continue;
       }
-      logger.info(":::CONTENT STATUS : " + strContentStatus);
+      if (logger.isDebugEnabled()) {
+        logger.debug(":::CONTENT STATUS : " + strContentStatus);
+      }
       MutableContentStatus contentStatus = SmartContentAPI.getInstance().getContentTypeLoader().
           createMutableContentStatus();
       contentStatus.setName(strContentStatus);
@@ -422,7 +425,9 @@ public class ContentSearcherResource extends AbstractResource {
       if (StringUtils.isBlank(strSingleFieldQuery)) {
         continue;
       }
-      logger.info(":::FIELD QUERY : " + strSingleFieldQuery);
+      if (logger.isDebugEnabled()) {
+        logger.debug(":::FIELD QUERY : " + strSingleFieldQuery);
+      }
       String[] values = splitStr(strSingleFieldQuery, ",");
       if (values.length < 2) {
         continue;

@@ -188,7 +188,7 @@ public class WorkspaceServiceCacheImpl implements WorkspaceService {
       return workspace;
     }
     catch (RuntimeException exception) {
-      logger.info("Could not delete thus did not invalidate cache!", exception);
+      logger.warn("Could not delete thus did not invalidate cache!", exception);
       throw exception;
     }
   }

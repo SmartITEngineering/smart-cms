@@ -59,8 +59,8 @@ public class CompositeFieldValueImpl extends FieldValueImpl<Collection<Field>> i
         new WriterBasedGenerator(new IOContext(new BufferRecycler(), new Object(), true), Feature.collectDefaults(),
                                  CollectionFieldValueImpl.MAPPER, stringWriter).writeTree(objectNode);
         toString = stringWriter.toString();
-        if (logger.isInfoEnabled()) {
-          logger.info("Returning composite field value " + toString);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Returning composite field value " + toString);
         }
         return toString;
       }
@@ -88,8 +88,8 @@ public class CompositeFieldValueImpl extends FieldValueImpl<Collection<Field>> i
               break;
             default: {
               final String toString = value.toString();
-              if (logger.isInfoEnabled()) {
-                logger.info("Adding default type field value for " + field.getName() + ", value " + toString);
+              if (logger.isDebugEnabled()) {
+                logger.debug("Adding default type field value for " + field.getName() + ", value " + toString);
               }
               objectNode.put(field.getName(), toString);
             }

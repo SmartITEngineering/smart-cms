@@ -111,10 +111,10 @@ public class CompositionDataTypeImpl implements MutableCompositeDataType {
   private Collection<? extends FieldDef> getEmbeddedFieldDefs(EmbeddedContentDataType embeddedContentType,
                                                               Collection<FieldDef> values) {
     if (embeddedContentType == null || embeddedContentType.getFieldEmbeddedIn() == null) {
-      logger.info("Could not find valid embedded content data type!");
+      logger.debug("Could not find valid embedded content data type!");
       return values;
     }
-    logger.info("Cloning field defs with parent container");
+    logger.debug("Cloning field defs with parent container");
     final FieldDef fieldEmbeddedIn = embeddedContentType.getFieldEmbeddedIn();
     ArrayList<FieldDef> defs = new ArrayList<FieldDef>(values.size());
     for (FieldDef def : values) {

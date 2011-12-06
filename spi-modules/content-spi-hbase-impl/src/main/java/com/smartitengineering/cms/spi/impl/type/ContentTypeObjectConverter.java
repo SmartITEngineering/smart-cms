@@ -157,7 +157,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
   @Override
   protected void getPutForTable(PersistentContentType instance, ExecutorService service, Put put) {
     if (logger.isInfoEnabled()) {
-      logger.info("Put formation for content type id " + instance.getId());
+      logger.info(new StringBuilder("Put formation for content type id ").append(instance.getId()).toString());
     }
     logger.debug("Set creation date if necessary and set last modification date");
     final Date date = new Date();
@@ -173,8 +173,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         put.add(FAMILY_SIMPLE, CELL_DISPLAY_NAME, Bytes.toBytes(displayName));
       }
       final String primaryFieldName = instance.getMutableContentType().getPrimaryFieldName();
-      if (logger.isInfoEnabled()) {
-        logger.info("Primary field name being saved: " + primaryFieldName);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Primary field name being saved: " + primaryFieldName);
       }
       if (StringUtils.isNotBlank(primaryFieldName)) {
         put.add(FAMILY_SIMPLE, CELL_PRIMARY_FIELD_NAME, Bytes.toBytes(primaryFieldName));
@@ -472,8 +472,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
     if (params != null && !params.isEmpty()) {
       for (Entry<String, String> param : params.entrySet()) {
         final byte[] qualifier = Bytes.add(paramsPrefix, Bytes.toBytes(param.getKey()));
-        if (logger.isInfoEnabled()) {
-          logger.info("Putting params " + Bytes.toString(qualifier) + " - " + param.getValue());
+        if (logger.isDebugEnabled()) {
+          logger.debug("Putting params " + Bytes.toString(qualifier) + " - " + param.getValue());
         }
         put.add(family, qualifier, Bytes.toBytes(param.getValue()));
       }
@@ -500,7 +500,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       logger.info("::::::::::::::::::::: Converting rowId to ContentTypeId :::::::::::::::::::::");
       contentType.setContentTypeID(getInfoProvider().getIdFromRowId(startRow.getRow()));
       if (logger.isInfoEnabled()) {
-        logger.info("ContentTypeId " + contentType.getContentTypeID());
+        logger.info(new StringBuilder("ContentTypeId ").append(contentType.getContentTypeID()).toString());
       }
       Map<byte[], byte[]> simpleValues = startRow.getFamilyMap(FAMILY_SIMPLE);
       byte[] displayName = simpleValues.remove(CELL_DISPLAY_NAME);
@@ -511,16 +511,16 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       byte[] primaryFieldName = simpleValues.remove(CELL_PRIMARY_FIELD_NAME);
       if (primaryFieldName != null) {
         final String toString = Bytes.toString(primaryFieldName);
-        if (logger.isInfoEnabled()) {
-          logger.info("Set primary field name of the content type!" + toString);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Set primary field name of the content type!" + toString);
         }
         contentType.setPrimaryFieldName(toString);
       }
       byte[] defTyoe = simpleValues.remove(CELL_DEF_TYPE);
       if (defTyoe != null) {
         final String toString = Bytes.toString(defTyoe);
-        if (logger.isInfoEnabled()) {
-          logger.info("Set primary field name of the content type!" + toString);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Set primary field name of the content type!" + toString);
         }
         contentType.setDefinitionType(ContentType.DefinitionType.valueOf(toString));
       }
@@ -537,10 +537,10 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         String displayNamesPrefix = new StringBuilder(CELL_PARAMETERIZED_DISPLAY_NAME_PREFIX).append(':').toString();
         final byte[] toBytes = Bytes.toBytes(CELL_PARAMETERIZED_DISPLAY_NAME_PREFIX);
         for (Entry<byte[], byte[]> entry : simpleValues.entrySet()) {
-          if (logger.isInfoEnabled()) {
-            logger.info("Extra simple fields Key " + Bytes.toString(entry.getKey()) + " " + Bytes.startsWith(entry.
+          if (logger.isDebugEnabled()) {
+            logger.debug("Extra simple fields Key " + Bytes.toString(entry.getKey()) + " " + Bytes.startsWith(entry.
                 getKey(), toBytes));
-            logger.info("Extra simple fields Value " + Bytes.toString(entry.getValue()));
+            logger.debug("Extra simple fields Value " + Bytes.toString(entry.getValue()));
           }
           if (Bytes.startsWith(entry.getKey(), toBytes)) {
             String paramKey = Bytes.toString(entry.getKey()).substring(displayNamesPrefix.length());
@@ -559,7 +559,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       /*
        * Content status
        */
-      logger.info("Form statuses");
+      logger.debug("Form statuses");
       NavigableMap<byte[], byte[]> statusMap = startRow.getFamilyMap(FAMILY_STATUSES);
       int index = 0;
       for (byte[] statusName : statusMap.navigableKeySet()) {
@@ -578,7 +578,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       /*
        * Representations
        */
-      logger.info("Form representations!");
+      logger.debug("Form representations!");
       NavigableMap<byte[], byte[]> representationMap = startRow.getFamilyMap(FAMILY_REPRESENTATIONS);
       Map<String, MutableRepresentationDef> reps = new HashMap<String, MutableRepresentationDef>();
       for (byte[] keyBytes : representationMap.navigableKeySet()) {
@@ -607,7 +607,7 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       /*
        * Content Co-Processors
        */
-      logger.info("Form Content Co-Processors!");
+      logger.debug("Form Content Co-Processors!");
       NavigableMap<byte[], byte[]> ccpMap = startRow.getFamilyMap(FAMILY_CCP);
       Map<String, MutableContentCoProcessorDef> ccps = new HashMap<String, MutableContentCoProcessorDef>();
       for (byte[] keyBytes : ccpMap.navigableKeySet()) {
@@ -692,8 +692,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
     final String collectionCompositeFieldPrefix = new StringBuilder(fieldName).append(':').append(Bytes.toString(
         CELL_FIELD_VAL_TYPE)).append(COLLECTION_FIELD_ITEM_DATA_TYPE_PREFIX).append(':').append(FieldValueType.COMPOSITE).
         append(':').append(COMPOSITE_FIELDS_SEPARATOR_STR).append(':').toString();
-    if (logger.isInfoEnabled()) {
-      logger.info("Prefixes being checked " + directCompositeFieldPrefix + " and " + collectionCompositeFieldPrefix);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Prefixes being checked " + directCompositeFieldPrefix + " and " + collectionCompositeFieldPrefix);
     }
     CompositeStatus status = CompositeStatus.NOT_COMPOSITE;
     Iterator<Entry<String, byte[]>> cells = fieldCells.entrySet().iterator();
@@ -712,11 +712,11 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         isCompositeCell = true;
       }
       final String substring = cell.getKey().substring(cutStr.length());
-      if (logger.isInfoEnabled()) {
-        logger.info("Key " + cell.getKey());
-        logger.info("Cut Str " + cutStr);
-        logger.info("Is Composite " + isCompositeCell);
-        logger.info("Composite field key " + substring);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Key " + cell.getKey());
+        logger.debug("Cut Str " + cutStr);
+        logger.debug("Is Composite " + isCompositeCell);
+        logger.debug("Composite field key " + substring);
       }
       if (isCompositeCell) {
         compositeFields.put(substring, cell.getValue());
@@ -737,8 +737,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
                                   final Map<String, byte[]> fieldCells) throws ClassNotFoundException,
                                                                                IllegalArgumentException,
                                                                                RuntimeException, IOException {
-    if (logger.isInfoEnabled()) {
-      logger.info("::::::::::::::::::::: POPULATING FIELD " + fieldName + " :::::::::::::::::::::");
+    if (logger.isDebugEnabled()) {
+      logger.debug("::::::::::::::::::::: POPULATING FIELD " + fieldName + " :::::::::::::::::::::");
     }
     final Map<Integer, MutableVariationDef> fieldVariations = new TreeMap<Integer, MutableVariationDef>();
     final MutableSearchDef searchDef = SmartContentAPI.getInstance().getContentTypeLoader().createMutableSearchDef();
@@ -748,9 +748,9 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
     final Map<String, byte[]> compositeFields = new LinkedHashMap<String, byte[]>();
     final Map<String, String> fieldParams = new LinkedHashMap<String, String>();
     CompositeStatus compositeStatus = distinguishCompositeFields(fieldCells, compositeFields, fieldName);
-    if (logger.isInfoEnabled()) {
-      logger.info("Composition status " + compositeStatus.name());
-      logger.info("Composed fields " + compositeFields);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Composition status " + compositeStatus.name());
+      logger.debug("Composed fields " + compositeFields);
     }
     final String validatorPatternString = new StringBuilder(fieldName).append(':').append(CELL_FIELD_VALIDATOR).
         append(":([\\d]+):(.*)").toString();
@@ -857,8 +857,8 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         }
         if (validatorDef != null) {
           String validatorCell = validatorMatcher.group(2);
-          if (logger.isInfoEnabled()) {
-            logger.info("Validator Cell " + validatorCell);
+          if (logger.isDebugEnabled()) {
+            logger.debug("Validator Cell " + validatorCell);
           }
           byte[] validatorCellBytes = Bytes.toBytes(validatorCell);
           if (Arrays.equals(validatorCellBytes, CELL_RSRC_URI_TYPE)) {
@@ -888,15 +888,15 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
           else if (StringUtils.isNotBlank(validatorCell) && validatorCell.startsWith(CELL_PARAMS_PREFIX) &&
               validatorCell.indexOf(
               ':') > -1) {
-            logger.info("Match params");
+            logger.debug("Match params");
             String paramKey = validatorCell.split(":")[1];
             String paramVal = Bytes.toString(value);
             Map<String, String> params = new LinkedHashMap<String, String>(validatorDef.getParameters());
             params.put(paramKey, paramVal);
-            if (logger.isInfoEnabled()) {
-              logger.info("Key " + paramKey);
-              logger.info("Val " + paramVal);
-              logger.info("Setting params " + params);
+            if (logger.isDebugEnabled()) {
+              logger.debug("Key " + paramKey);
+              logger.debug("Val " + paramVal);
+              logger.debug("Setting params " + params);
             }
             validatorDef.setParameters(params);
           }
@@ -974,15 +974,15 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
         final MutableFieldDef composedFieldDef = SmartContentAPI.getInstance().getContentTypeLoader().
             createMutableFieldDef(fieldDef);
         final Map<String, byte[]> composedFieldCells = compositeFieldsMap.get(composedFieldName);
-        if (logger.isInfoEnabled()) {
-          logger.info("::::::::::::::::::::: Nested composite field from " + fieldName + " for " + composedFieldName +
+        if (logger.isDebugEnabled()) {
+          logger.debug("::::::::::::::::::::: Nested composite field from " + fieldName + " for " + composedFieldName +
               " :::::::::::::::::::::");
         }
         populateFieldDef(composedFieldDef, composedFieldName, composedFieldCells);
         compositeDataType.getOwnMutableComposition().add(composedFieldDef);
       }
     }
-    logger.info("Set all fields into the field definition!");
+    logger.debug("Set all fields into the field definition!");
     if (!validatorDefs.isEmpty()) {
       fieldDef.setCustomValidators(validatorDefs.values());
     }

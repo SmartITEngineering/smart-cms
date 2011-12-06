@@ -46,7 +46,9 @@ public class SearchFieldNameGeneratorImpl implements SearchFieldNameGenerator {
       builder.append(parentName).append('.');
     }
     builder.append(def.getName());
-    logger.info("Search field name for " + def.getDisplayName() + " is " + builder.toString());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Search field name for " + def.getDisplayName() + " is " + builder.toString());
+    }
     return builder.toString();
   }
 

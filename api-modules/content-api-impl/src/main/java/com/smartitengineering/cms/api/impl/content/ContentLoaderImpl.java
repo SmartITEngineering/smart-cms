@@ -387,12 +387,12 @@ public class ContentLoaderImpl implements ContentLoader {
   public FieldValue getValueFor(String value, DataType dataType) {
     final FieldValue result;
     final FieldValueType type = dataType.getType();
-    if (logger.isInfoEnabled()) {
-      logger.info("Getting field value as " + type.name() + " from " + value);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Getting field value as " + type.name() + " from " + value);
     }
     switch (type) {
       case COMPOSITE:
-        logger.info("Getting as composite");
+        logger.debug("Getting as composite");
         MutableCompositeFieldValue compositeFieldValue = createCompositeFieldValue();
         try {
           JsonNode node = CollectionFieldValueImpl.MAPPER.readTree(value);
@@ -435,7 +435,7 @@ public class ContentLoaderImpl implements ContentLoader {
         result = compositeFieldValue;
         break;
       case COLLECTION:
-        logger.info("Getting as collection");
+        logger.debug("Getting as collection");
         MutableCollectionFieldValue collectionFieldValue = createCollectionFieldValue();
         try {
           JsonNode node = CollectionFieldValueImpl.MAPPER.readTree(value);
@@ -466,7 +466,7 @@ public class ContentLoaderImpl implements ContentLoader {
         result = collectionFieldValue;
         break;
       default:
-        logger.info("Getting as all other than collection");
+        logger.debug("Getting as all other than collection");
         result = getSimpleValueFor(value, type);
     }
     return result;
@@ -476,16 +476,16 @@ public class ContentLoaderImpl implements ContentLoader {
     final FieldValue result;
     switch (type) {
       case BOOLEAN:
-        logger.info("Getting as boolean");
+        logger.debug("Getting as boolean");
         MutableBooleanFieldValue booleanFieldValue = createBooleanFieldValue();
         result = booleanFieldValue;
         booleanFieldValue.setValue(Boolean.parseBoolean(value));
         break;
       case CONTENT:
-        logger.info("Getting as content");
+        logger.debug("Getting as content");
         MutableContentFieldValue contentFieldValue = createContentFieldValue();
-        if (logger.isInfoEnabled()) {
-          logger.info("Content value: " + value);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Content value: " + value);
         }
         try {
           DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(StringUtils.getBytesUtf8(value)));
@@ -499,25 +499,25 @@ public class ContentLoaderImpl implements ContentLoader {
         result = contentFieldValue;
         break;
       case INTEGER:
-        logger.info("Getting as integer");
+        logger.debug("Getting as integer");
         MutableNumberFieldValue integerFieldValue = createIntegerFieldValue();
         integerFieldValue.setValue(NumberUtils.toInt(value, Integer.MIN_VALUE));
         result = integerFieldValue;
         break;
       case DOUBLE:
-        logger.info("Getting as double");
+        logger.debug("Getting as double");
         MutableNumberFieldValue doubleFieldValue = createDoubleFieldValue();
         doubleFieldValue.setValue(NumberUtils.toDouble(value, Double.MIN_VALUE));
         result = doubleFieldValue;
         break;
       case LONG:
-        logger.info("Getting as long");
+        logger.debug("Getting as long");
         MutableNumberFieldValue longFieldValue = createLongFieldValue();
         longFieldValue.setValue(NumberUtils.toLong(value, Long.MIN_VALUE));
         result = longFieldValue;
         break;
       case DATE_TIME:
-        logger.info("Getting as date time");
+        logger.debug("Getting as date time");
         MutableDateTimeFieldValue valueOf;
         try {
           valueOf = DateTimeFieldValueImpl.valueOf(value);
@@ -528,14 +528,14 @@ public class ContentLoaderImpl implements ContentLoader {
         result = valueOf;
         break;
       case OTHER:
-        logger.info("Getting as other");
+        logger.debug("Getting as other");
         MutableOtherFieldValue otherFieldValue = createOtherFieldValue();
         otherFieldValue.setValue(Base64.decodeBase64(value));
         result = otherFieldValue;
         break;
       case STRING:
       default:
-        logger.info("Getting as else or string");
+        logger.debug("Getting as else or string");
         MutableStringFieldValue fieldValue = createStringFieldValue();
         fieldValue.setValue(value);
         result = fieldValue;
@@ -613,13 +613,13 @@ public class ContentLoaderImpl implements ContentLoader {
         continue;
       }
       final Field cField = fields.get(def.getName());
-      if (logger.isInfoEnabled()) {
-        logger.info(def.getName() + " is required: " + def.isRequired());
-        logger.info(def.getName() + ": " + cField);
+      if (logger.isDebugEnabled()) {
+        logger.debug(def.getName() + " is required: " + def.isRequired());
+        logger.debug(def.getName() + ": " + cField);
         if (cField != null) {
-          logger.info(def.getName() + ": " + cField.getValue());
+          logger.debug(def.getName() + ": " + cField.getValue());
           if (cField.getValue() != null) {
-            logger.info(def.getName() + ": " + cField.getValue().getValue());
+            logger.debug(def.getName() + ": " + cField.getValue().getValue());
           }
         }
       }
@@ -648,8 +648,8 @@ public class ContentLoaderImpl implements ContentLoader {
             nestedFields = null;
           }
           if (nestedDefs != null && nestedFields != null) {
-            if (logger.isInfoEnabled()) {
-              logger.info("Going to validate collection's item mandatory fields from " + cField.getName());
+            if (logger.isDebugEnabled()) {
+              logger.debug("Going to validate collection's item mandatory fields from " + cField.getName());
             }
             valid = isMandatoryFieldsPresent(nestedDefs, nestedFields);
           }
@@ -676,8 +676,8 @@ public class ContentLoaderImpl implements ContentLoader {
                   nestedFields = null;
                 }
                 if (nestedDefs != null && nestedFields != null) {
-                  if (logger.isInfoEnabled()) {
-                    logger.info("Going to validate collection's item mandatory fields from " + myField.getName());
+                  if (logger.isDebugEnabled()) {
+                    logger.debug("Going to validate collection's item mandatory fields from " + myField.getName());
                   }
                   valid = valid && isMandatoryFieldsPresent(nestedDefs, nestedFields);
                 }
@@ -699,11 +699,13 @@ public class ContentLoaderImpl implements ContentLoader {
     boolean valid = true;
     for (Field field : values) {
       if (!valid) {
-        logger.debug("Skipping field as already invalid! - " + field.getName());
+        if (logger.isDebugEnabled()) {
+          logger.debug("Skipping field as already invalid! - " + field.getName());
+        }
         continue;
       }
-      if (logger.isInfoEnabled()) {
-        logger.info("Attempting custom validation for " + field.getName());
+      if (logger.isDebugEnabled()) {
+        logger.debug("Attempting custom validation for " + field.getName());
       }
       FieldDef def = field.getFieldDef();
       if (def.getValueDef().getType().equals(FieldValueType.COMPOSITE)) {
@@ -721,8 +723,8 @@ public class ContentLoaderImpl implements ContentLoader {
           nestedFields = null;
         }
         if (nestedFields != null) {
-          if (logger.isInfoEnabled()) {
-            logger.info("Going to validate composite fields from " + field.getName());
+          if (logger.isDebugEnabled()) {
+            logger.debug("Going to validate composite fields from " + field.getName());
           }
           valid = isValidByCustomValidators(nestedFields.values(), content);
         }
@@ -747,8 +749,8 @@ public class ContentLoaderImpl implements ContentLoader {
                 nestedFields = null;
               }
               if (nestedFields != null) {
-                if (logger.isInfoEnabled()) {
-                  logger.info("Going to validate colletion's item composite fields from " + field.getName());
+                if (logger.isDebugEnabled()) {
+                  logger.debug("Going to validate colletion's item composite fields from " + field.getName());
                 }
                 valid = isValidByCustomValidators(nestedFields.values(), content);
               }
@@ -808,8 +810,8 @@ public class ContentLoaderImpl implements ContentLoader {
               EnumDataType enumDataType = (EnumDataType) collDataType.getItemDataType();
               Collection<String> choices = enumDataType.getChoices();
               for (FieldValue val : ((CollectionFieldValue) field.getValue()).getValue()) {
-                if (logger.isInfoEnabled()) {
-                  logger.info("Enum field value instance of string field value " + (val instanceof StringFieldValue));
+                if (logger.isDebugEnabled()) {
+                  logger.debug("Enum field value instance of string field value " + (val instanceof StringFieldValue));
                 }
                 if (val instanceof StringFieldValue) {
                   String strval = ((StringFieldValue) val).getValue();

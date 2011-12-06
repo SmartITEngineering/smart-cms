@@ -47,15 +47,15 @@ public class CacheProvider implements Provider<Cache> {
   }
 
   public Cache get() {
-    if (logger.isInfoEnabled()) {
-      logger.info("Trying for cache with name " + trialName);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Trying for cache with name " + trialName);
     }
     if (StringUtils.isNotBlank(trialName)) {
       try {
         Cache cache = manager.getCache(trialName);
         if (cache != null) {
-          if (logger.isInfoEnabled()) {
-            logger.info("Return special cache with name " + trialName);
+          if (logger.isDebugEnabled()) {
+            logger.debug("Return special cache with name " + trialName);
           }
           return cache;
         }
@@ -64,7 +64,7 @@ public class CacheProvider implements Provider<Cache> {
         logger.warn(ex.getMessage(), ex);
       }
     }
-    logger.info("Return default cache!");
+    logger.debug("Return default cache!");
     return defaultCache;
   }
 }

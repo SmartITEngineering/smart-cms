@@ -145,8 +145,8 @@ public class SequenceSearcherImpl implements SequenceSearcher {
                                                                                                          QueryParameterFactory.
           getMaxResultsParam(pageSize));
       if (searchResult == null || searchResult.getResult() == null || searchResult.getResult().isEmpty()) {
-        if (logger.isInfoEnabled()) {
-          logger.info("No sequence search result for " + finalQuery.toString());
+        if (logger.isDebugEnabled()) {
+          logger.debug("No sequence search result for " + finalQuery.toString());
         }
         continueLoop = false;
       }

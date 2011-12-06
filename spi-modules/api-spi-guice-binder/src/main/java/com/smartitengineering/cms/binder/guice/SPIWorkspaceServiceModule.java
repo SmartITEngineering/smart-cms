@@ -74,7 +74,9 @@ public class SPIWorkspaceServiceModule extends PrivateModule {
     prefixSeparator = properties.getProperty(SPIModule.PREFIX_SEPARATOR_PROP_KEY,
                                              SPIModule.PREFIX_SEPARATOR_PROP_DEFAULT);
     cacheName = properties.getProperty(CACHE_NAME_PROP_KEY, CACHE_NAME_DEFAULT);
-    logger.info("Cache name " + cacheName);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Cache name " + cacheName);
+    }
 
   }
 

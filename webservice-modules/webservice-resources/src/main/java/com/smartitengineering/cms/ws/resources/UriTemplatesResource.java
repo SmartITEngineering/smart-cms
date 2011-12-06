@@ -84,11 +84,11 @@ public class UriTemplatesResource extends AbstractResource {
           final String friendlyContentTypeUrlTemplate = templateBuilder.toString();
           UrlBuilder friendlyContentTypeBuilder = UrlBuilder.getBuilder().rel(REL_FRIENDLY_CONTENT_TYPE).template(
               friendlyContentTypeUrlTemplate).type(javax.ws.rs.core.MediaType.APPLICATION_ATOM_XML);
-          if (logger.isInfoEnabled()) {
-            logger.info("Workspace Template URL: " + orgUrlTemplate);
-            logger.info("Content type Template URL: " + typeUrlTemplate);
-            logger.info("Content Template URL: " + contentUrlTemplate);
-            logger.info("Friendly Content Type Template URL: " + friendlyContentTypeUrlTemplate);
+          if (logger.isDebugEnabled()) {
+            logger.debug("Workspace Template URL: " + orgUrlTemplate);
+            logger.debug("Content type Template URL: " + typeUrlTemplate);
+            logger.debug("Content Template URL: " + contentUrlTemplate);
+            logger.debug("Friendly Content Type Template URL: " + friendlyContentTypeUrlTemplate);
           }
           descBuilder.urls(workspaceBuilder.build(), contentTypeBuilder.build(), contentBuilder.build(), friendlyContentTypeBuilder.
               build());

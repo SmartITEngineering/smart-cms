@@ -131,10 +131,10 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
       }
     }
     if (instance.isValidatorsPopulated() && !instance.getValidatorTemplates().isEmpty()) {
-      logger.info("Saving validators");
+      logger.debug("Saving validators");
       for (PersistableValidatorTemplate template : instance.getValidatorTemplates()) {
-        if (logger.isInfoEnabled()) {
-          logger.info("Validator being saved is " + template.getName());
+        if (logger.isDebugEnabled()) {
+          logger.debug("Validator being saved is " + template.getName());
         }
         populatePutWithValidator(FAMILY_VALIDATORS_INFO, template, put);
         populatePutWithValidatorData(FAMILY_VALIDATORS_DATA, template, put);
@@ -179,8 +179,8 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
     final Date lastModified = template.getLastModifiedDate() == null ? created : template.getLastModifiedDate();
     put.add(family, Bytes.add(prefix, CELL_LAST_MODIFIED), Utils.toBytes(lastModified));
     template.setLastModifiedDate(lastModified);
-    if (logger.isInfoEnabled()) {
-      logger.info("PUTTING Entity Tag: " + template.getEntityTagValue());
+    if (logger.isDebugEnabled()) {
+      logger.debug("PUTTING Entity Tag: " + template.getEntityTagValue());
     }
     put.add(family, Bytes.add(prefix, CELL_ENTITY_TAG), Bytes.toBytes(template.getEntityTagValue()));
   }
@@ -521,7 +521,7 @@ public class WorkspaceObjectConverter extends AbstractObjectRowConverter<Persist
         }
         for (String valName : valsByName.keySet()) {
           if (logger.isInfoEnabled()) {
-            logger.info("Loading validator by name " + valName);
+            logger.info(new StringBuilder("Loading validator by name ").append(valName).toString());
           }
           PersistableValidatorTemplate template = SmartContentSPI.getInstance().getPersistableDomainFactory().
               createPersistableValidatorTemplate();

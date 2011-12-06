@@ -221,11 +221,11 @@ public class ContentTypeResource extends AbstractResource {
             break;
           case CONTENT:
             itemFieldDef = new ContentFieldDefImpl();
-            if (logger.isInfoEnabled()) {
-              logger.info("Content inner data type (" + fieldDef.getName() + "): " +
+            if (logger.isDebugEnabled()) {
+              logger.debug("Content inner data type (" + fieldDef.getName() + "): " +
                   collectionDataType.getItemDataType());
               if (collectionDataType.getItemDataType() != null) {
-                logger.info("Content inner data type type def (" + fieldDef.getName() + "): " +
+                logger.debug("Content inner data type type def (" + fieldDef.getName() + "): " +
                     ((ContentDataType) collectionDataType.getItemDataType()).getTypeDef());
               }
             }
@@ -236,8 +236,8 @@ public class ContentTypeResource extends AbstractResource {
             EnumDataType enumDataType = (EnumDataType) collectionDataType.getItemDataType();
             EnumFieldDefImpl enumFieldDefImpl = new EnumFieldDefImpl();
             itemFieldDef = enumFieldDefImpl;
-            if (logger.isInfoEnabled()) {
-              logger.info("Enum choices " + enumDataType.getChoices());
+            if (logger.isDebugEnabled()) {
+              logger.debug("Enum choices " + enumDataType.getChoices());
             }
             enumFieldDefImpl.setChoices(enumDataType.getChoices());
             break;
@@ -277,8 +277,8 @@ public class ContentTypeResource extends AbstractResource {
         EnumDataType enumDataType = (EnumDataType) fieldDef.getValueDef();
         EnumFieldDefImpl enumFieldDefImpl = new EnumFieldDefImpl();
         def = enumFieldDefImpl;
-        if (logger.isInfoEnabled()) {
-          logger.info("Enum choices " + enumDataType.getChoices());
+        if (logger.isDebugEnabled()) {
+          logger.debug("Enum choices " + enumDataType.getChoices());
         }
         enumFieldDefImpl.setChoices(enumDataType.getChoices());
         break;
@@ -363,8 +363,8 @@ public class ContentTypeResource extends AbstractResource {
       Feed feed = getFeed("Statuses", lastModified);
       for (String name : statuses.keySet()) {
         if (StringUtils.isNotBlank(name)) {
-          if (logger.isInfoEnabled()) {
-            logger.info("Adding status " + name);
+          if (logger.isDebugEnabled()) {
+            logger.debug("Adding status " + name);
           }
           org.apache.abdera.model.Entry entry = getEntry(name, name, lastModified);
           entry.setContent(name);

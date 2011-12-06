@@ -74,8 +74,8 @@ public class ContentTypeFeedResourceImpl extends AbstractFeedClientResource<Reso
     List<FieldDef> defs = new ArrayList<FieldDef>(getLastReadStateOfEntity().getEntries().size());
     ObjectMapper mapper = new ObjectMapper();
     for (Entry entry : getLastReadStateOfEntity().getEntries()) {
-      if (logger.isInfoEnabled()) {
-        logger.info("FiedDef JSON Content: " + entry.getContent());
+      if (logger.isDebugEnabled()) {
+        logger.debug("FiedDef JSON Content: " + entry.getContent());
       }
       try {
         defs.add(mapper.readValue(entry.getContent(), FieldDef.class));

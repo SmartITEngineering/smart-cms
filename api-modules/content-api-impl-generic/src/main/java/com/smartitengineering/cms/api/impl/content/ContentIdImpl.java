@@ -93,15 +93,15 @@ public class ContentIdImpl implements ContentId {
   @Override
   public void readExternal(DataInput input) throws IOException, ClassNotFoundException {
     String idString = Utils.readStringInUTF8(input);
-    if (logger.isInfoEnabled()) {
-      logger.info("Trying to parse content id: " + idString);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Trying to parse content id: " + idString);
     }
     if (StringUtils.isBlank(idString)) {
       throw new IOException("No content!");
     }
     String[] params = idString.split(":");
-    if (logger.isInfoEnabled()) {
-      logger.info("Params " + Arrays.toString(params));
+    if (logger.isDebugEnabled()) {
+      logger.debug("Params " + Arrays.toString(params));
     }
     if (params == null || params.length != 3) {
       throw new IOException(

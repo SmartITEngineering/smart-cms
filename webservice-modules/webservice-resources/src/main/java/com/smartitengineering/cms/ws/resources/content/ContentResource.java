@@ -243,12 +243,13 @@ public class ContentResource extends AbstractResource {
   @POST
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   public Response post(FormDataMultiPart multiPart) {
+    LOGGER.info("Received POST for content as multipart/form-data");
     com.smartitengineering.cms.ws.common.domains.Content contentImpl = parseMultipartFormData(multiPart,
                                                                                               getInjectables());
-    if (LOGGER.isInfoEnabled()) {
+    if (LOGGER.isDebugEnabled()) {
       try {
         ObjectMapper mapper = new ObjectMapper();
-        LOGGER.info("Serialized content impl is " + mapper.writeValueAsString(contentImpl));
+        LOGGER.debug("Serialized content impl is " + mapper.writeValueAsString(contentImpl));
       }
       catch (Exception ex) {
         LOGGER.warn("Could not output info log ", ex);
@@ -292,8 +293,8 @@ public class ContentResource extends AbstractResource {
                                    final Collection<com.smartitengineering.cms.ws.common.domains.Field> fields) {
     for (Entry<String, FieldDef> fieldDef : allDefs.entrySet()) {
       if (bodyParts != null && !bodyParts.isEmpty()) {
-        if (LOGGER.isInfoEnabled()) {
-          LOGGER.info("Creating field for " + fieldDef.getKey() + " with type " + fieldDef.getValue().getValueDef().
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Creating field for " + fieldDef.getKey() + " with type " + fieldDef.getValue().getValueDef().
               getType());
         }
         FieldImpl fieldImpl = new FieldImpl();
@@ -436,13 +437,13 @@ public class ContentResource extends AbstractResource {
         OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
         otherFieldValueImpl.setType(dataType.getType().name());
         otherFieldValueImpl.setMimeType(bodyPart.getMediaType().toString());
-        if (LOGGER.isInfoEnabled()) {
-          LOGGER.info("Body Part " + bodyPart.getMediaType());
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Body Part " + bodyPart.getMediaType());
         }
         try {
           otherFieldValueImpl.setValue(Base64.encodeBase64String(bodyPart.getValueAs(TMP.getClass())));
-          if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Field value " + otherFieldValueImpl.getValue());
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Field value " + otherFieldValueImpl.getValue());
           }
         }
         catch (Exception ex) {
@@ -473,6 +474,7 @@ public class ContentResource extends AbstractResource {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response put(com.smartitengineering.cms.ws.common.domains.Content jsonContent,
                       @HeaderParam(HttpHeaders.IF_MATCH) EntityTag etag) {
+    LOGGER.info("Received JSON Object representation of Content!");
     Content newContent;
     try {
       newContent = adapter.convertInversely(jsonContent);
@@ -483,10 +485,12 @@ public class ContentResource extends AbstractResource {
     }
     final WriteableContent writeableContent;
     if (this.content == null) {
+      LOGGER.info("Processing as new content");
       //Create new content
       writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(newContent, importMode);
     }
     else {
+      LOGGER.debug("Processing as content update");
       //Update new content with etag checking
       if (etag == null) {
         return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -534,6 +538,7 @@ public class ContentResource extends AbstractResource {
 
   @DELETE
   public Response delete(@HeaderParam(HttpHeaders.IF_MATCH) EntityTag etag) {
+    LOGGER.info("Deleting a content");
     if (content == null) {
       throw new WebApplicationException(Response.Status.NOT_FOUND);
     }
@@ -692,12 +697,12 @@ public class ContentResource extends AbstractResource {
                                             com.smartitengineering.cms.ws.common.domains.FieldValue value,
                                             ResourceContext context, UriBuilder absBuilder, boolean importMode) {
     FieldValue fieldValue;
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Parsing value as " + dataType.getType().name());
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Parsing value as " + dataType.getType().name());
     }
     switch (dataType.getType()) {
       case COMPOSITE: {
-        LOGGER.info("Parsing as composite");
+        LOGGER.debug("Parsing as composite");
         MutableCompositeFieldValue compositeFieldValue = SmartContentAPI.getInstance().getContentLoader().
             createCompositeFieldValue();
         CompositeFieldValue compositeValue = (CompositeFieldValue) value;
@@ -718,7 +723,7 @@ public class ContentResource extends AbstractResource {
         break;
       }
       case COLLECTION:
-        LOGGER.info("Parsing as collection");
+        LOGGER.debug("Parsing as collection");
         MutableCollectionFieldValue collectionFieldValue = SmartContentAPI.getInstance().getContentLoader().
             createCollectionFieldValue();
         CollectionDataType collectionDataType = (CollectionDataType) dataType;
@@ -732,23 +737,23 @@ public class ContentResource extends AbstractResource {
         fieldValue = collectionFieldValue;
         break;
       case CONTENT:
-        LOGGER.info("Parsing string as Content!");
+        LOGGER.debug("Parsing string as Content!");
         MutableContentFieldValue contentFieldValue = SmartContentAPI.getInstance().getContentLoader().
             createContentFieldValue();
         String contentUrl = value.getValue();
-        if (LOGGER.isInfoEnabled()) {
-          LOGGER.info("URL to content is " + contentUrl);
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("URL to content is " + contentUrl);
         }
         try {
           ContentResource resource = getContentResource(contentUrl, absBuilder, context);
-          if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Resource " + resource);
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Resource " + resource);
           }
           if (resource == null) {
             throw new NullPointerException();
           }
-          if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Content ID " + resource.getContentId());
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Content ID " + resource.getContentId());
           }
           if (!importMode && resource.getContent() == null) {
             throw new NullPointerException("No such content! " + resource.getContentId());
@@ -762,7 +767,7 @@ public class ContentResource extends AbstractResource {
         fieldValue = contentFieldValue;
         break;
       default:
-        LOGGER.info("Parsing as default or all other than content and collection");
+        LOGGER.debug("Parsing as default or all other than content and collection");
         fieldValue = SmartContentAPI.getInstance().getContentLoader().getValueFor(value.getValue(), dataType);
     }
     return fieldValue;
@@ -782,8 +787,10 @@ public class ContentResource extends AbstractResource {
       throw new IllegalArgumentException("No field in content type with name " + field.getName());
     }
     final DataType dataType = fieldDef.getValueDef();
-    LOGGER.info("Working with field " + field.getName() + " of type " + dataType.getType().name() + " with value " +
-        field.getValue());
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Working with field " + field.getName() + " of type " + dataType.getType().name() + " with value " +
+          field.getValue());
+    }
     if (field.getValue() != null && org.apache.commons.lang.StringUtils.isNotBlank(field.getValue().getType()) &&
         !org.apache.commons.lang.StringUtils.equalsIgnoreCase(dataType.getType().name(), field.getValue().getType())) {
       throw new IllegalArgumentException("Type mismatch! NOTE: type of values in field is optional in this case. " +
@@ -813,8 +820,8 @@ public class ContentResource extends AbstractResource {
       uri =
       UriBuilder.fromPath(contentUrl).host(absUri.getHost()).port(absUri.getPort()).scheme(absUri.getScheme()).build();
     }
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("URI to content is " + uri);
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("URI to content is " + uri);
     }
     ContentResource resource = context.matchResource(uri, ContentResource.class);
     return resource;
@@ -864,7 +871,8 @@ public class ContentResource extends AbstractResource {
     switch (valueDef.getType()) {
       case CONTENT: {
         FieldValueImpl valueImpl = new FieldValueImpl();
-        valueImpl.setValue(ContentResource.getContentUri(builder.clone(), ((ContentFieldValue) contentFieldValue).getValue()).
+        valueImpl.setValue(ContentResource.getContentUri(builder.clone(), ((ContentFieldValue) contentFieldValue).
+            getValue()).
             toASCIIString());
         value = valueImpl;
         break;
@@ -917,10 +925,10 @@ public class ContentResource extends AbstractResource {
                                                   Map<String, Field> fields, String contentUri) {
     final String fieldName = fieldDef.getName();
     Field field = fields.get(fieldName);
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Field " + field);
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Field " + field);
       if (field != null) {
-        LOGGER.info("Converting field " + field.getName() + " with value " + field.getValue() +
+        LOGGER.debug("Converting field " + field.getName() + " with value " + field.getValue() +
             " and URI " + contentUri);
       }
     }

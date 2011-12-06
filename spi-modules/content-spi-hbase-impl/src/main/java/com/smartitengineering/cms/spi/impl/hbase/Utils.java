@@ -71,7 +71,7 @@ public final class Utils {
 
   public static void organizeByPrefix(Map<byte[], byte[]> fieldMap, Map<String, Map<String, byte[]>> fieldsByName,
                                       char separator) {
-    logger.info("Organize by their prefix so that each field cells can be processed at once");
+    logger.debug("Organize by their prefix so that each field cells can be processed at once");
     for (Entry<byte[], byte[]> entry : fieldMap.entrySet()) {
       final String key = Bytes.toString(entry.getKey());
       final int indexOfFirstColon = key.indexOf(separator);
@@ -95,7 +95,7 @@ public final class Utils {
 
   public static void organizeByPrefixOnString(Map<String, byte[]> fieldMap,
                                               Map<String, Map<String, byte[]>> fieldsByName, char separator) {
-    logger.info("Organize by their prefix so that each field cells can be processed at once");
+    logger.debug("Organize by their prefix so that each field cells can be processed at once");
     for (Entry<String, byte[]> entry : fieldMap.entrySet()) {
       final String key = entry.getKey();
       final int indexOfFirstColon = key.indexOf(separator);

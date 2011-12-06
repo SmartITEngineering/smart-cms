@@ -87,8 +87,8 @@ public class EventPublicationListener implements EventListener {
     if (StringUtils.isNotBlank(hexedContentId)) {
       String message = new StringBuilder(event.getEventSourceType().name()).append('\n').append(event.getEventType().
           name()).append('\n').append(hexedContentId).toString();
-      if (logger.isInfoEnabled()) {
-        logger.info("Publishing message " + message);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Publishing message " + message);
       }
       publisher.publishEvent("text/plain", message);
     }

@@ -231,8 +231,8 @@ public class RootResourceImpl extends AbstractFeedClientResource<Resource<? exte
   public UriTemplateResource getTemplates() {
     try {
       final ResourceLink first = getRelatedResourceUris().getFirst(REL_TEMPLATES);
-      if (logger.isInfoEnabled()) {
-        logger.info("Templates URI " + first);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Templates URI " + first);
       }
       return new UriTemplateResourceImpl(this, first);
     }

@@ -45,8 +45,8 @@ public class ValidatorProviderImpl implements ValidatorProvider {
       return true;
     }
     Collection<ValidatorDef> validatorDefs = field.getFieldDef().getCustomValidators();
-    if (logger.isInfoEnabled()) {
-      logger.info("Number of validator definitions for " + field.getName() + " is " + validatorDefs.size());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Number of validator definitions for " + field.getName() + " is " + validatorDefs.size());
     }
     boolean valid = true;
     for (ValidatorDef validatorDef : validatorDefs) {

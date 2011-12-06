@@ -228,8 +228,8 @@ public class ContentTypeSearcherImpl implements ContentTypeSearcher {
     if (query.length() > 0) {
       finalQuery.append(conjunctionSeperator).append('(').append(query.toString()).append(')');
     }
-    if (logger.isInfoEnabled()) {
-      logger.info("Query q = " + finalQuery.toString());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Query q = " + finalQuery.toString());
     }
     final com.smartitengineering.common.dao.search.SearchResult<ContentType> searchResult =
                                                                              textSearchDao.detailedSearch(QueryParameterFactory.

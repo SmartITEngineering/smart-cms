@@ -69,9 +69,9 @@ public class EventConsumerImpl implements EventConsumer {
       reader = new BufferedReader(new StringReader(eventMessage));
       final Type sourceType = Type.valueOf(reader.readLine());
       final EventType type = EventType.valueOf(reader.readLine());
-      if (logger.isInfoEnabled()) {
-        logger.info("Event source type " + sourceType);
-        logger.info("Event type " + type);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Event source type " + sourceType);
+        logger.debug("Event type " + type);
       }
       final StringBuilder idStr = new StringBuilder("");
       String line;
@@ -158,7 +158,7 @@ public class EventConsumerImpl implements EventConsumer {
         }
         break;
         default:
-          logger.info("Ignoring event source type " + sourceType);
+          logger.info(new StringBuilder("Ignoring event source type ").append(sourceType).toString());
       }
     }
     catch (Exception ex) {

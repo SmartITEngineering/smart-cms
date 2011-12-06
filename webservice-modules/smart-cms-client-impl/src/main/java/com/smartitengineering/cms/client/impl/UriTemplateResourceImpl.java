@@ -144,14 +144,14 @@ public class UriTemplateResourceImpl extends AbstractClientResource<OpenSearchDe
       for (Rel rel : url.getRels()) {
         if (relValue.equals(rel.getValue())) {
           String urlStr = url.getTemplate();
-          if (logger.isInfoEnabled()) {
-            logger.info("Templated URI " + urlStr);
+          if (logger.isDebugEnabled()) {
+            logger.debug("Templated URI " + urlStr);
           }
           for (Entry<String, String> templateVar : templateVars) {
             urlStr = urlStr.replace(templateVar.getKey(), templateVar.getValue());
           }
-          if (logger.isInfoEnabled()) {
-            logger.info("Final URI " + urlStr);
+          if (logger.isDebugEnabled()) {
+            logger.debug("Final URI " + urlStr);
           }
           ResourceLink link = ClientUtil.createResourceLink(relValue, URI.create(urlStr), url.getType());
           return link;

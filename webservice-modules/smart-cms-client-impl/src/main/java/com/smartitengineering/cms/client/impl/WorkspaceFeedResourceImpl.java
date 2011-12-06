@@ -100,10 +100,10 @@ public class WorkspaceFeedResourceImpl extends AbstractFeedClientResource<Resour
     final ResourceLink link =
                        AtomClientUtil.convertFromAtomLinkToResourceLink(getLastReadStateOfEntity().getLink(
         Link.REL_ALTERNATE));
-    if (logger.isInfoEnabled()) {
-      logger.info("Link Rel: " + link.getRel());
-      logger.info("Link URI: " + link.getUri().toASCIIString());
-      logger.info("Link MIME Type: " + link.getMimeType());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Link Rel: " + link.getRel());
+      logger.debug("Link URI: " + link.getUri().toASCIIString());
+      logger.debug("Link MIME Type: " + link.getMimeType());
     }
     return new WorkspaceContentResourceImpl(this, link);
   }
