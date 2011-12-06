@@ -162,7 +162,8 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
       return SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(this);
     }
     catch (Exception ex) {
-      logger.warn("could not load content type!", ex);
+      logger.warn("Could not load content type!");
+      logger.debug("Exception loading content type!", ex);
       return null;
     }
   }
