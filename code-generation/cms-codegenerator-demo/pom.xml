@@ -89,7 +89,7 @@
           </solrArtifact>
           <eventHubArtifact>
             <groupId>com.smartitengineering.event</groupId>
-            <artifactId>hub-db</artifactId>
+            <artifactId>hub-hbase</artifactId>
             <version>${hub.version}</version>
           </eventHubArtifact>
           <cmsWebServiceArtifact>
@@ -190,6 +190,5 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit.version>4.8.2</junit.version>
-    <hub.version>0.1-hbase-SNAPSHOT</hub.version>
   </properties>
 </project>

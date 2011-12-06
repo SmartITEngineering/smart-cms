@@ -202,7 +202,7 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>com.smartitengineering.event</groupId>
-                  <artifactId>hub-db</artifactId>
+                  <artifactId>hub-hbase</artifactId>
                   <version>${hub.version}</version>
                   <type>war</type>
                   <outputDirectory>${project.build.directory}/hub/</outputDirectory>
@@ -232,7 +232,4 @@
       </plugin>
     </plugins>
   </build>
-  <properties>
-    <hub.version>0.1-hbase-SNAPSHOT</hub.version>
-  </properties>
 </project>
