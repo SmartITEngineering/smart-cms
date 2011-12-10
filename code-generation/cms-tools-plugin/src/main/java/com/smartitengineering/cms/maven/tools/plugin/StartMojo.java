@@ -76,7 +76,6 @@ public class StartMojo
   /**
    * CMS Event Hub war artifact
    * @parameter
-   * @required
    */
   private ArtifactItem cmsWebServiceArtifact;
   /**
@@ -233,7 +232,7 @@ public class StartMojo
         new File(libDir, new StringBuilder("jersey-server-").append(jerseyVersion).append(".jar").toString()).delete();
       }
     }
-    {
+    if (cmsWebServiceArtifact != null) {
       Artifact artifact = getArtifact(cmsWebServiceArtifact);
       File cmsOutDir = new File(outputDirectory, "cms");
       cmsOutDir.mkdirs();
@@ -365,10 +364,12 @@ public class StartMojo
         final WebAppClassLoader webAppClassLoader = new WebAppClassLoader(hub);
         hub.setClassLoader(webAppClassLoader);
         handlerList.addHandler(hub);
-        WebAppContext cms = new WebAppContext(cmsOutDir.getAbsolutePath(), "/cms");
-        final WebAppClassLoader cmsWebAppClassLoader = new WebAppClassLoader(cms);
-        cms.setClassLoader(cmsWebAppClassLoader);
-        handlerList.addHandler(cms);
+        if (cmsWebServiceArtifact != null) {
+          WebAppContext cms = new WebAppContext(cmsOutDir.getAbsolutePath(), "/cms");
+          final WebAppClassLoader cmsWebAppClassLoader = new WebAppClassLoader(cms);
+          cms.setClassLoader(cmsWebAppClassLoader);
+          handlerList.addHandler(cms);
+        }
         jettyServer.setHandler(handlerList);
         jettyServer.setSendDateHeader(true);
         jettyServer.start();
