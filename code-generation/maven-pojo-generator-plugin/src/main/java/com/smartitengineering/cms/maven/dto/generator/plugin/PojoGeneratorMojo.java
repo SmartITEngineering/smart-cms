@@ -50,6 +50,7 @@ import com.smartitengineering.cms.api.type.MutableContentType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.repo.dao.impl.AbstractRepoAdapterHelper;
 import com.smartitengineering.cms.repo.dao.impl.AbstractRepositoryDomain;
+import com.smartitengineering.cms.repo.dao.impl.ExtendedReadDao;
 import com.smartitengineering.cms.repo.dao.impl.RepositoryDaoImpl;
 import com.smartitengineering.cms.type.xml.XMLParserIntrospector;
 import com.smartitengineering.cms.type.xml.XmlParser;
@@ -221,6 +222,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
     JClass typeLiteral = codeModel.ref(TypeLiteral.class);
     JClass commonDao = codeModel.ref(CommonDao.class);
     JClass commonReadDao = codeModel.ref(CommonReadDao.class);
+    JClass extendedReadDao = codeModel.ref(ExtendedReadDao.class);
     JClass commonWriteDao = codeModel.ref(CommonWriteDao.class);
     JClass commonDaoImpl = codeModel.ref(RepositoryDaoImpl.class);
     JClass genericAdapter = codeModel.ref(GenericAdapter.class).narrow(Content.class);
@@ -247,6 +249,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
                                                        "configure");
           JBlock block = configureMethod.body();
           final JDefinedClass commonDaoType;
+          final JDefinedClass daoImplType;
           {
             final JClass narrowedCommonDaoTypeLiteral = typeLiteral.narrow(commonDao.narrow(definedClass).narrow(
                 String.class));
@@ -259,7 +262,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
             classType._extends(typeLiteral.narrow(beanClass));
             block.add(JExpr.invoke("bind").arg(JExpr._new(classType)).invoke("toInstance").arg(definedClass.dotclass()));
             final JClass narrowedDaoImplTypeLiteral = typeLiteral.narrow(commonDaoImpl.narrow(definedClass));
-            final JDefinedClass daoImplType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).
+            daoImplType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).
                 append("DaoImplType").toString());
             daoImplType._extends(narrowedDaoImplTypeLiteral);
             block.add(JExpr.invoke("bind").arg(JExpr._new(commonDaoType)).invoke("to").arg(JExpr._new(daoImplType)).
@@ -273,6 +276,16 @@ public class PojoGeneratorMojo extends AbstractMojo {
                 append("ReadDaoType").toString());
             readDaoType._extends(narrowedReadTypeLiteral);
             block.add(JExpr.invoke("bind").arg(JExpr._new(readDaoType)).invoke("to").arg(JExpr._new(commonDaoType)).
+                invoke("in").arg(singletonScope.dotclass()));
+            block.add(JExpr.invoke("binder").invoke("expose").arg(JExpr._new(readDaoType)));
+          }
+          {
+            final JClass narrowedReadTypeLiteral = typeLiteral.narrow(extendedReadDao.narrow(definedClass).narrow(
+                String.class));
+            final JDefinedClass readDaoType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).
+                append("ExtReadDaoType").toString());
+            readDaoType._extends(narrowedReadTypeLiteral);
+            block.add(JExpr.invoke("bind").arg(JExpr._new(readDaoType)).invoke("to").arg(JExpr._new(daoImplType)).
                 invoke("in").arg(singletonScope.dotclass()));
             block.add(JExpr.invoke("binder").invoke("expose").arg(JExpr._new(readDaoType)));
           }

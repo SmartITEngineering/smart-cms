@@ -13,6 +13,7 @@ import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.binder.guice.Initializer;
+import com.smartitengineering.cms.repo.dao.impl.ExtendedReadDao;
 import com.smartitengineering.dao.common.CommonDao;
 import com.smartitengineering.dao.common.queryparam.FetchMode;
 import com.smartitengineering.dao.common.queryparam.MatchMode;
@@ -210,6 +211,8 @@ public class CodeGenerationTest {
     }
     sleep();
     sleep();
+    //Test all count
+    Assert.assertEquals((long) size, service.getPersonCount());
     //Test limit
     List<Person> all = new ArrayList<Person>(service.search(QueryParameterFactory.getOrderByParam(
         Person.PROPERTY_NATIONALID, Order.ASC), QueryParameterFactory.getFirstResultParam(10), QueryParameterFactory.
@@ -227,6 +230,12 @@ public class CodeGenerationTest {
         getNestedParametersParam(Person.PROPERTY_NAME, FetchMode.DEFAULT, QueryParameterFactory.
         getStringLikePropertyParam(Name.PROPERTY_FIRSTNAME, "imr", MatchMode.START))));
     Assert.assertEquals(size / 3, all.size());
+    //Test query count
+    Assert.assertEquals(size / 3, service.getSearchPersonCount(QueryParameterFactory.getOrderByParam(
+        Person.PROPERTY_NATIONALID, Order.ASC), QueryParameterFactory.getFirstResultParam(0), QueryParameterFactory.
+        getMaxResultsParam(size), QueryParameterFactory.getNestedParametersParam(
+        Person.PROPERTY_NAME, FetchMode.DEFAULT, QueryParameterFactory.getStringLikePropertyParam(
+        Name.PROPERTY_FIRSTNAME, "imr", MatchMode.START))));
     // Delete ALL created data
     all = new ArrayList<Person>(service.getAll());
     Set<Integer> nIds = new HashSet<Integer>();
@@ -301,6 +310,8 @@ public class CodeGenerationTest {
 
     @Inject
     private CommonDao<Person, String> dao;
+    @Inject
+    private ExtendedReadDao<Person, String> extDao;
 
     public void save(Person person) {
       dao.save(person);
@@ -320,6 +331,14 @@ public class CodeGenerationTest {
 
     public Set<Person> getAll() {
       return dao.getAll();
+    }
+
+    public long getPersonCount() {
+      return extDao.count();
+    }
+
+    public long getSearchPersonCount(QueryParameter... params) {
+      return extDao.count(params);
     }
 
     public Collection<Person> search(QueryParameter... params) {

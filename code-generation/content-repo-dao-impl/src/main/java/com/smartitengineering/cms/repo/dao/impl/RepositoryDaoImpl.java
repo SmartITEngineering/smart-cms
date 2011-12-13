@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * @author imyousuf
  */
 public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends PersistentDTO>>
-    implements CommonDao<T, String> {
+    implements CommonDao<T, String>, ExtendedReadDao<T, String> {
 
   @Inject
   private WorkspaceId defaultContainerWorkspace;
@@ -167,6 +167,13 @@ public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends Pers
 
   public List<T> getList(List<QueryParameter> queries) {
     return searchCms(processQueryParams(getDefaultFilter(), queries), false);
+  }
+
+  protected long countResults(Filter filter) {
+    filter.setStartFrom(0);
+    filter.setMaxContents(0);
+    SearchResult<Content> searchResult = SmartContentAPI.getInstance().getContentLoader().search(filter);
+    return searchResult.getTotalResultsCount();
   }
 
   protected List<T> searchCms(Filter filter, boolean getAll) {
@@ -524,5 +531,9 @@ public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends Pers
         }
       }
     }
+  }
+
+  public long count(QueryParameter... params) {
+    return countResults(processQueryParams(getDefaultFilter(), Arrays.asList(params)));
   }
 }
