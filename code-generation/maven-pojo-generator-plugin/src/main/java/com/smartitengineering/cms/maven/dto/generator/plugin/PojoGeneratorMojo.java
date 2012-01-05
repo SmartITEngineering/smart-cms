@@ -892,7 +892,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
                       "ReadDao").toString();
                   JVar typeDao = typeDaoBlock.decl(model.ref(CommonReadDao.class).narrow(typeDef.wildcard()).narrow(
                       String.class), readDaoName, readDaoVar.invoke("get").arg(contentIdVal.invoke("getContent").invoke(
-                      "getContentDefinition").invoke("toString")));
+                      "getContentDefinition").invoke("getContentTypeID").invoke("toString")));
                   JConditional daoValCond = typeDaoBlock._if(typeDao.ne(JExpr._null()));
                   daoValCond._then().add(resultVal.invoke("add").arg(typeDao.invoke("getById").arg(
                       contentIdVal.invoke("toString"))));
@@ -1351,7 +1351,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
               generateReverseBlocks(defs, forBody, nextVal, mutableItemFieldValue, contentLoader,
                                     compositeFieldDefs, model, clazz, classes, types,
                                     new StringBuilder(prefix).append(name).append('_').toString());
-
+              forBody.add(collection.invoke("add").arg(mutableItemFieldValue));
             }
           }
           break;

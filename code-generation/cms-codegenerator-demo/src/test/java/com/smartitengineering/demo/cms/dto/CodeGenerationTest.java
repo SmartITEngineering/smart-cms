@@ -1,5 +1,7 @@
 package com.smartitengineering.demo.cms.dto;
 
+import collection.CollectionTest;
+import collection.CollectionTestBean;
 import com.embarcadero.edn.Customer;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -23,6 +25,7 @@ import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ConnectionConfig;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -283,6 +286,80 @@ public class CodeGenerationTest {
     Assert.assertFalse(rPerson.isLockOwned());
     rPerson = service.getById(person.getId());
     Assert.assertEquals(newNatId, rPerson.getNationalId().intValue());
+  }
+
+  @Test
+  public void testPersistCollectionOfComposite() {
+    Injector injector = Guice.createInjector(new MasterModule());
+    CommonDao<CollectionTest, String> collectionTestDao =
+                                      injector.getInstance(Key.get(new TypeLiteral<CommonDao<CollectionTest, String>>() {
+    }));
+    CollectionTest test = new CollectionTest();
+    test.setCollId(Integer.MAX_VALUE);
+    CollectionTest.CompField compField = new CollectionTest.CompField();
+    compField.setCompFieldGeneral(Integer.MAX_VALUE);
+    compField.setCompFieldId(Integer.MIN_VALUE);
+    test.setCompField(Arrays.asList(compField));
+    collectionTestDao.save(test);
+    Assert.assertNotNull(test.getId());
+    Assert.assertNotNull(test.getCompField());
+    Assert.assertFalse(test.getCompField().isEmpty());
+    CollectionTest readTest = collectionTestDao.getById(test.getId());
+    Assert.assertEquals(Integer.MAX_VALUE, readTest.getCollId().intValue());
+    Assert.assertNotNull(readTest.getCompField());
+    Assert.assertFalse("Collection of composite field is empty", readTest.getCompField().isEmpty());
+  }
+
+  @Test
+  public void testPersistCollectionOfString() {
+    Injector injector = Guice.createInjector(new MasterModule());
+    CommonDao<CollectionTest, String> collectionTestDao =
+                                      injector.getInstance(Key.get(new TypeLiteral<CommonDao<CollectionTest, String>>() {
+    }));
+    CollectionTest test = new CollectionTest();
+    test.setCollId(Integer.MAX_VALUE);
+    test.setStringField(Arrays.asList("testString"));
+    collectionTestDao.save(test);
+    Assert.assertNotNull(test.getId());
+    Assert.assertNotNull(test.getStringField());
+    Assert.assertFalse(test.getStringField().isEmpty());
+    CollectionTest readTest = collectionTestDao.getById(test.getId());
+    Assert.assertEquals(Integer.MAX_VALUE, readTest.getCollId().intValue());
+    Assert.assertNotNull(readTest.getStringField());
+    Assert.assertFalse("Collection of String field is empty", readTest.getStringField().isEmpty());
+    Assert.assertEquals(1, readTest.getStringField().size());
+    final String next = readTest.getStringField().iterator().next();
+    Assert.assertEquals("testString", next);
+  }
+
+  @Test
+  public void testPersistCollectionOfContent() {
+    Injector injector = Guice.createInjector(new MasterModule());
+    CommonDao<CollectionTest, String> collectionTestDao =
+                                      injector.getInstance(Key.get(new TypeLiteral<CommonDao<CollectionTest, String>>() {
+    }));
+    CommonDao<CollectionTestBean, String> collectionTestBeanDao =
+                                          injector.getInstance(Key.get(new TypeLiteral<CommonDao<CollectionTestBean, String>>() {
+    }));
+    CollectionTestBean bean = new CollectionTestBean();
+    bean.setCollId(Integer.SIZE);
+    collectionTestBeanDao.save(bean);
+    sleep();
+    CollectionTest test = new CollectionTest();
+    test.setCollId(Integer.MAX_VALUE);
+    test.setConField(Arrays.asList(bean));
+    collectionTestDao.save(test);
+    Assert.assertNotNull(test.getId());
+    Assert.assertNotNull(test.getConField());
+    Assert.assertFalse(test.getConField().isEmpty());
+    CollectionTest readTest = collectionTestDao.getById(test.getId());
+    Assert.assertEquals(Integer.MAX_VALUE, readTest.getCollId().intValue());
+    Assert.assertNotNull(readTest.getConField());
+    Assert.assertFalse("Collection of content field is empty", readTest.getConField().isEmpty());
+    Assert.assertEquals(1, readTest.getConField().size());
+    final CollectionTestBean next = readTest.getConField().iterator().next();
+    Assert.assertEquals(bean.getId(), next.getId());
+    Assert.assertEquals(Integer.SIZE, next.getCollId().intValue());
   }
 
   public static class ConfigurationModule extends AbstractModule {

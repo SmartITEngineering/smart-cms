@@ -125,6 +125,10 @@ public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends Pers
       final byte[] bytesUtf8 = org.apache.commons.codec.binary.StringUtils.getBytesUtf8(id);
       cId = SmartContentAPI.getInstance().getContentLoader().createContentId(defaultContainerWorkspace, bytesUtf8);
     }
+    if (logger.isDebugEnabled()) {
+      logger.debug("Attempting to read content with passed ID " + id + " and reading " + cId);
+    }
+
     return cId;
   }
 

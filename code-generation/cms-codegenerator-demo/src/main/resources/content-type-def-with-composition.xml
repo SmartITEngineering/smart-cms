@@ -679,4 +679,78 @@
       </field>
     </fields>
   </contentType>
+  <contentType namespace="collection">
+    <name>CollectionTestBean</name>
+    <primaryField>collId</primaryField>
+    <fields>
+      <field>
+        <name>collId</name>
+        <value>
+          <integer />
+        </value>
+      </field>
+    </fields>
+  </contentType>
+  <contentType namespace="collection">
+    <name>CollectionTest</name>
+    <primaryField>collId</primaryField>
+    <fields>
+      <field>
+        <name>collId</name>
+        <value>
+          <integer />
+        </value>
+      </field>
+      <field>
+        <name>conField</name>
+        <value>
+          <collection>
+            <simple-value>
+              <content>
+                <definition>
+                  <typeNS>collection</typeNS>
+                  <typeName>CollectionTestBean</typeName>
+                </definition>
+              </content>
+            </simple-value>
+          </collection>
+        </value>
+      </field>
+      <field>
+        <name>stringField</name>
+        <value>
+          <collection>
+            <simple-value>
+              <string>
+                <mimeType>text/plain</mimeType>
+              </string>
+            </simple-value>
+          </collection>
+        </value>
+      </field>
+      <field>
+        <name>compField</name>
+        <value>
+          <collection>
+            <simple-value>
+              <composition>
+                <field>
+                  <name>compFieldId</name>
+                  <value>
+                    <integer />
+                  </value>
+                </field>
+                <field>
+                  <name>compFieldGeneral</name>
+                  <value>
+                    <integer />
+                  </value>
+                </field>
+              </composition>
+            </simple-value>
+          </collection>
+        </value>
+      </field>
+    </fields>
+  </contentType>
 </contentTypes>
