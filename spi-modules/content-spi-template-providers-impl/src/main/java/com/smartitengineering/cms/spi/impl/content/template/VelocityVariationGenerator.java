@@ -18,7 +18,6 @@
  */
 package com.smartitengineering.cms.spi.impl.content.template;
 
-import com.smartitengineering.cms.spi.impl.content.template.AbstractTypeVariationGenerator;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
@@ -28,9 +27,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.runtime.RuntimeSingleton;
-import org.apache.velocity.runtime.parser.node.SimpleNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +39,8 @@ import org.slf4j.LoggerFactory;
  */
 public class VelocityVariationGenerator extends AbstractTypeVariationGenerator {
 
+  private static final Semaphore MUTEX = new Semaphore(1);
+
   @Override
   public VariationGenerator getGenerator(VariationTemplate template) throws InvalidTemplateException {
     return new VelocityTemplateVariationGenerator(template.getTemplate());
@@ -47,21 +48,17 @@ public class VelocityVariationGenerator extends AbstractTypeVariationGenerator {
 
   static class VelocityTemplateVariationGenerator implements VariationGenerator {
 
-    private final SimpleNode simpleNode;
+    private final InputStreamReader inputStreamReader;
     private final VelocityContext ctx = new VelocityContext();
     protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     public VelocityTemplateVariationGenerator(byte[] templateData) throws InvalidTemplateException {
       try {
-        this.simpleNode = RuntimeSingleton.parse(new InputStreamReader(new ByteArrayInputStream(templateData)),
-                                                 "some.vm");
+        inputStreamReader = new InputStreamReader(new ByteArrayInputStream(templateData));
       }
       catch (Exception ex) {
         logger.warn(ex.getMessage(), ex);
         throw new InvalidTemplateException(ex);
-      }
-      if (simpleNode == null) {
-        throw new InvalidTemplateException();
       }
     }
 
@@ -73,10 +70,26 @@ public class VelocityVariationGenerator extends AbstractTypeVariationGenerator {
         ctx.put("params", params);
       }
       try {
-        RuntimeSingleton.getRuntimeInstance().render(ctx, writer, "some.vm", simpleNode);
+        MUTEX.acquire();
+      }
+      catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+      try {
+        if (!RuntimeSingleton.getRuntimeServices().evaluate(ctx, writer, "some.vm", inputStreamReader)) {
+          throw new IllegalStateException("Invalid template!", new InvalidTemplateException());
+        }
       }
       catch (IOException ex) {
         throw new RuntimeException(ex);
+      }
+      finally {
+        try {
+          MUTEX.release();
+        }
+        catch (Exception ex) {
+          throw new RuntimeException(ex);
+        }
       }
       return writer.toString();
     }

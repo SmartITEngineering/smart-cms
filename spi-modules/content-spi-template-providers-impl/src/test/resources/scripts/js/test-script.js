@@ -1,5 +1,5 @@
 obj = {
-  getRepresentationForContent: function (content) {
+  getRepresentationForContent: function (content, params) {
     return content.fields.get("test").value.value.toString();
   }
 }

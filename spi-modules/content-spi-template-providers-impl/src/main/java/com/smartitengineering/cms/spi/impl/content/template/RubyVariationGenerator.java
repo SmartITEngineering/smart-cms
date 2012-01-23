@@ -18,8 +18,6 @@
  */
 package com.smartitengineering.cms.spi.impl.content.template;
 
-import com.smartitengineering.cms.spi.impl.content.template.AbstractTypeVariationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.JRubyObjectFactory;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.content.template.VariationGenerator;

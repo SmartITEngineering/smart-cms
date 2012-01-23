@@ -47,8 +47,10 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit3.JUnit3Mockery;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -57,11 +59,13 @@ import org.junit.Test;
 public class JasperGeneratorTest {
 
   private static final String CONTENT = "field value";
-  private static final Mockery mockery = new JUnit3Mockery();
+  private Mockery mockery;
   private static final String REP_NAME = "test";
+  private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
-  @BeforeClass
-  public static void setupAPIAndSPI() throws ClassNotFoundException {
+  @Before
+  public void setupAPIAndSPI() throws ClassNotFoundException {
+    mockery = new JUnit3Mockery();
     GroovyGeneratorTest.setupAPI(mockery);
   }
 

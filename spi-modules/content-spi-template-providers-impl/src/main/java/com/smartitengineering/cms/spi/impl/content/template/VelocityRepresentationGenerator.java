@@ -18,7 +18,6 @@
  */
 package com.smartitengineering.cms.spi.impl.content.template;
 
-import com.smartitengineering.cms.spi.impl.content.template.AbstractTypeRepresentationGenerator;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
@@ -28,9 +27,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.runtime.RuntimeSingleton;
-import org.apache.velocity.runtime.parser.node.SimpleNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +39,8 @@ import org.slf4j.LoggerFactory;
  */
 public class VelocityRepresentationGenerator extends AbstractTypeRepresentationGenerator {
 
+  private static final Semaphore MUTEX = new Semaphore(1);
+
   @Override
   public RepresentationGenerator getGenerator(RepresentationTemplate template) throws InvalidTemplateException {
     return new VelocityTemplateRepresentationGenerator(template.getTemplate());
@@ -47,21 +48,17 @@ public class VelocityRepresentationGenerator extends AbstractTypeRepresentationG
 
   static class VelocityTemplateRepresentationGenerator implements RepresentationGenerator {
 
-    private final SimpleNode simpleNode;
+    private final InputStreamReader inputStreamReader;
     private final VelocityContext ctx = new VelocityContext();
     protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     public VelocityTemplateRepresentationGenerator(byte[] templateData) throws InvalidTemplateException {
       try {
-        this.simpleNode = RuntimeSingleton.parse(new InputStreamReader(new ByteArrayInputStream(templateData)),
-                                                 "some.vm");
+        inputStreamReader = new InputStreamReader(new ByteArrayInputStream(templateData));
       }
       catch (Exception ex) {
         logger.warn(ex.getMessage(), ex);
         throw new InvalidTemplateException(ex);
-      }
-      if (simpleNode == null) {
-        throw new InvalidTemplateException();
       }
     }
 
@@ -69,14 +66,32 @@ public class VelocityRepresentationGenerator extends AbstractTypeRepresentationG
     public String getRepresentationForContent(Content content, Map<String, String> params) {
       StringWriter writer = new StringWriter();
       ctx.put("content", content);
-      ctx.put("params", params);
+      if (params != null) {
+        ctx.put("params", params);
+      }
       try {
-        RuntimeSingleton.getRuntimeInstance().render(ctx, writer, "some.vm", simpleNode);
+        MUTEX.acquire();
+      }
+      catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+      try {
+        if (!RuntimeSingleton.getRuntimeServices().evaluate(ctx, writer, "some.vm", inputStreamReader)) {
+          throw new IllegalStateException("Invalid template!", new InvalidTemplateException());
+        }
       }
       catch (IOException ex) {
         throw new RuntimeException(ex);
       }
-      return writer.toString();
+      finally {
+        try {
+          MUTEX.release();
+        }
+        catch (Exception ex) {
+          throw new RuntimeException(ex);
+        }
+        return writer.toString();
+      }
     }
   }
 }

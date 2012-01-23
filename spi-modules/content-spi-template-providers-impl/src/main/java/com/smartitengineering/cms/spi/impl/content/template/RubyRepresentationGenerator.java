@@ -18,8 +18,6 @@
  */
 package com.smartitengineering.cms.spi.impl.content.template;
 
-import com.smartitengineering.cms.spi.impl.content.template.JRubyObjectFactory;
-import com.smartitengineering.cms.spi.impl.content.template.AbstractTypeRepresentationGenerator;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.content.template.RepresentationGenerator;

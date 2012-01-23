@@ -21,7 +21,6 @@ package com.smartitengineering.cms.spi.impl.content.template;
 import org.apache.commons.io.IOUtils;
 import org.python.core.Py;
 import org.python.core.PyObject;
-import org.python.core.PySystemState;
 import org.python.core.util.FileUtil;
 import org.python.util.PythonInterpreter;
 

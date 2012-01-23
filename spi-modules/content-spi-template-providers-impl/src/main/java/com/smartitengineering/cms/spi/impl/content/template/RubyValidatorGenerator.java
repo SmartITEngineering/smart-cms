@@ -18,8 +18,6 @@
  */
 package com.smartitengineering.cms.spi.impl.content.template;
 
-import com.smartitengineering.cms.spi.impl.content.template.JRubyObjectFactory;
-import com.smartitengineering.cms.spi.impl.content.template.AbstractTypeFieldValidator;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.content.template.FieldValidator;

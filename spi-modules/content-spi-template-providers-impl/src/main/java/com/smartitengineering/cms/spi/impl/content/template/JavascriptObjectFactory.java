@@ -30,9 +30,6 @@ import org.mozilla.javascript.Scriptable;
  */
 public class JavascriptObjectFactory {
 
-  private final Context context = Context.enter();
-  private final Scriptable scriptable = context.initStandardObjects();
-
   private JavascriptObjectFactory() {
   }
   private static final JavascriptObjectFactory OBJECT_FACTORY = new JavascriptObjectFactory();
@@ -44,12 +41,15 @@ public class JavascriptObjectFactory {
   public synchronized <T> T getObjectFromScript(byte[] data, Class<? extends T> clazz) throws InvalidTemplateException {
     try {
       String script = StringUtils.newStringUtf8(data);
+      final Context context = Context.enter();
+      final Scriptable scriptable = context.initStandardObjects();
       Script myScript = context.compileString(script, "source", 0, null);
       Object object = myScript.exec(context, scriptable);
       T generator = (T) Context.jsToJava(object, clazz);
       return generator;
     }
     catch (Exception ex) {
+      ex.printStackTrace();
       throw new InvalidTemplateException(ex);
     }
   }
