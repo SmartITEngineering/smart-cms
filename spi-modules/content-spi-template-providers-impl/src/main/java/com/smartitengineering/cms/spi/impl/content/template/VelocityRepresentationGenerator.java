@@ -23,11 +23,13 @@ import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.content.template.RepresentationGenerator;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
+import org.apache.commons.io.IOUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.runtime.RuntimeSingleton;
 import org.slf4j.Logger;
@@ -48,13 +50,17 @@ public class VelocityRepresentationGenerator extends AbstractTypeRepresentationG
 
   static class VelocityTemplateRepresentationGenerator implements RepresentationGenerator {
 
-    private final InputStreamReader inputStreamReader;
-    private final VelocityContext ctx = new VelocityContext();
+    private final String templateData;
     protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     public VelocityTemplateRepresentationGenerator(byte[] templateData) throws InvalidTemplateException {
       try {
-        inputStreamReader = new InputStreamReader(new ByteArrayInputStream(templateData));
+        final InputStreamReader inputStreamReader = new InputStreamReader(new ByteArrayInputStream(templateData));
+        this.templateData = IOUtils.toString(inputStreamReader);
+        IOUtils.closeQuietly(inputStreamReader);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Template data " + this.templateData);
+        }
       }
       catch (Exception ex) {
         logger.warn(ex.getMessage(), ex);
@@ -64,6 +70,7 @@ public class VelocityRepresentationGenerator extends AbstractTypeRepresentationG
 
     @Override
     public String getRepresentationForContent(Content content, Map<String, String> params) {
+      final VelocityContext ctx = new VelocityContext();
       StringWriter writer = new StringWriter();
       ctx.put("content", content);
       if (params != null) {
@@ -76,11 +83,13 @@ public class VelocityRepresentationGenerator extends AbstractTypeRepresentationG
         throw new RuntimeException(ex);
       }
       try {
-        if (!RuntimeSingleton.getRuntimeServices().evaluate(ctx, writer, "some.vm", inputStreamReader)) {
+        final Reader templateReader = new StringReader(this.templateData);
+        if (!RuntimeSingleton.getRuntimeServices().evaluate(ctx, writer, "some.vm", templateReader)) {
           throw new IllegalStateException("Invalid template!", new InvalidTemplateException());
         }
+        IOUtils.closeQuietly(writer);
       }
-      catch (IOException ex) {
+      catch (Exception ex) {
         throw new RuntimeException(ex);
       }
       finally {
@@ -90,8 +99,8 @@ public class VelocityRepresentationGenerator extends AbstractTypeRepresentationG
         catch (Exception ex) {
           throw new RuntimeException(ex);
         }
-        return writer.toString();
       }
+      return writer.toString();
     }
   }
 }

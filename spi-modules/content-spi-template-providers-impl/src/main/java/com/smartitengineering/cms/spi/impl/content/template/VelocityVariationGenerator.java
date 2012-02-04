@@ -23,13 +23,15 @@ import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.content.template.VariationGenerator;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
+import org.apache.commons.io.IOUtils;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.runtime.RuntimeSingleton;
+import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,13 +50,17 @@ public class VelocityVariationGenerator extends AbstractTypeVariationGenerator {
 
   static class VelocityTemplateVariationGenerator implements VariationGenerator {
 
-    private final InputStreamReader inputStreamReader;
-    private final VelocityContext ctx = new VelocityContext();
+    private final String templateData;
     protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     public VelocityTemplateVariationGenerator(byte[] templateData) throws InvalidTemplateException {
       try {
-        inputStreamReader = new InputStreamReader(new ByteArrayInputStream(templateData));
+        final InputStreamReader inputStreamReader = new InputStreamReader(new ByteArrayInputStream(templateData));
+        this.templateData = IOUtils.toString(inputStreamReader);
+        IOUtils.closeQuietly(inputStreamReader);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Template data " + this.templateData);
+        }
       }
       catch (Exception ex) {
         logger.warn(ex.getMessage(), ex);
@@ -64,6 +70,7 @@ public class VelocityVariationGenerator extends AbstractTypeVariationGenerator {
 
     @Override
     public String getVariationForField(Field field, Map<String, String> params) {
+      final VelocityContext ctx = new VelocityContext();
       StringWriter writer = new StringWriter();
       ctx.put("field", field);
       if (params != null) {
@@ -76,11 +83,14 @@ public class VelocityVariationGenerator extends AbstractTypeVariationGenerator {
         throw new RuntimeException(ex);
       }
       try {
-        if (!RuntimeSingleton.getRuntimeServices().evaluate(ctx, writer, "some.vm", inputStreamReader)) {
+        VelocityEngine engine = new VelocityEngine();
+        final Reader templateReader = new StringReader(this.templateData);
+        if (!engine.evaluate(ctx, writer, "some.vm", templateReader)) {
           throw new IllegalStateException("Invalid template!", new InvalidTemplateException());
         }
+        IOUtils.closeQuietly(writer);
       }
-      catch (IOException ex) {
+      catch (Exception ex) {
         throw new RuntimeException(ex);
       }
       finally {

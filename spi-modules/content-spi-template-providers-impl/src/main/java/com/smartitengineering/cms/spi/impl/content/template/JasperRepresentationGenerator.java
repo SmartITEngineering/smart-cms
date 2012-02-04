@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Semaphore;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporter;
@@ -82,6 +83,7 @@ public class JasperRepresentationGenerator extends AbstractTypeRepresentationGen
 
   static abstract class AbstractJasperTemplateGenerator {
 
+    private static final Semaphore MUTEX = new Semaphore(1);
     protected final transient Logger logger = LoggerFactory.getLogger(getClass());
     protected final JasperReport report;
     protected final ResourceTemplate resourceTemplate;
@@ -106,11 +108,20 @@ public class JasperRepresentationGenerator extends AbstractTypeRepresentationGen
       final String output;
       output = getOutputFormat(params);
       try {
+        MUTEX.acquire();
+      }
+      catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+      try {
         final JasperPrint print = JasperFillManager.fillReport(report, getParams(params), jRBeanCollectionDataSource);
         return export(output, print);
       }
       catch (Exception ex) {
         throw new RuntimeException(ex);
+      }
+      finally {
+        MUTEX.release();
       }
     }
 
