@@ -362,6 +362,38 @@ public class CodeGenerationTest {
     Assert.assertEquals(Integer.SIZE, next.getCollId().intValue());
   }
 
+  @Test
+  public void testPersistingCollectionOfNumbers() {
+    Injector injector = Guice.createInjector(new MasterModule());
+    CommonDao<CollectionTest, String> collectionTestDao =
+                                      injector.getInstance(Key.get(new TypeLiteral<CommonDao<CollectionTest, String>>() {
+    }));
+    CollectionTest collectionTest = new CollectionTest();
+    collectionTest.setCollId(Integer.MAX_VALUE);
+    collectionTest.setIntegerField(Arrays.asList(0, 1, 2));
+    collectionTest.setLongField(Arrays.asList(0l, 1l, 2l));
+    collectionTest.setDoubleField(Arrays.asList(0.0, 1.0, 2.0));
+    collectionTestDao.save(collectionTest);
+    String id = collectionTest.getId();
+    CollectionTest readCollections = collectionTestDao.getById(id);
+    Assert.assertNotNull(readCollections);
+    Assert.assertNotNull(readCollections.getIntegerField());
+    Assert.assertNotNull(readCollections.getLongField());
+    Assert.assertNotNull(readCollections.getDoubleField());
+    Assert.assertEquals(3, readCollections.getIntegerField().size());
+    Assert.assertEquals(3, readCollections.getDoubleField().size());
+    Assert.assertEquals(3, readCollections.getLongField().size());
+    Assert.assertTrue(collectionTest.getIntegerField().contains(new Integer(0)));
+    Assert.assertTrue(collectionTest.getIntegerField().contains(new Integer(1)));
+    Assert.assertTrue(collectionTest.getIntegerField().contains(new Integer(2)));
+    Assert.assertTrue(collectionTest.getLongField().contains(new Long(0)));
+    Assert.assertTrue(collectionTest.getLongField().contains(new Long(1)));
+    Assert.assertTrue(collectionTest.getLongField().contains(new Long(2)));
+    Assert.assertTrue(collectionTest.getDoubleField().contains(new Double(0)));
+    Assert.assertTrue(collectionTest.getDoubleField().contains(new Double(1)));
+    Assert.assertTrue(collectionTest.getDoubleField().contains(new Double(2)));
+  }
+
   public static class ConfigurationModule extends AbstractModule {
 
     @Override
