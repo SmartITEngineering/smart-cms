@@ -394,6 +394,30 @@ public class CodeGenerationTest {
     Assert.assertTrue(collectionTest.getDoubleField().contains(new Double(2)));
   }
 
+  @Test
+  public void testPersistingCollectionOfByteArray() {
+    Injector injector = Guice.createInjector(new MasterModule());
+    CommonDao<CollectionTest, String> collectionTestDao =
+                                      injector.getInstance(Key.get(new TypeLiteral<CommonDao<CollectionTest, String>>() {
+    }));
+    CollectionTest collectionTest = new CollectionTest();
+    collectionTest.setCollId(Integer.MAX_VALUE);
+    collectionTest.setBinaryField(Arrays.asList(new byte[]{0}, new byte[]{1}, new byte[]{2}));
+    collectionTestDao.save(collectionTest);
+    String id = collectionTest.getId();
+    CollectionTest readCollections = collectionTestDao.getById(id);
+    Assert.assertNotNull(readCollections);
+    Assert.assertNotNull(readCollections.getBinaryField());
+    Assert.assertEquals(3, readCollections.getBinaryField().size());
+    Set<Byte> selectedBytes = new HashSet<Byte>();
+    for (byte[] singleVal : readCollections.getBinaryField()) {
+      Assert.assertEquals(1, singleVal.length);
+      Assert.assertTrue(singleVal[0] == 0 || singleVal[0] == 1 || singleVal[0] == 2);
+      selectedBytes.add(singleVal[0]);
+    }
+    Assert.assertEquals(3, selectedBytes.size());
+  }
+
   public static class ConfigurationModule extends AbstractModule {
 
     @Override
