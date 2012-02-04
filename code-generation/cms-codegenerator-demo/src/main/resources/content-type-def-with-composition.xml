@@ -729,6 +729,46 @@
         </value>
       </field>
       <field>
+        <name>integerField</name>
+        <value>
+          <collection>
+            <simple-value>
+              <integer />
+            </simple-value>
+          </collection>
+        </value>
+      </field>
+      <field>
+        <name>longField</name>
+        <value>
+          <collection>
+            <simple-value>
+              <long />
+            </simple-value>
+          </collection>
+        </value>
+      </field>
+      <field>
+        <name>doubleField</name>
+        <value>
+          <collection>
+            <simple-value>
+              <double />
+            </simple-value>
+          </collection>
+        </value>
+      </field>
+      <field>
+        <name>dateField</name>
+        <value>
+          <collection>
+            <simple-value>
+              <datetime />
+            </simple-value>
+          </collection>
+        </value>
+      </field>
+      <field>
         <name>compField</name>
         <value>
           <collection>

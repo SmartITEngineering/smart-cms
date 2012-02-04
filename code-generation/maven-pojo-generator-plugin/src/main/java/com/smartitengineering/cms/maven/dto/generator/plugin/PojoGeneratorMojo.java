@@ -1251,21 +1251,21 @@ public class PojoGeneratorMojo extends AbstractMojo {
             }
             case INTEGER: {
               final String methodName = "createIntegerFieldValue";
-              final Class valClass = Integer.class;
+              final Class valClass = Number.class;
               setSimpleMultiField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
                                   methodName, prefix);
               break;
             }
             case DOUBLE: {
               final String methodName = "createDoubleFieldValue";
-              final Class valClass = Double.class;
+              final Class valClass = Number.class;
               setSimpleMultiField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
                                   methodName, prefix);
               break;
             }
             case LONG: {
               final String methodName = "createLongFieldValue";
-              final Class valClass = Long.class;
+              final Class valClass = Number.class;
               setSimpleMultiField(block, fromBean, wContent, getterName, fieldDefs, name, model, contentLoader, valClass,
                                   methodName, prefix);
               break;
@@ -1392,7 +1392,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
         prefix, "collectionVar"), JExpr._new(model.ref(ArrayList.class).narrow(FieldValue.class)));
     nonNullBlock.add(mutableFieldValue.invoke("setValue").arg(collection));
     final JForLoop forLoop = nonNullBlock._for();
-    JVar iterator_item = forLoop.init(model.ref(Iterator.class).narrow(valClass), getVarName(prefix, "i"),
+    JVar iterator_item = forLoop.init(model.ref(Iterator.class).narrow(model.ref(valClass).wildcard()), getVarName(prefix, "i"),
                                       fromBean.invoke(getterName).invoke("iterator"));
     forLoop.test(iterator_item.invoke("hasNext"));
     final JBlock forBody = forLoop.body();
