@@ -769,6 +769,18 @@
         </value>
       </field>
       <field>
+        <name>binaryField</name>
+        <value>
+          <collection>
+            <simple-value>
+              <other>
+                <mimeType>appliction/octet-stream</mimeType>
+              </other>
+            </simple-value>
+          </collection>
+        </value>
+      </field>
+      <field>
         <name>compField</name>
         <value>
           <collection>

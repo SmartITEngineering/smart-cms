@@ -262,8 +262,8 @@ public class PojoGeneratorMojo extends AbstractMojo {
             classType._extends(typeLiteral.narrow(beanClass));
             block.add(JExpr.invoke("bind").arg(JExpr._new(classType)).invoke("toInstance").arg(definedClass.dotclass()));
             final JClass narrowedDaoImplTypeLiteral = typeLiteral.narrow(commonDaoImpl.narrow(definedClass));
-            daoImplType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).
-                append("DaoImplType").toString());
+            daoImplType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).append("DaoImplType").
+                toString());
             daoImplType._extends(narrowedDaoImplTypeLiteral);
             block.add(JExpr.invoke("bind").arg(JExpr._new(commonDaoType)).invoke("to").arg(JExpr._new(daoImplType)).
                 invoke("in").arg(singletonScope.dotclass()));
@@ -572,32 +572,32 @@ public class PojoGeneratorMojo extends AbstractMojo {
         }
         case COLLECTION:
           fieldClass = null;
-          final String itemType;
+          final JClass itemType;
           CollectionDataType collectionDataType = (CollectionDataType) def.getValueDef();
           switch (collectionDataType.getItemDataType().getType()) {
             case BOOLEAN:
-              itemType = Boolean.class.getName();
+              itemType = codeModel.ref(Boolean.class);
               break;
             case STRING:
-              itemType = String.class.getName();
+              itemType = codeModel.ref(String.class);
               break;
             case CONTENT:
-              itemType = classes.get(((ContentDataType) collectionDataType.getItemDataType()).getTypeDef()).fullName();
+              itemType = classes.get(((ContentDataType) collectionDataType.getItemDataType()).getTypeDef());
               break;
             case DATE_TIME:
-              itemType = Date.class.getName();
+              itemType = codeModel.ref(Date.class);
               break;
             case INTEGER:
-              itemType = Integer.class.getName();
+              itemType = codeModel.ref(Integer.class);
               break;
             case DOUBLE:
-              itemType = Double.class.getName();
+              itemType = codeModel.ref(Double.class);
               break;
             case LONG:
-              itemType = Long.class.getName();
+              itemType = codeModel.ref(Long.class);
               break;
             case OTHER:
-              itemType = byte[].class.getName();
+              itemType = codeModel.ref(byte[].class);
               break;
             case ENUM: {
               JDefinedClass enumClass = definedClass._enum(JMod.PUBLIC | JMod.STATIC, getterSetterSuffix);
@@ -606,7 +606,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
               for (String choice : choices) {
                 enumClass.enumConstant(choice);
               }
-              itemType = enumClass.fullName();
+              itemType = enumClass;
               break;
             }
             case COMPOSITE: {
@@ -625,21 +625,20 @@ public class PojoGeneratorMojo extends AbstractMojo {
                   compositeFieldClass._extends(composedOfClass);
                 }
                 generateFields(compositeDataType.getOwnComposition(), compositeFieldClass, classes, codeModel);
-                itemType = compositeFieldClass.fullName();
+                itemType = compositeFieldClass;
               }
               else if (composedOfContent != null) {
-                itemType = composedOfClass.fullName();
+                itemType = composedOfClass;
               }
               else {
-                itemType = "Object";
+                itemType = codeModel.ref(Object.class);
               }
               break;
             }
             default:
-              itemType = "Object";
+              itemType = codeModel.ref(Object.class);
           }
-          jType =
-          codeModel.parseType(new StringBuilder("java.util.Collection<").append(itemType).append('>').toString());
+          jType = codeModel.ref(Collection.class).narrow(itemType);
           break;
         case COMPOSITE: {
           CompositeDataType compositeDataType = (CompositeDataType) def.getValueDef();
@@ -1392,7 +1391,8 @@ public class PojoGeneratorMojo extends AbstractMojo {
         prefix, "collectionVar"), JExpr._new(model.ref(ArrayList.class).narrow(FieldValue.class)));
     nonNullBlock.add(mutableFieldValue.invoke("setValue").arg(collection));
     final JForLoop forLoop = nonNullBlock._for();
-    JVar iterator_item = forLoop.init(model.ref(Iterator.class).narrow(model.ref(valClass).wildcard()), getVarName(prefix, "i"),
+    JVar iterator_item = forLoop.init(model.ref(Iterator.class).narrow(model.ref(valClass).wildcard()), getVarName(
+        prefix, "i"),
                                       fromBean.invoke(getterName).invoke("iterator"));
     forLoop.test(iterator_item.invoke("hasNext"));
     final JBlock forBody = forLoop.body();
