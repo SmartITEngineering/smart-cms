@@ -458,6 +458,16 @@ public class SPIModule extends PrivateModule {
       bind(UriStorer.class).to(FileSystemUriStorer.class);
       bind(String.class).annotatedWith(Names.named("pathToFolderOfUriStorer")).toInstance(uriStoreFolder);
       bind(String.class).annotatedWith(Names.named("fileNameOfUriStorer")).toInstance(uriStoreFileName);
+      /**
+       * Start of subscriber cron configurations
+       */
+      bind(String.class).annotatedWith(Names.named("subscribePollName")).toInstance("cmsSubscriberPoll");
+      bind(String.class).annotatedWith(Names.named("subscribePollJobName")).toInstance("cmsSubscriberPollJob");
+      bind(String.class).annotatedWith(Names.named("subscribePollTriggerName")).toInstance("cmsSubscriberPollTrigger");
+      bind(String.class).annotatedWith(Names.named("subscribePollListenerName")).toInstance("cmsSubscriberPollListener");
+      /**
+       * End of subscriber cron configurations
+       */
       bind(EventSubscriber.class).to(EventSubscriberImpl.class);
       Multibinder<EventConsumer> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventConsumer>() {
       });
