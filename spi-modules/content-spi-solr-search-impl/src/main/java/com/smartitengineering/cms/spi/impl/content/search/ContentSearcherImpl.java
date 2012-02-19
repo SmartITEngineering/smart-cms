@@ -46,7 +46,6 @@ import com.smartitengineering.dao.common.queryparam.QueryParameterCastHelper;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.dao.common.queryparam.StringLikeQueryParameter;
 import com.smartitengineering.dao.common.queryparam.UniOperandQueryParameter;
-import com.smartitengineering.events.async.api.EventSubscriber;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -75,8 +74,6 @@ public class ContentSearcherImpl implements ContentSearcher {
   @Inject
   private SearchBeanLoader<Content, ContentId> contentLoader;
   // Injected so that the quartz service starts
-  @Inject(optional = true)
-  private EventSubscriber subscriber;
   @Inject
   @Named(REINDEX_LISTENER_NAME)
   private EventListener reindexListener;

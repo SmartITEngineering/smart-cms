@@ -465,10 +465,12 @@ public class SPIModule extends PrivateModule {
       bind(String.class).annotatedWith(Names.named("subscribePollJobName")).toInstance("cmsSubscriberPollJob");
       bind(String.class).annotatedWith(Names.named("subscribePollTriggerName")).toInstance("cmsSubscriberPollTrigger");
       bind(String.class).annotatedWith(Names.named("subscribePollListenerName")).toInstance("cmsSubscriberPollListener");
+      bind(EventSubscriberImpl.PollNameConfig.class);
+      logger.info("Inject custom names for EventSubscriberImpl");
       /**
        * End of subscriber cron configurations
        */
-      bind(EventSubscriber.class).to(EventSubscriberImpl.class);
+      bind(EventSubscriber.class).to(EventSubscriberImpl.class).asEagerSingleton();
       Multibinder<EventConsumer> listenerBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<EventConsumer>() {
       });
       listenerBinder.addBinding().to(EventConsumerImpl.class);
