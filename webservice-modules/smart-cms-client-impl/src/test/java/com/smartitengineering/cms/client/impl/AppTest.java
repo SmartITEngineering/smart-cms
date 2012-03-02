@@ -1246,7 +1246,8 @@ public class AppTest {
     valueImpl.setName("b");
     valueImpl.setValue(otherFieldValueImpl);
 
-    Thread.sleep(SLEEP_DURATION);
+    sleep();
+    sleep();
 
     LOGGER.info(":::::::::::::: CREATE CONTENT RESOURCE TEST ::::::::::::::");
     ObjectMapper mapper = new ObjectMapper();
@@ -1340,10 +1341,11 @@ public class AppTest {
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
+    sleep();
   }
 
   @Test
-  public void testUriTempaltes() throws URISyntaxException {
+  public void testUriTemplates() throws URISyntaxException {
     LOGGER.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TEST TEMPLATES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
     final String workspaceNS, workspaceId, typeNS, typeId;
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
@@ -1440,7 +1442,7 @@ public class AppTest {
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
-    Thread.sleep(SLEEP_DURATION);
+    sleep();
     ContentResource contentResource = feedResource.getContents().createContentResource(content);
     Assert.assertEquals(2, createCount.intValue());
     contentResource.update(content);
@@ -1449,7 +1451,7 @@ public class AppTest {
     contentResource.get();
     contentResource.delete();
     Assert.assertEquals(2, deleteCount.intValue());
-    Thread.sleep(SLEEP_DURATION);
+    sleep();
   }
 
   @Test
@@ -1466,7 +1468,7 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    Thread.sleep(SLEEP_DURATION);
+    sleep();
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -1535,7 +1537,7 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    Thread.sleep(SLEEP_DURATION);
+    sleep();
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -1605,7 +1607,7 @@ public class AppTest {
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
 
-    Thread.sleep(SLEEP_DURATION);
+    sleep();
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -1823,6 +1825,7 @@ public class AppTest {
     Assert.assertEquals(updateField.getName(), updateField1.getName());
     Assert.assertEquals(updateField.getValue().getType().toUpperCase(), updateField1.getValue().getType());
     Assert.assertEquals(updateField.getValue().getValue(), updateField1.getValue().getValue());
+    sleep();
   }
 
   @Test
@@ -1840,7 +1843,7 @@ public class AppTest {
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
     LOGGER.info("Author for representation created!");
-    Thread.sleep(SLEEP_DURATION);
+    sleep();
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -1883,6 +1886,7 @@ public class AppTest {
       String type = contentResource.getRepresentation(next);
       Assert.assertEquals("some/type", type);
     }
+    sleep();
   }
 
   @Test
@@ -1897,7 +1901,7 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    Thread.sleep(SLEEP_DURATION);
+    sleep();
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -1949,7 +1953,7 @@ public class AppTest {
   public void testSearch() throws Exception {
     LOGGER.info(":::::::::::::: SEARCH CONTENT RESOURCE TEST ::::::::::::::");
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
-    Thread.sleep(SLEEP_DURATION);
+    sleep();
     String query =
            "typeId=atest2:additional:com.smartitengineering.smart-shopping.content:Author&status=published&status=draft&disjunction=true";
     ContentSearcherResource searchContent = resource.searchContent(query);
@@ -1976,7 +1980,7 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    Thread.sleep(SLEEP_DURATION);
+    sleep();
 
     FieldValueImpl value = new FieldValueImpl();
     value.setType("content");
@@ -2650,7 +2654,7 @@ public class AppTest {
     val = ((CollectionFieldValue) lastReadStateOfEntity.getFieldsMap().get("collectiveEnumField").getValue()).getValues().
         iterator().next().getValue();
     Assert.assertEquals("4", val);
-    Thread.sleep(SLEEP_DURATION);
+    sleep();
     for (int i = 1; i < 5; ++i) {
       try {
         properties = new Properties();
@@ -2732,6 +2736,7 @@ public class AppTest {
       rsrc.get();
       rsrc.update(template);
     }
+    sleep();
   }
 
   @Test
@@ -2759,6 +2764,7 @@ public class AppTest {
     Collection<WorkspaceContentCoProcessorResource> secRsrcs = resource.getWorkspaceFeeds().iterator().
         next().getContentCoProcessors().getContentCoProcessorResources();
     Assert.assertEquals(1, secRsrcs.size());
+    sleep();
   }
 
   @Test
@@ -2806,6 +2812,7 @@ public class AppTest {
     Assert.assertEquals(1, def.getParameters().size());
     Assert.assertEquals("v2", def.getParameters().get("k2"));
     Assert.assertEquals("test2", def.getResourceUri().getValue());
+    sleep();
   }
 
   private WorkspaceFeedResource setupContentCoProcessorExecWorkspace() {
@@ -2879,7 +2886,7 @@ public class AppTest {
       Assert.assertEquals(lastReadStateOfEntity.getFieldsMap().get("directEnumField").getValue().getValue(),
                           lastReadStateOfEntity.getFieldsMap().get("directEnumFieldCopy").getValue().getValue());
       String dynaField = lastReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue();
-      Thread.sleep(SLEEP_DURATION);
+      sleep();
       final Content reReadStateOfEntity = client.resource(resourceImpl.getUri()).accept(MediaType.APPLICATION_JSON).
           header("Pragma", "no-cache").get(Content.class);
       Assert.assertEquals(dynaField, reReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue());
@@ -2906,11 +2913,12 @@ public class AppTest {
       Assert.assertEquals(lastReadStateOfEntity.getFieldsMap().get("directEnumField").getValue().getValue(),
                           lastReadStateOfEntity.getFieldsMap().get("directEnumFieldCopy").getValue().getValue());
       String dynaField = lastReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue();
-      Thread.sleep(SLEEP_DURATION);
+      sleep();
       final Content reReadStateOfEntity = client.resource(resourceImpl.getUri()).accept(MediaType.APPLICATION_JSON).
           header("Pragma", "no-cache").get(Content.class);
       Assert.assertFalse(dynaField.equals(reReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue()));
     }
+    sleep();
   }
 
   private WorkspaceFeedResource setupSequenceWorkspace() {
@@ -2945,10 +2953,11 @@ public class AppTest {
 
   @Test
   public void testCreateSequences() {
+    LOGGER.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Create Sequence %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
     WorkspaceFeedResource resource = setupSequenceWorkspace();
     final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
     com.smartitengineering.cms.api.workspace.Workspace workspace = workspaceApi.createWorkspaceId(resource.
-        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspae();
+        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspace();
     Sequence sequence = workspaceApi.putSequence(workspace.getId(), TEST, PORT);
     Assert.assertNotNull(sequence);
     Assert.assertEquals(workspace.getId(), sequence.getWorkspace());
@@ -2959,10 +2968,11 @@ public class AppTest {
 
   @Test
   public void testGetSequence() {
+    LOGGER.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Get Sequence %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
     WorkspaceFeedResource resource = setupSequenceWorkspace();
     final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
     com.smartitengineering.cms.api.workspace.Workspace workspace = workspaceApi.createWorkspaceId(resource.
-        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspae();
+        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspace();
     Sequence sequence = workspaceApi.getSequence(workspace.getId(), TEST);
     Assert.assertNotNull(sequence);
     Assert.assertEquals(workspace.getId(), sequence.getWorkspace());
@@ -2976,14 +2986,16 @@ public class AppTest {
     Assert.assertEquals(workspace.getId(), sequence.getWorkspace());
     Assert.assertEquals(TEST, sequence.getName());
     Assert.assertEquals(PORT, sequence.getCurrentValue());
+    sleep();
   }
 
   @Test
   public void testBasicSequenceModifications() {
+    LOGGER.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Basic Modify Sequence %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
     WorkspaceFeedResource resource = setupSequenceWorkspace();
     final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
     com.smartitengineering.cms.api.workspace.Workspace workspace = workspaceApi.createWorkspaceId(resource.
-        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspae();
+        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspace();
     Sequence sequence = workspaceApi.getSequence(workspace.getId(), TEST);
     long newVal = workspaceApi.modifySequenceValue(sequence, 1);
     Assert.assertEquals(PORT + 1, newVal);
@@ -2991,14 +3003,16 @@ public class AppTest {
     Assert.assertEquals(PORT - 1, newVal);
     newVal = workspaceApi.modifySequenceValue(sequence, 1);
     Assert.assertEquals(PORT, newVal);
+    sleep();
   }
 
   @Test
   public void testSingleJVMMultiThreadedSequenceModifications() {
+    LOGGER.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Multithread modify Sequence %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
     WorkspaceFeedResource resource = setupSequenceWorkspace();
     final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
     com.smartitengineering.cms.api.workspace.Workspace workspace = workspaceApi.createWorkspaceId(resource.
-        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspae();
+        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspace();
     final Sequence sequence = workspaceApi.getSequence(workspace.getId(), TEST);
     final ConcurrentHashSet<Long> vals = new ConcurrentHashSet<Long>();
     Runnable runnable = new Runnable() {
@@ -3035,10 +3049,11 @@ public class AppTest {
 
   @Test
   public void testDeleteSequence() {
+    LOGGER.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Delete Sequence %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
     WorkspaceFeedResource resource = setupSequenceWorkspace();
     final WorkspaceAPI workspaceApi = SmartContentAPI.getInstance().getWorkspaceApi();
     com.smartitengineering.cms.api.workspace.Workspace workspace = workspaceApi.createWorkspaceId(resource.
-        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspae();
+        getWorkspaceNamespace(), resource.getWorkspaceName()).getWorkspace();
     Sequence sequence = workspaceApi.getSequence(workspace.getId(), TEST);
     Assert.assertNotNull(sequence);
     workspaceApi.deleteSequence(workspace.getId(), TEST);
@@ -3075,6 +3090,7 @@ public class AppTest {
     long newVal = seq.update(1);
     Assert.assertEquals(TEST, seq.getName());
     Assert.assertEquals(PORT + 1, newVal);
+    sleep();
   }
 
   @Test
@@ -3091,6 +3107,7 @@ public class AppTest {
     catch (Exception ex) {
       //Expected
     }
+    sleep();
   }
 
   protected void sleep() {
