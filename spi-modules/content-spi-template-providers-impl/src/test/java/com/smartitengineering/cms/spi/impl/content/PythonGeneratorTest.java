@@ -28,13 +28,20 @@ import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceAPIImpl;
 import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
+import com.smartitengineering.cms.api.type.ValidatorDef;
+import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.content.RepresentationProvider;
+import com.smartitengineering.cms.spi.content.ValidatorProvider;
+import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.PythonRepresentationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.PythonValidatorGenerator;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
@@ -91,8 +98,6 @@ public class PythonGeneratorTest {
         exactly(1).of(template).getTemplate();
         will(returnValue(
             IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("scripts/python/test-script.py"))));
-        exactly(1).of(template).getName();
-        will(returnValue(REP_NAME));
         exactly(1).of(value).getValue();
         will(returnValue(CONTENT));
         exactly(1).of(field).getValue();
@@ -127,6 +132,119 @@ public class PythonGeneratorTest {
     Assert.assertEquals(REP_NAME, representation.getName());
     Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getRepresentation()));
     Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());
+    mockery.assertIsSatisfied();
+  }
+
+  @Test
+  public void testPythonValGenerationWithFalseAssertion() throws IOException {
+    TypeFieldValidator generator = new PythonValidatorGenerator();
+    final ValidatorTemplate template = mockery.mock(ValidatorTemplate.class);
+    WorkspaceAPIImpl impl = new WorkspaceAPIImpl() {
+
+      @Override
+      public ValidatorTemplate getValidatorTemplate(WorkspaceId workspaceId, String name) {
+        return template;
+      }
+    };
+    impl.setValidatorGenerators(Collections.singletonMap(ValidatorType.PYTHON, generator));
+    ValidatorProvider provider = new ValidatorProviderImpl();
+    registerBeanFactory(impl);
+    final Content content = mockery.mock(Content.class, "valContent");
+    final Field field = mockery.mock(Field.class, "valField");
+    final FieldValue value = mockery.mock(FieldValue.class, "valFieldVal");
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(1).of(template).getTemplate();
+        will(returnValue(
+            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("scripts/python/val-script.py"))));
+        exactly(1).of(value).getValue();
+        will(returnValue(CONTENT));
+        exactly(1).of(field).getValue();
+        will(returnValue(value));
+        FieldDef fieldDef = mockery.mock(FieldDef.class, "valFieldDef");
+        exactly(1).of(field).getFieldDef();
+        will(returnValue(fieldDef));
+        ValidatorDef valDef = mockery.mock(ValidatorDef.class, "valDef");
+        exactly(1).of(fieldDef).getCustomValidators();
+        will(returnValue(Collections.singleton(valDef)));
+        final ResourceUri rUri = mockery.mock(ResourceUri.class, "valRUri");
+        exactly(1).of(valDef).getUri();
+        will(returnValue(rUri));
+        exactly(1).of(rUri).getValue();
+        will(returnValue("iUri"));
+        exactly(1).of(rUri).getType();
+        will(returnValue(ResourceUri.Type.INTERNAL));
+        final ContentId contentId = mockery.mock(ContentId.class, "valContentId");
+        exactly(1).of(content).getContentId();
+        will(returnValue(contentId));
+        final WorkspaceId wId = mockery.mock(WorkspaceId.class, "valWId");
+        exactly(1).of(contentId).getWorkspaceId();
+        will(returnValue(wId));
+        exactly(1).of(template).getTemplateType();
+        will(returnValue(ValidatorType.PYTHON));
+        exactly(1).of(valDef).getParameters();
+        will(returnValue(Collections.emptyMap()));
+      }
+    });
+    Assert.assertFalse(provider.isValidField(content, field));
+    mockery.assertIsSatisfied();
+  }
+
+  @Test
+  public void testPythonValGenerationWithTrueAssertion() throws IOException {
+    TypeFieldValidator generator = new PythonValidatorGenerator();
+    final ValidatorTemplate template = mockery.mock(ValidatorTemplate.class, "valTemp");
+    WorkspaceAPIImpl impl = new WorkspaceAPIImpl() {
+
+      @Override
+      public ValidatorTemplate getValidatorTemplate(WorkspaceId workspaceId, String name) {
+        return template;
+      }
+    };
+    impl.setValidatorGenerators(Collections.singletonMap(ValidatorType.GROOVY, generator));
+    ValidatorProvider provider = new ValidatorProviderImpl();
+    registerBeanFactory(impl);
+    final Content content = mockery.mock(Content.class, "valContent2");
+    final Field field = mockery.mock(Field.class, "valField2");
+    final FieldValue value = mockery.mock(FieldValue.class, "valFieldVal2");
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(1).of(template).getTemplate();
+        will(returnValue(
+            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("scripts/python/val-script-2.py"))));
+        exactly(1).of(value).getValue();
+        will(returnValue(CONTENT));
+        exactly(1).of(field).getValue();
+        will(returnValue(value));
+        FieldDef fieldDef = mockery.mock(FieldDef.class, "valFieldDef2");
+        exactly(1).of(field).getFieldDef();
+        will(returnValue(fieldDef));
+        ValidatorDef valDef = mockery.mock(ValidatorDef.class, "valDef2");
+        exactly(1).of(fieldDef).getCustomValidators();
+        will(returnValue(Collections.singleton(valDef)));
+        final ResourceUri rUri = mockery.mock(ResourceUri.class, "valRUri2");
+        exactly(1).of(valDef).getUri();
+        will(returnValue(rUri));
+        exactly(1).of(rUri).getValue();
+        will(returnValue("iUri"));
+        exactly(1).of(rUri).getType();
+        will(returnValue(ResourceUri.Type.INTERNAL));
+        final ContentId contentId = mockery.mock(ContentId.class, "valContentId2");
+        exactly(1).of(content).getContentId();
+        will(returnValue(contentId));
+        final WorkspaceId wId = mockery.mock(WorkspaceId.class, "valWId2");
+        exactly(1).of(contentId).getWorkspaceId();
+        will(returnValue(wId));
+        exactly(1).of(template).getTemplateType();
+        will(returnValue(ValidatorType.GROOVY));
+        exactly(1).of(valDef).getParameters();
+        will(returnValue(Collections.emptyMap()));
+      }
+    });
+    Assert.assertTrue(provider.isValidField(content, field));
+    mockery.assertIsSatisfied();
   }
 
   protected void registerBeanFactory(final WorkspaceAPI api) {

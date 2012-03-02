@@ -49,7 +49,6 @@ import com.smartitengineering.cms.spi.impl.content.VelocityGeneratorTest.Threads
 import com.smartitengineering.cms.spi.impl.content.template.RubyRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.RubyValidatorGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.RubyVariationGenerator;
-import com.smartitengineering.cms.spi.impl.content.template.VelocityRepresentationGenerator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;

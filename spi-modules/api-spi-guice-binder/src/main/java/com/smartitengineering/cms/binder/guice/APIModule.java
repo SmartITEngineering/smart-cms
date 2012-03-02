@@ -44,6 +44,7 @@ import com.smartitengineering.cms.spi.impl.content.template.JavascriptContentCoP
 import com.smartitengineering.cms.spi.impl.content.template.JavascriptRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.JavascriptValidatorGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.JavascriptVariationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.PythonValidatorGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.RubyContentCoProcessorGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.RubyRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.RubyValidatorGenerator;
@@ -105,6 +106,7 @@ public class APIModule extends AbstractModule {
     typeFieldValBinder.addBinding(ValidatorType.RUBY).to(RubyValidatorGenerator.class);
     typeFieldValBinder.addBinding(ValidatorType.GROOVY).to(GroovyValidatorGenerator.class);
     typeFieldValBinder.addBinding(ValidatorType.JAVASCRIPT).to(JavascriptValidatorGenerator.class);
+    typeFieldValBinder.addBinding(ValidatorType.PYTHON).to(PythonValidatorGenerator.class);
 
   }
 }

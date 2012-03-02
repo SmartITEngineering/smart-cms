@@ -26,5 +26,6 @@ public enum ValidatorType {
 
   RUBY,
   GROOVY,
+  PYTHON,
   JAVASCRIPT
 }
