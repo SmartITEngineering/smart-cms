@@ -59,12 +59,12 @@ public class FriendlyContentTypesResource extends AbstractResource {
   @GET
   @Produces(MediaType.APPLICATION_ATOM_XML)
   public Response get() {
-    Workspace workspace = workspaceId.getWorkspae();
+    Workspace workspace = workspaceId.getWorkspace();
     List<ContentType> types = new ArrayList<ContentType>();
     Collection<WorkspaceId> friends = workspace.getFriendlies();
     if (friends != null && !friends.isEmpty()) {
       for (WorkspaceId wId : friends) {
-        Workspace friend = wId.getWorkspae();
+        Workspace friend = wId.getWorkspace();
         if (friend != null) {
           types.addAll(friend.getContentDefintions());
         }

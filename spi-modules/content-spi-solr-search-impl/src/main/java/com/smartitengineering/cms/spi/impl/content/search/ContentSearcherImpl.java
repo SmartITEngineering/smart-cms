@@ -96,7 +96,7 @@ public class ContentSearcherImpl implements ContentSearcher {
       finalQuery.append(SolrFieldNames.WORKSPACEID).append(": ").append(ClientUtils.escapeQueryChars(
           workspaceId.toString()));
       if (filter.isFriendliesIncluded()) {
-        Collection<WorkspaceId> friendlies = workspaceId.getWorkspae().getFriendlies();
+        Collection<WorkspaceId> friendlies = workspaceId.getWorkspace().getFriendlies();
         if (friendlies != null && !friendlies.isEmpty()) {
           finalQuery.append(disjunctionSeperator).append("(private: false AND (");
           boolean first = true;

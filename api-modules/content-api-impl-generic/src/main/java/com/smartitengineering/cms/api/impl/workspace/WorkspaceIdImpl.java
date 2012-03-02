@@ -128,7 +128,7 @@ public class WorkspaceIdImpl implements WorkspaceId {
   }
 
   @Override
-  public Workspace getWorkspae() {
+  public Workspace getWorkspace() {
     try {
       return SmartContentAPI.getInstance().getWorkspaceApi().getWorkspace(this);
     }

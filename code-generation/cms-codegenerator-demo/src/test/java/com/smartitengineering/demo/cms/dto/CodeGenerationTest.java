@@ -73,7 +73,7 @@ public class CodeGenerationTest {
       }
       boolean valid = false;
       try {
-        Workspace workspace = wId.getWorkspae();
+        Workspace workspace = wId.getWorkspace();
         final ContentTypeLoader contentTypeLoader = SmartContentAPI.getInstance().getContentTypeLoader();
         Collection<WritableContentType> types;
         types = contentTypeLoader.parseContentTypes(workspace.getId(), CodeGenerationTest.class.getClassLoader().
