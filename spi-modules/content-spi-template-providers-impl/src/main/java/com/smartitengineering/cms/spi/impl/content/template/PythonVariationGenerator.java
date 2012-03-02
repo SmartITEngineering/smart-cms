@@ -32,8 +32,10 @@ public class PythonVariationGenerator extends AbstractTypeVariationGenerator {
   @Override
   public VariationGenerator getGenerator(VariationTemplate template) throws InvalidTemplateException {
     try {
-      return new JythonObjectFactory<VariationGenerator>(VariationGenerator.class,
-                                                         StringUtils.newStringUtf8(template.getTemplate())).createObject();
+      final VariationGenerator varGen = new JythonObjectFactory<VariationGenerator>(VariationGenerator.class,
+                                                                                    StringUtils.newStringUtf8(template.
+          getTemplate())).createObject();
+      return new SynchronizedVariationGeneratorDecorator(varGen);
     }
     catch (Exception ex) {
       logger.warn("Could not create Python based variation generator", ex);

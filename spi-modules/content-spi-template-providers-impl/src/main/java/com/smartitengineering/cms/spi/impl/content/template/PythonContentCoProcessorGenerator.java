@@ -36,8 +36,10 @@ public class PythonContentCoProcessorGenerator implements ContentCoProcessorGene
 
   public ContentCoProcessor getGenerator(ContentCoProcessorTemplate template) throws InvalidTemplateException {
     try {
-      return new JythonObjectFactory<ContentCoProcessor>(ContentCoProcessor.class,
-                                                         StringUtils.newStringUtf8(template.getTemplate())).createObject();
+      final ContentCoProcessor coProc = new JythonObjectFactory<ContentCoProcessor>(ContentCoProcessor.class,
+                                                                                    StringUtils.newStringUtf8(template.
+          getTemplate())).createObject();
+      return new SynchronizedContentCoProcessorGeneratorDecorator(coProc);
     }
     catch (Exception ex) {
       logger.warn("Could not create Python based content co processor", ex);

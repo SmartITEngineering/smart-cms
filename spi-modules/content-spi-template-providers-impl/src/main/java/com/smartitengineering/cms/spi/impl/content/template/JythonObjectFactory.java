@@ -46,19 +46,19 @@ public class JythonObjectFactory<T> {
     return (T) klass.__call__().__tojava__(interfaceType);
   }
 
-  public T createObject(Object arg1) {
+  protected T createObject(Object arg1) {
     return (T) klass.__call__(Py.java2py(arg1)).__tojava__(interfaceType);
   }
 
-  public T createObject(Object arg1, Object arg2) {
+  protected T createObject(Object arg1, Object arg2) {
     return (T) klass.__call__(Py.java2py(arg1), Py.java2py(arg2)).__tojava__(interfaceType);
   }
 
-  public T createObject(Object arg1, Object arg2, Object arg3) {
+  protected T createObject(Object arg1, Object arg2, Object arg3) {
     return (T) klass.__call__(Py.java2py(arg1), Py.java2py(arg2), Py.java2py(arg3)).__tojava__(interfaceType);
   }
 
-  public T createObject(Object args[], String keywords[]) {
+  protected T createObject(Object args[], String keywords[]) {
     PyObject convertedArgs[] = new PyObject[args.length];
     for (int i = 0; i < args.length; i++) {
       convertedArgs[i] = Py.java2py(args[i]);
@@ -66,7 +66,7 @@ public class JythonObjectFactory<T> {
     return (T) klass.__call__(convertedArgs, keywords).__tojava__(interfaceType);
   }
 
-  public T createObject(Object... args) {
+  protected T createObject(Object... args) {
     return createObject(args, Py.NoKeywords);
   }
 }

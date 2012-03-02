@@ -327,6 +327,115 @@ public class PythonGeneratorTest {
     mockery.assertIsSatisfied();
   }
 
+  @Test
+  public void testMultiPythonRepGeneration() throws IOException {
+    TypeRepresentationGenerator generator = new PythonRepresentationGenerator();
+    final RepresentationTemplate template = mockery.mock(RepresentationTemplate.class);
+    WorkspaceAPIImpl impl = new WorkspaceAPIImpl() {
+
+      @Override
+      public RepresentationTemplate getRepresentationTemplate(WorkspaceId id, String name) {
+        return template;
+      }
+    };
+    impl.setRepresentationGenerators(Collections.singletonMap(TemplateType.PYTHON, generator));
+    final RepresentationProvider provider = new RepresentationProviderImpl();
+    final WorkspaceAPI api = impl;
+    registerBeanFactory(api);
+    final Content content = mockery.mock(Content.class);
+    final Field field = mockery.mock(Field.class);
+    final FieldValue value = mockery.mock(FieldValue.class);
+    final Map<String, Field> fieldMap = mockery.mock(Map.class);
+    final ContentType type = mockery.mock(ContentType.class);
+    final Map<String, RepresentationDef> reps = mockery.mock(Map.class, "repMap");
+    final RepresentationDef def = mockery.mock(RepresentationDef.class);
+    final int threadCount = new Random().nextInt(50) + 50;
+    logger.info("Number of parallel threads " + threadCount);
+    final Set<Integer> expecteds = new LinkedHashSet<Integer>();
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(threadCount).of(template).getTemplateType();
+        will(returnValue(TemplateType.PYTHON));
+        exactly(threadCount).of(template).getTemplate();
+        final byte[] toByteArray =
+                     IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
+            "scripts/python/test-multi-rep-gen-script.py"));
+        will(returnValue(toByteArray));
+        exactly(threadCount).of(template).getName();
+        will(returnValue(REP_NAME));
+
+        for (int i = 0; i < threadCount; ++i) {
+          exactly(1).of(value).getValue();
+          will(returnValue(String.valueOf(i)));
+          expecteds.add(i);
+        }
+        exactly(threadCount).of(field).getValue();
+        will(returnValue(value));
+        exactly(threadCount).of(fieldMap).get(with(Expectations.<String>anything()));
+        will(returnValue(field));
+        exactly(threadCount).of(content).getFields();
+        will(returnValue(fieldMap));
+        exactly(threadCount).of(content).getContentDefinition();
+        will(returnValue(type));
+        final ContentId contentId = mockery.mock(ContentId.class);
+        exactly(2 * threadCount).of(content).getContentId();
+        will(returnValue(contentId));
+        final WorkspaceId wId = mockery.mock(WorkspaceId.class);
+        exactly(threadCount).of(contentId).getWorkspaceId();
+        will(returnValue(wId));
+        exactly(2 * threadCount).of(type).getRepresentationDefs();
+        will(returnValue(reps));
+        exactly(2 * threadCount).of(reps).get(with(REP_NAME));
+        will(returnValue(def));
+        exactly(threadCount).of(def).getParameters();
+        will(returnValue(Collections.emptyMap()));
+        exactly(threadCount).of(def).getMIMEType();
+        will(returnValue(GroovyGeneratorTest.MIME_TYPE));
+        final ResourceUri rUri = mockery.mock(ResourceUri.class);
+        exactly(threadCount).of(def).getResourceUri();
+        will(returnValue(rUri));
+        exactly(threadCount).of(rUri).getValue();
+        will(returnValue("iUri"));
+      }
+    });
+    final Set<String> set = Collections.synchronizedSet(new LinkedHashSet<String>(threadCount));
+    final List<String> list = Collections.synchronizedList(new ArrayList<String>(threadCount));
+    final AtomicInteger integer = new AtomicInteger(0);
+    Threads group = new Threads();
+    for (int i = 0; i < threadCount; ++i) {
+      group.addThread(new Thread(new Runnable() {
+
+        public void run() {
+          Representation representation = provider.getRepresentation(REP_NAME, type, content);
+          Assert.assertNotNull(representation);
+          Assert.assertEquals(REP_NAME, representation.getName());
+          final String rep = StringUtils.newStringUtf8(representation.getRepresentation());
+          list.add(rep);
+          set.add(rep);
+          Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());
+          integer.addAndGet(1);
+        }
+      }));
+    }
+    long start = System.currentTimeMillis();
+    group.start();
+    try {
+      group.join();
+    }
+    catch (Exception ex) {
+      logger.error(ex.getMessage(), ex);
+    }
+    long end = System.currentTimeMillis();
+    logger.info("For generating " + threadCount + " simple representation it took " + (end - start) + "ms");
+    logger.info("Generated reps list: " + list);
+    logger.info("Generated reps set: " + set);
+    Assert.assertEquals(threadCount, expecteds.size());
+    Assert.assertEquals(threadCount, integer.get());
+    Assert.assertEquals(threadCount, list.size());
+    Assert.assertEquals(threadCount, set.size());
+  }
+
   protected void registerBeanFactory(final WorkspaceAPI api) {
     try {
       SmartContentAPI mainApi = SmartContentAPI.getInstance();

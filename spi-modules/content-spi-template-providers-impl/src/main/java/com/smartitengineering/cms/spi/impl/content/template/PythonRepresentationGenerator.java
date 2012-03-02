@@ -32,8 +32,9 @@ public class PythonRepresentationGenerator extends AbstractTypeRepresentationGen
   @Override
   public RepresentationGenerator getGenerator(RepresentationTemplate template) throws InvalidTemplateException {
     try {
-      return new JythonObjectFactory<RepresentationGenerator>(RepresentationGenerator.class, StringUtils.
-          newStringUtf8(template.getTemplate())).createObject();
+      final RepresentationGenerator repGen = new JythonObjectFactory<RepresentationGenerator>(
+          RepresentationGenerator.class, StringUtils.newStringUtf8(template.getTemplate())).createObject();
+      return new SynchronizedRepresentationGeneratorDecorator(repGen);
     }
     catch (Exception ex) {
       ex.printStackTrace();

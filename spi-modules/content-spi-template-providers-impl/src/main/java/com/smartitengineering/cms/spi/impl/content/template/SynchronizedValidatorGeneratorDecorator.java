@@ -18,27 +18,41 @@
  */
 package com.smartitengineering.cms.spi.impl.content.template;
 
+import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.template.FieldValidator;
-import com.smartitengineering.cms.api.exception.InvalidTemplateException;
-import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
-import org.apache.commons.codec.binary.StringUtils;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author imyousuf
  */
-public class PythonValidatorGenerator extends AbstractTypeFieldValidator {
+public final class SynchronizedValidatorGeneratorDecorator implements FieldValidator {
 
-  @Override
-  public FieldValidator getValidator(ValidatorTemplate template) throws InvalidTemplateException {
+  private final FieldValidator fieldValidator;
+  private final transient Logger logger = LoggerFactory.getLogger(getClass());
+  private static final Semaphore MUTEX = new Semaphore(1);
+
+  public SynchronizedValidatorGeneratorDecorator(FieldValidator fieldValidator) {
+    this.fieldValidator = fieldValidator;
+  }
+
+  public boolean isValidFieldValue(Field field,
+                                   Map<String, String> params) {
     try {
-      final FieldValidator fieldVal = new JythonObjectFactory<FieldValidator>(FieldValidator.class, StringUtils.
-          newStringUtf8(template.getTemplate())).createObject();
-      return new SynchronizedValidatorGeneratorDecorator(fieldVal);
+      MUTEX.acquire();
     }
-    catch (Exception ex) {
-      logger.warn("Could not create Python based validator", ex);
-      throw new InvalidTemplateException(ex);
+    catch (InterruptedException ex) {
+      logger.warn("Could not acquire thus returning false", ex);
+      return false;
+    }
+    try {
+      return this.fieldValidator.isValidFieldValue(field, params);
+    }
+    finally {
+      MUTEX.release();
     }
   }
 }
