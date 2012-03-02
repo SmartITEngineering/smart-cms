@@ -24,6 +24,7 @@ import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.content.Representation;
+import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.impl.workspace.WorkspaceAPIImpl;
@@ -33,26 +34,40 @@ import com.smartitengineering.cms.api.type.RepresentationDef;
 import com.smartitengineering.cms.api.type.ResourceUri;
 import com.smartitengineering.cms.api.type.ValidatorDef;
 import com.smartitengineering.cms.api.type.ValidatorType;
+import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
+import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.content.RepresentationProvider;
 import com.smartitengineering.cms.spi.content.ValidatorProvider;
+import com.smartitengineering.cms.spi.content.VariationProvider;
 import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
+import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
+import com.smartitengineering.cms.spi.impl.content.VelocityGeneratorTest.Threads;
 import com.smartitengineering.cms.spi.impl.content.template.PythonRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.PythonValidatorGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.PythonVariationGenerator;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.io.IOUtils;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit3.JUnit3Mockery;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -61,11 +76,13 @@ import org.junit.Test;
 public class PythonGeneratorTest {
 
   public static final String CONTENT = "content";
-  private static final Mockery mockery = new JUnit3Mockery();
+  private Mockery mockery;
   public static final String REP_NAME = "test";
+  private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
-  @BeforeClass
-  public static void setupAPIAndSPI() throws ClassNotFoundException {
+  @Before
+  public void setupAPIAndSPI() throws ClassNotFoundException {
+    mockery = new JUnit3Mockery();
     GroovyGeneratorTest.setupAPI(mockery);
   }
 
@@ -244,6 +261,69 @@ public class PythonGeneratorTest {
       }
     });
     Assert.assertTrue(provider.isValidField(content, field));
+    mockery.assertIsSatisfied();
+  }
+
+  @Test
+  public void testPythonVarGeneration() throws IOException {
+    TypeVariationGenerator generator = new PythonVariationGenerator();
+    final VariationTemplate template = mockery.mock(VariationTemplate.class);
+    WorkspaceAPIImpl impl = new WorkspaceAPIImpl() {
+
+      @Override
+      public VariationTemplate getVariationTemplate(WorkspaceId id, String name) {
+        return template;
+      }
+    };
+    impl.setVariationGenerators(Collections.singletonMap(TemplateType.PYTHON, generator));
+    VariationProvider provider = new VariationProviderImpl();
+    registerBeanFactory(impl);
+    final Field field = mockery.mock(Field.class, "varField");
+    final FieldValue value = mockery.mock(FieldValue.class, "varFieldVal");
+    final FieldDef fieldDef = mockery.mock(FieldDef.class);
+    final Map<String, VariationDef> vars = mockery.mock(Map.class, "varMap");
+    final VariationDef def = mockery.mock(VariationDef.class);
+    final Content content = mockery.mock(Content.class, "varContent");
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(1).of(template).getTemplateType();
+        will(returnValue(TemplateType.PYTHON));
+        exactly(1).of(template).getTemplate();
+        will(returnValue(
+            IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("scripts/python/var-script.py"))));
+        exactly(1).of(value).getValue();
+        will(returnValue(CONTENT));
+        exactly(1).of(field).getValue();
+        will(returnValue(value));
+        exactly(1).of(field).getFieldDef();
+        will(returnValue(fieldDef));
+        final ContentId contentId = mockery.mock(ContentId.class, "varId");
+        exactly(2).of(content).getContentId();
+        will(returnValue(contentId));
+        final WorkspaceId wId = mockery.mock(WorkspaceId.class, "varWId");
+        exactly(1).of(contentId).getWorkspaceId();
+        will(returnValue(wId));
+        exactly(1).of(fieldDef).getVariations();
+        will(returnValue(vars));
+        exactly(1).of(vars).get(with(REP_NAME));
+        will(returnValue(def));
+        exactly(1).of(def).getMIMEType();
+        will(returnValue(GroovyGeneratorTest.MIME_TYPE));
+        exactly(1).of(def).getParameters();
+        will(returnValue(Collections.emptyMap()));
+        final ResourceUri rUri = mockery.mock(ResourceUri.class, "varRUri");
+        exactly(1).of(def).getResourceUri();
+        will(returnValue(rUri));
+        exactly(1).of(rUri).getValue();
+        will(returnValue("iUri"));
+      }
+    });
+    Variation representation = provider.getVariation(REP_NAME, content, field);
+    Assert.assertNotNull(representation);
+    Assert.assertEquals(REP_NAME, representation.getName());
+    Assert.assertEquals(GroovyGeneratorTest.MIME_TYPE, representation.getMimeType());
+    Assert.assertEquals(CONTENT, StringUtils.newStringUtf8(representation.getVariation()));
     mockery.assertIsSatisfied();
   }
 

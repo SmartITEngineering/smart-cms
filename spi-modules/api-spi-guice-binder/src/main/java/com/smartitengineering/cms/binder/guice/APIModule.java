@@ -40,11 +40,16 @@ import com.smartitengineering.cms.spi.impl.content.template.GroovyContentCoProce
 import com.smartitengineering.cms.spi.impl.content.template.GroovyRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.GroovyValidatorGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.GroovyVariationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.JasperRepresentationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.JasperVariationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.JavascriptContentCoProcessorGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.JavascriptRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.JavascriptValidatorGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.JavascriptVariationGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.PythonContentCoProcessorGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.PythonRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.PythonValidatorGenerator;
+import com.smartitengineering.cms.spi.impl.content.template.PythonVariationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.RubyContentCoProcessorGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.RubyRepresentationGenerator;
 import com.smartitengineering.cms.spi.impl.content.template.RubyValidatorGenerator;
@@ -86,6 +91,7 @@ public class APIModule extends AbstractModule {
     ccpGenBinder.addBinding(TemplateType.RUBY).to(RubyContentCoProcessorGenerator.class).in(Singleton.class);
     ccpGenBinder.addBinding(TemplateType.GROOVY).to(GroovyContentCoProcessorGenerator.class).in(Singleton.class);
     ccpGenBinder.addBinding(TemplateType.JAVASCRIPT).to(JavascriptContentCoProcessorGenerator.class).in(Singleton.class);
+    ccpGenBinder.addBinding(TemplateType.PYTHON).to(PythonContentCoProcessorGenerator.class).in(Singleton.class);
     MapBinder<TemplateType, TypeRepresentationGenerator> typeGenBinder =
                                                          MapBinder.newMapBinder(binder(), TemplateType.class,
                                                                                 TypeRepresentationGenerator.class);
@@ -93,6 +99,8 @@ public class APIModule extends AbstractModule {
     typeGenBinder.addBinding(TemplateType.GROOVY).to(GroovyRepresentationGenerator.class);
     typeGenBinder.addBinding(TemplateType.JAVASCRIPT).to(JavascriptRepresentationGenerator.class);
     typeGenBinder.addBinding(TemplateType.VELOCITY).to(VelocityRepresentationGenerator.class);
+    typeGenBinder.addBinding(TemplateType.PYTHON).to(PythonRepresentationGenerator.class);
+    typeGenBinder.addBinding(TemplateType.JASPER).to(JasperRepresentationGenerator.class);
     MapBinder<TemplateType, TypeVariationGenerator> typeVarGenBinder =
                                                     MapBinder.newMapBinder(binder(), TemplateType.class,
                                                                            TypeVariationGenerator.class);
@@ -100,6 +108,8 @@ public class APIModule extends AbstractModule {
     typeVarGenBinder.addBinding(TemplateType.GROOVY).to(GroovyVariationGenerator.class);
     typeVarGenBinder.addBinding(TemplateType.JAVASCRIPT).to(JavascriptVariationGenerator.class);
     typeVarGenBinder.addBinding(TemplateType.VELOCITY).to(VelocityVariationGenerator.class);
+    typeVarGenBinder.addBinding(TemplateType.PYTHON).to(PythonVariationGenerator.class);
+    typeVarGenBinder.addBinding(TemplateType.JASPER).to(JasperVariationGenerator.class);
     MapBinder<ValidatorType, TypeFieldValidator> typeFieldValBinder =
                                                  MapBinder.newMapBinder(binder(), ValidatorType.class,
                                                                         TypeFieldValidator.class);

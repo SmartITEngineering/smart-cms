@@ -27,6 +27,7 @@ public enum TemplateType {
   VELOCITY,
   RUBY,
   GROOVY,
+  PYTHON,
   JASPER,
   JAVASCRIPT
 }
