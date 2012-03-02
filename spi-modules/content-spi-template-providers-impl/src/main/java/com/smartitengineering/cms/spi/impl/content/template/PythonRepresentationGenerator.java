@@ -22,7 +22,6 @@ import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.content.template.RepresentationGenerator;
 import org.apache.commons.codec.binary.StringUtils;
-import org.python.util.PythonInterpreter;
 
 /**
  *
@@ -30,12 +29,10 @@ import org.python.util.PythonInterpreter;
  */
 public class PythonRepresentationGenerator extends AbstractTypeRepresentationGenerator {
 
-  private final PythonInterpreter interpreter = new PythonInterpreter();
-
   @Override
   public RepresentationGenerator getGenerator(RepresentationTemplate template) throws InvalidTemplateException {
     try {
-      return new JythonObjectFactory<RepresentationGenerator>(interpreter, RepresentationGenerator.class, StringUtils.
+      return new JythonObjectFactory<RepresentationGenerator>(RepresentationGenerator.class, StringUtils.
           newStringUtf8(template.getTemplate())).createObject();
     }
     catch (Exception ex) {

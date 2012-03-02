@@ -22,7 +22,6 @@ import com.smartitengineering.cms.api.content.template.FieldValidator;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import org.apache.commons.codec.binary.StringUtils;
-import org.python.util.PythonInterpreter;
 
 /**
  *
@@ -30,12 +29,10 @@ import org.python.util.PythonInterpreter;
  */
 public class PythonValidatorGenerator extends AbstractTypeFieldValidator {
 
-  private final PythonInterpreter interpreter = new PythonInterpreter();
-
   @Override
   public FieldValidator getValidator(ValidatorTemplate template) throws InvalidTemplateException {
     try {
-      return new JythonObjectFactory<FieldValidator>(interpreter, FieldValidator.class,
+      return new JythonObjectFactory<FieldValidator>(FieldValidator.class,
                                                      StringUtils.newStringUtf8(template.getTemplate())).createObject();
     }
     catch (Exception ex) {

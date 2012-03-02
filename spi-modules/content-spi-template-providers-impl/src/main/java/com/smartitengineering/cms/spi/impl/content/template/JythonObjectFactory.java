@@ -35,9 +35,9 @@ public class JythonObjectFactory<T> {
   private final PythonInterpreter pythonInterpreter;
 
   // likely want to reuse PySystemState in some clever fashion since expensive to setup...
-  public JythonObjectFactory(PythonInterpreter interpreter, Class<? extends T> interfaceType, String script) {
+  public JythonObjectFactory(Class<? extends T> interfaceType, String script) {
     this.interfaceType = interfaceType;
-    pythonInterpreter = interpreter;
+    pythonInterpreter = new PythonInterpreter();
     pythonInterpreter.exec(FileUtil.wrap(IOUtils.toInputStream(script)));
     klass = pythonInterpreter.get("rep");
   }
