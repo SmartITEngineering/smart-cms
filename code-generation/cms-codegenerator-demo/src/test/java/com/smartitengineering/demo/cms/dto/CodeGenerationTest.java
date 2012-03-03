@@ -22,6 +22,9 @@ import com.smartitengineering.dao.common.queryparam.MatchMode;
 import com.smartitengineering.dao.common.queryparam.Order;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
+import com.smartitengineering.dao.hbase.ddl.HBaseTableGenerator;
+import com.smartitengineering.dao.hbase.ddl.config.json.ConfigurationJsonParser;
+import com.smartitengineering.dao.impl.hbase.HBaseConfigurationFactory;
 import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ConnectionConfig;
 import java.util.ArrayList;
@@ -31,6 +34,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import junit.framework.Assert;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -51,6 +56,20 @@ public class CodeGenerationTest {
 
   @BeforeClass
   public static void globalSetup() throws Exception {
+    // Creating table
+    Configuration config = HBaseConfigurationFactory.getConfigurationInstance();
+    final ClassLoader classLoader = Initializer.class.getClassLoader();
+    try {
+      new HBaseTableGenerator(ConfigurationJsonParser.getConfigurations(classLoader.getResourceAsStream(
+          "com/smartitengineering/cms/spi/impl/schema.json")), config, false).generateTables();
+    }
+    catch (MasterNotRunningException ex) {
+      LOGGER.error("Master could not be found!", ex);
+    }
+    catch (Exception ex) {
+      LOGGER.error("Could not create table!", ex);
+    }
+
     /**
      * Initialize CMS
      */

@@ -92,11 +92,6 @@
             <artifactId>hub-hbase</artifactId>
             <version>${hub.version}</version>
           </eventHubArtifact>
-          <cmsWebServiceArtifact>
-            <groupId>com.smartitengineering.smart-cms</groupId>
-            <artifactId>webservice</artifactId>
-            <version>${project.version}</version>
-          </cmsWebServiceArtifact>
           <!-- Other configurations and their default expressions -->
           <!--
           <zooKeeperPort>2181</zooKeeperPort>
