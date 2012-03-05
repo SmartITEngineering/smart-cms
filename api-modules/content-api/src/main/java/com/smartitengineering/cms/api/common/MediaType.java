@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.common;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -32,7 +33,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author imyousuf
  */
-public final class MediaType {
+public final class MediaType implements Serializable {
 
   private final String type;
   private final String subtype;
@@ -151,7 +152,7 @@ public final class MediaType {
     }
     MediaType other = (MediaType) obj;
     return (this.type.equalsIgnoreCase(other.type) && this.subtype.equalsIgnoreCase(other.subtype) && this.parameters.
-        equals(other.parameters));
+            equals(other.parameters));
   }
 
   @Override

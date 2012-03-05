@@ -19,13 +19,14 @@
 package com.smartitengineering.cms.api.content;
 
 import com.smartitengineering.cms.api.type.FieldValueType;
+import java.io.Serializable;
 
 /**
  *
  * @author imyousuf
  * @since 0.1
  */
-public interface FieldValue<V> {
+public interface FieldValue<V> extends Serializable {
 
   public FieldValueType getDataType();
 

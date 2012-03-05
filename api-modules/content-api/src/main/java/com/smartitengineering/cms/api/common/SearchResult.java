@@ -18,7 +18,6 @@
  */
 package com.smartitengineering.cms.api.common;
 
-import com.smartitengineering.cms.api.content.Content;
 import java.util.Collection;
 
 /**

@@ -18,13 +18,15 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.io.Serializable;
+
 /**
  *
  * @author imyousuf
  */
-public interface ResourceUri {
+public interface ResourceUri extends Serializable {
 
-  public enum Type {
+  public enum Type implements Serializable {
 
     INTERNAL,
     EXTERNAL

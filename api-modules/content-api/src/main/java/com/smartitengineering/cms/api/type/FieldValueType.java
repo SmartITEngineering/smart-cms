@@ -18,12 +18,14 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.io.Serializable;
+
 /**
  * Constants representing specialized forms of {@link FieldDef}
  * @author imyousuf
  * @since 0.1
  */
-public enum FieldValueType {
+public enum FieldValueType implements Serializable {
 
   INTEGER,
   LONG,

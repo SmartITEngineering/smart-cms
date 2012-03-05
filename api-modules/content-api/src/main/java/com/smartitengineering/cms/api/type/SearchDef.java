@@ -18,11 +18,13 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.io.Serializable;
+
 /**
  *
  * @author imyousuf
  */
-public interface SearchDef {
+public interface SearchDef extends Serializable {
 
   public boolean isIndexed();
 

@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
@@ -26,7 +27,7 @@ import java.util.Map;
  * @author imyousuf
  * @since 0.1
  */
-public interface FieldDef {
+public interface FieldDef extends Serializable {
 
   /**
    * Retrieves the name of this field

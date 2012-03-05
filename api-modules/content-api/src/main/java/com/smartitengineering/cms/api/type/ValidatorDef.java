@@ -18,13 +18,14 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  *
  * @author imyousuf
  */
-public interface ValidatorDef {
+public interface ValidatorDef extends Serializable {
 
   Map<String, String> getParameters();
 

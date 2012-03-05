@@ -20,13 +20,14 @@ package com.smartitengineering.cms.api.content;
 
 import com.smartitengineering.cms.api.common.ReferrableResource;
 import com.smartitengineering.cms.api.type.FieldDef;
+import java.io.Serializable;
 import java.net.URI;
 
 /**
  *
  * @author imyousuf
  */
-public interface Field extends ReferrableResource {
+public interface Field extends ReferrableResource, Serializable {
 
   public ContentId getContent();
 

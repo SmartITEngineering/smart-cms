@@ -19,13 +19,14 @@
 package com.smartitengineering.cms.api.content;
 
 import com.smartitengineering.cms.api.common.ReferrableResource;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  *
  * @author imyousuf
  */
-public interface Representation extends ReferrableResource {
+public interface Representation extends ReferrableResource, Serializable {
 
   public String getName();
 

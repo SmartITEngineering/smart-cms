@@ -21,6 +21,7 @@ package com.smartitengineering.cms.api.content;
 import com.smartitengineering.cms.api.common.ReferrableResource;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ import java.util.Map;
  *
  * @author imyousuf
  */
-public interface Content extends ReferrableResource {
+public interface Content extends ReferrableResource, Serializable {
 
   public ContentId getContentId();
 

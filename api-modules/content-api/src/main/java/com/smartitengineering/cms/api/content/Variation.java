@@ -20,13 +20,14 @@ package com.smartitengineering.cms.api.content;
 
 import com.smartitengineering.cms.api.common.ReferrableResource;
 import com.smartitengineering.cms.api.type.FieldDef;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  *
  * @author imyousuf
  */
-public interface Variation extends ReferrableResource {
+public interface Variation extends ReferrableResource, Serializable {
 
   public String getName();
 

@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.type;
 
 import com.smartitengineering.cms.api.common.MediaType;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -29,7 +30,7 @@ import java.util.Map;
  * @author imyousuf
  * @since 0.1
  */
-public interface ContentType {
+public interface ContentType extends Serializable {
 
   /**
    * Retrieve the unique ID of the content type to be used for relating
@@ -97,7 +98,7 @@ public interface ContentType {
    */
   public DefinitionType getSelfDefinitionType();
 
-  enum DefinitionType {
+  enum DefinitionType implements Serializable {
 
     ABSTRACT_TYPE,
     ABSTRACT_COMPONENT,
@@ -109,7 +110,7 @@ public interface ContentType {
     }
   }
 
-  enum ContentProcessingPhase {
+  enum ContentProcessingPhase implements Serializable {
 
     /**
      * This phase refers to after content is retrieved from persistent storage and converted to mutable content but yet

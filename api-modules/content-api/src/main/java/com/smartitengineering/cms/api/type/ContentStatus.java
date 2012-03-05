@@ -18,12 +18,14 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.io.Serializable;
+
 /**
  * Represents a single status defines in a {@link ContentType}.
  * @author imyousuf
  * since 0.1
  */
-public interface ContentStatus {
+public interface ContentStatus extends Serializable {
 
   /**
    * Retrieve the unique identifier integer for this status.

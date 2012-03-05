@@ -18,12 +18,14 @@
  */
 package com.smartitengineering.cms.api.type;
 
+import java.io.Serializable;
+
 /**
  * Represents the data type for field of the {@link FieldDef}
  * @author imyousuf
  * @since 0.1
  */
-public interface DataType {
+public interface DataType extends Serializable {
 
   /**
    * Represents the integer data type
