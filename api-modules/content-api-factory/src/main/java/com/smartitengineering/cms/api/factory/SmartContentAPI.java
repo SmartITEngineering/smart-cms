@@ -25,6 +25,8 @@ import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
 import com.smartitengineering.util.bean.annotations.InjectableField;
+import java.util.concurrent.Semaphore;
+import java.util.logging.Logger;
 
 /**
  * The single point of entry to the APIs' of Smart CMS. All other APIs will be
@@ -45,6 +47,7 @@ public final class SmartContentAPI {
    */
   public static final String CONTEXT_NAME = "com.smartitnengineering.smart-cms";
   private static SmartContentAPI api;
+  private static final Semaphore MUTEX = new Semaphore(1);
 
   private SmartContentAPI() {
   }
@@ -56,8 +59,21 @@ public final class SmartContentAPI {
    */
   public static SmartContentAPI getInstance() {
     if (api == null) {
-      api = new SmartContentAPI();
-      BeanFactoryRegistrar.aggregate(api);
+      try {
+        MUTEX.acquire();
+      }
+      catch (Exception ex) {
+        return null;
+      }
+      try {
+        if (api == null) {
+          api = new SmartContentAPI();
+          BeanFactoryRegistrar.aggregate(api);
+        }
+      }
+      finally {
+        MUTEX.release();
+      }
     }
     return api;
   }

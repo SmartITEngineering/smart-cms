@@ -40,6 +40,7 @@ import com.smartitengineering.cms.spi.workspace.WorkspaceService;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
 import com.smartitengineering.util.bean.annotations.InjectableField;
+import java.util.concurrent.Semaphore;
 
 /**
  * All SPI collection for SPI implementations.
@@ -181,11 +182,25 @@ public final class SmartContentSPI {
   private SmartContentSPI() {
   }
   private static SmartContentSPI spi;
+  private static final Semaphore MUTEX = new Semaphore(1);
 
   public static SmartContentSPI getInstance() {
     if (spi == null) {
-      spi = new SmartContentSPI();
-      BeanFactoryRegistrar.aggregate(spi);
+      try {
+        MUTEX.acquire();
+      }
+      catch (Exception ex) {
+        return null;
+      }
+      try {
+        if (spi == null) {
+          spi = new SmartContentSPI();
+          BeanFactoryRegistrar.aggregate(spi);
+        }
+      }
+      finally {
+        MUTEX.release();
+      }
     }
     return spi;
   }
