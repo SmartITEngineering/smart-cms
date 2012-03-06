@@ -31,6 +31,7 @@ import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.workspace.Sequence;
 import com.smartitengineering.cms.api.workspace.SequenceId;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.dao.solr.SolrWriteDao;
 import com.smartitengineering.events.async.api.EventConsumer;
 import java.io.BufferedReader;
@@ -83,10 +84,23 @@ public class EventConsumerImpl implements EventConsumer {
       }
       while (StringUtils.isNotBlank(line));
       final byte[] decodedIdString = Base64.decodeBase64(idStr.toString());
+      final String idString = org.apache.commons.codec.binary.StringUtils.newStringUtf8(decodedIdString);
+      if (logger.isInfoEnabled()) {
+        logger.info("ID String from message " + idString);
+      }
       switch (sourceType) {
         case CONTENT: {
-          final ContentId contentId =
-                          (ContentId) new ObjectInputStream(new ByteArrayInputStream(decodedIdString)).readObject();
+          final ContentId contentId;
+          final String[] idParams = idString.split("\n");
+          if (idParams.length < 3) {
+            logger.warn("Insufficient params for forming content id in id string. Thus ignoring the following message " +
+                idString);
+            return;
+          }
+          final byte[] contentIdBytes = org.apache.commons.codec.binary.StringUtils.getBytesUtf8(idParams[2]);
+          final WorkspaceId workspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId(idParams[0],
+                                                                                                            idParams[1]);
+          contentId = SmartContentAPI.getInstance().getContentLoader().createContentId(workspaceId, contentIdBytes);
           Content content = contentId.getContent();
           if (content == null && EventType.DELETE.equals(type)) {
             content =
@@ -102,6 +116,10 @@ public class EventConsumerImpl implements EventConsumer {
               }
             });
           }
+          if (content == null) {
+            logger.warn("No Content for event thus ignoring it - " + idString);
+            return;
+          }
           final Event<Content> event = SmartContentAPI.getInstance().getEventRegistrar().<Content>createEvent(type,
                                                                                                               sourceType,
                                                                                                               content);
@@ -109,9 +127,17 @@ public class EventConsumerImpl implements EventConsumer {
         }
         break;
         case CONTENT_TYPE: {
-          final ContentTypeId typeId =
-                              (ContentTypeId) new ObjectInputStream(new ByteArrayInputStream(decodedIdString)).
-              readObject();
+          final ContentTypeId typeId;
+          final String[] idParams = idString.split("\n");
+          if (idParams.length < 4) {
+            logger.error("Insufficient params for forming content type id in id string. Thus ignoring the following message " +
+                idString);
+            return;
+          }
+          final WorkspaceId workspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId(idParams[0],
+                                                                                                            idParams[1]);
+          typeId = SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(workspaceId, idParams[2],
+                                                                                            idParams[3]);
           ContentType contentType = typeId.getContentType();
           if (contentType == null && EventType.DELETE.equals(type)) {
             contentType = (ContentType) Proxy.newProxyInstance(ContentType.class.getClassLoader(), new Class[]{
@@ -126,6 +152,10 @@ public class EventConsumerImpl implements EventConsumer {
               }
             });
           }
+          if (contentType == null) {
+            logger.warn("No Content Type for event thus ignoring it - " + idString);
+            return;
+          }
           final Event<ContentType> event =
                                    SmartContentAPI.getInstance().getEventRegistrar().<ContentType>createEvent(type,
                                                                                                               sourceType,
@@ -134,8 +164,16 @@ public class EventConsumerImpl implements EventConsumer {
         }
         break;
         case SEQUENCE: {
-          final SequenceId seqId =
-                           (SequenceId) new ObjectInputStream(new ByteArrayInputStream(decodedIdString)).readObject();
+          final SequenceId seqId;
+          final String[] idParams = idString.split("\n");
+          if (idParams.length < 3) {
+            logger.error("Insufficient params for forming sequence id in id string. Thus ignoring the following message " +
+                idString);
+            return;
+          }
+          final WorkspaceId workspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId(idParams[0],
+                                                                                                            idParams[1]);
+          seqId = SmartContentAPI.getInstance().getWorkspaceApi().createSequenceId(workspaceId, idParams[2]);
           Sequence sequence = seqId.getSequence();
           if (sequence == null && EventType.DELETE.equals(type)) {
             sequence = (Sequence) Proxy.newProxyInstance(Sequence.class.getClassLoader(), new Class[]{
@@ -149,6 +187,10 @@ public class EventConsumerImpl implements EventConsumer {
                 return null;
               }
             });
+          }
+          if (sequence == null) {
+            logger.warn("No Sequence for event thus ignoring it - " + idString);
+            return;
           }
           final Event<Sequence> event =
                                 SmartContentAPI.getInstance().getEventRegistrar().<Sequence>createEvent(type,
