@@ -35,8 +35,6 @@ import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.dao.solr.SolrWriteDao;
 import com.smartitengineering.events.async.api.EventConsumer;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
 import java.io.StringReader;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
