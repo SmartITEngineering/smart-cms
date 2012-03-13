@@ -116,13 +116,7 @@ public final class MediaType implements Serializable {
       this.parameters = Collections.emptyMap();
     }
     else {
-      Map<String, String> map = new TreeMap<String, String>(new Comparator<String>() {
-
-        @Override
-        public int compare(String key1, String key2) {
-          return key1.compareToIgnoreCase(key2);
-        }
-      });
+      Map<String, String> map = new TreeMap<String, String>(new StringComparator());
       for (Map.Entry<String, String> entry : parameters.entrySet()) {
         map.put(entry.getKey().toLowerCase(), entry.getValue());
       }
@@ -193,6 +187,14 @@ public final class MediaType implements Serializable {
         builder.append('\\');
       }
       builder.append(c);
+    }
+  }
+
+  private static class StringComparator implements Comparator<String>, Serializable {
+
+    @Override
+    public int compare(String key1, String key2) {
+      return key1.compareToIgnoreCase(key2);
     }
   }
 }
