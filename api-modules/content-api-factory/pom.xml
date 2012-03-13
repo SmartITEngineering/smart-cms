@@ -13,13 +13,22 @@
   <name>Content API Factory</name>
   <dependencies>
     <dependency>
+      <groupId>com.smartitengineering.smart-cms</groupId>
+      <artifactId>content-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.smartitengineering.smart-cms</groupId>
-      <artifactId>content-api</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jdk14</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

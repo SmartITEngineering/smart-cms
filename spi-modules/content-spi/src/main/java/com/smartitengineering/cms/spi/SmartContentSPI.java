@@ -41,6 +41,8 @@ import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
 import com.smartitengineering.util.bean.annotations.InjectableField;
 import java.util.concurrent.Semaphore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * All SPI collection for SPI implementations.
@@ -51,6 +53,7 @@ public final class SmartContentSPI {
 
   public static final String SPI_CONTEXT = SmartContentAPI.CONTEXT_NAME +
       ".spi";
+  private static final Logger LOGGER = LoggerFactory.getLogger(SmartContentSPI.class);
   /**
    * The lock handler implementation to be used to receive lock implementations.
    * Use <tt>lockHandler</tt> as bean name to be injected here.
@@ -195,6 +198,15 @@ public final class SmartContentSPI {
       try {
         if (spi == null) {
           spi = new SmartContentSPI();
+          if (LOGGER.isInfoEnabled()) {
+            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            final StringBuilder builder = new StringBuilder();
+            for (StackTraceElement traceElement : stack) {
+              builder.append(traceElement.getClassName()).append(':').append(traceElement.getMethodName()).append(
+                  ':').append(traceElement.getLineNumber()).append('\n');
+            }
+            LOGGER.info(new StringBuilder("Initializing Smart Content SPI:\n").append(builder.toString()).toString());
+          }
           BeanFactoryRegistrar.aggregate(spi);
         }
       }

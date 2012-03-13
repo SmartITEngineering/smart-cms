@@ -37,7 +37,7 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
    * The persistence service for this domain instance.
    * @see SmartSPI#getPersistentService(java.lang.Class)
    */
-  protected PersistentService<T> service;
+  private final Class<T> pesistenceRegistryClass;
   /**
    * Set whether to invoke {@link AbstractLockableDomain#lock} or
    * {@link AbstractLockableDomain#tryLock()} next time {@link LockPerformer}
@@ -52,9 +52,8 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
    *																	registry
    */
   protected AbstractPersistableDomain() {
-    Class<T> pesistenceRegistryClass =
-             (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-    service = SmartContentSPI.getInstance().getPersistentService(pesistenceRegistryClass);
+    pesistenceRegistryClass =
+    (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     nextPerformToWaitForLock = false;
   }
 
@@ -63,7 +62,7 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
    * @return Service instance being used by this instance
    */
   public PersistentService<T> getService() {
-    return service;
+    return SmartContentSPI.getInstance().getPersistentService(pesistenceRegistryClass);
   }
 
   /**
@@ -99,7 +98,7 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
   protected void create()
       throws IOException {
     try {
-      service.create((T) this);
+      getService().create((T) this);
     }
     catch (Exception ex) {
       throw new IOException(ex);
@@ -115,7 +114,7 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
           throw new IOException("Can't update a domain not already persisted!");
         }
         try {
-          service.update((T) AbstractPersistableDomain.this);
+          getService().update((T) AbstractPersistableDomain.this);
         }
         catch (Exception ex) {
           throw new IOException(ex);
@@ -138,7 +137,7 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
               "Can't delete a domain not already persisted!");
         }
         try {
-          service.delete((T) AbstractPersistableDomain.this);
+          getService().delete((T) AbstractPersistableDomain.this);
         }
         catch (Exception ex) {
           throw new IOException(ex);

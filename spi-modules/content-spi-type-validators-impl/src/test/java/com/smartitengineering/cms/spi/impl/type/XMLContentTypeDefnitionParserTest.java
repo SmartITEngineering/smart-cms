@@ -666,6 +666,7 @@ public class XMLContentTypeDefnitionParserTest {
 
         {
           allowing(handler).register(with(any(Key.class)));
+          allowing(handler).unregister(with(any(Key.class)));
           allowing(mockReader).readContentTypeFromPersistentStorage(with(Expectations.<ContentTypeId[]>anything()));
           will(returnValue(Collections.emptyList()));
         }

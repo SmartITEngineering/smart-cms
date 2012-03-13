@@ -38,6 +38,10 @@ CMS.
 						<artifactId>content-api-factory</artifactId>
 						<version>${project.version}</version>
 				</dependency>
+        <dependency>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+				</dependency>
 				<dependency>
 						<groupId>com.smartitengineering.smart-util</groupId>
 						<artifactId>smart-bean-util</artifactId>

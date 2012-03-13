@@ -22,11 +22,13 @@ import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
 import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.factory.event.EventRegistrar;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
+import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
 import com.smartitengineering.util.bean.annotations.Aggregator;
 import com.smartitengineering.util.bean.annotations.InjectableField;
 import java.util.concurrent.Semaphore;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The single point of entry to the APIs' of Smart CMS. All other APIs will be
@@ -46,6 +48,7 @@ public final class SmartContentAPI {
    * class.
    */
   public static final String CONTEXT_NAME = "com.smartitnengineering.smart-cms";
+  private static final Logger LOGGER = LoggerFactory.getLogger(SmartContentAPI.class);
   private static SmartContentAPI api;
   private static final Semaphore MUTEX = new Semaphore(1);
 
@@ -68,6 +71,15 @@ public final class SmartContentAPI {
       try {
         if (api == null) {
           api = new SmartContentAPI();
+          if (LOGGER.isInfoEnabled()) {
+            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            final StringBuilder builder = new StringBuilder();
+            for (StackTraceElement traceElement : stack) {
+              builder.append(traceElement.getClassName()).append(':').append(traceElement.getMethodName()).append(
+                  ':').append(traceElement.getLineNumber()).append('\n');
+            }
+            LOGGER.info(new StringBuilder("Initializing Smart Content API:\n").append(builder.toString()).toString());
+          }
           BeanFactoryRegistrar.aggregate(api);
         }
       }

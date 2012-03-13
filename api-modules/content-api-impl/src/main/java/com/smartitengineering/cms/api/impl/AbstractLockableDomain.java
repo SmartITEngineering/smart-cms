@@ -36,17 +36,25 @@ public abstract class AbstractLockableDomain
                Key {
 
   protected final transient Logger logger = LoggerFactory.getLogger(getClass());
-  protected Lock lock;
+  private Lock lock;
 
   /**
    * Gets the lock for the concrete class invoking this constructor
    */
   protected AbstractLockableDomain() {
-    lock = LockManager.register(this);
   }
 
   public Lock getLock() {
+    if (lock == null) {
+      initLock();
+    }
     return lock;
+  }
+
+  private synchronized void initLock() {
+    if (lock == null) {
+      lock = LockManager.register(this);
+    }
   }
 
   public void setLock(Lock lock) {
@@ -62,17 +70,17 @@ public abstract class AbstractLockableDomain
 
   @Override
   public boolean isLockOwned() {
-    return lock.isLockOwned();
+    return getLock().isLockOwned();
   }
 
   @Override
   public void lock() {
-    lock.lock();
+    getLock().lock();
   }
 
   @Override
   public boolean tryLock() {
-    boolean locked = lock.tryLock();
+    boolean locked = getLock().tryLock();
     return locked;
   }
 
@@ -80,12 +88,12 @@ public abstract class AbstractLockableDomain
   public boolean tryLock(long time,
                          TimeUnit unit)
       throws InterruptedException {
-    boolean locked = lock.tryLock(time, unit);
+    boolean locked = getLock().tryLock(time, unit);
     return locked;
   }
 
   @Override
   public void unlock() {
-    lock.unlock();
+    getLock().unlock();
   }
 }

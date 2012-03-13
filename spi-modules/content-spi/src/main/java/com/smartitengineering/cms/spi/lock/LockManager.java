@@ -21,8 +21,8 @@ package com.smartitengineering.cms.spi.lock;
 import com.smartitengineering.cms.api.factory.write.Lock;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
-import com.smartitengineering.util.bean.annotations.Aggregator;
-import com.smartitengineering.util.bean.annotations.InjectableField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class for managing instances of locks being used by concrete objects to
@@ -35,30 +35,16 @@ import com.smartitengineering.util.bean.annotations.InjectableField;
  * @author imyousuf
  * @since 0.1
  */
-@Aggregator(contextName = SmartContentSPI.SPI_CONTEXT)
 public final class LockManager {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(LockManager.class);
   /**
    * The lock handler implementation to be used to receive lock implementations.
    * Use "lockHandler" as bean name to be injected here.
    */
-  @InjectableField
-  protected LockHandler lockHandler;
+  
 
   private LockManager() {
-  }
-
-  public LockHandler getLockHandler() {
-    return lockHandler;
-  }
-  private static LockManager lockManager;
-
-  private synchronized static LockManager getInstance() {
-    if (lockManager == null) {
-      lockManager = new LockManager();
-      BeanFactoryRegistrar.aggregate(lockManager);
-    }
-    return lockManager;
   }
 
   /**
@@ -71,8 +57,9 @@ public final class LockManager {
    * @see {@link LockHandler#register(com.smartitengineering.cms.content.lock.Key)}
    */
   public static synchronized Lock register(Key key) {
-    final LockHandler handler = getInstance().getLockHandler();
+    final LockHandler handler = SmartContentSPI.getInstance().getLockHandler();
     if (handler == null) {
+      LOGGER.warn("No lock handler found LockManager");
       return null;
     }
     return handler.register(key);
@@ -86,9 +73,12 @@ public final class LockManager {
    * @see {@link LockHandler#unregister(com.smartitengineering.cms.content.lock.Key)}
    */
   public static synchronized void unregister(Key key) {
-    final LockHandler handler = getInstance().getLockHandler();
+    final LockHandler handler = SmartContentSPI.getInstance().getLockHandler();
     if (handler != null) {
       handler.unregister(key);
+    }
+    else {
+      LOGGER.warn("No lock handler found LockManager");
     }
   }
 }
