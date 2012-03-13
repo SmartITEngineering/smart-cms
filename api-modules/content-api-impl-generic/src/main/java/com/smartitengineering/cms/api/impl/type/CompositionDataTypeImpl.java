@@ -25,6 +25,7 @@ import com.smartitengineering.cms.api.type.FieldDef;
 import com.smartitengineering.cms.api.type.FieldValueType;
 import com.smartitengineering.cms.api.type.MutableCompositeDataType;
 import com.smartitengineering.cms.api.type.MutableFieldDef;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -135,7 +136,7 @@ public class CompositionDataTypeImpl implements MutableCompositeDataType {
     return defs;
   }
 
-  public static class EmbeddedContentDataTypeImpl implements EmbeddedContentDataType {
+  public static class EmbeddedContentDataTypeImpl implements EmbeddedContentDataType, Serializable {
 
     private FieldDef fieldEmbeddedIn;
     private ContentDataType contentDataType;

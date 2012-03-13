@@ -62,13 +62,6 @@ public abstract class AbstractLockableDomain
   }
 
   @Override
-  protected void finalize()
-      throws Throwable {
-    LockManager.unregister(this);
-    super.finalize();
-  }
-
-  @Override
   public boolean isLockOwned() {
     return getLock().isLockOwned();
   }
