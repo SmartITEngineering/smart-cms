@@ -43,7 +43,14 @@ public class ContentIdImpl implements ContentId {
 
   private WorkspaceId workspaceId;
   private byte[] id;
-  private final transient Logger logger = LoggerFactory.getLogger(getClass());
+  private transient Logger logger = LoggerFactory.getLogger(getClass());
+
+  protected Logger getLogger() {
+    if (logger == null) {
+      logger = Utils.getLogger(getClass());
+    }
+    return logger;
+  }
 
   public void setWorkspaceId(WorkspaceId workspaceId) {
     if (workspaceId == null) {
@@ -65,7 +72,7 @@ public class ContentIdImpl implements ContentId {
       return SmartContentAPI.getInstance().getContentLoader().loadContent(this);
     }
     catch (Exception ex) {
-      logger.warn("could not load content!", ex);
+      getLogger().warn("could not load content!", ex);
       return null;
     }
   }
@@ -93,15 +100,15 @@ public class ContentIdImpl implements ContentId {
   @Override
   public void readExternal(DataInput input) throws IOException, ClassNotFoundException {
     String idString = Utils.readStringInUTF8(input);
-    if (logger.isDebugEnabled()) {
-      logger.debug("Trying to parse content id: " + idString);
+    if (getLogger().isDebugEnabled()) {
+      getLogger().debug("Trying to parse content id: " + idString);
     }
     if (StringUtils.isBlank(idString)) {
       throw new IOException("No content!");
     }
     String[] params = idString.split(":");
-    if (logger.isDebugEnabled()) {
-      logger.debug("Params " + Arrays.toString(params));
+    if (getLogger().isDebugEnabled()) {
+      getLogger().debug("Params " + Arrays.toString(params));
     }
     if (params == null || params.length != 3) {
       throw new IOException(

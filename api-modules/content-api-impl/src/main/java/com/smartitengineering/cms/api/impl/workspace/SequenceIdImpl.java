@@ -39,7 +39,14 @@ public class SequenceIdImpl implements SequenceId {
 
   private WorkspaceId workspaceId;
   private String name;
-  private final transient Logger logger = LoggerFactory.getLogger(getClass());
+  private transient Logger logger = LoggerFactory.getLogger(getClass());
+
+  protected Logger getLogger() {
+    if (logger == null) {
+      logger = Utils.getLogger(getClass());
+    }
+    return logger;
+  }
 
   public String getName() {
     return name;
@@ -70,15 +77,15 @@ public class SequenceIdImpl implements SequenceId {
   @Override
   public void readExternal(DataInput input) throws IOException, ClassNotFoundException {
     String idString = Utils.readStringInUTF8(input);
-    if (logger.isDebugEnabled()) {
-      logger.debug("Trying to parse sequence id: " + idString);
+    if (getLogger().isDebugEnabled()) {
+      getLogger().debug("Trying to parse sequence id: " + idString);
     }
     if (StringUtils.isBlank(idString)) {
       throw new IOException("No Sequence!");
     }
     String[] params = idString.split(":");
-    if (logger.isDebugEnabled()) {
-      logger.debug("Params " + Arrays.toString(params));
+    if (getLogger().isDebugEnabled()) {
+      getLogger().debug("Params " + Arrays.toString(params));
     }
     if (params == null || params.length != 3) {
       throw new IOException(

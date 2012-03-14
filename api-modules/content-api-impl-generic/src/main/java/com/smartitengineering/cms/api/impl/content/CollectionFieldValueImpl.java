@@ -61,7 +61,7 @@ public class CollectionFieldValueImpl extends FieldValueImpl<Collection<FieldVal
         return toString;
       }
       catch (Exception ex) {
-        logger.warn("Could not serialize JSON node", ex);
+        getLogger().warn("Could not serialize JSON node", ex);
       }
     }
     return getValue() != null ? Arrays.toString(getValue().toArray()) : super.getValueAsString();

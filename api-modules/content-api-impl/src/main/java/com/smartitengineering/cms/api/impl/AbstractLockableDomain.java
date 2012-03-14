@@ -35,8 +35,15 @@ public abstract class AbstractLockableDomain
     implements Lock,
                Key {
 
-  protected final transient Logger logger = LoggerFactory.getLogger(getClass());
+  private transient Logger logger = LoggerFactory.getLogger(getClass());
   private Lock lock;
+
+  protected Logger getLogger() {
+    if (logger == null) {
+      logger = Utils.getLogger(getClass());
+    }
+    return logger;
+  }
 
   /**
    * Gets the lock for the concrete class invoking this constructor

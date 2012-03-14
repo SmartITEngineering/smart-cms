@@ -59,13 +59,13 @@ public class CompositeFieldValueImpl extends FieldValueImpl<Collection<Field>> i
         new WriterBasedGenerator(new IOContext(new BufferRecycler(), new Object(), true), Feature.collectDefaults(),
                                  CollectionFieldValueImpl.MAPPER, stringWriter).writeTree(objectNode);
         toString = stringWriter.toString();
-        if (logger.isDebugEnabled()) {
-          logger.debug("Returning composite field value " + toString);
+        if (getLogger().isDebugEnabled()) {
+          getLogger().debug("Returning composite field value " + toString);
         }
         return toString;
       }
       catch (Exception ex) {
-        logger.warn("Could not serialize JSON node", ex);
+        getLogger().warn("Could not serialize JSON node", ex);
       }
     }
     return getValue() != null ? Arrays.toString(getValue().toArray()) : super.getValueAsString();
@@ -88,8 +88,8 @@ public class CompositeFieldValueImpl extends FieldValueImpl<Collection<Field>> i
               break;
             default: {
               final String toString = value.toString();
-              if (logger.isDebugEnabled()) {
-                logger.debug("Adding default type field value for " + field.getName() + ", value " + toString);
+              if (getLogger().isDebugEnabled()) {
+                getLogger().debug("Adding default type field value for " + field.getName() + ", value " + toString);
               }
               objectNode.put(field.getName(), toString);
             }
@@ -110,7 +110,7 @@ public class CompositeFieldValueImpl extends FieldValueImpl<Collection<Field>> i
       }
     }
     else {
-      logger.warn("EMPTY COMPOSITE FIELD!");
+      getLogger().warn("EMPTY COMPOSITE FIELD!");
     }
     return fieldMap;
   }

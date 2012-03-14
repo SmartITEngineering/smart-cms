@@ -73,7 +73,7 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
   @Override
   public void put() throws IOException {
     if (!isValid()) {
-      logger.info("Content type not in valid state!");
+      getLogger().info("Content type not in valid state!");
       //First get contents indexed before attempting to use this validity!
       //Uncomment the following line once indexing is ensured in testing
       throw new IOException("Content is not in valid state!");
@@ -322,22 +322,22 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
 
   @Override
   public FieldDef getPrimaryFieldDef() {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Trying to get primary field for type " + getContentTypeID().toString());
+    if (getLogger().isDebugEnabled()) {
+      getLogger().debug("Trying to get primary field for type " + getContentTypeID().toString());
     }
     if (StringUtils.isBlank(primaryFieldName)) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("Trying to get primary field from parent!");
-        logger.debug("Parent type id " + parentTypeId);
+      if (getLogger().isDebugEnabled()) {
+        getLogger().debug("Trying to get primary field from parent!");
+        getLogger().debug("Parent type id " + parentTypeId);
       }
       if (parentTypeId != null) {
         ContentType parantType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(parentTypeId);
-        if (logger.isDebugEnabled()) {
-          logger.debug("Parent type " + parantType);
+        if (getLogger().isDebugEnabled()) {
+          getLogger().debug("Parent type " + parantType);
         }
         if (parantType != null) {
-          if (logger.isDebugEnabled()) {
-            logger.debug("Parent primary field name: " + parantType.getPrimaryFieldName());
+          if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Parent primary field name: " + parantType.getPrimaryFieldName());
           }
           return parantType.getPrimaryFieldDef();
         }
@@ -350,22 +350,22 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
   }
 
   private boolean isValid() {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Primary Field Def present: " + primaryFieldName + " " + (getPrimaryFieldDef() != null));
-      logger.debug("Primary Field Def: " + getPrimaryFieldDef());
+    if (getLogger().isDebugEnabled()) {
+      getLogger().debug("Primary Field Def present: " + primaryFieldName + " " + (getPrimaryFieldDef() != null));
+      getLogger().debug("Primary Field Def: " + getPrimaryFieldDef());
     }
     final DefinitionType myDefType = getDefinitionType();
     if (getParent() != null && getParent().getContentType() != null) {
       DefinitionType parentType = getParent().getContentType().getDefinitionType();
       if (parentType.equals(DefinitionType.ABSTRACT_COMPONENT) || parentType.equals(DefinitionType.CONCRETE_COMPONENT)) {
         if (myDefType.equals(DefinitionType.ABSTRACT_TYPE) || myDefType.equals(DefinitionType.CONCRETE_TYPE)) {
-          logger.warn("Parent definition is of component, but this is of type!");
+          getLogger().warn("Parent definition is of component, but this is of type!");
           return false;
         }
       }
       else {
         if (myDefType.equals(DefinitionType.ABSTRACT_COMPONENT) || myDefType.equals(DefinitionType.CONCRETE_COMPONENT)) {
-          logger.warn("Parent definition is of type, but this is of component!");
+          getLogger().warn("Parent definition is of type, but this is of component!");
           return false;
         }
       }

@@ -42,7 +42,14 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
   private String newNamespace;
   private String newContentTypeName;
   private WorkspaceId workspaceId;
-  protected transient final Logger logger = LoggerFactory.getLogger(getClass());
+  private transient Logger logger = LoggerFactory.getLogger(getClass());
+
+  protected Logger getLogger() {
+    if (logger == null) {
+      logger = Utils.getLogger(getClass());
+    }
+    return logger;
+  }
 
   @Override
   public void setNamespace(String newNamespace) {
@@ -162,8 +169,8 @@ public class ContentTypeIdImpl implements MutableContentTypeId {
       return SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(this);
     }
     catch (Exception ex) {
-      logger.warn("Could not load content type!");
-      logger.debug("Exception loading content type!", ex);
+      getLogger().warn("Could not load content type!");
+      getLogger().debug("Exception loading content type!", ex);
       return null;
     }
   }

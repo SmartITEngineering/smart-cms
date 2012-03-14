@@ -79,7 +79,7 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   public void put() throws IOException {
     triggerContentCoProcessors(ContentType.ContentProcessingPhase.WRITE);
     if (!isValid()) {
-      logger.info("Content not in valid state!");
+      getLogger().info("Content not in valid state!");
       //First get contents indexed before attempting to use this validity!
       //Uncomment the following line once indexing is ensured in testing
       throw new IOException("Content is not in valid state!");
@@ -334,8 +334,8 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   @Override
   public boolean isValid() {
     boolean validContent = supressChecking || SmartContentAPI.getInstance().getContentLoader().isValidContent(this);
-    if (logger.isDebugEnabled()) {
-      logger.debug("!!! Checking Content " + validContent);
+    if (getLogger().isDebugEnabled()) {
+      getLogger().debug("!!! Checking Content " + validContent);
     }
     return validContent;
   }

@@ -25,6 +25,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import org.apache.commons.codec.binary.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -55,5 +57,9 @@ public final class Utils {
     }
     String string = StringUtils.newStringUtf8(Arrays.copyOf(buffer.array(), length));
     return string;
+  }
+
+  public static synchronized Logger getLogger(Class clazz) {
+    return LoggerFactory.getLogger(clazz);
   }
 }

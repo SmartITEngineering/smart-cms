@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.api.impl.type;
 
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.impl.Utils;
 import com.smartitengineering.cms.api.type.ContentDataType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.FieldDef;
@@ -44,7 +45,14 @@ public class CompositionDataTypeImpl implements MutableCompositeDataType {
 
   private final Set<FieldDef> ownedCompositeFields = new LinkedHashSet<FieldDef>();
   private EmbeddedContentDataType embeddedContentDataType;
-  protected transient final Logger logger = LoggerFactory.getLogger(getClass());
+  private transient Logger logger = LoggerFactory.getLogger(getClass());
+
+  protected Logger getLogger() {
+    if (logger == null) {
+      logger = Utils.getLogger(getClass());
+    }
+    return logger;
+  }
 
   public void setEmbeddedContentDataType(EmbeddedContentDataType contentDataType) {
     this.embeddedContentDataType = contentDataType;
@@ -67,18 +75,18 @@ public class CompositionDataTypeImpl implements MutableCompositeDataType {
 
   public Collection<FieldDef> getComposition() {
     Set<FieldDef> compositeFields = new LinkedHashSet<FieldDef>();
-    if (logger.isDebugEnabled()) {
-      logger.debug("Embedded content type id " + getEmbeddedContentType());
+    if (getLogger().isDebugEnabled()) {
+      getLogger().debug("Embedded content type id " + getEmbeddedContentType());
     }
     if (getEmbeddedContentType() != null && getEmbeddedContentType().getTypeDef() != null) {
       ContentType type = getEmbeddedContentType().getTypeDef().getContentType();
-      if (logger.isDebugEnabled()) {
-        logger.debug("Embedded content type " + type);
+      if (getLogger().isDebugEnabled()) {
+        getLogger().debug("Embedded content type " + type);
       }
       if (type != null) {
         final Map<String, FieldDef> fieldDefs = type.getFieldDefs();
-        if (logger.isDebugEnabled()) {
-          logger.debug("Embedded fields " + fieldDefs);
+        if (getLogger().isDebugEnabled()) {
+          getLogger().debug("Embedded fields " + fieldDefs);
         }
         if (fieldDefs != null && !fieldDefs.isEmpty()) {
           compositeFields.addAll(getEmbeddedFieldDefs(embeddedContentDataType, fieldDefs.values()));
@@ -112,10 +120,10 @@ public class CompositionDataTypeImpl implements MutableCompositeDataType {
   private Collection<? extends FieldDef> getEmbeddedFieldDefs(EmbeddedContentDataType embeddedContentType,
                                                               Collection<FieldDef> values) {
     if (embeddedContentType == null || embeddedContentType.getFieldEmbeddedIn() == null) {
-      logger.debug("Could not find valid embedded content data type!");
+      getLogger().debug("Could not find valid embedded content data type!");
       return values;
     }
-    logger.debug("Cloning field defs with parent container");
+    getLogger().debug("Cloning field defs with parent container");
     final FieldDef fieldEmbeddedIn = embeddedContentType.getFieldEmbeddedIn();
     ArrayList<FieldDef> defs = new ArrayList<FieldDef>(values.size());
     for (FieldDef def : values) {
