@@ -161,7 +161,11 @@ public class ContentTypeResource extends AbstractResource {
                            com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
       feed.addLink(getLink(instancesUri, PATH_TO_INSTANCES,
                            com.smartitengineering.util.opensearch.jaxrs.MediaType.APPLICATION_OPENSEARCHDESCRIPTION_XML));
-      feed.addLink(getLink(getUriInfo().getRequestUri(), Link.REL_ALTERNATE, MediaType.APPLICATION_XML));
+      final URI typeUri = getRelativeURIBuilder().path(ContentTypesResource.class).path(
+          ContentTypesResource.PATH_TO_CONTENT_TYPE).build(type.getContentTypeID().getWorkspace().getGlobalNamespace(),
+                                                           type.getContentTypeID().getWorkspace().getName(), type.
+          getContentTypeID().getNamespace(), type.getContentTypeID().getName());
+      feed.addLink(getLink(typeUri, Link.REL_ALTERNATE, MediaType.APPLICATION_XML));
       final URI statusesUri = getRelativeURIBuilder().path(ContentTypesResource.class).path(
           ContentTypesResource.PATH_TO_CONTENT_TYPE).path(PATH_TO_STATUSES).build(type.getContentTypeID().getWorkspace().
           getGlobalNamespace(), type.getContentTypeID().getWorkspace().getName(), type.getContentTypeID().getNamespace(),
