@@ -21,6 +21,7 @@ package com.smartitengineering.cms.ws.resources.content;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.Representation;
+import com.smartitengineering.cms.ws.resources.ResourcesConfig;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import java.net.URI;
@@ -61,7 +62,7 @@ public class RepresentationResource extends AbstractResource {
         builder = Response.ok(rep.getRepresentation()).type(MediaType.valueOf(rep.getMimeType())).lastModified(
             lastModifiedDate);
         CacheControl control = new CacheControl();
-        control.setMaxAge(900);
+        control.setMaxAge(ResourcesConfig.getInstance().getRepresentationHttpCacheControlMaxAge());
         builder.cacheControl(control);
       }
     }

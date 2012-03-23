@@ -24,6 +24,7 @@ import com.smartitengineering.cms.api.content.Field;
 import com.smartitengineering.cms.api.content.Variation;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.ws.resources.ResourcesConfig;
 import com.smartitengineering.util.rest.server.AbstractResource;
 import com.smartitengineering.util.rest.server.ServerResourceInjectables;
 import java.net.URI;
@@ -66,7 +67,7 @@ public class VariationResource extends AbstractResource {
         builder = Response.ok(var.getVariation()).type(MediaType.valueOf(var.getMimeType())).lastModified(
             lastModifiedDate);
         CacheControl control = new CacheControl();
-        control.setMaxAge(900);
+        control.setMaxAge(ResourcesConfig.getInstance().getVariationHttpCacheControlMaxAge());
         builder.cacheControl(control);
       }
     }

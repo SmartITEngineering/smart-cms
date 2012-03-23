@@ -1,0 +1,4 @@
+com.smartitengineering.cms.content.http.cache.maxAge=300
+com.smartitengineering.cms.field.http.cache.maxAge=300
+com.smartitengineering.cms.representation.http.cache.maxAge=900
+com.smartitengineering.cms.variation.http.cache.maxAge=900

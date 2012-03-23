@@ -48,6 +48,7 @@ import com.smartitengineering.cms.ws.common.domains.FieldImpl;
 import com.smartitengineering.cms.ws.common.domains.FieldValueImpl;
 import com.smartitengineering.cms.ws.common.domains.OtherFieldValueImpl;
 import com.smartitengineering.cms.ws.common.utils.SimpleFeedExtensions;
+import com.smartitengineering.cms.ws.resources.ResourcesConfig;
 import com.smartitengineering.cms.ws.resources.type.ContentTypeResource;
 import com.smartitengineering.util.bean.adapter.AbstractAdapterHelper;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
@@ -180,7 +181,7 @@ public class ContentResource extends AbstractResource {
       builder.tag(tag);
       builder.lastModified(getContent().getLastModifiedDate());
       CacheControl control = new CacheControl();
-      control.setMaxAge(300);
+      control.setMaxAge(ResourcesConfig.getInstance().getContentHttpCacheControlMaxAge());
       builder.cacheControl(control);
     }
     return builder.build();
@@ -234,7 +235,7 @@ public class ContentResource extends AbstractResource {
       builder.tag(tag);
       builder.lastModified(getContent().getLastModifiedDate());
       CacheControl control = new CacheControl();
-      control.setMaxAge(300);
+      control.setMaxAge(ResourcesConfig.getInstance().getContentHttpCacheControlMaxAge());
       builder.cacheControl(control);
     }
     return builder.build();
