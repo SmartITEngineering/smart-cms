@@ -178,11 +178,7 @@ public class ContentResource extends AbstractResource {
     ResponseBuilder builder = getContext().getRequest().evaluatePreconditions(content.getLastModifiedDate(), tag);
     if (builder == null) {
       builder = Response.ok(adapter.convert(getContent()));
-      builder.tag(tag);
-      builder.lastModified(getContent().getLastModifiedDate());
-      CacheControl control = new CacheControl();
-      control.setMaxAge(ResourcesConfig.getInstance().getContentHttpCacheControlMaxAge());
-      builder.cacheControl(control);
+      buildCommonContentResponseFields(builder);
     }
     return builder.build();
   }
@@ -232,13 +228,18 @@ public class ContentResource extends AbstractResource {
         }
       }
       builder = Response.ok(feed);
-      builder.tag(tag);
-      builder.lastModified(getContent().getLastModifiedDate());
-      CacheControl control = new CacheControl();
-      control.setMaxAge(ResourcesConfig.getInstance().getContentHttpCacheControlMaxAge());
-      builder.cacheControl(control);
+      buildCommonContentResponseFields(builder);
     }
     return builder.build();
+  }
+
+  protected void buildCommonContentResponseFields(ResponseBuilder builder) {
+    builder.tag(tag);
+    builder.lastModified(getContent().getLastModifiedDate());
+    CacheControl control = new CacheControl();
+    control.setMaxAge(ResourcesConfig.getInstance().getContentHttpCacheControlMaxAge());
+    builder.header(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+    builder.cacheControl(control);
   }
 
   @POST

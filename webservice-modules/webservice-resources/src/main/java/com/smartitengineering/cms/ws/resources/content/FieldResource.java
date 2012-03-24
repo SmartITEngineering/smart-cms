@@ -207,6 +207,7 @@ public class FieldResource extends AbstractResource {
         }
         CacheControl control = new CacheControl();
         control.setMaxAge(ResourcesConfig.getInstance().getFieldHttpCacheControlMaxAge());
+        builder.header(HttpHeaders.VARY, HttpHeaders.ACCEPT);
         builder.cacheControl(control);
       }
     }
