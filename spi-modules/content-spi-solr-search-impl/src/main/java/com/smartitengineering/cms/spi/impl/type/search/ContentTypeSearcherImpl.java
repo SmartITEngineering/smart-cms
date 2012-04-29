@@ -200,9 +200,18 @@ public class ContentTypeSearcherImpl implements ContentTypeSearcher {
       query.append(")");
     }
 
+    if (StringUtils.isNotBlank(filter.getSearchTerms())) {
+      if (query.length() > 0) {
+        query.append(seperator);
+      }
+      query.append(SolrFieldNames.ALL_TEXT).append(": ").append(ClientUtils.escapeQueryChars(filter.getSearchTerms()));
+    }
     if (filter.getCreationDateFilter() != null) {
       if (query.length() > 0) {
         query.append(seperator);
+      }
+      else {
+        query.append("workspaceId: [* TO *]").append(seperator);
       }
       QueryParameter<Date> creationDateFilter = filter.getCreationDateFilter();
       String queryStr = ContentSearcherImpl.generateDateQuery(SolrFieldNames.CREATIONDATE, creationDateFilter);
@@ -213,16 +222,12 @@ public class ContentTypeSearcherImpl implements ContentTypeSearcher {
       if (query.length() > 0) {
         query.append(seperator);
       }
+      else {
+        query.append("workspaceId: [* TO *]").append(seperator);
+      }
       QueryParameter<Date> lastModifiedDateFilter = filter.getLastModifiedDateFilter();
       String queryStr = ContentSearcherImpl.generateDateQuery(SolrFieldNames.LASTMODIFIEDDATE, lastModifiedDateFilter);
       query.append(queryStr);
-    }
-
-    if (StringUtils.isNotBlank(filter.getSearchTerms())) {
-      if (query.length() > 0) {
-        query.append(seperator);
-      }
-      query.append(SolrFieldNames.ALL_TEXT).append(": ").append(ClientUtils.escapeQueryChars(filter.getSearchTerms()));
     }
 
     if (query.length() > 0) {

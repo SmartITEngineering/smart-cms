@@ -137,22 +137,6 @@ public class ContentSearcherImpl implements ContentSearcher {
     if (contentTypeIds != null && !contentTypeIds.isEmpty()) {
       query.append(")");
     }
-    if (filter.getCreationDateFilter() != null) {
-      if (query.length() > 0) {
-        query.append(seperator);
-      }
-      QueryParameter<Date> creationDateFilter = filter.getCreationDateFilter();
-      String queryStr = generateDateQuery(SolrFieldNames.CREATIONDATE, creationDateFilter);
-      query.append(queryStr);
-    }
-    if (filter.getLastModifiedDateFilter() != null) {
-      if (query.length() > 0) {
-        query.append(seperator);
-      }
-      QueryParameter<Date> lastModifiedDateFilter = filter.getLastModifiedDateFilter();
-      String queryStr = generateDateQuery(SolrFieldNames.LASTMODIFIEDDATE, lastModifiedDateFilter);
-      query.append(queryStr);
-    }
     if (StringUtils.isNotBlank(filter.getSearchTerms())) {
       if (query.length() > 0) {
         query.append(seperator);
@@ -171,6 +155,28 @@ public class ContentSearcherImpl implements ContentSearcher {
     Collection<QueryParameter> fieldQuery = new ArrayList<QueryParameter>(filter.getFieldFilters());
     final QueryParameter orderParam = findAndRemoveOrderByParam(fieldQuery);
     processParams(fieldQuery, query, seperator, filter.isFieldParamsEscaped());
+    if (filter.getCreationDateFilter() != null) {
+      if (query.length() > 0) {
+        query.append(seperator);
+      }
+      else {
+        query.append("contentTypeId: [* TO *]").append(seperator);
+      }
+      QueryParameter<Date> creationDateFilter = filter.getCreationDateFilter();
+      String queryStr = generateDateQuery(SolrFieldNames.CREATIONDATE, creationDateFilter);
+      query.append(queryStr);
+    }
+    if (filter.getLastModifiedDateFilter() != null) {
+      if (query.length() > 0) {
+        query.append(seperator);
+      }
+      else {
+        query.append("contentTypeId: [* TO *]").append(seperator);
+      }
+      QueryParameter<Date> lastModifiedDateFilter = filter.getLastModifiedDateFilter();
+      String queryStr = generateDateQuery(SolrFieldNames.LASTMODIFIEDDATE, lastModifiedDateFilter);
+      query.append(queryStr);
+    }
     if (query.length() > 0) {
       finalQuery.append(conjunctionSeperator).append('(').append(query.toString()).append(')');
     }

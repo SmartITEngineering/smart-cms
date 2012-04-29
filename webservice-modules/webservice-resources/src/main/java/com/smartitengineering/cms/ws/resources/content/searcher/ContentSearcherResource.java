@@ -465,24 +465,23 @@ public class ContentSearcherResource extends AbstractResource {
       return null;
     }
     QueryParameter<Date> queryParameter = null;
-    if (strDate.startsWith(">")) {
-      String date = strDate.replace(">", "");
-      queryParameter = QueryParameterFactory.getGreaterThanPropertyParam("greaterThan", new Date(Long.parseLong(date)));
-    }
-    else if (strDate.startsWith("<")) {
-      String date = strDate.replace("<", "");
-      queryParameter = QueryParameterFactory.getLesserThanPropertyParam("lessThan", new Date(Long.parseLong(date)));
-    }
-    else if (strDate.startsWith(">=")) {
+    if (strDate.startsWith(">=")) {
       String date = strDate.replaceAll(">=", "");
       queryParameter = QueryParameterFactory.getGreaterThanEqualToPropertyParam("greaterOrEqual", new Date(Long.
-          parseLong(
-          date)));
+          parseLong(date)));
     }
     else if (strDate.startsWith("<=")) {
       String date = strDate.replaceAll("<=", "");
       queryParameter = QueryParameterFactory.getLesserThanEqualToPropertyParam("lessOrEqual", new Date(Long.parseLong(
           date)));
+    }
+    else if (strDate.startsWith("<")) {
+      String date = strDate.replace("<", "");
+      queryParameter = QueryParameterFactory.getLesserThanPropertyParam("lessThan", new Date(Long.parseLong(date)));
+    }
+    else if (strDate.startsWith(">")) {
+      String date = strDate.replace(">", "");
+      queryParameter = QueryParameterFactory.getGreaterThanPropertyParam("greaterThan", new Date(Long.parseLong(date)));
     }
     else if (strDate.contains(",")) {
       String[] date = strDate.split(",");
