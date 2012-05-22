@@ -717,7 +717,7 @@ public class ContentResource extends AbstractResource {
           if (def == null) {
             throw new NullPointerException("No such field definition within composed field");
           }
-          MutableField mutableField = getField(null, def, field.getValue(), context, absBuilder);
+          MutableField mutableField = getField(null, def, field.getValue(), context, absBuilder, importMode);
           composedOf.add(mutableField);
         }
         compositeFieldValue.setValue(composedOf);
@@ -773,12 +773,6 @@ public class ContentResource extends AbstractResource {
         fieldValue = SmartContentAPI.getInstance().getContentLoader().getValueFor(value.getValue(), dataType);
     }
     return fieldValue;
-  }
-
-  protected static MutableField getField(final ContentId contentId, final FieldDef fieldDef,
-                                         com.smartitengineering.cms.ws.common.domains.Field field,
-                                         ResourceContext context, UriBuilder absBuilder) {
-    return getField(contentId, fieldDef, field, context, absBuilder, false);
   }
 
   protected static MutableField getField(final ContentId contentId, final FieldDef fieldDef,

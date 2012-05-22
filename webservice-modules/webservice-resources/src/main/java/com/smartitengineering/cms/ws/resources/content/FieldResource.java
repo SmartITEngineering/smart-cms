@@ -508,7 +508,7 @@ public class FieldResource extends AbstractResource {
     @Override
     protected Field convertFromT2F(com.smartitengineering.cms.ws.common.domains.Field toBean) {
       return ContentResource.getField(content.getContentId(), fieldDef, toBean, getResourceContext(),
-                                      getAbsoluteURIBuilder());
+                                      getAbsoluteURIBuilder(), false);
     }
   }
 }
