@@ -661,25 +661,27 @@ public class ContentLoaderImpl implements ContentLoader {
           if (fields.containsKey(def.getName()) && cField != null) {
             final Field myField = cField;
             CollectionFieldValue collectionFieldValue = (CollectionFieldValue) myField.getValue();
-            Collection<FieldValue> values = collectionFieldValue.getValue();
-            if (values != null) {
-              for (FieldValue fieldValue : values) {
-                if (!valid) {
-                  continue;
-                }
-                CompositeFieldValue compositeFieldValue = (CompositeFieldValue) fieldValue;
-                final Map<String, Field> nestedFields;
-                if (compositeFieldValue != null) {
-                  nestedFields = compositeFieldValue.getValueAsMap();
-                }
-                else {
-                  nestedFields = null;
-                }
-                if (nestedDefs != null && nestedFields != null) {
-                  if (logger.isDebugEnabled()) {
-                    logger.debug("Going to validate collection's item mandatory fields from " + myField.getName());
+            if (collectionFieldValue != null) {
+              Collection<FieldValue> values = collectionFieldValue.getValue();
+              if (values != null) {
+                for (FieldValue fieldValue : values) {
+                  if (!valid) {
+                    continue;
                   }
-                  valid = valid && isMandatoryFieldsPresent(nestedDefs, nestedFields);
+                  CompositeFieldValue compositeFieldValue = (CompositeFieldValue) fieldValue;
+                  final Map<String, Field> nestedFields;
+                  if (compositeFieldValue != null) {
+                    nestedFields = compositeFieldValue.getValueAsMap();
+                  }
+                  else {
+                    nestedFields = null;
+                  }
+                  if (nestedDefs != null && nestedFields != null) {
+                    if (logger.isDebugEnabled()) {
+                      logger.debug("Going to validate collection's item mandatory fields from " + myField.getName());
+                    }
+                    valid = valid && isMandatoryFieldsPresent(nestedDefs, nestedFields);
+                  }
                 }
               }
             }
