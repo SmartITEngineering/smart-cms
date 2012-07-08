@@ -1,34 +1,102 @@
+########################
+# Basic Configurations #
+########################
+
 contextName=com.smartitnengineering.smart-cms.spi,com.smartitnengineering.smart-cms
+# The modules that constitute Smart CMS API and SPI
 modules=com.smartitengineering.cms.binder.guice.APIModule,com.smartitengineering.cms.binder.guice.SPIModule,com.smartitengineering.cms.binder.guice.SPIWorkspaceServiceModule,com.smartitengineering.cms.binder.guice.SPITemplateEngineModule,com.smartitengineering.cms.binder.guice.SPIContentCacheModule,com.smartitengineering.cms.binder.guice.SPIContentTypeCacheModule,com.smartitengineering.cms.binder.guice.SolrQueryDaoModule,com.smartitengineering.cms.binder.guice.SPIContentFieldsCacheModule,com.smartitengineering.cms.binder.guice.WorkspaceResourceCacheModule
 ignoreMissingDependency=false
+# The XSD to use to validate Content Type XML documentation
 com.smartitengineering.cms.schemaLocationForContentType=http://github.com/smart-it/smart-cms/raw/master/content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd
-com.smartitengineering.cms.solrUri=http://localhost:10080/solr/
-# Use the following configuration to separate read and write solr URIs
-# com.smartitengineering.cms.solrReadUri=http://localhost:10080/solr/
+
+# Please do not change the following interval confiugrations
+# They do not come into effect when async event publication is in action
 com.smartitengineering.cms.waitTimeInSec=10
 com.smartitengineering.cms.saveIntervalInSec=60
 com.smartitengineering.cms.updateIntervalInSec=60
 com.smartitengineering.cms.deleteIntervalInSec=60
+
+# This configuration of URI Provider for content, fields, representations etc.
+# By default it refers to URI relative to current host and port, but can be an
+# absolute URI as well
 com.smartitengineering.cms.uriPrefix=/cms
-com.smartitengineering.cms.cache.resource=com/smartitengineering/cms/binder/guice/ehcache.xml
-com.smartitengineering.cms.cache.name=cmsCache
-com.smartitengineering.cms.cache.fields.name=fieldCache
-com.smartitengineering.cms.cache.content.name=contentCache
-com.smartitengineering.cms.cache.type.name=typeCache
-com.smartitengineering.cms.cache.ws.name=workspaceCache
-com.smartitengineering.cms.cache.workspace.resources.name=workspaceResourcesCache
+
+# Configure the default global namespace for workspaces
 com.smartitengineering.cms.globalNamespace=com.smartitengineering
-com.smartitengineering.cms.event.async.subscribe=true
+
+########################
+# Cache Configurations #
+########################
+
+# Ehcache configuration file to read from, from classpath
+com.smartitengineering.cms.cache.resource=com/smartitengineering/cms/binder/guice/ehcache.xml
+# Default cache region name. If any cache named below are not available then it
+# is cached in default cache. By default only this cache region is defined
+com.smartitengineering.cms.cache.name=cmsCache
+# Field cache region name
+com.smartitengineering.cms.cache.fields.name=fieldCache
+# Content header cache region name
+com.smartitengineering.cms.cache.content.name=contentCache
+# Content type cache region name
+com.smartitengineering.cms.cache.type.name=typeCache
+# Workspace cache region name
+com.smartitengineering.cms.cache.ws.name=workspaceCache
+# Representation, variation, validator cache region name
+com.smartitengineering.cms.cache.workspace.resources.name=workspaceResourcesCache
+
+############################
+# Event Hub Configurations #
+############################
+
+# The flag determining whether Event Hub is used for indexing content and other
+# information into Solr or not. If false then no other configuration below will
+# take effect
 com.smartitengineering.cms.event.async=true
+# The controlling flag whether to subscribe or not. If false then this instance
+# of CMS will only publish events and not subscribe. Important thing to note is
+# that this should be turned 'true' in EXACTLY one instance of CMS, where
+# instance is either the web server web application or any other application
+# initializing Smart CMS API
+com.smartitengineering.cms.event.async.subscribe=true
+# The Event Hub channel URI used to POST events to. Please ensure that the
+# channel, in this case - 'cms', is created before any activity in CMS
 com.smartitengineering.cms.event.hubUri=http://localhost:9090/api/channels/cms/hub
+# The Event Hub channel events' URI used by the subscriber to read events.
 com.smartitengineering.cms.event.atomFeedUri=http://localhost:9090/api/channels/cms/events
+# Cron expression for CMS Event consumers, by default is 'every 15 seconds'
 com.smartitengineering.cms.event.consumerCronExp=0/15 * * * * ?
+# Context Path to event hub
 com.smartitengineering.cms.event.contextPath=
+# Base URI to event hub
 com.smartitengineering.cms.event.baseUri=/api/
+# The folder to store event hub head URI, it will create the folder if not exists.
 com.smartitengineering.cms.event.storeFolder=/tmp/cms/
+# The name of the file in which READ HEAD of event hub channel is stored
 com.smartitengineering.cms.event.storeFileName=cmsPollUri.txt
+
+#######################
+# Solr Configurations #
+#######################
+
+# Solr Master URI used for writing to index. In case of specialized
+# read URI missing this is also used for reading, i.e. searching from
+# Solr. This is one of most vital configurations
+com.smartitengineering.cms.solrUri=http://localhost:10080/solr/
+# The Solr Slave URI used for reading only. The idea is using it we can
+# read from Solr Slaves instead of the master. If the Slaves are proxied
+# behind a HTTP Load Balancer than a farm of search servers can be used
+# as well
+# com.smartitengineering.cms.solrReadUri=http://localhost:10080/solr/
+
+# Solr read socket timeout
 com.smartitengineering.cms.solr.socketTimeout=1000
+# Solr connection timeout
 com.smartitengineering.cms.solr.connectionTimeout=100
+
+####################################
+#Distributed Locking configurations#
+####################################
+
 # Following properties configure distributed locking
 com.smartitengineering.cms.distributedLocking.enabled=true
 # com.smartitengineering.cms.distributedLocking.localLockTimeout=120000
