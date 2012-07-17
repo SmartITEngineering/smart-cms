@@ -1167,7 +1167,11 @@ public class ContentTypeObjectConverter extends AbstractObjectRowConverter<Persi
       }
     }
     else {
-      logger.warn("Could not match field to any known field format! ");
+      if (logger.isInfoEnabled()) {
+        //TODO: Change it to DEBUG unless the bug is identified
+        logger.info(new StringBuilder("Could not match field to any known special field format! - ").append(
+            def.getName()).append(", field name key - ").append(key).toString());
+      }
     }
     return mutableDataType;
   }
