@@ -19,6 +19,7 @@
 package com.smartitengineering.cms.binder.guice;
 
 import com.smartitengineering.util.bean.guice.GuiceUtil;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -26,10 +27,25 @@ import com.smartitengineering.util.bean.guice.GuiceUtil;
  */
 public final class Initializer {
 
+  public static final String DEFAULT_CONF = "com/smartitengineering/cms/binder/guice/spi-modules.properties";
+  public static final String DEFAULT_CONF_PROP = "com.smartitengineering.cms.conf";
+
   private Initializer() {
   }
 
   public static void init() {
-    GuiceUtil.getInstance("com/smartitengineering/cms/binder/guice/spi-modules.properties").register();
+    init(null);
+  }
+
+  public static void init(String confSmartLocation) {
+    if (StringUtils.isNotBlank(confSmartLocation)) {
+      GuiceUtil.getInstance(confSmartLocation).register();
+    }
+    else if (StringUtils.isNotBlank(System.getProperty(DEFAULT_CONF_PROP))) {
+      GuiceUtil.getInstance(System.getProperty(DEFAULT_CONF_PROP)).register();
+    }
+    else {
+      GuiceUtil.getInstance(DEFAULT_CONF).register();
+    }
   }
 }
