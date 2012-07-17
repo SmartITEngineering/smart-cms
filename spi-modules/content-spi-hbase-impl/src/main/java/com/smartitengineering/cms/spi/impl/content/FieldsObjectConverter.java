@@ -30,6 +30,7 @@ import com.smartitengineering.dao.impl.hbase.spi.impl.AbstractObjectRowConverter
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -93,8 +94,16 @@ public class FieldsObjectConverter extends AbstractObjectRowConverter<Persistent
       value = Bytes.toString(fieldMap.get(key));
       MutableField field = SmartContentAPI.getInstance().getContentLoader().createMutableField(content.getId(),
                                                                                                fieldDef);
-      field.setValue(SmartContentAPI.getInstance().getContentLoader().getValueFor(value, fieldDef.getValueDef()));
-      content.addField(field);
+      try {
+        field.setValue(SmartContentAPI.getInstance().getContentLoader().getValueFor(value, fieldDef.getValueDef()));
+        content.addField(field);
+      }
+      catch (Exception ex) {
+        if (logger.isWarnEnabled()) {
+          logger.warn("Could not fetch field value for field " + fieldName +
+              ". This field will not be populated in the content.");
+        }
+      }
     }
     return content;
   }
@@ -106,7 +115,9 @@ public class FieldsObjectConverter extends AbstractObjectRowConverter<Persistent
         continue;
       }
       if (field.getValue() == null) {
-        logger.warn("Null value for field " + field.getName());
+        if (logger.isWarnEnabled()) {
+          logger.warn("Null value for field " + field.getName());
+        }
         continue;
       }
       putField(field, put);
@@ -115,6 +126,14 @@ public class FieldsObjectConverter extends AbstractObjectRowConverter<Persistent
 
   private void putField(Field field, Put put) {
     final byte[] toBytes = Bytes.toBytes(field.getName());
-    put.add(FAMILY_SELF, toBytes, Bytes.toBytes(field.getValue().toString()));
+    final String fieldValueAsString = field.getValue().toString();
+    if (StringUtils.isNotBlank(fieldValueAsString)) {
+      put.add(FAMILY_SELF, toBytes, Bytes.toBytes(fieldValueAsString));
+    }
+    else {
+      if (logger.isInfoEnabled()) {
+        logger.info("The following field is not persisted because it contains empty value - " + field.getName());
+      }
+    }
   }
 }
