@@ -101,7 +101,7 @@ public class FieldsObjectConverter extends AbstractObjectRowConverter<Persistent
       catch (Exception ex) {
         if (logger.isWarnEnabled()) {
           logger.warn("Could not fetch field value for field " + fieldName +
-              ". This field will not be populated in the content.");
+              ". This field will not be populated in the content.", ex);
         }
       }
     }
