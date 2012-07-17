@@ -1,11 +1,17 @@
-########################
-# Basic Configurations #
-########################
+############################
+# Injection Configurations #
+############################
 
+# Context names to bind the injector against in bean factory registrar
 contextName=com.smartitnengineering.smart-cms.spi,com.smartitnengineering.smart-cms
 # The modules that constitute Smart CMS API and SPI
 modules=com.smartitengineering.cms.binder.guice.APIModule,com.smartitengineering.cms.binder.guice.SPIModule,com.smartitengineering.cms.binder.guice.SPIWorkspaceServiceModule,com.smartitengineering.cms.binder.guice.SPITemplateEngineModule,com.smartitengineering.cms.binder.guice.SPIContentCacheModule,com.smartitengineering.cms.binder.guice.SPIContentTypeCacheModule,com.smartitengineering.cms.binder.guice.SolrQueryDaoModule,com.smartitengineering.cms.binder.guice.SPIContentFieldsCacheModule,com.smartitengineering.cms.binder.guice.WorkspaceResourceCacheModule
 ignoreMissingDependency=false
+
+########################
+# Basic Configurations #
+########################
+
 # The XSD to use to validate Content Type XML documentation
 com.smartitengineering.cms.schemaLocationForContentType=http://github.com/smart-it/smart-cms/raw/master/content-api-impl/src/main/resources/com/smartitengineering/cms/content/content-type-schema.xsd
 
