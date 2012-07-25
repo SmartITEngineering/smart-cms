@@ -783,7 +783,7 @@ public class ContentLoaderImpl implements ContentLoader {
   protected boolean checkForImpliedValidations(Collection<Field> fields) {
     boolean valid = true;
     for (Field field : fields) {
-      if (field != null && field.getFieldDef() != null) {
+      if (field != null && field.getFieldDef() != null && field.getValue() != null) {
         FieldDef def = field.getFieldDef();
         switch (def.getValueDef().getType()) {
           case COLLECTION:
