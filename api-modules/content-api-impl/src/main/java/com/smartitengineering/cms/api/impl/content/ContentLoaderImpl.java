@@ -706,20 +706,29 @@ public class ContentLoaderImpl implements ContentLoader {
         }
         continue;
       }
+      if (field == null || field.getFieldDef() == null || field.getValue() == null) {
+        if (field != null && logger.isWarnEnabled()) {
+          if (field.getFieldDef() != null) {
+            logger.warn("The field def is null for " + field.getName());
+          }
+          else if (field.getValue() != null) {
+            logger.warn("The field value is null for " + field.getName());
+          }
+        }
+        else {
+          logger.warn("Field is NULL");
+        }
+        continue;
+      }
       if (logger.isDebugEnabled()) {
         logger.debug("Attempting custom validation for " + field.getName());
       }
       FieldDef def = field.getFieldDef();
       if (def.getValueDef().getType().equals(FieldValueType.COMPOSITE)) {
         final Map<String, Field> nestedFields;
-        if (field != null) {
-          CompositeFieldValue compositeFieldValue = (CompositeFieldValue) field.getValue();
-          if (compositeFieldValue != null) {
-            nestedFields = compositeFieldValue.getValueAsMap();
-          }
-          else {
-            nestedFields = null;
-          }
+        CompositeFieldValue compositeFieldValue = (CompositeFieldValue) field.getValue();
+        if (compositeFieldValue != null) {
+          nestedFields = compositeFieldValue.getValueAsMap();
         }
         else {
           nestedFields = null;
@@ -733,29 +742,27 @@ public class ContentLoaderImpl implements ContentLoader {
       }
       else if (def.getValueDef().getType().equals(FieldValueType.COLLECTION) &&
           ((CollectionDataType) def.getValueDef()).getItemDataType().getType().equals(FieldValueType.COMPOSITE)) {
-        if (field != null) {
-          CollectionFieldValue collectionFieldValue = (CollectionFieldValue) field.getValue();
-          Collection<FieldValue> collectionValues = collectionFieldValue.getValue();
-          if (collectionValues != null) {
-            for (FieldValue fieldValue : collectionValues) {
-              if (!valid) {
-                logger.debug("Skipping iteration over collection field as already invalid! - " + field.getName());
-                continue;
+        CollectionFieldValue collectionFieldValue = (CollectionFieldValue) field.getValue();
+        Collection<FieldValue> collectionValues = collectionFieldValue.getValue();
+        if (collectionValues != null) {
+          for (FieldValue fieldValue : collectionValues) {
+            if (!valid) {
+              logger.debug("Skipping iteration over collection field as already invalid! - " + field.getName());
+              continue;
+            }
+            CompositeFieldValue compositeFieldValue = (CompositeFieldValue) fieldValue;
+            final Map<String, Field> nestedFields;
+            if (compositeFieldValue != null) {
+              nestedFields = compositeFieldValue.getValueAsMap();
+            }
+            else {
+              nestedFields = null;
+            }
+            if (nestedFields != null) {
+              if (logger.isDebugEnabled()) {
+                logger.debug("Going to validate colletion's item composite fields from " + field.getName());
               }
-              CompositeFieldValue compositeFieldValue = (CompositeFieldValue) fieldValue;
-              final Map<String, Field> nestedFields;
-              if (compositeFieldValue != null) {
-                nestedFields = compositeFieldValue.getValueAsMap();
-              }
-              else {
-                nestedFields = null;
-              }
-              if (nestedFields != null) {
-                if (logger.isDebugEnabled()) {
-                  logger.debug("Going to validate colletion's item composite fields from " + field.getName());
-                }
-                valid = isValidByCustomValidators(nestedFields.values(), content);
-              }
+              valid = isValidByCustomValidators(nestedFields.values(), content);
             }
           }
         }
