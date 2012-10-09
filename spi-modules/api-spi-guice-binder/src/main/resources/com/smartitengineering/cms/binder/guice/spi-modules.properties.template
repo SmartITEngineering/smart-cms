@@ -5,7 +5,7 @@
 # Context names to bind the injector against in bean factory registrar
 contextName=com.smartitnengineering.smart-cms.spi,com.smartitnengineering.smart-cms
 # The modules that constitute Smart CMS API and SPI
-modules=com.smartitengineering.cms.binder.guice.APIModule,com.smartitengineering.cms.binder.guice.SPIModule,com.smartitengineering.cms.binder.guice.SPIWorkspaceServiceModule,com.smartitengineering.cms.binder.guice.SPITemplateEngineModule,com.smartitengineering.cms.binder.guice.SPIContentCacheModule,com.smartitengineering.cms.binder.guice.SPIContentTypeCacheModule,com.smartitengineering.cms.binder.guice.SolrQueryDaoModule,com.smartitengineering.cms.binder.guice.SPIContentFieldsCacheModule,com.smartitengineering.cms.binder.guice.WorkspaceResourceCacheModule
+modules=com.smartitengineering.cms.binder.guice.APIModule,com.smartitengineering.cms.binder.guice.SPIModule,com.smartitengineering.cms.binder.guice.SPIWorkspaceServiceModule,com.smartitengineering.cms.binder.guice.SPITemplateEngineModule,com.smartitengineering.cms.binder.guice.SolrQueryDaoModule,com.smartitengineering.cms.binder.guice.WorkspaceResourceCacheModule
 ignoreMissingDependency=false
 
 ########################
@@ -30,9 +30,15 @@ com.smartitengineering.cms.uriPrefix=/cms
 # Configure the default global namespace for workspaces
 com.smartitengineering.cms.globalNamespace=com.smartitengineering
 
+# Whether implicit locking should wait for lock or fail if not available immediately
+com.smartitengineering.cms.enableDomainLockAwait=true
+
 ########################
 # Cache Configurations #
 ########################
+
+# Whether to enable caching for Content and its fields, and content type
+com.smartitengineering.cms.cache.enabled=true
 
 # Ehcache configuration file to read from, from classpath
 com.smartitengineering.cms.cache.resource=com/smartitengineering/cms/binder/guice/ehcache.xml

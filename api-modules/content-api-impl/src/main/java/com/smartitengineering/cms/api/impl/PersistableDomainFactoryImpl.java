@@ -18,6 +18,8 @@
  */
 package com.smartitengineering.cms.api.impl;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.impl.content.ContentImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
 import com.smartitengineering.cms.api.impl.workspace.ContentCoProcessorTemplateImpl;
@@ -42,9 +44,15 @@ import com.smartitengineering.cms.spi.workspace.PersistableWorkspace;
  */
 public class PersistableDomainFactoryImpl implements PersistableDomainFactory {
 
+  @Inject
+  @Named("domainLockAwaitEnabled")
+  private boolean domainLockAwaitEnabled;
+
   @Override
   public PersistableContentType createPersistableContentType() {
-    return new ContentTypeImpl();
+    final ContentTypeImpl contentTypeImpl = new ContentTypeImpl();
+    contentTypeImpl.setNextPerformToWaitForLock(domainLockAwaitEnabled);
+    return contentTypeImpl;
   }
 
   @Override
@@ -66,6 +74,7 @@ public class PersistableDomainFactoryImpl implements PersistableDomainFactory {
   public PersistableContent createPersistableContent(boolean supressChecking) {
     final ContentImpl contentImpl = new ContentImpl();
     contentImpl.setSupressChecking(supressChecking);
+    contentImpl.setNextPerformToWaitForLock(domainLockAwaitEnabled);
     return contentImpl;
   }
 
