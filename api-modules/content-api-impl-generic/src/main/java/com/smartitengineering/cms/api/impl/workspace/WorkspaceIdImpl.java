@@ -98,7 +98,6 @@ public class WorkspaceIdImpl implements WorkspaceId {
   @Override
   public boolean equals(Object obj) {
     if (obj == null) {
-      System.out.println("1");
       return false;
     }
     if (!WorkspaceId.class.isAssignableFrom(obj.getClass())) {
