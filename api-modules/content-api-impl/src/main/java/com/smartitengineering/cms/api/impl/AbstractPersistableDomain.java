@@ -167,14 +167,6 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
     private boolean waitToAttain;
 
     /**
-     * Defaults to false.
-     * @see LockPerformer#LockPerformer(boolean)
-     */
-    public LockPerformer() {
-      this(false);
-    }
-
-    /**
      * Initializes the lock performer with code whether to wait for lock or
      * not.
      * @param waitToAttain If true will wait to attain the lock.
@@ -217,11 +209,15 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
           lock();
         }
       }
-      V result = run();
-      if (attainLock) {
-        unlock();
+      try {
+        V result = run();
+        return result;
       }
-      return result;
+      finally {
+        if (attainLock && isLockOwned()) {
+          unlock();
+        }
+      }
     }
   }
 }
