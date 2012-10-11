@@ -390,8 +390,14 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent, Con
     contentImpl.privateContent = privateContent;
     contentImpl.contentStatus = contentStatus;
     contentImpl.nextPerformToWaitForLock = nextPerformToWaitForLock;
-    contentImpl.creationDate = creationDate;
     contentImpl.supressChecking = supressChecking;
+    contentImpl.entityTagValue = entityTagValue;
+    if (creationDate != null) {
+      contentImpl.creationDate = new Date(creationDate.getTime());
+    }
+    if (lastModifiedDate != null) {
+      contentImpl.lastModifiedDate = new Date(lastModifiedDate.getTime());
+    }
     contentImpl.map = map;
     if (map != null) {
       contentImpl.map = new LinkedHashMap<String, Field>();
