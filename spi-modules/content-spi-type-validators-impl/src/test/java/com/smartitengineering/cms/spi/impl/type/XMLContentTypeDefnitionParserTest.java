@@ -640,6 +640,7 @@ public class XMLContentTypeDefnitionParserTest {
 
     @Override
     protected void configure() {
+      bind(boolean.class).annotatedWith(Names.named("domainLockAwaitEnabled")).toInstance(Boolean.TRUE);
       bind(PersistableDomainFactory.class).to(PersistableDomainFactoryImpl.class).in(Scopes.SINGLETON);
       bind(ContentTypeLoader.class).annotatedWith(Names.named("apiContentTypeLoader")).to(ContentTypeLoaderImpl.class);
       bind(ContentLoader.class).annotatedWith(Names.named("apiContentLoader")).to(ContentLoaderImpl.class);

@@ -39,6 +39,8 @@ import com.smartitengineering.cms.api.type.ContentTypeId;
 import com.smartitengineering.cms.api.workspace.Sequence;
 import com.smartitengineering.cms.api.workspace.SequenceId;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
+import com.smartitengineering.cms.spi.SmartContentSPI;
+import com.smartitengineering.cms.spi.lock.LockHandler;
 import com.smartitengineering.dao.solr.SolrWriteDao;
 import com.smartitengineering.events.async.api.EventConsumer;
 import com.smartitengineering.util.bean.BeanFactoryRegistrar;
@@ -70,6 +72,7 @@ public class EventConsumerTest {
   private ContentLoader contentLoader;
   private WorkspaceAPI workspaceApi;
   private EventRegistrar eventRegistrar;
+  private LockHandler lockHandler;
   private Injector injector;
 
   @Before
@@ -84,11 +87,17 @@ public class EventConsumerTest {
     contentLoader = mockery.mock(ContentLoader.class);
     workspaceApi = mockery.mock(WorkspaceAPI.class);
     eventRegistrar = mockery.mock(EventRegistrar.class);
+    lockHandler = mockery.mock(LockHandler.class);
     injector = Guice.createInjector(new EventConsumptionImplModule());
     Field field = SmartContentAPI.class.getDeclaredField("api");
     field.setAccessible(true);
     field.set(null, null);
-    BeanFactoryRegistrar.registerBeanFactory(SmartContentAPI.CONTEXT_NAME, new GoogleGuiceBeanFactory(injector));
+    field = SmartContentSPI.class.getDeclaredField("spi");
+    field.setAccessible(true);
+    field.set(null, null);
+    final GoogleGuiceBeanFactory googleGuiceBeanFactory = new GoogleGuiceBeanFactory(true, injector);
+    BeanFactoryRegistrar.registerBeanFactory(SmartContentAPI.CONTEXT_NAME, googleGuiceBeanFactory);
+    BeanFactoryRegistrar.registerBeanFactory(SmartContentSPI.SPI_CONTEXT, googleGuiceBeanFactory);
   }
 
   @Test(expected = RuntimeException.class)
@@ -326,6 +335,7 @@ public class EventConsumerTest {
       bind(ContentLoader.class).annotatedWith(Names.named("apiContentLoader")).toInstance(contentLoader);
       bind(WorkspaceAPI.class).annotatedWith(Names.named("apiWorkspaceApi")).toInstance(workspaceApi);
       bind(EventRegistrar.class).annotatedWith(Names.named("apiEventRegistrar")).toInstance(eventRegistrar);
+      bind(LockHandler.class).toInstance(lockHandler);
     }
   }
 }

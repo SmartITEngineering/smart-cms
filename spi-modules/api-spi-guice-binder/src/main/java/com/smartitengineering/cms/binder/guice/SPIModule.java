@@ -44,6 +44,7 @@ import com.smartitengineering.cms.spi.content.PersistentContentReader;
 import com.smartitengineering.cms.spi.content.UriProvider;
 import com.smartitengineering.cms.spi.impl.DefaultLockHandler;
 import com.smartitengineering.cms.spi.impl.SearchBeanLoader;
+import com.smartitengineering.cms.spi.impl.cache.CacheableContentReadDao;
 import com.smartitengineering.cms.spi.impl.content.ContentAdapterHelper;
 import com.smartitengineering.cms.spi.impl.content.ContentFieldsAdapterHelper;
 import com.smartitengineering.cms.spi.impl.content.ContentObjectConverter;
@@ -210,7 +211,8 @@ public class SPIModule extends PrivateModule {
                                                "com/smartitengineering/cms/binder/guice/ehcache.xml");
       cacheName = properties.getProperty("com.smartitengineering.cms.cache.name", "cmsCache");
       enableCaching = Boolean.parseBoolean(properties.getProperty("com.smartitengineering.cms.cache.enabled", "true"));
-      enableDomainLockAwait = Boolean.parseBoolean(properties.getProperty("com.smartitengineering.cms.enableDomainLockAwait", "true"));
+      enableDomainLockAwait = Boolean.parseBoolean(properties.getProperty(
+          "com.smartitengineering.cms.enableDomainLockAwait", "true"));
       enableAsyncEvent = Boolean.parseBoolean(properties.getProperty("com.smartitengineering.cms.event.async", "true"));
       enableEventConsumption = Boolean.parseBoolean(properties.getProperty(
           "com.smartitengineering.cms.event.async.subscribe", "true"));
@@ -324,7 +326,7 @@ public class SPIModule extends PrivateModule {
       }).in(Singleton.class);
       bind(new TypeLiteral<CommonReadDao<PersistentContentType, ContentTypeId>>() {
       }).to(new TypeLiteral<CacheableDao<PersistentContentType, ContentTypeId, String>>() {
-      }).in(Singleton.class);      
+      }).in(Singleton.class);
     }
     else {
       bind(new TypeLiteral<CommonReadDao<PersistentContentType, ContentTypeId>>() {
@@ -335,8 +337,8 @@ public class SPIModule extends PrivateModule {
       }).in(Singleton.class);
     }
     bind(new TypeLiteral<com.smartitengineering.dao.common.CommonDao<PersistentContentType, ContentTypeId>>() {
-      }).to(new TypeLiteral<CommonDao<PersistentContentType, ContentTypeId>>() {
-      }).in(Singleton.class);
+    }).to(new TypeLiteral<CommonDao<PersistentContentType, ContentTypeId>>() {
+    }).in(Singleton.class);
     final TypeLiteral<SchemaInfoProviderImpl<PersistentContentType, ContentTypeId>> typeLiteral =
                                                                                     new TypeLiteral<SchemaInfoProviderImpl<PersistentContentType, ContentTypeId>>() {
     };
@@ -402,7 +404,6 @@ public class SPIModule extends PrivateModule {
       bind(new TypeLiteral<CommonWriteDao<PersistentContentFields>>() {
       }).to(new TypeLiteral<CommonDao<PersistentContentFields, ContentId>>() {
       }).in(Singleton.class);
-
     }
     bind(new TypeLiteral<EventListener<Content>>() {
     }).to(ContentEventListener.class).in(Singleton.class);
@@ -581,8 +582,10 @@ public class SPIModule extends PrivateModule {
       binder().expose(new TypeLiteral<CommonReadDao<PersistentContent, ContentId>>() {
       }).annotatedWith(Names.named("primaryCacheableReadDao"));
       bind(new TypeLiteral<CommonReadDao<PersistentContent, ContentId>>() {
-      }).to(new TypeLiteral<CacheableDao<PersistentContent, ContentId, String>>() {
+      }).annotatedWith(Names.named("cacheableDao")).to(new TypeLiteral<CacheableDao<PersistentContent, ContentId, String>>() {
       }).in(Singleton.class);
+      bind(new TypeLiteral<CommonReadDao<PersistentContent, ContentId>>() {
+      }).to(CacheableContentReadDao.class).in(Singleton.class);
     }
     else {
       bind(new TypeLiteral<CommonReadDao<PersistentContent, ContentId>>() {

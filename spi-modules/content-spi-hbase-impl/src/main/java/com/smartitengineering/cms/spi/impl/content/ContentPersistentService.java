@@ -104,10 +104,10 @@ public class ContentPersistentService implements PersistentService<WriteableCont
     }
     content.setLastModifiedDate(new Date());
     content.setEntityTagValue(SmartContentAPI.getInstance().getContentLoader().getEntityTagValueForContent(content));
-    commonWriteDao.update(adapter.convert(content));
     final PersistentContentFields converted = fieldsAdapter.convert(content.getOwnFields());
     converted.setId(content.getContentId());
     fieldsWriteDao.update(converted);
+    commonWriteDao.update(adapter.convert(content));
   }
 
   @Override
