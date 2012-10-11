@@ -9,7 +9,9 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.workspace.Workspace;
@@ -33,11 +35,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import junit.framework.Assert;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,6 +137,7 @@ public class CodeGenerationTest {
   }
 
   @Test
+  //@Ignore
   public void testSimpleDomainPersistence() {
     Injector injector = Guice.createInjector(new MasterModule(), new ServiceModule());
     Assert.assertNotNull(injector);
@@ -161,6 +168,7 @@ public class CodeGenerationTest {
   }
 
   @Test
+  //@Ignore
   public void testGetAll() {
     Injector injector = Guice.createInjector(new MasterModule(), new ServiceModule());
     Assert.assertNotNull(injector);
@@ -196,6 +204,7 @@ public class CodeGenerationTest {
   }
 
   @Test
+  //@Ignore
   public void testPersistCustomer() {
     Customer customer = new Customer();
     final String id = "customer1@testdomain.com";
@@ -213,6 +222,7 @@ public class CodeGenerationTest {
   }
 
   @Test
+  //@Ignore
   public void testSearch() {
     Injector injector = Guice.createInjector(new MasterModule(), new ServiceModule());
     Assert.assertNotNull(injector);
@@ -273,6 +283,7 @@ public class CodeGenerationTest {
   }
 
   @Test
+  //@Ignore
   public void testLocking() {
     Injector injector = Guice.createInjector(new MasterModule(), new ServiceModule());
     Assert.assertNotNull(injector);
@@ -308,6 +319,7 @@ public class CodeGenerationTest {
   }
 
   @Test
+  //@Ignore
   public void testPersistCollectionOfComposite() {
     Injector injector = Guice.createInjector(new MasterModule());
     CommonDao<CollectionTest, String> collectionTestDao =
@@ -330,6 +342,7 @@ public class CodeGenerationTest {
   }
 
   @Test
+  //@Ignore
   public void testPersistCollectionOfString() {
     Injector injector = Guice.createInjector(new MasterModule());
     CommonDao<CollectionTest, String> collectionTestDao =
@@ -352,6 +365,7 @@ public class CodeGenerationTest {
   }
 
   @Test
+  //@Ignore
   public void testPersistCollectionOfContent() {
     Injector injector = Guice.createInjector(new MasterModule());
     CommonDao<CollectionTest, String> collectionTestDao =
@@ -363,6 +377,8 @@ public class CodeGenerationTest {
     CollectionTestBean bean = new CollectionTestBean();
     bean.setCollId(Integer.SIZE);
     collectionTestBeanDao.save(bean);
+    sleep();
+    sleep();
     sleep();
     CollectionTest test = new CollectionTest();
     test.setCollId(Integer.MAX_VALUE);
@@ -382,6 +398,7 @@ public class CodeGenerationTest {
   }
 
   @Test
+  //@Ignore
   public void testPersistingCollectionOfNumbers() {
     Injector injector = Guice.createInjector(new MasterModule());
     CommonDao<CollectionTest, String> collectionTestDao =
@@ -414,6 +431,7 @@ public class CodeGenerationTest {
   }
 
   @Test
+  //@Ignore
   public void testPersistingCollectionOfByteArray() {
     Injector injector = Guice.createInjector(new MasterModule());
     CommonDao<CollectionTest, String> collectionTestDao =
@@ -435,6 +453,233 @@ public class CodeGenerationTest {
       selectedBytes.add(singleVal[0]);
     }
     Assert.assertEquals(3, selectedBytes.size());
+  }
+
+  @Test
+  //@Ignore
+  public void testMultiExplicitSingleThreadedLocking() {
+    LOGGER.info("Start Multiple Explicit Lock testing on Single Thread");
+    long start = System.currentTimeMillis();
+    Injector injector = Guice.createInjector(new MasterModule(), new ServiceModule());
+    Assert.assertNotNull(injector);
+    PersonService service = injector.getInstance(PersonService.class);
+    Assert.assertNotNull(service);
+    Person person = new Person();
+    person.setNationalId(124124124);
+    Name name = new ExtName();
+    name.setFirstName("Imran");
+    name.setLastName("Yousuf");
+    name.setMiddleInitial("Md");
+    person.setName(name);
+    service.save(person);
+    sleep();
+    final String personId = person.getId();
+    Assert.assertNotNull(personId);
+    for (int i = 0; i < 200; ++i) {
+      Person rPerson = service.getById(personId);
+      Assert.assertNotNull(rPerson);
+      int newNatId = 222 + i;
+      if (i > 0) {
+        Assert.assertEquals(newNatId - 1, rPerson.getNationalId().intValue());
+      }
+      Assert.assertFalse(rPerson.isLockOwned());
+      rPerson.lock();
+      Assert.assertTrue(rPerson.isLockOwned());
+      try {
+        rPerson.setNationalId(newNatId);
+        service.update(rPerson);
+        Assert.assertTrue(rPerson.isLockOwned());
+      }
+      finally {
+        rPerson.unlock();
+      }
+      Assert.assertFalse(rPerson.isLockOwned());
+      Person aPerson = service.getById(personId);
+      Assert.assertNotNull(aPerson);
+      Assert.assertEquals(newNatId, aPerson.getNationalId().intValue());
+    }
+    LOGGER.info("END Multiple Explicit Lock testing on Single Thread " + (System.currentTimeMillis() - start) + "ms");
+  }
+
+  @Test
+  @Ignore
+  public void testMultiExplicitMultiThreadedLocking() {
+    LOGGER.info("Start Multiple Explicit Lock testing on Multi Thread");
+    long start = System.currentTimeMillis();
+    Injector injector = Guice.createInjector(new MasterModule(), new ServiceModule());
+    Assert.assertNotNull(injector);
+    final PersonService service = injector.getInstance(PersonService.class);
+    Assert.assertNotNull(service);
+    Person person = new Person();
+    person.setNationalId(124124124);
+    Name name = new ExtName();
+    name.setFirstName("Imran");
+    name.setLastName("Yousuf");
+    name.setMiddleInitial("Md");
+    person.setName(name);
+    service.save(person);
+    sleep();
+    final String personId = person.getId();
+    Assert.assertNotNull(personId);
+    ExecutorService executorService = Executors.newFixedThreadPool(5);
+    List<Future<?>> futures = new ArrayList<Future<?>>();
+    for (int j = 0; j < 5; ++j) {
+      final int threadIndex = j;
+      futures.add(executorService.submit(new Runnable() {
+
+        public void run() {
+          LOGGER.info("Explicit Lock test START for " + threadIndex);
+          for (int i = 0; i < 200; ++i) {
+            String suffix = "" + threadIndex + " run index " + i + " for " + personId;
+            LOGGER.info("Explicit Lock test on " + suffix);
+            Person rPerson = service.getById(personId);
+            Assert.assertNotNull(rPerson);
+            Assert.assertFalse("Lock owned before locking on " + suffix, rPerson.isLockOwned());
+            rPerson.lock();
+            LOGGER.info("Explicit Lock got LOCK on " + suffix);
+            Assert.assertTrue("No Explicit Lock for update " + suffix, rPerson.isLockOwned());
+            try {
+              int newNatId = 222 + i;
+              rPerson.setNationalId(newNatId);
+              service.update(rPerson);
+              Assert.assertTrue("No Lock to unlock " + suffix, rPerson.isLockOwned());
+            }
+            finally {
+              rPerson.unlock();
+              LOGGER.info("Explicit Lock UNLOCK on " + threadIndex + " run index " + i);
+            }
+            Assert.assertFalse("Lock owned after unlock on " + suffix, rPerson.isLockOwned());
+            Person aPerson = service.getById(personId);
+            Assert.assertNotNull(aPerson);
+          }
+          LOGGER.info("Explicit Lock test END for " + threadIndex);
+        }
+      }));
+    }
+    for (Future<?> future : futures) {
+      try {
+        future.get();
+      }
+      catch (Exception ex) {
+        LOGGER.error("Failed to complete thread task", ex);
+        Assert.fail("Failed to complete task: " + ex.getMessage());
+      }
+    }
+    LOGGER.info("END Multiple Explicit Lock testing on Multi Thread " + (System.currentTimeMillis() - start) + "ms");
+    sleep();
+    sleep();
+    sleep();
+  }
+
+  @Test
+  //@Ignore
+  public void testMultiImplicitSingleThreadedLocking() {
+    LOGGER.info("Start Multiple Implicit Lock testing on Single Thread");
+    long start = System.currentTimeMillis();
+    Injector injector = Guice.createInjector(new MasterModule(), new ServiceModule());
+    Assert.assertNotNull(injector);
+    PersonService service = injector.getInstance(PersonService.class);
+    Assert.assertNotNull(service);
+    Person person = new Person();
+    person.setNationalId(124124124);
+    Name name = new ExtName();
+    name.setFirstName("Imran");
+    name.setLastName("Yousuf");
+    name.setMiddleInitial("Md");
+    person.setName(name);
+    service.save(person);
+    sleep();
+    final String personId = person.getId();
+    Assert.assertNotNull(personId);
+    for (int i = 0; i < 200; ++i) {
+      Person rPerson = service.getById(personId);
+      Assert.assertNotNull(rPerson);
+      int newNatId = 222 + i;
+      if (i > 0) {
+        Assert.assertEquals(newNatId - 1, rPerson.getNationalId().intValue());
+      }
+      Assert.assertFalse(rPerson.isLockOwned());
+      LOGGER.info("Setting national id " + newNatId + " for " + personId);
+      rPerson.setNationalId(newNatId);
+      service.update(rPerson);
+      Assert.assertFalse(rPerson.isLockOwned());
+      Person aPerson = service.getById(personId);
+      Assert.assertNotNull(aPerson);
+      final ContentLoader contentLoader =
+                          SmartContentAPI.getInstance().getContentLoader();
+      try {
+        Content content = contentLoader.loadContent(contentLoader.createContentId(SmartContentAPI.getInstance().
+            getWorkspaceApi().createWorkspaceId("p", "q"), personId.getBytes("UTF-8")));
+        LOGGER.info("Value of " + Person.PROPERTY_NATIONALID + " in " + personId + " is " + content.getField(
+            Person.PROPERTY_NATIONALID).getValue().toString());
+      }
+      catch (Exception ex) {
+        LOGGER.error(ex.getMessage(), ex);
+      }
+      LOGGER.info("Asserting national id " + newNatId + " for " + personId);
+      Assert.assertEquals("Update failed for " + personId + " expected " + newNatId + " received " + aPerson.
+          getNationalId(), newNatId, aPerson.getNationalId().intValue());
+    }
+    LOGGER.info("END Multiple Implicit Lock testing on Single Thread - " + (System.currentTimeMillis() - start) + "ms");
+  }
+
+  @Test
+  @Ignore
+  public void testMultiImplicitMultiThreadedLocking() {
+    LOGGER.info("Start Multiple Implicit Lock testing on Multi Thread");
+    long start = System.currentTimeMillis();
+    Injector injector = Guice.createInjector(new MasterModule(), new ServiceModule());
+    Assert.assertNotNull(injector);
+    final PersonService service = injector.getInstance(PersonService.class);
+    Assert.assertNotNull(service);
+    Person person = new Person();
+    person.setNationalId(124124124);
+    Name name = new ExtName();
+    name.setFirstName("Imran");
+    name.setLastName("Yousuf");
+    name.setMiddleInitial("Md");
+    person.setName(name);
+    service.save(person);
+    sleep();
+    final String personId = person.getId();
+    Assert.assertNotNull(personId);
+    ExecutorService executorService = Executors.newFixedThreadPool(5);
+    List<Future<?>> futures = new ArrayList<Future<?>>();
+    for (int j = 0; j < 5; ++j) {
+      final int threadIndex = j;
+      futures.add(executorService.submit(new Runnable() {
+
+        public void run() {
+          for (int i = 0; i < 200; ++i) {
+            String suffix = "" + threadIndex + " run index " + i + " for " + personId;
+            Person rPerson = service.getById(personId);
+            Assert.assertNotNull(rPerson);
+            int newNatId = 222 + i;
+            Assert.assertFalse("Implicit Lock has lock unexpectly before update for " + suffix, rPerson.isLockOwned());
+            rPerson.setNationalId(newNatId);
+            service.update(rPerson);
+            Assert.assertFalse("Implicit Lock has lock unexpectly after update for " + suffix, rPerson.isLockOwned());
+            Person aPerson = service.getById(personId);
+            Assert.assertNotNull(aPerson);
+            LOGGER.info("Implicit Lock test done for " + suffix);
+          }
+          LOGGER.info("Implicit Lock test END for " + threadIndex);
+        }
+      }));
+    }
+    for (Future<?> future : futures) {
+      try {
+        future.get();
+      }
+      catch (Exception ex) {
+        LOGGER.error("Failed to complete thread task", ex);
+        Assert.fail("Failed to complete task: " + ex.getMessage());
+      }
+    }
+    LOGGER.info("END Multiple Implicit Lock testing on Multi Thread - " + (System.currentTimeMillis() - start) + "ms");
+    sleep();
+    sleep();
+    sleep();
   }
 
   public static class ConfigurationModule extends AbstractModule {
