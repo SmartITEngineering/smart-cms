@@ -75,12 +75,18 @@ public abstract class AbstractRepositoryDomain<T extends PersistentDTO>
   }
 
   public boolean isLockOwned() {
+    if (lock == null) {
+      System.out.println("NNNNNNNNNNNNNNUUUUUUUUUUUULLLLLLLLLLL LOCK in DTO");
+    }
     return lock != null ? lock.isLockOwned() : true;
   }
 
   public void lock() {
     if (lock != null) {
       lock.lock();
+    }
+    else {
+      System.out.println("NNNNNNNNNNNNNNUUUUUUUUUUUULLLLLLLLLLL LOCK in DTO");
     }
   }
 
@@ -95,6 +101,9 @@ public abstract class AbstractRepositoryDomain<T extends PersistentDTO>
   public void unlock() {
     if (lock != null) {
       lock.unlock();
+    }
+    else {
+      System.out.println("NNNNNNNNNNNNNNUUUUUUUUUUUULLLLLLLLLLL LOCK in DTO");
     }
   }
 }

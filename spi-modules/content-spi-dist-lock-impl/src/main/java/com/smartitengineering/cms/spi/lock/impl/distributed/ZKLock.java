@@ -141,12 +141,12 @@ public class ZKLock implements Lock, Watcher, LockTimeoutListener {
               });
             }
             catch (Exception ex) {
+              logger.error("Could not attach watcher", ex);
             }
             final long remoteStart = System.currentTimeMillis();
             ZKLock.this.wait(availableMillisForRemoteLock);
             return tryRemoteLock(lockId, availableMillisForRemoteLock - (System.currentTimeMillis() - remoteStart));
           }
-
         }
         else {
           registrar.unlock(key, lockId);
