@@ -18,6 +18,7 @@
  */
 package com.smartitengineering.cms.api.impl.content;
 
+import com.smartitengineering.cms.api.content.FieldValue;
 import com.smartitengineering.cms.api.type.ContentType.ContentProcessingPhase;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.api.content.Content;
@@ -53,7 +54,7 @@ import org.apache.commons.lang.ObjectUtils;
  *
  * @author kaisar
  */
-public class ContentImpl extends AbstractPersistableDomain<WriteableContent> implements PersistableContent {
+public class ContentImpl extends AbstractPersistableDomain<WriteableContent, ContentId> implements PersistableContent {
 
   private ContentId contentId;
   private ContentId parentId;
@@ -67,6 +68,10 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   private boolean privateContent;
   private boolean supressChecking;
 
+  public ContentImpl() {
+    super(LOCK_KEY_PREFIX);
+  }
+
   public boolean isSupressChecking() {
     return supressChecking;
   }
@@ -77,14 +82,29 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
 
   @Override
   public void put() throws IOException {
-    triggerContentCoProcessors(ContentType.ContentProcessingPhase.WRITE);
-    if (!isValid()) {
-      getLogger().info("Content not in valid state!");
-      //First get contents indexed before attempting to use this validity!
-      //Uncomment the following line once indexing is ensured in testing
-      throw new IOException("Content is not in valid state!");
+    final boolean attainedLockLocally;
+    if (isPersisted() && !isLockOwned()) {
+      lock();
+      attainedLockLocally = true;
     }
-    super.put();
+    else {
+      attainedLockLocally = false;
+    }
+    try {
+      triggerContentCoProcessors(ContentType.ContentProcessingPhase.WRITE);
+      if (!isValid()) {
+        getLogger().info("Content not in valid state!");
+        //First get contents indexed before attempting to use this validity!
+        //Uncomment the following line once indexing is ensured in testing
+        throw new IOException("Content is not in valid state!");
+      }
+      super.put();
+    }
+    finally {
+      if (attainedLockLocally) {
+        unlock();
+      }
+    }
   }
 
   protected void triggerContentCoProcessors(final ContentProcessingPhase phase) {
@@ -232,12 +252,8 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   }
 
   @Override
-  public String getKeyStringRep() {
-    StringBuilder builder = new StringBuilder();
-    if (contentId != null) {
-      builder.append("content:").append(contentId.toString());
-    }
-    return builder.toString();
+  public ContentId getKeySpecimen() {
+    return contentId;
   }
 
   @Override
@@ -363,5 +379,41 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent> imp
   @Override
   public boolean isPrivate() {
     return this.privateContent;
+  }
+
+  @Override
+  public ContentImpl clone() {
+    ContentImpl contentImpl = new ContentImpl();
+    contentImpl.contentDef = contentDef;
+    contentImpl.contentId = contentId;
+    contentImpl.parentId = parentId;
+    contentImpl.privateContent = privateContent;
+    contentImpl.contentStatus = contentStatus;
+    contentImpl.nextPerformToWaitForLock = nextPerformToWaitForLock;
+    contentImpl.creationDate = creationDate;
+    contentImpl.supressChecking = supressChecking;
+    contentImpl.map = map;
+    if (map != null) {
+      contentImpl.map = new LinkedHashMap<String, Field>();
+      cloneFields(map, contentImpl.map);
+    }
+    if (cachedFieldMap != null) {
+      contentImpl.cachedFieldMap = new LinkedHashMap<String, Field>();
+      cloneFields(cachedFieldMap, contentImpl.cachedFieldMap);
+    }
+    return contentImpl;
+  }
+
+  protected void cloneFields(Map<String, Field> fieldMap, Map<String, Field> destMap) {
+    for (Map.Entry<String, Field> oneField : fieldMap.entrySet()) {
+      FieldImpl fieldImpl = new FieldImpl();
+      final Field value = oneField.getValue();
+      fieldImpl.setContent(value.getContent());
+      fieldImpl.setFieldDef(value.getFieldDef());
+      fieldImpl.setName(value.getName());
+      final FieldValue fieldVal = value.getValue();
+      fieldImpl.setValue(fieldVal);
+      destMap.put(oneField.getKey(), fieldImpl);
+    }
   }
 }

@@ -21,6 +21,7 @@ package com.smartitengineering.cms.api.impl;
 import com.smartitengineering.cms.api.factory.write.Lock;
 import com.smartitengineering.cms.spi.lock.Key;
 import com.smartitengineering.cms.spi.lock.LockManager;
+import com.smartitengineering.cms.spi.util.LockUtil;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +32,12 @@ import org.slf4j.LoggerFactory;
  * @author imyousuf
  * @since 0.1
  */
-public abstract class AbstractLockableDomain
-    implements Lock,
-               Key {
+public abstract class AbstractLockableDomain<K>
+    implements Lock {
 
   private transient Logger logger = LoggerFactory.getLogger(getClass());
-  private Lock lock;
+  private transient Lock lock;
+  protected final String lockPrefix;
 
   protected Logger getLogger() {
     if (logger == null) {
@@ -48,7 +49,8 @@ public abstract class AbstractLockableDomain
   /**
    * Gets the lock for the concrete class invoking this constructor
    */
-  protected AbstractLockableDomain() {
+  protected AbstractLockableDomain(String lockPrefix) {
+    this.lockPrefix = lockPrefix;
   }
 
   public Lock getLock() {
@@ -60,7 +62,8 @@ public abstract class AbstractLockableDomain
 
   private synchronized void initLock() {
     if (lock == null) {
-      lock = LockManager.register(this);
+      Key key = LockUtil.getCommonLockKey(lockPrefix, getKeySpecimen());
+      lock = LockManager.register(key);
     }
   }
 
@@ -96,4 +99,6 @@ public abstract class AbstractLockableDomain
   public void unlock() {
     getLock().unlock();
   }
+
+  protected abstract K getKeySpecimen();
 }

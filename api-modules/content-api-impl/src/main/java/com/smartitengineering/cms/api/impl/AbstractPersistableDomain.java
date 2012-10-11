@@ -29,8 +29,8 @@ import java.lang.reflect.ParameterizedType;
  * implementations of {@link PersistentWriter}.
  * @author imyousuf
  */
-public abstract class AbstractPersistableDomain<T extends PersistentWriter>
-    extends AbstractLockableDomain
+public abstract class AbstractPersistableDomain<T extends PersistentWriter, K>
+    extends AbstractLockableDomain<K>
     implements PersistentWriter {
 
   /**
@@ -51,7 +51,8 @@ public abstract class AbstractPersistableDomain<T extends PersistentWriter>
    * @param pesistenceRegistryClass Persistence class to look for in the
    *																	registry
    */
-  protected AbstractPersistableDomain() {
+  protected AbstractPersistableDomain(String lockPrefix) {
+    super(lockPrefix);
     pesistenceRegistryClass =
     (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     nextPerformToWaitForLock = false;

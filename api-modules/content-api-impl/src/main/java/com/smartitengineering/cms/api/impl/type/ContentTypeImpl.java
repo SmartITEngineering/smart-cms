@@ -50,7 +50,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author kaisar
  */
-public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentType> implements PersistableContentType {
+public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentType, ContentTypeId> implements PersistableContentType {
 
   private ContentTypeId contentTypeId;
   private final Set<ContentStatus> contentStatus = new LinkedHashSet<ContentStatus>();
@@ -69,6 +69,10 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
                                                                                new EnumMap<ContentProcessingPhase, Collection<ContentCoProcessorDef>>(
       ContentProcessingPhase.class);
   private DefinitionType definitionType;
+
+  public ContentTypeImpl() {
+    super(LOCK_KEY_PREFIX);
+  }
 
   @Override
   public void put() throws IOException {
@@ -227,12 +231,8 @@ public class ContentTypeImpl extends AbstractPersistableDomain<WritableContentTy
   }
 
   @Override
-  public String getKeyStringRep() {
-    StringBuilder keyString = new StringBuilder();
-    if (contentTypeId != null) {
-      keyString.append("content-type:").append(contentTypeId.toString());
-    }
-    return keyString.toString();
+  public ContentTypeId getKeySpecimen() {
+    return contentTypeId;
   }
 
   @Override

@@ -29,7 +29,7 @@ import java.util.Map;
  *
  * @author imyousuf
  */
-public interface Content extends ReferrableResource, Serializable {
+public interface Content extends ReferrableResource, Serializable, Cloneable {
 
   public ContentId getContentId();
 
@@ -56,4 +56,6 @@ public interface Content extends ReferrableResource, Serializable {
   public String getEntityTagValue();
 
   public boolean isPrivate();
+
+  public Content clone();
 }

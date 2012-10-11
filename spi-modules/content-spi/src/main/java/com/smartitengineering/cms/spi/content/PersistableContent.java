@@ -26,7 +26,9 @@ import java.util.Date;
  *
  * @author imyousuf
  */
-public interface PersistableContent extends WriteableContent {
+public interface PersistableContent extends WriteableContent, Cloneable {
+
+  public static final String LOCK_KEY_PREFIX = "content:";
 
   public void setCreationDate(Date creationDate);
 

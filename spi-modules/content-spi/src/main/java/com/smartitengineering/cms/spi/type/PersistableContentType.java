@@ -30,6 +30,8 @@ import java.util.Map;
  */
 public interface PersistableContentType extends WritableContentType {
 
+  public static final String LOCK_KEY_PREFIX = "content-type:";
+
   public boolean isFromPersistentStorage();
 
   public void setFromPersistentStorage(boolean fromPersistentStorage);
