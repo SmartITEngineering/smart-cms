@@ -1,7 +1,7 @@
 package com.smartitengineering.demo.cms.dto;
 
 /**
- * Hello world!
+ * Sample App demostrating how to use the generated code
  *
  */
 public class App 
