@@ -44,11 +44,11 @@ public class CacheableContentReadDao implements CommonReadDao<PersistentContent,
   }
 
   public <OtherTemplate> List<OtherTemplate> getOtherList(List<QueryParameter> query) {
-    return cacheableReadDao.getOtherList(query);
+    return cacheableReadDao.<OtherTemplate>getOtherList(query);
   }
 
   public <OtherTemplate> OtherTemplate getOther(List<QueryParameter> query) {
-    return cacheableReadDao.getOther(query);
+    return cacheableReadDao.<OtherTemplate>getOther(query);
   }
 
   public List<PersistentContent> getList(List<QueryParameter> query) {
@@ -60,11 +60,11 @@ public class CacheableContentReadDao implements CommonReadDao<PersistentContent,
   }
 
   public <OtherTemplate> List<OtherTemplate> getOtherList(QueryParameter... query) {
-    return cacheableReadDao.getOtherList(query);
+    return cacheableReadDao.<OtherTemplate>getOtherList(query);
   }
 
   public <OtherTemplate> OtherTemplate getOther(QueryParameter... query) {
-    return cacheableReadDao.getOther(query);
+    return cacheableReadDao.<OtherTemplate>getOther(query);
   }
 
   public List<PersistentContent> getList(QueryParameter... query) {
