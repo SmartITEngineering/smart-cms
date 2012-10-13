@@ -212,13 +212,14 @@ public class StartMojo
 
   public void execute()
       throws MojoExecutionException {
-    {
+    if (solrArtifact != null) {
+
       Artifact artifact = getArtifact(solrArtifact);
       File solrOutDir = new File(outputDirectory, "solr");
       solrOutDir.mkdirs();
       extract(artifact.getFile(), solrOutDir);
     }
-    {
+    if (eventHubArtifact != null) {
       Artifact artifact = getArtifact(eventHubArtifact);
       File hubOutDir = new File(outputDirectory, "hub");
       hubOutDir.mkdirs();
