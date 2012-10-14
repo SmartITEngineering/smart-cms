@@ -356,13 +356,17 @@ public class StartMojo
         File solrOutDir = new File(outputDirectory, "solr");
         File hubOutDir = new File(outputDirectory, "hub");
         File cmsOutDir = new File(outputDirectory, "cms");
-        System.setProperty("solr.solr.home", solrHomeDirectory.getAbsolutePath());
-        Handler solr = new WebAppContext(solrOutDir.getAbsolutePath(), "/solr");
-        handlerList.addHandler(solr);
-        WebAppContext hub = new WebAppContext(hubOutDir.getAbsolutePath(), "/hub");
-        final WebAppClassLoader webAppClassLoader = new WebAppClassLoader(hub);
-        hub.setClassLoader(webAppClassLoader);
-        handlerList.addHandler(hub);
+        if (solrArtifact != null) {
+          System.setProperty("solr.solr.home", solrHomeDirectory.getAbsolutePath());
+          Handler solr = new WebAppContext(solrOutDir.getAbsolutePath(), "/solr");
+          handlerList.addHandler(solr);
+        }
+        if (eventHubArtifact != null) {
+          WebAppContext hub = new WebAppContext(hubOutDir.getAbsolutePath(), "/hub");
+          final WebAppClassLoader webAppClassLoader = new WebAppClassLoader(hub);
+          hub.setClassLoader(webAppClassLoader);
+          handlerList.addHandler(hub);
+        }
         if (cmsWebServiceArtifact != null) {
           WebAppContext cms = new WebAppContext(cmsOutDir.getAbsolutePath(), "/cms");
           final WebAppClassLoader cmsWebAppClassLoader = new WebAppClassLoader(cms);
