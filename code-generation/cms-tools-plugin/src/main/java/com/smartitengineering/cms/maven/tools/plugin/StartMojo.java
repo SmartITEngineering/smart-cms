@@ -64,13 +64,11 @@ public class StartMojo
   /**
    * Solr HBase war artifact
    * @parameter
-   * @required
    */
   private ArtifactItem solrArtifact;
   /**
    * Event Hub HBase war artifact
    * @parameter
-   * @required
    */
   private ArtifactItem eventHubArtifact;
   /**
