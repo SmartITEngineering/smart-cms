@@ -151,6 +151,20 @@ public class StartMojo
    * @required
    */
   protected List remoteRepos;
+  /**
+   * EventHub channel name
+   * @parameter expression="test"
+   * @required
+   */
+  private String eventHubChannelName;
+
+  public String getEventHubChannelName() {
+    return eventHubChannelName;
+  }
+
+  public void setEventHubChannelName(String eventHubChannelName) {
+    this.eventHubChannelName = eventHubChannelName;
+  }
 
   public String getJerseyVersion() {
     return jerseyVersion;
@@ -389,9 +403,9 @@ public class StartMojo
         throw new IllegalStateException(ex);
       }
       Client client = CacheableClient.create();
-      client.resource("http://localhost:10080/hub/api/channels/test").header(HttpHeaders.CONTENT_TYPE,
-                                                                             MediaType.APPLICATION_JSON).put(
-          "{\"name\":\"test\"}");
+      client.resource("http://localhost:10080/hub/api/channels/" + eventHubChannelName).header(HttpHeaders.CONTENT_TYPE,
+                                                                                               MediaType.APPLICATION_JSON).
+          put("{\"name\":\"" + eventHubChannelName + "\"}");
       getLog().debug("Created test channel!");
     }
 
