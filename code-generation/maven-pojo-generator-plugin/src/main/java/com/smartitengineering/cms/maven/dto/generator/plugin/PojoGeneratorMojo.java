@@ -24,6 +24,7 @@ import com.google.inject.PrivateModule;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
+import com.google.inject.name.Names;
 import com.smartitengineering.cms.api.content.CompositeFieldValue;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
@@ -51,6 +52,7 @@ import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.repo.dao.impl.AbstractRepoAdapterHelper;
 import com.smartitengineering.cms.repo.dao.impl.AbstractRepositoryDomain;
 import com.smartitengineering.cms.repo.dao.impl.ExtendedReadDao;
+import com.smartitengineering.cms.repo.dao.impl.Initializer;
 import com.smartitengineering.cms.repo.dao.impl.RepositoryDaoImpl;
 import com.smartitengineering.cms.type.xml.XMLParserIntrospector;
 import com.smartitengineering.cms.type.xml.XmlParser;
@@ -69,6 +71,7 @@ import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JConditional;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JExpression;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JForLoop;
 import com.sun.codemodel.JInvocation;
@@ -119,7 +122,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
    * a file or a classpath resource. If either is missing it would result a classpath exception
    * @parameter
    */
-  private Map<String, String> contentTypesResourceConfig;
+  private List<String> contentTypes;
   /**
    * A content type file
    * @parameter
@@ -144,6 +147,12 @@ public class PojoGeneratorMojo extends AbstractMojo {
    * @required
    */
   private MavenProject project;
+  /**
+   * The content type files from classpath to use for initialization
+   * 
+   * @parameter
+   */
+  private List<String> typeFiles;
 
   public void execute()
       throws MojoExecutionException {
@@ -151,7 +160,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
     if (!f.exists()) {
       f.mkdirs();
     }
-    if ((contentTypesResourceConfig == null || contentTypesResourceConfig.isEmpty()) && contentTypeResource == null) {
+    if ((contentTypes == null || contentTypes.isEmpty()) && contentTypeResource == null) {
       throw new MojoExecutionException("Parameters not specified properly. Any one and only one of " +
           "contentTypesResourceConfig, contentTypeResourceConfig and contentTypeResource must be specified!");
     }
@@ -160,39 +169,31 @@ public class PojoGeneratorMojo extends AbstractMojo {
     }
     JCodeModel codeModel = new JCodeModel();
     Set<MutableContentType> types = new LinkedHashSet<MutableContentType>();
+    if (StringUtils.isBlank(workspaceId) || workspaceId.split(":").length != 2) {
+      throw new MojoExecutionException("Workspace ID not specified or is not in format 'namespace:name'");
+    }
+    final String wIds[] = workspaceId.split(":");
     if (contentTypeResource != null) {
       if (!contentTypeResource.exists() || !contentTypeResource.isFile()) {
         throw new MojoExecutionException("'contentTypeResource' file either does not exist or is not a file: " +
             (contentTypeResource == null ? null : contentTypeResource.getAbsolutePath()));
       }
-      if (StringUtils.isBlank(workspaceId) || workspaceId.split(":").length != 2) {
-        throw new MojoExecutionException("Workspace ID not specified or is not in format 'namespace:name'");
-      }
-      String wIds[] = workspaceId.split(":");
       final WorkspaceIdImpl dummyIdImpl = new WorkspaceIdImpl();
       dummyIdImpl.setGlobalNamespace(wIds[0]);
       dummyIdImpl.setName(wIds[1]);
       types.addAll(parseContentType(dummyIdImpl, contentTypeResource));
     }
     else {
-      for (Entry<String, String> contentTypeRsrc : contentTypesResourceConfig.entrySet()) {
-        final String key = contentTypeRsrc.getKey();
-        if (StringUtils.isBlank(key)) {
-          throw new MojoExecutionException("'contentTypesResourceConfig' can not have empty key");
-        }
-        final String[] wId = key.split(":");
-        if (wId.length != 2) {
-          throw new MojoExecutionException("'contentTypesResourceConfig' key must be in 'string:string' format: " + key);
-        }
-        final String value = contentTypeRsrc.getValue();
+      for (String contentTypeRsrc : contentTypes) {
+        final String value = contentTypeRsrc;
         if (StringUtils.isBlank(value)) {
           throw new MojoExecutionException("'contentTypesResourceConfig' can not have empty resource config");
         }
         File file = new File(value);
         if (file.exists() && file.isFile()) {
           WorkspaceIdImpl idImpl = new WorkspaceIdImpl();
-          idImpl.setGlobalNamespace(wId[0]);
-          idImpl.setName(wId[1]);
+          idImpl.setGlobalNamespace(wIds[0]);
+          idImpl.setName(wIds[1]);
           types.addAll(parseContentType(idImpl, file));
         }
         else {
@@ -339,7 +340,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
         }
       }
     }
-    generateMasterModule(modules, codeModel);
+    generateMasterModule(modules, codeModel, wId);
   }
 
   protected Set<FieldDef> getAllComposedFields(CompositeDataType compositeDataType,
@@ -1402,7 +1403,8 @@ public class PojoGeneratorMojo extends AbstractMojo {
     forBody.add(collection.invoke("add").arg(mutableItemFieldValue));
   }
 
-  protected void generateMasterModule(Map<ContentTypeId, JDefinedClass> modules, JCodeModel codeModel) throws
+  protected void generateMasterModule(Map<ContentTypeId, JDefinedClass> modules, JCodeModel codeModel, String[] wId)
+      throws
       JClassAlreadyExistsException {
     final String moduleClassName = new StringBuilder(packageForGuiceMasterModule).append(".MasterModule").toString();
     final JDefinedClass moduleClass = codeModel._class(moduleClassName);
@@ -1410,6 +1412,31 @@ public class PojoGeneratorMojo extends AbstractMojo {
     JMethod configureMethod = moduleClass.method(JMod.PUBLIC, JCodeModel.boxToPrimitive.get(Void.class),
                                                  "configure");
     JBlock block = configureMethod.body();
+    if (typeFiles != null && !typeFiles.isEmpty()) {
+      JClass namesClass = codeModel.ref(Names.class);
+      JExpression stringClass = codeModel.ref(String.class).dotclass();
+      block.add(JExpr.invoke("bind").arg(stringClass).invoke("annotatedWith").arg(namesClass.staticInvoke("named").
+          arg("cmsWorkspaceNamespace")).invoke("toInstance").arg(wId[0]));
+      block.add(JExpr.invoke("bind").arg(stringClass).invoke("annotatedWith").arg(namesClass.staticInvoke("named").
+          arg("cmsWorkspaceName")).invoke("toInstance").arg(wId[1]));
+      {
+        JClass typeLiteral = codeModel.ref(TypeLiteral.class);
+        final JClass narrowedTypesLiteral = typeLiteral.narrow(codeModel.ref(List.class).narrow(String.class));
+        final JDefinedClass stringListType = moduleClass._class("InitializationContentTypes");
+        stringListType._extends(narrowedTypesLiteral);
+        JVar typesList = block.decl(codeModel.ref(List.class).narrow(String.class), "contentTypes",
+                                    JExpr._new(codeModel.ref(ArrayList.class).narrow(String.class)));
+        for (String typeFile : typeFiles) {
+          block.add(typesList.invoke("add").arg(typeFile));
+        }
+        block.add(JExpr.invoke("bind").arg(JExpr._new(stringListType)).invoke(
+            "annotatedWith").arg(namesClass.staticInvoke("named").arg("contentTypePath")).invoke("toInstance").arg(
+            typesList));
+        JVar initVar = block.decl(codeModel.ref(Initializer.class), "initializer",
+                                  JExpr._new(codeModel.ref(Initializer.class)).arg(wId[0]).arg(wId[1]).arg(typesList));
+        block.add(initVar.invoke("init"));
+      }
+    }
     for (JDefinedClass clazz : modules.values()) {
       block.invoke("install").arg(JExpr._new(clazz));
     }
