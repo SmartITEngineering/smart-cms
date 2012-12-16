@@ -36,11 +36,6 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.smartitengineering.smart-dao</groupId>
-      <artifactId>hbase-ddl-util</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>com.smartitengineering.smart-util</groupId>
       <artifactId>smart-bean-guice-util</artifactId>
       <scope>test</scope>
@@ -48,12 +43,6 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jdk14</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.smartitengineering.smart-cms</groupId>
-      <artifactId>api-spi-guice-binder</artifactId>
-      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -140,6 +129,9 @@
             <configuration>
               <contentTypeResource>${basedir}/src/main/resources/content-type-example.xml</contentTypeResource>
               <packageForGuiceMasterModule>com.embarcadero.edn</packageForGuiceMasterModule>
+              <typeFiles>
+                <typeFile>content-type-example.xml</typeFile>
+              </typeFiles>
             </configuration>
           </execution>
           <execution>
@@ -151,6 +143,9 @@
             <configuration>
               <contentTypeResource>${basedir}/src/main/resources/content-type-def-with-composition.xml</contentTypeResource>
               <packageForGuiceMasterModule>test.di</packageForGuiceMasterModule>
+              <typeFiles>
+                <typeFile>content-type-def-with-composition.xml</typeFile>
+              </typeFiles>
             </configuration>
           </execution>
           <execution>
@@ -162,6 +157,9 @@
             <configuration>
               <contentTypeResource>${basedir}/src/main/resources/content-type-def-with-composition_1.xml</contentTypeResource>
               <packageForGuiceMasterModule>testa.di</packageForGuiceMasterModule>
+              <typeFiles>
+                <typeFile>content-type-def-with-composition_1.xml</typeFile>
+              </typeFiles>
             </configuration>
           </execution>
           <execution>
@@ -171,10 +169,14 @@
               <goal>generate</goal>
             </goals>
             <configuration>
-              <contentTypesResourceConfig>
-                <a:b>${basedir}/src/main/resources/content-type-def-with-composition_2.xml</a:b>
-                <b:c>${basedir}/src/main/resources/content-type-def-with-composition_3.xml</b:c>
-              </contentTypesResourceConfig>
+              <contentTypes>
+                <contentType>${basedir}/src/main/resources/content-type-def-with-composition_2.xml</contentType>
+                <contentType>${basedir}/src/main/resources/content-type-def-with-composition_3.xml</contentType>
+              </contentTypes>
+              <typeFiles>
+                <typeFile>content-type-def-with-composition_2.xml</typeFile>
+                <typeFile>content-type-def-with-composition_3.xml</typeFile>
+              </typeFiles>
               <packageForGuiceMasterModule>testb.di</packageForGuiceMasterModule>
             </configuration>
           </execution>
