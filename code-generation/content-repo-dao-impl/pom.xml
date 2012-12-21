@@ -50,6 +50,10 @@
       <artifactId>hbase-ddl-util</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.smartitengineering.smart-cms</groupId>
       <artifactId>api-spi-guice-binder</artifactId>
       <version>${project.version}</version>

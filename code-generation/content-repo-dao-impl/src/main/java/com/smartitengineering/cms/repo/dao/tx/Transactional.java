@@ -1,4 +1,4 @@
-package com.smartitengineering.cms.repo.dao.impl.tx;
+package com.smartitengineering.cms.repo.dao.tx;
 
 import com.google.inject.BindingAnnotation;
 import java.lang.annotation.Documented;
