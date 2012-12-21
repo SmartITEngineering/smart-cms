@@ -17,7 +17,7 @@ public interface TransactionStoreKey extends Serializable {
 
   public <T extends AbstractRepositoryDomain> Class<T> getObjectType();
 
-  public void setOpTimestamp();
+  public void setOpTimestamp(long opTimestamp);
 
   public void setTransactionId(String txId);
 

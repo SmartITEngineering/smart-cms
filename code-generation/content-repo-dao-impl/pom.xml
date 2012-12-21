@@ -42,6 +42,10 @@
       <artifactId>guice-multibindings</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-assistedinject</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.smartitengineering</groupId>
       <artifactId>smart-abstract-dao</artifactId>
     </dependency>
@@ -60,6 +64,7 @@
     </dependency>
   </dependencies>
   <properties>
+    <junit.version>4.8.2</junit.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 </project>

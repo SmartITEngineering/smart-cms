@@ -6,6 +6,10 @@ package com.smartitengineering.cms.repo.dao.impl.tx;
  */
 public interface TransactionInMemoryCache {
 
+  public Pair<TransactionStoreKey, TransactionStoreValue> getValueForIsolatedTransaction(TransactionStoreKey key);
+
+  public Pair<TransactionStoreKey, TransactionStoreValue> getValueForNonIsolatedTransacton(TransactionStoreKey key);
+
   public Pair<TransactionStoreKey, TransactionStoreValue> getValueForIsolatedTransaction(String txId, String objectType,
                                                                                          String objectId);
 
