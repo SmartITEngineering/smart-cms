@@ -20,16 +20,19 @@ import org.junit.Test;
 public class TransactionManagerImplTest {
 
   private Mockery mockery;
+  private TransactionFactory factory;
+  private TransactionInMemoryCache memCache;
 
   @Before
   public void setup() {
     mockery = new Mockery();
+    factory = mockery.mock(TransactionFactory.class);
+    memCache = mockery.mock(TransactionInMemoryCache.class);
   }
 
   @Test
   public void testNonExistingTransaction() {
-    final TransactionFactory factory = mockery.mock(TransactionFactory.class);
-    Injector injector = initializeInjector(factory);
+    Injector injector = initializeInjector();
     final TransactionManager manager = injector.getInstance(TransactionManager.class);
     mockery.checking(new Expectations() {
 
@@ -42,8 +45,7 @@ public class TransactionManagerImplTest {
 
   @Test
   public void testBeginTransaction() {
-    final TransactionFactory factory = mockery.mock(TransactionFactory.class);
-    Injector injector = initializeInjector(factory);
+    Injector injector = initializeInjector();
     final TransactionManager manager = injector.getInstance(TransactionManager.class);
     mockery.checking(new Expectations() {
 
@@ -60,8 +62,7 @@ public class TransactionManagerImplTest {
 
   @Test
   public void testGetCurrentTransactionForSingleTxOnAThread() {
-    final TransactionFactory factory = mockery.mock(TransactionFactory.class);
-    Injector injector = initializeInjector(factory);
+    Injector injector = initializeInjector();
     final TransactionManager manager = injector.getInstance(TransactionManager.class);
     mockery.checking(new Expectations() {
 
@@ -79,8 +80,7 @@ public class TransactionManagerImplTest {
 
   @Test
   public void testGetCurrentTransactionForMultiTxOnAThread() {
-    final TransactionFactory factory = mockery.mock(TransactionFactory.class);
-    Injector injector = initializeInjector(factory);
+    Injector injector = initializeInjector();
     final TransactionManager manager = injector.getInstance(TransactionManager.class);
     mockery.checking(new Expectations() {
 
@@ -104,8 +104,7 @@ public class TransactionManagerImplTest {
 
   @Test
   public void testGetCurrentTransactionWithTransactionCompletionInProperOrder() {
-    final TransactionFactory factory = mockery.mock(TransactionFactory.class);
-    Injector injector = initializeInjector(factory);
+    Injector injector = initializeInjector();
     final TransactionManager manager = injector.getInstance(TransactionManager.class);
     final TransactionCompletionListener listener = (TransactionCompletionListener) manager;
     mockery.checking(new Expectations() {
@@ -115,10 +114,16 @@ public class TransactionManagerImplTest {
         final Transaction txMock1 = mockery.mock(Transaction.class, "Tx1");
         will(returnValue(txMock1));
         exactly(1).of(txMock1).addTransactionCompletionListener(listener);
+        exactly(1).of(txMock1).getId();
+        will(returnValue("1"));
+        exactly(1).of(memCache).removeTransactionReferences("1");
         exactly(1).of(factory).createTransaction();
         final Transaction txMock2 = mockery.mock(Transaction.class, "Tx2");
         will(returnValue(txMock2));
+        exactly(1).of(txMock2).getId();
+        will(returnValue("2"));
         exactly(1).of(txMock2).addTransactionCompletionListener(listener);
+        exactly(1).of(memCache).removeTransactionReferences("2");
       }
     });
     Transaction tx1 = manager.beginTransaction();
@@ -138,8 +143,7 @@ public class TransactionManagerImplTest {
 
   @Test
   public void testGetCurrentTransactionWithTransactionCompletionInInproperOrder() {
-    final TransactionFactory factory = mockery.mock(TransactionFactory.class);
-    Injector injector = initializeInjector(factory);
+    Injector injector = initializeInjector();
     final TransactionManager manager = injector.getInstance(TransactionManager.class);
     final TransactionCompletionListener listener = (TransactionCompletionListener) manager;
     mockery.checking(new Expectations() {
@@ -148,13 +152,17 @@ public class TransactionManagerImplTest {
         exactly(1).of(factory).createTransaction();
         final Transaction txMock1 = mockery.mock(Transaction.class, "Tx1");
         will(returnValue(txMock1));
-        exactly(1).of(txMock1).getId();
+        exactly(2).of(txMock1).getId();
         will(returnValue("1"));
         exactly(1).of(txMock1).addTransactionCompletionListener(listener);
+        exactly(1).of(memCache).removeTransactionReferences("1");
         exactly(1).of(factory).createTransaction();
         final Transaction txMock2 = mockery.mock(Transaction.class, "Tx2");
         will(returnValue(txMock2));
+        exactly(1).of(txMock2).getId();
+        will(returnValue("2"));
         exactly(1).of(txMock2).addTransactionCompletionListener(listener);
+        exactly(1).of(memCache).removeTransactionReferences("2");
       }
     });
     Transaction tx1 = manager.beginTransaction();
@@ -172,13 +180,14 @@ public class TransactionManagerImplTest {
     mockery.assertIsSatisfied();
   }
 
-  private Injector initializeInjector(final TransactionFactory factory) {
+  private Injector initializeInjector() {
     final Injector injector = Guice.createInjector(new AbstractModule() {
 
       @Override
       protected void configure() {
         bind(TransactionManager.class).to(TransactionManagerImpl.class);
         bind(TransactionFactory.class).toInstance(factory);
+        bind(TransactionInMemoryCache.class).toInstance(memCache);
       }
     });
     return injector;

@@ -20,11 +20,13 @@ class TransactionManagerImpl implements TransactionManager, TransactionCompletio
 
   private final ThreadLocal<Deque<Transaction>> transactions = new ThreadLocal<Deque<Transaction>>();
   private final TransactionFactory factory;
+  private final TransactionInMemoryCache memCache;
   private static final Logger LOGGER = LoggerFactory.getLogger(TransactionManagerImpl.class);
 
   @Inject
-  public TransactionManagerImpl(TransactionFactory factory) {
+  public TransactionManagerImpl(TransactionFactory factory, TransactionInMemoryCache memCache) {
     this.factory = factory;
+    this.memCache = memCache;
   }
 
   public Transaction beginTransaction() {
@@ -62,5 +64,6 @@ class TransactionManagerImpl implements TransactionManager, TransactionCompletio
         stack.remove(event.getTransaction());
       }
     }
+    memCache.removeTransactionReferences(event.getTransaction().getId());
   }
 }

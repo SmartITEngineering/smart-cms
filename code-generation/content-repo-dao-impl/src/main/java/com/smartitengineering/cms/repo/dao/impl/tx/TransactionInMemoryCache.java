@@ -20,5 +20,7 @@ public interface TransactionInMemoryCache {
 
   public List<Pair<TransactionStoreKey, TransactionStoreValue>> getTransactionParticipants(String txId);
 
+  public void removeTransactionReferences(String txId);
+
   public void storeTransactionValue(TransactionStoreKey key, TransactionStoreValue val);
 }
