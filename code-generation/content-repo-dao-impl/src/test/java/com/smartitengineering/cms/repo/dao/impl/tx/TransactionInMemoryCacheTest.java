@@ -240,6 +240,12 @@ public class TransactionInMemoryCacheTest {
     ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>> gCache =
                                                                                      (ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>>) field.
         get(impl);
+    field = TransactionInMemoryCacheImpl.class.getDeclaredField("isolatedTxCache");
+    field.setAccessible(true);
+    ConcurrentMap<MultiKey, Pair<TransactionStoreKey, TransactionStoreValue>> tCache =
+                                                                              (ConcurrentMap<MultiKey, Pair<TransactionStoreKey, TransactionStoreValue>>) field.
+        get(impl);
     Assert.assertTrue(gCache.isEmpty());
+    Assert.assertTrue(tCache.isEmpty());
   }
 }
