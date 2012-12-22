@@ -1,6 +1,8 @@
 package com.smartitengineering.cms.repo.dao.impl.tx;
 
 import com.google.inject.Singleton;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.collections.keyvalue.MultiKey;
@@ -47,5 +49,16 @@ class TransactionInMemoryCacheImpl implements TransactionInMemoryCache {
     isolatedTxCache.put(iKey, pairVal);
     MultiKey gKey = new MultiKey(new Object[]{key.getObjectType().getName(), key.getObjectId()});
     globalCache.put(gKey, pairVal);
+  }
+
+  public List<Pair<TransactionStoreKey, TransactionStoreValue>> getTransactionParticipants(String txId) {
+    List<Pair<TransactionStoreKey, TransactionStoreValue>> pairs =
+                                                           new ArrayList<Pair<TransactionStoreKey, TransactionStoreValue>>();
+    for (MultiKey tKey : isolatedTxCache.keySet()) {
+      if (txId.equals(tKey.getKey(0))) {
+        pairs.add(isolatedTxCache.get(tKey));
+      }
+    }
+    return pairs;
   }
 }

@@ -34,4 +34,16 @@ public interface Transaction {
    * @return True if either rollback or commit has been called at least once.
    */
   public boolean isCompleted();
+
+  /**
+   * Add a completion listener to be notified when a transaction has completed if life-span
+   * @param completionListener The listener to notify
+   */
+  public void addTransactionCompletionListener(TransactionCompletionListener completionListener);
+
+  /**
+   * Remove a listener if it had been added earlier
+   * @param completionListener The listener to remove
+   */
+  public void removeTransactionCompletionListener(TransactionCompletionListener completionListener);
 }

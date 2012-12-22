@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * A thread-safe {@link Map.Entry Entry} implementation.
+ * A thread-safe {@link Map.Entry} implementation.
  * @author imyousuf
  */
 public class Pair<K, V> implements Map.Entry<K, V> {
