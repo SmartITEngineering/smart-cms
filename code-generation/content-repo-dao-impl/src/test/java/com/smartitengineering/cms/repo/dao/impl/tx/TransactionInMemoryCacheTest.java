@@ -253,17 +253,12 @@ public class TransactionInMemoryCacheTest {
     Assert.assertNotNull(memCache.getValueForNonIsolatedTransacton(DemoDomain.class.getName(), "1"));
     memCache.removeTransactionReferences("1");
     Assert.assertNull(memCache.getValueForNonIsolatedTransacton(DemoDomain.class.getName(), "1"));
-    TransactionInMemoryCacheImpl impl = (TransactionInMemoryCacheImpl) memCache;
-    Field field = TransactionInMemoryCacheImpl.class.getDeclaredField("globalCache");
-    field.setAccessible(true);
-    ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>> gCache =
-                                                                                     (ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>>) field.
-        get(impl);
-    field = TransactionInMemoryCacheImpl.class.getDeclaredField("isolatedTxCache");
+    ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>> gCache = getGlobalCache(memCache);
+    Field field = TransactionInMemoryCacheImpl.class.getDeclaredField("isolatedTxCache");
     field.setAccessible(true);
     ConcurrentMap<MultiKey, Pair<TransactionStoreKey, TransactionStoreValue>> tCache =
                                                                               (ConcurrentMap<MultiKey, Pair<TransactionStoreKey, TransactionStoreValue>>) field.
-        get(impl);
+        get(memCache);
     Assert.assertTrue(gCache.isEmpty());
     Assert.assertTrue(tCache.isEmpty());
   }
@@ -309,12 +304,7 @@ public class TransactionInMemoryCacheTest {
     pair = memCache.getValueForIsolatedTransaction(k2);
     Assert.assertSame(k2, pair.getKey());
     Assert.assertSame(v2, pair.getValue());
-    TransactionInMemoryCacheImpl impl = (TransactionInMemoryCacheImpl) memCache;
-    Field field = TransactionInMemoryCacheImpl.class.getDeclaredField("globalCache");
-    field.setAccessible(true);
-    ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>> gCache =
-                                                                                     (ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>>) field.
-        get(impl);
+    ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>> gCache = getGlobalCache(memCache);
     Assert.assertTrue(gCache.isEmpty());
   }
 
@@ -353,13 +343,21 @@ public class TransactionInMemoryCacheTest {
     v2.setOpState(OpState.UPDATE);
     v2.setOriginalState(d0);
     memCache.storeTransactionValue(k2, v2);
+    ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>> gCache =
+                                                                                     getGlobalCache(memCache);
+    Assert.assertTrue(gCache.isEmpty());
+    Pair<TransactionStoreKey, TransactionStoreValue> pair = memCache.getValueForNonIsolatedTransacton(k1);
+  }
+
+  private ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>> getGlobalCache(
+      final TransactionInMemoryCache memCache)
+      throws IllegalAccessException, IllegalArgumentException, NoSuchFieldException, SecurityException {
     TransactionInMemoryCacheImpl impl = (TransactionInMemoryCacheImpl) memCache;
     Field field = TransactionInMemoryCacheImpl.class.getDeclaredField("globalCache");
     field.setAccessible(true);
     ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>> gCache =
                                                                                      (ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>>) field.
         get(impl);
-    Assert.assertTrue(gCache.isEmpty());
-    Pair<TransactionStoreKey, TransactionStoreValue> pair = memCache.getValueForNonIsolatedTransacton(k1);
+    return gCache;
   }
 }
