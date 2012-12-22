@@ -3,9 +3,9 @@ package com.smartitengineering.cms.repo.dao.impl.tx;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import edu.emory.mathcs.backport.java.util.Arrays;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
@@ -76,11 +76,22 @@ class TransactionInMemoryCacheImpl implements TransactionInMemoryCache {
       MultiKey gKey = new MultiKey(new Object[]{key.getObjectType().getName(), key.getObjectId()});
       ArrayDeque<Pair<TransactionStoreKey, TransactionStoreValue>> newStack =
                                                                    new ArrayDeque<Pair<TransactionStoreKey, TransactionStoreValue>>();
-      Deque<Pair<TransactionStoreKey, TransactionStoreValue>> stack = globalCache.putIfAbsent(gKey, newStack);
-      if (stack == null) {
-        stack = newStack;
+      try {
+        semaphore.acquire();
+        try {
+          Deque<Pair<TransactionStoreKey, TransactionStoreValue>> stack = globalCache.putIfAbsent(gKey, newStack);
+          if (stack == null) {
+            stack = newStack;
+          }
+          stack.push(pairVal);
+        }
+        finally {
+          semaphore.release();
+        }
       }
-      stack.push(pairVal);
+      catch (InterruptedException ie) {
+        throw new IllegalStateException(ie);
+      }
     }
   }
 
@@ -107,7 +118,7 @@ class TransactionInMemoryCacheImpl implements TransactionInMemoryCache {
         if (this.nonIsolatedLookupEnabled) {
           MultiKey gKey = new MultiKey(Arrays.copyOfRange(tKey.getKeys(), 1, 3));
           final Deque<Pair<TransactionStoreKey, TransactionStoreValue>> mainStack = globalCache.get(gKey);
-          mainStack.remove(entry.getValue());          
+          mainStack.remove(entry.getValue());
           try {
             semaphore.acquire();
             try {
