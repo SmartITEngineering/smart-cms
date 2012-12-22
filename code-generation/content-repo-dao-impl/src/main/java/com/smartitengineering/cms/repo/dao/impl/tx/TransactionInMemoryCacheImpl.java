@@ -1,6 +1,8 @@
 package com.smartitengineering.cms.repo.dao.impl.tx;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -26,11 +28,14 @@ class TransactionInMemoryCacheImpl implements TransactionInMemoryCache {
   private final ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>> globalCache;
   private final Semaphore semaphore;
   private static final Logger LOGGER = LoggerFactory.getLogger(TransactionInMemoryCacheImpl.class);
+  private final boolean nonIsolatedLookupEnabled;
 
-  public TransactionInMemoryCacheImpl() {
-    isolatedTxCache = new ConcurrentHashMap<MultiKey, Pair<TransactionStoreKey, TransactionStoreValue>>();
-    globalCache = new ConcurrentHashMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>>();
-    semaphore = new Semaphore(1);
+  @Inject
+  public TransactionInMemoryCacheImpl(@Named("nonIsolatedLookupEnabled") boolean nonIsolatedLookupEnabled) {
+    this.isolatedTxCache = new ConcurrentHashMap<MultiKey, Pair<TransactionStoreKey, TransactionStoreValue>>();
+    this.globalCache = new ConcurrentHashMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>>();
+    this.semaphore = new Semaphore(1);
+    this.nonIsolatedLookupEnabled = nonIsolatedLookupEnabled;
   }
 
   public Pair<TransactionStoreKey, TransactionStoreValue> getValueForIsolatedTransaction(TransactionStoreKey key) {
@@ -49,6 +54,9 @@ class TransactionInMemoryCacheImpl implements TransactionInMemoryCache {
 
   public Pair<TransactionStoreKey, TransactionStoreValue> getValueForNonIsolatedTransacton(String objectType,
                                                                                            String objectId) {
+    if (!this.nonIsolatedLookupEnabled) {
+      throw new UnsupportedOperationException("Non isolated lookup disabled!");
+    }
     MultiKey gKey = new MultiKey(new Object[]{objectType, objectId});
     final Deque<Pair<TransactionStoreKey, TransactionStoreValue>> stack = globalCache.get(gKey);
     if (stack != null) {
@@ -64,14 +72,16 @@ class TransactionInMemoryCacheImpl implements TransactionInMemoryCache {
                                                                                                                     val);
     MultiKey iKey = new MultiKey(new Object[]{key.getTransactionId(), key.getObjectType().getName(), key.getObjectId()});
     isolatedTxCache.put(iKey, pairVal);
-    MultiKey gKey = new MultiKey(new Object[]{key.getObjectType().getName(), key.getObjectId()});
-    ArrayDeque<Pair<TransactionStoreKey, TransactionStoreValue>> newStack =
-                                                                 new ArrayDeque<Pair<TransactionStoreKey, TransactionStoreValue>>();
-    Deque<Pair<TransactionStoreKey, TransactionStoreValue>> stack = globalCache.putIfAbsent(gKey, newStack);
-    if (stack == null) {
-      stack = newStack;
+    if (this.nonIsolatedLookupEnabled) {
+      MultiKey gKey = new MultiKey(new Object[]{key.getObjectType().getName(), key.getObjectId()});
+      ArrayDeque<Pair<TransactionStoreKey, TransactionStoreValue>> newStack =
+                                                                   new ArrayDeque<Pair<TransactionStoreKey, TransactionStoreValue>>();
+      Deque<Pair<TransactionStoreKey, TransactionStoreValue>> stack = globalCache.putIfAbsent(gKey, newStack);
+      if (stack == null) {
+        stack = newStack;
+      }
+      stack.push(pairVal);
     }
-    stack.push(pairVal);
   }
 
   public List<Pair<TransactionStoreKey, TransactionStoreValue>> getTransactionParticipants(String txId) {
@@ -93,23 +103,25 @@ class TransactionInMemoryCacheImpl implements TransactionInMemoryCache {
       Entry<MultiKey, Pair<TransactionStoreKey, TransactionStoreValue>> entry = iterator.next();
       MultiKey tKey = entry.getKey();
       if (txId.equals(tKey.getKey(0))) {
-        MultiKey gKey = new MultiKey(Arrays.copyOfRange(tKey.getKeys(), 1, 3));
-        final Deque<Pair<TransactionStoreKey, TransactionStoreValue>> mainStack = globalCache.get(gKey);
-        mainStack.remove(entry.getValue());
         iterator.remove();
-        try {
-          semaphore.acquire();
+        if (this.nonIsolatedLookupEnabled) {
+          MultiKey gKey = new MultiKey(Arrays.copyOfRange(tKey.getKeys(), 1, 3));
+          final Deque<Pair<TransactionStoreKey, TransactionStoreValue>> mainStack = globalCache.get(gKey);
+          mainStack.remove(entry.getValue());          
           try {
-            if (mainStack.isEmpty()) {
-              globalCache.remove(gKey);
+            semaphore.acquire();
+            try {
+              if (mainStack.isEmpty()) {
+                globalCache.remove(gKey);
+              }
+            }
+            finally {
+              semaphore.release();
             }
           }
-          finally {
-            semaphore.release();
+          catch (Exception ex) {
+            LOGGER.error("Error acquiring lock for global cache cleanup", ex);
           }
-        }
-        catch (Exception ex) {
-          LOGGER.error("Error acquiring lock for global cache cleanup", ex);
         }
       }
     }
