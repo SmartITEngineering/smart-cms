@@ -86,11 +86,11 @@ class TransactionImpl implements Transaction {
     if (obj == null) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
+    if (!(obj instanceof Transaction)) {
       return false;
     }
-    final TransactionImpl other = (TransactionImpl) obj;
-    if ((this.id == null) ? (other.id != null) : !this.id.equals(other.id)) {
+    final Transaction other = (Transaction) obj;
+    if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId())) {
       return false;
     }
     return true;
