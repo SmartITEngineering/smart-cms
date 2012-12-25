@@ -1,6 +1,7 @@
 package com.smartitengineering.cms.repo.dao.impl.tx;
 
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import com.smartitengineering.cms.repo.dao.tx.Transaction;
 import com.smartitengineering.cms.repo.dao.tx.TransactionCompletionEvent;
 import com.smartitengineering.cms.repo.dao.tx.TransactionCompletionEvent.CompletionEvent;
@@ -20,13 +21,15 @@ class TransactionImpl implements Transaction {
   private final MutableBoolean completed;
   private final TransactionService service;
   private final Set<TransactionCompletionListener> listeners;
+  private final boolean isolatedTransaction;
 
   @Inject
-  public TransactionImpl(TransactionService service) {
+  public TransactionImpl(TransactionService service, @Assisted boolean isolatedTransaction) {
     this.service = service;
     this.id = this.service.getNextTransactionId();
     this.completed = new MutableBoolean(false);
     this.listeners = new LinkedHashSet<TransactionCompletionListener>();
+    this.isolatedTransaction = isolatedTransaction;
   }
 
   public String getId() {
@@ -101,5 +104,9 @@ class TransactionImpl implements Transaction {
     int hash = 7;
     hash = 47 * hash + (this.id != null ? this.id.hashCode() : 0);
     return hash;
+  }
+
+  public boolean isIsolatedTransaction() {
+    return isolatedTransaction;
   }
 }

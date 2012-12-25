@@ -30,12 +30,16 @@ class TransactionManagerImpl implements TransactionManager, TransactionCompletio
   }
 
   public Transaction beginTransaction() {
+    return beginTransaction(true);
+  }
+
+  public Transaction beginTransaction(boolean isolatedTransaction) {
     Deque<Transaction> stack = transactions.get();
     if (stack == null) {
       stack = new ArrayDeque<Transaction>();
       transactions.set(stack);
     }
-    final Transaction tx = this.factory.createTransaction();
+    final Transaction tx = this.factory.createTransaction(isolatedTransaction);
     tx.addTransactionCompletionListener(this);
     stack.push(tx);
     return getCurrentTransaction();

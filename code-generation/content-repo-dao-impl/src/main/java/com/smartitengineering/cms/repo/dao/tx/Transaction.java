@@ -15,6 +15,12 @@ public interface Transaction {
   public String getId();
 
   /**
+   * Retrieve whether the transaction is isolated or not
+   * @return True if isolated else false
+   */
+  public boolean isIsolatedTransaction();
+
+  /**
    * Commit (confirm/affirm) the activities performed during this transaction's life.
    * @throws TransactionException If underlying storage throws any exception or if invoked after once the transaction
    *                              has been completed. In case of underlying storage throwing exception an rollback would

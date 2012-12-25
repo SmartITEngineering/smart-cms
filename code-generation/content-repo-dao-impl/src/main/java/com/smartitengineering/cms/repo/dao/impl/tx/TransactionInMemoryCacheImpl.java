@@ -42,8 +42,8 @@ class TransactionInMemoryCacheImpl implements TransactionInMemoryCache {
     return getValueForIsolatedTransaction(key.getTransactionId(), key.getObjectType().getName(), key.getObjectId());
   }
 
-  public Pair<TransactionStoreKey, TransactionStoreValue> getValueForNonIsolatedTransacton(TransactionStoreKey key) {
-    return getValueForNonIsolatedTransacton(key.getObjectType().getName(), key.getObjectId());
+  public Pair<TransactionStoreKey, TransactionStoreValue> getValueForNonIsolatedTransaction(TransactionStoreKey key) {
+    return getValueForNonIsolatedTransaction(key.getObjectType().getName(), key.getObjectId());
   }
 
   public Pair<TransactionStoreKey, TransactionStoreValue> getValueForIsolatedTransaction(String txId, String objectType,
@@ -52,7 +52,7 @@ class TransactionInMemoryCacheImpl implements TransactionInMemoryCache {
     return isolatedTxCache.get(isolatedTxKey);
   }
 
-  public Pair<TransactionStoreKey, TransactionStoreValue> getValueForNonIsolatedTransacton(String objectType,
+  public Pair<TransactionStoreKey, TransactionStoreValue> getValueForNonIsolatedTransaction(String objectType,
                                                                                            String objectId) {
     if (!this.nonIsolatedLookupEnabled) {
       throw new UnsupportedOperationException("Non isolated lookup disabled!");

@@ -2,6 +2,7 @@ package com.smartitengineering.cms.repo.dao.impl.tx;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.smartitengineering.cms.repo.dao.impl.AbstractRepositoryDomain;
 import com.smartitengineering.cms.repo.dao.tx.TransactionManager;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -29,6 +30,18 @@ public class TransactionServiceImpl implements TransactionService {
   }
 
   public void rollback(String txId) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  public <T extends AbstractRepositoryDomain> void save(TransactionElement<T> element) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  public <T extends AbstractRepositoryDomain> void update(TransactionElement<T> element) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  public <T extends AbstractRepositoryDomain> void delete(TransactionElement<T> element) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 }

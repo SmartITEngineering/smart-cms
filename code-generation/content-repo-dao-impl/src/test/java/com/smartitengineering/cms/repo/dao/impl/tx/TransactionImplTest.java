@@ -3,6 +3,8 @@ package com.smartitengineering.cms.repo.dao.impl.tx;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.assistedinject.Assisted;
+import com.smartitengineering.cms.repo.dao.impl.AbstractRepositoryDomain;
 import com.smartitengineering.cms.repo.dao.tx.Transaction;
 import com.smartitengineering.cms.repo.dao.tx.TransactionCompletionEvent;
 import com.smartitengineering.cms.repo.dao.tx.TransactionCompletionListener;
@@ -210,7 +212,19 @@ public class TransactionImplTest {
             public void rollback(String txId) {
               throw new UnsupportedOperationException("Not supported yet.");
             }
-          });
+
+            public <T extends AbstractRepositoryDomain> void save(TransactionElement<T> element) {
+              throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public <T extends AbstractRepositoryDomain> void update(TransactionElement<T> element) {
+              throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public <T extends AbstractRepositoryDomain> void delete(TransactionElement<T> element) {
+              throw new UnsupportedOperationException("Not supported yet.");
+            }
+          }, true);
           TransactionCompletionEvent event = new TransactionCompletionEvent(
               TransactionCompletionEvent.CompletionEvent.COMMIT, true, tx);
           exactly(1).of(listener).transactionComplete(with(equal(event)));
@@ -249,7 +263,19 @@ public class TransactionImplTest {
             public void rollback(String txId) {
               throw new UnsupportedOperationException("Not supported yet.");
             }
-          });
+
+            public <T extends AbstractRepositoryDomain> void save(TransactionElement<T> element) {
+              throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public <T extends AbstractRepositoryDomain> void update(TransactionElement<T> element) {
+              throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public <T extends AbstractRepositoryDomain> void delete(TransactionElement<T> element) {
+              throw new UnsupportedOperationException("Not supported yet.");
+            }
+          }, true);
           TransactionCompletionEvent event = new TransactionCompletionEvent(
               TransactionCompletionEvent.CompletionEvent.COMMIT, false, tx);
           exactly(1).of(listener).transactionComplete(with(equal(event)));
@@ -291,7 +317,19 @@ public class TransactionImplTest {
             public void rollback(String txId) {
               throw new UnsupportedOperationException("Not supported yet.");
             }
-          });
+
+            public <T extends AbstractRepositoryDomain> void save(TransactionElement<T> element) {
+              throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public <T extends AbstractRepositoryDomain> void update(TransactionElement<T> element) {
+              throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public <T extends AbstractRepositoryDomain> void delete(TransactionElement<T> element) {
+              throw new UnsupportedOperationException("Not supported yet.");
+            }
+          }, true);
           TransactionCompletionEvent event = new TransactionCompletionEvent(
               TransactionCompletionEvent.CompletionEvent.ROLLBACK, true, tx);
           exactly(1).of(listener).transactionComplete(with(equal(event)));
@@ -330,7 +368,19 @@ public class TransactionImplTest {
             public void rollback(String txId) {
               throw new UnsupportedOperationException("Not supported yet.");
             }
-          });
+
+            public <T extends AbstractRepositoryDomain> void save(TransactionElement<T> element) {
+              throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public <T extends AbstractRepositoryDomain> void update(TransactionElement<T> element) {
+              throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public <T extends AbstractRepositoryDomain> void delete(TransactionElement<T> element) {
+              throw new UnsupportedOperationException("Not supported yet.");
+            }
+          }, true);
           TransactionCompletionEvent event = new TransactionCompletionEvent(
               TransactionCompletionEvent.CompletionEvent.ROLLBACK, false, tx);
           exactly(1).of(listener).transactionComplete(with(equal(event)));
@@ -379,6 +429,7 @@ public class TransactionImplTest {
       protected void configure() {
         bind(TransactionService.class).toInstance(service);
         bind(Transaction.class).to(TransactionImpl.class);
+        bind(Boolean.class).annotatedWith(Assisted.class).toInstance(Boolean.TRUE);
       }
     });
     return injector;

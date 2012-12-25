@@ -50,7 +50,7 @@ public class TransactionManagerImplTest {
     mockery.checking(new Expectations() {
 
       {
-        exactly(1).of(factory).createTransaction();
+        exactly(1).of(factory).createTransaction(true);
         final Transaction txMock = mockery.mock(Transaction.class);
         will(returnValue(txMock));
         exactly(1).of(txMock).addTransactionCompletionListener((TransactionCompletionListener) manager);
@@ -67,7 +67,7 @@ public class TransactionManagerImplTest {
     mockery.checking(new Expectations() {
 
       {
-        exactly(1).of(factory).createTransaction();
+        exactly(1).of(factory).createTransaction(true);
         final Transaction txMock = mockery.mock(Transaction.class);
         will(returnValue(txMock));
         exactly(1).of(txMock).addTransactionCompletionListener((TransactionCompletionListener) manager);
@@ -85,11 +85,11 @@ public class TransactionManagerImplTest {
     mockery.checking(new Expectations() {
 
       {
-        exactly(1).of(factory).createTransaction();
+        exactly(1).of(factory).createTransaction(true);
         final Transaction txMock1 = mockery.mock(Transaction.class, "Tx1");
         will(returnValue(txMock1));
         exactly(1).of(txMock1).addTransactionCompletionListener((TransactionCompletionListener) manager);
-        exactly(1).of(factory).createTransaction();
+        exactly(1).of(factory).createTransaction(true);
         final Transaction txMock2 = mockery.mock(Transaction.class, "Tx2");
         will(returnValue(txMock2));
         exactly(1).of(txMock2).addTransactionCompletionListener((TransactionCompletionListener) manager);
@@ -110,14 +110,14 @@ public class TransactionManagerImplTest {
     mockery.checking(new Expectations() {
 
       {
-        exactly(1).of(factory).createTransaction();
+        exactly(1).of(factory).createTransaction(true);
         final Transaction txMock1 = mockery.mock(Transaction.class, "Tx1");
         will(returnValue(txMock1));
         exactly(1).of(txMock1).addTransactionCompletionListener(listener);
         exactly(1).of(txMock1).getId();
         will(returnValue("1"));
         exactly(1).of(memCache).removeTransactionReferences("1");
-        exactly(1).of(factory).createTransaction();
+        exactly(1).of(factory).createTransaction(true);
         final Transaction txMock2 = mockery.mock(Transaction.class, "Tx2");
         will(returnValue(txMock2));
         exactly(1).of(txMock2).getId();
@@ -149,14 +149,14 @@ public class TransactionManagerImplTest {
     mockery.checking(new Expectations() {
 
       {
-        exactly(1).of(factory).createTransaction();
+        exactly(1).of(factory).createTransaction(true);
         final Transaction txMock1 = mockery.mock(Transaction.class, "Tx1");
         will(returnValue(txMock1));
         exactly(2).of(txMock1).getId();
         will(returnValue("1"));
         exactly(1).of(txMock1).addTransactionCompletionListener(listener);
         exactly(1).of(memCache).removeTransactionReferences("1");
-        exactly(1).of(factory).createTransaction();
+        exactly(1).of(factory).createTransaction(true);
         final Transaction txMock2 = mockery.mock(Transaction.class, "Tx2");
         will(returnValue(txMock2));
         exactly(1).of(txMock2).getId();

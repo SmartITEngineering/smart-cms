@@ -97,10 +97,10 @@ public class TransactionInMemoryCacheTest {
     pair = memCache.getValueForIsolatedTransaction(k2);
     Assert.assertSame(k2, pair.getKey());
     Assert.assertSame(v2, pair.getValue());
-    pair = memCache.getValueForNonIsolatedTransacton(k1);
+    pair = memCache.getValueForNonIsolatedTransaction(k1);
     Assert.assertSame(k2, pair.getKey());
     Assert.assertSame(v2, pair.getValue());
-    pair = memCache.getValueForNonIsolatedTransacton(k2);
+    pair = memCache.getValueForNonIsolatedTransaction(k2);
     Assert.assertSame(k2, pair.getKey());
     Assert.assertSame(v2, pair.getValue());
   }
@@ -160,10 +160,10 @@ public class TransactionInMemoryCacheTest {
     pair = memCache.getValueForIsolatedTransaction(k2);
     Assert.assertSame(k2, pair.getKey());
     Assert.assertSame(v2, pair.getValue());
-    pair = memCache.getValueForNonIsolatedTransacton(k1);
+    pair = memCache.getValueForNonIsolatedTransaction(k1);
     Assert.assertSame(k2, pair.getKey());
     Assert.assertSame(v2, pair.getValue());
-    pair = memCache.getValueForNonIsolatedTransacton(k2);
+    pair = memCache.getValueForNonIsolatedTransaction(k2);
     Assert.assertSame(k2, pair.getKey());
     Assert.assertSame(v2, pair.getValue());
     List<Pair<TransactionStoreKey, TransactionStoreValue>> pairs = memCache.getTransactionParticipants("2");
@@ -231,10 +231,10 @@ public class TransactionInMemoryCacheTest {
     pair = memCache.getValueForIsolatedTransaction(k2);
     Assert.assertSame(k2, pair.getKey());
     Assert.assertSame(v2, pair.getValue());
-    pair = memCache.getValueForNonIsolatedTransacton(k1);
+    pair = memCache.getValueForNonIsolatedTransaction(k1);
     Assert.assertSame(k2, pair.getKey());
     Assert.assertSame(v2, pair.getValue());
-    pair = memCache.getValueForNonIsolatedTransacton(k2);
+    pair = memCache.getValueForNonIsolatedTransaction(k2);
     Assert.assertSame(k2, pair.getKey());
     Assert.assertSame(v2, pair.getValue());
     List<Pair<TransactionStoreKey, TransactionStoreValue>> pairs = memCache.getTransactionParticipants("2");
@@ -249,10 +249,10 @@ public class TransactionInMemoryCacheTest {
     pairs = memCache.getTransactionParticipants("2");
     Assert.assertNotNull(pairs);
     Assert.assertEquals(0, pairs.size());
-    Assert.assertNull(memCache.getValueForNonIsolatedTransacton(DemoDomain.class.getName(), "2"));
-    Assert.assertNotNull(memCache.getValueForNonIsolatedTransacton(DemoDomain.class.getName(), "1"));
+    Assert.assertNull(memCache.getValueForNonIsolatedTransaction(DemoDomain.class.getName(), "2"));
+    Assert.assertNotNull(memCache.getValueForNonIsolatedTransaction(DemoDomain.class.getName(), "1"));
     memCache.removeTransactionReferences("1");
-    Assert.assertNull(memCache.getValueForNonIsolatedTransacton(DemoDomain.class.getName(), "1"));
+    Assert.assertNull(memCache.getValueForNonIsolatedTransaction(DemoDomain.class.getName(), "1"));
     ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>> gCache = getGlobalCache(memCache);
     Field field = TransactionInMemoryCacheImpl.class.getDeclaredField("isolatedTxCache");
     field.setAccessible(true);
@@ -346,7 +346,7 @@ public class TransactionInMemoryCacheTest {
     ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>> gCache =
                                                                                      getGlobalCache(memCache);
     Assert.assertTrue(gCache.isEmpty());
-    Pair<TransactionStoreKey, TransactionStoreValue> pair = memCache.getValueForNonIsolatedTransacton(k1);
+    Pair<TransactionStoreKey, TransactionStoreValue> pair = memCache.getValueForNonIsolatedTransaction(k1);
   }
 
   private ConcurrentMap<MultiKey, Deque<Pair<TransactionStoreKey, TransactionStoreValue>>> getGlobalCache(

@@ -12,5 +12,5 @@ public interface TransactionFactory {
 
   TransactionStoreValue createTransactionStoreValue();
 
-  Transaction createTransaction();
+  Transaction createTransaction(boolean isolatedTransaction);
 }
