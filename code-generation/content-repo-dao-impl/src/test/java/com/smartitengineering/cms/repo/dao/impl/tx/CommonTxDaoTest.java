@@ -494,11 +494,67 @@ public class CommonTxDaoTest {
         Pair<TransactionStoreKey, TransactionStoreValue> pair = new Pair<TransactionStoreKey, TransactionStoreValue>(
             key, val);
         will(returnValue(pair));
+        exactly(2).of(val).getOpState();
+        will(returnValue(OpState.UPDATE));
         exactly(1).of(val).getCurrentState();
         will(returnValue(TEST_DOMAINS.get(0)));
       }
     });
     Assert.assertSame(TEST_DOMAINS.get(0), this.services.readDao.getById("1"));
+    mockery.assertIsSatisfied();
+  }
+
+  @Test
+  public void testGetByIdWithTransactionIsolationFromCacheDeleteState() {
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(2).of(txManager).getCurrentTransaction();
+        Transaction tx = mockery.mock(Transaction.class);
+        will(returnValue(tx));
+        exactly(1).of(tx).isIsolatedTransaction();
+        will(returnValue(true));
+        exactly(1).of(tx).getId();
+        will(returnValue("1"));
+        exactly(1).of(memCache).getValueForIsolatedTransaction("1", DemoDomain.class.getName(), TEST_DOMAINS.get(0).
+            getId());
+        TransactionStoreKey key = mockery.mock(TransactionStoreKey.class);
+        TransactionStoreValue val = mockery.mock(TransactionStoreValue.class);
+        Pair<TransactionStoreKey, TransactionStoreValue> pair = new Pair<TransactionStoreKey, TransactionStoreValue>(
+            key, val);
+        will(returnValue(pair));
+        exactly(2).of(val).getOpState();
+        will(returnValue(OpState.DELETE));
+      }
+    });
+    Assert.assertNull(this.services.readDao.getById("1"));
+    mockery.assertIsSatisfied();
+  }
+
+  @Test
+  public void testGetByIdWithTransactionIsolationFromCacheWithNullState() {
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(2).of(txManager).getCurrentTransaction();
+        Transaction tx = mockery.mock(Transaction.class);
+        will(returnValue(tx));
+        exactly(1).of(tx).isIsolatedTransaction();
+        will(returnValue(true));
+        exactly(1).of(tx).getId();
+        will(returnValue("1"));
+        exactly(1).of(memCache).getValueForIsolatedTransaction("1", DemoDomain.class.getName(), TEST_DOMAINS.get(0).
+            getId());
+        TransactionStoreKey key = mockery.mock(TransactionStoreKey.class);
+        TransactionStoreValue val = mockery.mock(TransactionStoreValue.class);
+        Pair<TransactionStoreKey, TransactionStoreValue> pair = new Pair<TransactionStoreKey, TransactionStoreValue>(
+            key, val);
+        will(returnValue(pair));
+        exactly(1).of(val).getOpState();
+        will(returnValue(null));
+      }
+    });
+    Assert.assertNull(null, this.services.readDao.getById("1"));
     mockery.assertIsSatisfied();
   }
 
@@ -543,11 +599,65 @@ public class CommonTxDaoTest {
         Pair<TransactionStoreKey, TransactionStoreValue> pair = new Pair<TransactionStoreKey, TransactionStoreValue>(
             key, val);
         will(returnValue(pair));
+        exactly(2).of(val).getOpState();
+        will(returnValue(OpState.UPDATE));
         exactly(1).of(val).getCurrentState();
         will(returnValue(TEST_DOMAINS.get(0)));
       }
     });
     Assert.assertSame(TEST_DOMAINS.get(0), this.services.readDao.getById("1"));
+    mockery.assertIsSatisfied();
+  }
+
+  @Test
+  public void testGetByIdWithTransactionNonIsolationFromCacheWithDeleteState() {
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(2).of(txManager).getCurrentTransaction();
+        Transaction tx = mockery.mock(Transaction.class);
+        will(returnValue(tx));
+        exactly(1).of(tx).isIsolatedTransaction();
+        will(returnValue(false));
+        final String id = TEST_DOMAINS.get(0).getId();
+        exactly(1).of(memCache).getValueForNonIsolatedTransaction(DemoDomain.class.getName(), TEST_DOMAINS.get(0).
+            getId());
+        TransactionStoreKey key = mockery.mock(TransactionStoreKey.class);
+        TransactionStoreValue val = mockery.mock(TransactionStoreValue.class);
+        Pair<TransactionStoreKey, TransactionStoreValue> pair = new Pair<TransactionStoreKey, TransactionStoreValue>(
+            key, val);
+        will(returnValue(pair));
+        exactly(2).of(val).getOpState();
+        will(returnValue(OpState.DELETE));
+      }
+    });
+    Assert.assertNull(this.services.readDao.getById("1"));
+    mockery.assertIsSatisfied();
+  }
+
+  @Test
+  public void testGetByIdWithTransactionNonIsolationFromCacheWithNullState() {
+    mockery.checking(new Expectations() {
+
+      {
+        exactly(2).of(txManager).getCurrentTransaction();
+        Transaction tx = mockery.mock(Transaction.class);
+        will(returnValue(tx));
+        exactly(1).of(tx).isIsolatedTransaction();
+        will(returnValue(false));
+        final String id = TEST_DOMAINS.get(0).getId();
+        exactly(1).of(memCache).getValueForNonIsolatedTransaction(DemoDomain.class.getName(), TEST_DOMAINS.get(0).
+            getId());
+        TransactionStoreKey key = mockery.mock(TransactionStoreKey.class);
+        TransactionStoreValue val = mockery.mock(TransactionStoreValue.class);
+        Pair<TransactionStoreKey, TransactionStoreValue> pair = new Pair<TransactionStoreKey, TransactionStoreValue>(
+            key, val);
+        will(returnValue(pair));
+        exactly(1).of(val).getOpState();
+        will(returnValue(null));
+      }
+    });
+    Assert.assertNull(this.services.readDao.getById("1"));
     mockery.assertIsSatisfied();
   }
 
@@ -591,6 +701,8 @@ public class CommonTxDaoTest {
         Pair<TransactionStoreKey, TransactionStoreValue> pair = new Pair<TransactionStoreKey, TransactionStoreValue>(
             key, val);
         will(returnValue(pair));
+        exactly(4).of(val).getOpState();
+        will(returnValue(OpState.UPDATE));
         exactly(2).of(val).getCurrentState();
         will(returnValue(TEST_DOMAINS.get(0)));
         exactly(2).of(readDao).getSingle(with(equal(PARAM_LIST)));
@@ -619,6 +731,8 @@ public class CommonTxDaoTest {
           Pair<TransactionStoreKey, TransactionStoreValue> pair = new Pair<TransactionStoreKey, TransactionStoreValue>(
               key, val);
           will(returnValue(pair));
+          exactly(2).of(val).getOpState();
+          will(returnValue(OpState.UPDATE));
           exactly(1).of(val).getCurrentState();
           will(returnValue(domain));
         }
