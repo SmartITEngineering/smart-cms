@@ -69,7 +69,7 @@ public class TransactionInMemoryCacheTest {
     d1.setId("1");
     d2.setTestValue(2);
     d2.setId("1");
-    TransactionStoreKey k1 = factory.createTrasactionStoreKey();
+    TransactionStoreKey k1 = factory.createTransactionStoreKey();
     k1.setTransactionId("1");
     k1.setObjectId(d0.getId());
     k1.setObjectType(d0.getClass());
@@ -80,7 +80,7 @@ public class TransactionInMemoryCacheTest {
     v1.setOpState(OpState.SAVE);
     v1.setOriginalState(d0);
     memCache.storeTransactionValue(k1, v1);
-    TransactionStoreKey k2 = factory.createTrasactionStoreKey();
+    TransactionStoreKey k2 = factory.createTransactionStoreKey();
     k2.setTransactionId("2");
     k2.setObjectId(d0.getId());
     k2.setObjectType(d0.getClass());
@@ -121,7 +121,7 @@ public class TransactionInMemoryCacheTest {
     d2.setId("1");
     d3.setTestValue(2);
     d3.setId("2");
-    TransactionStoreKey k1 = factory.createTrasactionStoreKey();
+    TransactionStoreKey k1 = factory.createTransactionStoreKey();
     k1.setTransactionId("1");
     k1.setObjectId(d0.getId());
     k1.setObjectType(d0.getClass());
@@ -132,7 +132,7 @@ public class TransactionInMemoryCacheTest {
     v1.setOpState(OpState.SAVE);
     v1.setOriginalState(d0);
     memCache.storeTransactionValue(k1, v1);
-    TransactionStoreKey k2 = factory.createTrasactionStoreKey();
+    TransactionStoreKey k2 = factory.createTransactionStoreKey();
     k2.setTransactionId("2");
     k2.setObjectId(d0.getId());
     k2.setObjectType(d0.getClass());
@@ -143,7 +143,7 @@ public class TransactionInMemoryCacheTest {
     v2.setOpState(OpState.UPDATE);
     v2.setOriginalState(d0);
     memCache.storeTransactionValue(k2, v2);
-    TransactionStoreKey k3 = factory.createTrasactionStoreKey();
+    TransactionStoreKey k3 = factory.createTransactionStoreKey();
     k3.setTransactionId("2");
     k3.setObjectId(d3.getId());
     k3.setObjectType(d0.getClass());
@@ -192,7 +192,7 @@ public class TransactionInMemoryCacheTest {
     d2.setId("1");
     d3.setTestValue(2);
     d3.setId("2");
-    TransactionStoreKey k1 = factory.createTrasactionStoreKey();
+    TransactionStoreKey k1 = factory.createTransactionStoreKey();
     k1.setTransactionId("1");
     k1.setObjectId(d0.getId());
     k1.setObjectType(d0.getClass());
@@ -203,7 +203,7 @@ public class TransactionInMemoryCacheTest {
     v1.setOpState(OpState.SAVE);
     v1.setOriginalState(d0);
     memCache.storeTransactionValue(k1, v1);
-    TransactionStoreKey k2 = factory.createTrasactionStoreKey();
+    TransactionStoreKey k2 = factory.createTransactionStoreKey();
     k2.setTransactionId("2");
     k2.setObjectId(d0.getId());
     k2.setObjectType(d0.getClass());
@@ -214,7 +214,7 @@ public class TransactionInMemoryCacheTest {
     v2.setOpState(OpState.UPDATE);
     v2.setOriginalState(d0);
     memCache.storeTransactionValue(k2, v2);
-    TransactionStoreKey k3 = factory.createTrasactionStoreKey();
+    TransactionStoreKey k3 = factory.createTransactionStoreKey();
     k3.setTransactionId("2");
     k3.setObjectId(d3.getId());
     k3.setObjectType(d0.getClass());
@@ -276,7 +276,7 @@ public class TransactionInMemoryCacheTest {
     d1.setId("1");
     d2.setTestValue(2);
     d2.setId("1");
-    TransactionStoreKey k1 = factory.createTrasactionStoreKey();
+    TransactionStoreKey k1 = factory.createTransactionStoreKey();
     k1.setTransactionId("1");
     k1.setObjectId(d0.getId());
     k1.setObjectType(d0.getClass());
@@ -287,7 +287,7 @@ public class TransactionInMemoryCacheTest {
     v1.setOpState(OpState.SAVE);
     v1.setOriginalState(d0);
     memCache.storeTransactionValue(k1, v1);
-    TransactionStoreKey k2 = factory.createTrasactionStoreKey();
+    TransactionStoreKey k2 = factory.createTransactionStoreKey();
     k2.setTransactionId("2");
     k2.setObjectId(d0.getId());
     k2.setObjectType(d0.getClass());
@@ -321,7 +321,7 @@ public class TransactionInMemoryCacheTest {
     d1.setId("1");
     d2.setTestValue(2);
     d2.setId("1");
-    TransactionStoreKey k1 = factory.createTrasactionStoreKey();
+    TransactionStoreKey k1 = factory.createTransactionStoreKey();
     k1.setTransactionId("1");
     k1.setObjectId(d0.getId());
     k1.setObjectType(d0.getClass());
@@ -332,7 +332,7 @@ public class TransactionInMemoryCacheTest {
     v1.setOpState(OpState.SAVE);
     v1.setOriginalState(d0);
     memCache.storeTransactionValue(k1, v1);
-    TransactionStoreKey k2 = factory.createTrasactionStoreKey();
+    TransactionStoreKey k2 = factory.createTransactionStoreKey();
     k2.setTransactionId("2");
     k2.setObjectId(d0.getId());
     k2.setObjectType(d0.getClass());

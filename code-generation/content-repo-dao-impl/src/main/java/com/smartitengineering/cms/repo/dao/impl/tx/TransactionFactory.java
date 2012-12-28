@@ -8,7 +8,7 @@ import com.smartitengineering.cms.repo.dao.tx.Transaction;
  */
 public interface TransactionFactory {
 
-  TransactionStoreKey createTrasactionStoreKey();
+  TransactionStoreKey createTransactionStoreKey();
 
   TransactionStoreValue createTransactionStoreValue();
 
