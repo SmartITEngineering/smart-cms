@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +49,9 @@ public class TransactionServiceImpl implements TransactionService {
   }
 
   public void commit(String txId) {
+    if (StringUtils.isBlank(txId)) {
+      return;
+    }
     List<Pair<TransactionStoreKey, TransactionStoreValue>> list = memCache.getTransactionParticipants(txId);
     if (list == null || list.isEmpty()) {
       return;
@@ -172,7 +176,7 @@ public class TransactionServiceImpl implements TransactionService {
       }
       catch (Exception ex) {
         LOGGER.warn("Exception trying to perform a hard rollback. Ignoring and continuing", ex);
-      }      
+      }
     }
     while (val != null);
   }
