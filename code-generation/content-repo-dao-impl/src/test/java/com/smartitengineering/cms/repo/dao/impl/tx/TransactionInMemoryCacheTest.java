@@ -25,7 +25,7 @@ public class TransactionInMemoryCacheTest {
 
   @Before
   public void setup() {
-    injector = Guice.createInjector(new DemoDomainMasterModule());
+    injector = Guice.createInjector(new DemoDomainMasterModule(null));
     isolatedOnlyInjector = Guice.createInjector(new AbstractModule() {
 
       @Override
