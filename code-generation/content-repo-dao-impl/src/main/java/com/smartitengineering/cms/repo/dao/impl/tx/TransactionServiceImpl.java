@@ -141,6 +141,12 @@ public class TransactionServiceImpl implements TransactionService {
     do {
       TransactionStoreKey key = val.getKey();
       TransactionStoreValue value = val.getValue();
+      if (opsPerformed.isEmpty()) {
+        val = null;
+      }
+      else {
+        val = opsPerformed.pop();
+      }
       try {
         final CommonWriteDao<? extends AbstractRepositoryDomain> writeDao = daoCache.get(key.getObjectType().getName()).
             getKey();
@@ -166,8 +172,7 @@ public class TransactionServiceImpl implements TransactionService {
       }
       catch (Exception ex) {
         LOGGER.warn("Exception trying to perform a hard rollback. Ignoring and continuing", ex);
-      }
-      val = opsPerformed.pop();
+      }      
     }
     while (val != null);
   }

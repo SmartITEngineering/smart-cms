@@ -3,11 +3,16 @@ package com.smartitengineering.cms.repo.dao.impl.tx;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.smartitengineering.cms.repo.dao.impl.AbstractRepositoryDomain;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicLong;
 import junit.framework.Assert;
@@ -470,6 +475,102 @@ public class TransactionServiceImplTest {
       }
     });
     service.save(element);
+    mockery.assertIsSatisfied();
+  }
+
+  @Test
+  public void testHardRollbackWithEmptyDeque() {
+    final TransactionService service = injector.getInstance(TransactionService.class);
+    final TransactionServiceImpl serviceImpl = (TransactionServiceImpl) service;
+    serviceImpl.rollback(new LinkedList<Pair<TransactionStoreKey, TransactionStoreValue>>());
+    serviceImpl.rollback((Deque<Pair<TransactionStoreKey, TransactionStoreValue>>) null);
+  }
+
+  @Test
+  public void testHardRollback() {
+    final CommonReadDao<DemoDomain, String> readDao = mockery.mock(CommonReadDao.class);
+    final CommonWriteDao<DemoDomain> writeDao = mockery.mock(CommonWriteDao.class);
+    final TransactionService service = injector.getInstance(TransactionService.class);
+    final TransactionServiceImpl serviceImpl = (TransactionServiceImpl) service;
+    ConcurrentMap<String, Pair<CommonWriteDao<? extends AbstractRepositoryDomain>, CommonReadDao<? extends AbstractRepositoryDomain, String>>> daoCache;
+    try {
+      final Field daoCacheField =
+                  TransactionServiceImpl.class.getDeclaredField("daoCache");
+      daoCacheField.setAccessible(true);
+      daoCache =
+      (ConcurrentMap<String, Pair<CommonWriteDao<? extends AbstractRepositoryDomain>, CommonReadDao<? extends AbstractRepositoryDomain, String>>>) daoCacheField.
+          get(serviceImpl);
+      daoCache.put(DemoDomain.class.getName(),
+                   new Pair<CommonWriteDao<? extends AbstractRepositoryDomain>, CommonReadDao<? extends AbstractRepositoryDomain, String>>(
+          writeDao, readDao));
+    }
+    catch (Exception ex) {
+      throw new IllegalStateException(ex);
+    }
+    final TransactionStoreKey k1 = mockery.mock(TransactionStoreKey.class, "k1"), k2 = mockery.mock(
+        TransactionStoreKey.class, "k2");
+    final TransactionStoreValue v1 = mockery.mock(TransactionStoreValue.class, "v1"), v2 = mockery.mock(
+        TransactionStoreValue.class, "v2");
+    final TransactionStoreKey k3 = mockery.mock(TransactionStoreKey.class, "k3"), k4 = mockery.mock(
+        TransactionStoreKey.class, "k4");
+    final TransactionStoreValue v3 = mockery.mock(TransactionStoreValue.class, "v3"), v4 = mockery.mock(
+        TransactionStoreValue.class, "v4");
+    final Deque<Pair<TransactionStoreKey, TransactionStoreValue>> linkedList =
+                                                                  new LinkedList<Pair<TransactionStoreKey, TransactionStoreValue>>();
+    linkedList.push(new Pair<TransactionStoreKey, TransactionStoreValue>(k1, v1));
+    linkedList.push(new Pair<TransactionStoreKey, TransactionStoreValue>(k2, v2));
+    linkedList.push(new Pair<TransactionStoreKey, TransactionStoreValue>(k3, v3));
+    linkedList.push(new Pair<TransactionStoreKey, TransactionStoreValue>(k4, v4));    
+    mockery.checking(new Expectations() {
+
+      {
+        DemoDomain d1 = new DemoDomain();
+        Sequence seq = mockery.sequence("hardRollback");
+        exactly(1).of(k4).getObjectType();
+        will(returnValue(DemoDomain.class));
+        inSequence(seq);
+        exactly(1).of(v4).getOpState();
+        will(returnValue(OpState.SAVE));
+        inSequence(seq);
+        exactly(1).of(v4).getCurrentState();
+        will(returnValue(d1));
+        inSequence(seq);
+        exactly(1).of(writeDao).delete(d1);
+        inSequence(seq);
+
+        exactly(1).of(k3).getObjectType();
+        will(returnValue(DemoDomain.class));
+        inSequence(seq);
+        exactly(1).of(v3).getOpState();
+        will(returnValue(OpState.UPDATE));
+        inSequence(seq);
+        exactly(1).of(v3).getCurrentState();
+        will(returnValue(d1));
+        inSequence(seq);
+        exactly(1).of(writeDao).update(d1);
+        inSequence(seq);
+
+        exactly(1).of(k2).getObjectType();
+        will(returnValue(DemoDomain.class));
+        inSequence(seq);
+        exactly(1).of(v2).getOpState();
+        will(returnValue(OpState.DELETE));
+        inSequence(seq);
+        exactly(1).of(v2).getCurrentState();
+        will(returnValue(d1));
+        inSequence(seq);
+        exactly(1).of(writeDao).save(d1);
+        inSequence(seq);
+
+        exactly(1).of(k1).getObjectType();
+        will(returnValue(DemoDomain.class));
+        inSequence(seq);
+        exactly(1).of(v1).getOpState();
+        will(returnValue(null));
+        inSequence(seq);
+      }
+    });
+    serviceImpl.rollback(linkedList);
     mockery.assertIsSatisfied();
   }
 }
