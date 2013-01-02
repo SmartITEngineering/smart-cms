@@ -57,8 +57,9 @@ class TransactionManagerImpl implements TransactionManager, TransactionCompletio
 
   public void transactionComplete(TransactionCompletionEvent event) {
     Deque<Transaction> stack = transactions.get();
-    if (stack != null) {
-      if (stack.peek().equals(event.getTransaction())) {
+    if (stack != null && !stack.isEmpty()) {
+      final Transaction peek = stack.peek();
+      if (peek.equals(event.getTransaction())) {
         stack.pop();
       }
       else {
