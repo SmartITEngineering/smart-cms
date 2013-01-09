@@ -36,6 +36,7 @@ import com.smartitengineering.cms.api.type.ContentCoProcessorDef;
 import com.smartitengineering.cms.api.type.ContentStatus;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.FieldDef;
+import com.smartitengineering.cms.api.workspace.Workspace;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.PersistableContent;
 import java.io.IOException;
@@ -278,6 +279,21 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent, Con
 
   @Override
   protected void create() throws IOException {
+    System.out.println("Inside create method");
+    if (contentId != null) {
+      if (contentId.getWorkspaceId() == null && contentId.getId() == null) {
+        throw new IOException("Workspace Id and Id is null though Content Id is not null");
+      }
+      if (contentId.getWorkspaceId() != null) {
+        Workspace workspace = SmartContentAPI.getInstance().getWorkspaceApi().getWorkspace(contentId.getWorkspaceId());
+        if (workspace == null) {
+          throw new IOException("Non existance workspace Id " + contentId.getWorkspaceId());
+        }
+      }
+      else {
+        throw new IOException("Invalid workspace null");
+      }
+    }
     if (contentId == null && contentDef != null && contentDef.getContentTypeID() != null) {
       createContentId(contentDef.getContentTypeID().getWorkspace());
     }
