@@ -1414,11 +1414,18 @@ public class PojoGeneratorMojo extends AbstractMojo {
     JBlock block = configureMethod.body();
     if (typeFiles != null && !typeFiles.isEmpty()) {
       JClass namesClass = codeModel.ref(Names.class);
-      JExpression stringClass = codeModel.ref(String.class).dotclass();
+      final JClass stringClassType = codeModel.ref(String.class);
+      final JClass systemClass = codeModel.ref(System.class);
+      JExpression stringClass = stringClassType.dotclass();
+      JVar workspaceNamespace = block.decl(stringClassType, "workspaceNamespace",
+                                           systemClass.staticInvoke("getProperty").arg(
+          "com.smartitengineering.cms.repo.workspace.namespace").arg(wId[0]));
+      JVar workspaceName = block.decl(stringClassType, "workspaceName", systemClass.staticInvoke("getProperty").arg(
+          "com.smartitengineering.cms.repo.workspace.name").arg(wId[1]));
       block.add(JExpr.invoke("bind").arg(stringClass).invoke("annotatedWith").arg(namesClass.staticInvoke("named").
-          arg("cmsWorkspaceNamespace")).invoke("toInstance").arg(wId[0]));
+          arg("cmsWorkspaceNamespace")).invoke("toInstance").arg(workspaceNamespace));
       block.add(JExpr.invoke("bind").arg(stringClass).invoke("annotatedWith").arg(namesClass.staticInvoke("named").
-          arg("cmsWorkspaceName")).invoke("toInstance").arg(wId[1]));
+          arg("cmsWorkspaceName")).invoke("toInstance").arg(workspaceName));
       {
         JClass typeLiteral = codeModel.ref(TypeLiteral.class);
         final JClass narrowedTypesLiteral = typeLiteral.narrow(codeModel.ref(List.class).narrow(String.class));
@@ -1433,7 +1440,8 @@ public class PojoGeneratorMojo extends AbstractMojo {
             "annotatedWith").arg(namesClass.staticInvoke("named").arg("contentTypePath")).invoke("toInstance").arg(
             typesList));
         JVar initVar = block.decl(codeModel.ref(Initializer.class), "initializer",
-                                  JExpr._new(codeModel.ref(Initializer.class)).arg(wId[0]).arg(wId[1]).arg(typesList));
+                                  JExpr._new(codeModel.ref(Initializer.class)).arg(workspaceNamespace).arg(workspaceName).
+            arg(typesList));
         block.add(initVar.invoke("init"));
       }
     }
