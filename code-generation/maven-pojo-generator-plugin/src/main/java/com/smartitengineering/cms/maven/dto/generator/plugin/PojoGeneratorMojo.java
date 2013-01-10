@@ -54,6 +54,9 @@ import com.smartitengineering.cms.repo.dao.impl.AbstractRepositoryDomain;
 import com.smartitengineering.cms.repo.dao.impl.ExtendedReadDao;
 import com.smartitengineering.cms.repo.dao.impl.Initializer;
 import com.smartitengineering.cms.repo.dao.impl.RepositoryDaoImpl;
+import com.smartitengineering.cms.repo.dao.impl.tx.CommonTxDao;
+import com.smartitengineering.cms.repo.dao.impl.tx.TransactionImplModule;
+import com.smartitengineering.cms.repo.dao.impl.tx.Transactionable;
 import com.smartitengineering.cms.type.xml.XMLParserIntrospector;
 import com.smartitengineering.cms.type.xml.XmlParser;
 import com.smartitengineering.dao.common.CommonDao;
@@ -153,6 +156,17 @@ public class PojoGeneratorMojo extends AbstractMojo {
    * @parameter
    */
   private List<String> typeFiles;
+  /**
+   * Whether transaction is enabled for this piece of generated code or not. By default its false to be backward
+   * compatible.
+   * @parameter expression="false"
+   */
+  private boolean transactionEnabled;
+  /**
+   * Whether a transaction with isolated=false is allowed or not. By default its not allowed.
+   * @parameter expression="false"
+   */
+  private boolean nonIsolatedTransactionAllowed;
 
   public void execute()
       throws MojoExecutionException {
@@ -226,6 +240,8 @@ public class PojoGeneratorMojo extends AbstractMojo {
     JClass extendedReadDao = codeModel.ref(ExtendedReadDao.class);
     JClass commonWriteDao = codeModel.ref(CommonWriteDao.class);
     JClass commonDaoImpl = codeModel.ref(RepositoryDaoImpl.class);
+    JClass commonTxDao = codeModel.ref(CommonTxDao.class);
+    JClass transactionableAnn = codeModel.ref(Transactionable.class);
     JClass genericAdapter = codeModel.ref(GenericAdapter.class).narrow(Content.class);
     JClass classRef = codeModel.ref(Class.class);
     JClass genericAdapterImpl = codeModel.ref(GenericAdapterImpl.class).narrow(Content.class);
@@ -251,53 +267,70 @@ public class PojoGeneratorMojo extends AbstractMojo {
           JBlock block = configureMethod.body();
           final JDefinedClass commonDaoType;
           final JDefinedClass daoImplType;
+          final JDefinedClass txDaoImplType;
+          final JDefinedClass readDaoType;
+          final JDefinedClass writeDaoType;
           {
             final JClass narrowedCommonDaoTypeLiteral = typeLiteral.narrow(commonDao.narrow(definedClass).narrow(
                 String.class));
             commonDaoType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).append(
                 "CommonDaoType").toString());
             commonDaoType._extends(narrowedCommonDaoTypeLiteral);
-            final JClass beanClass = classRef.narrow(definedClass.wildcard());
-            JDefinedClass classType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).append(
-                "ClassType").toString());
-            classType._extends(typeLiteral.narrow(beanClass));
-            block.add(JExpr.invoke("bind").arg(JExpr._new(classType)).invoke("toInstance").arg(definedClass.dotclass()));
-            final JClass narrowedDaoImplTypeLiteral = typeLiteral.narrow(commonDaoImpl.narrow(definedClass));
-            daoImplType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).append("DaoImplType").
-                toString());
-            daoImplType._extends(narrowedDaoImplTypeLiteral);
-            block.add(JExpr.invoke("bind").arg(JExpr._new(commonDaoType)).invoke("to").arg(JExpr._new(daoImplType)).
-                invoke("in").arg(singletonScope.dotclass()));
-            block.add(JExpr.invoke("binder").invoke("expose").arg(JExpr._new(commonDaoType)));
           }
           {
             final JClass narrowedReadTypeLiteral = typeLiteral.narrow(commonReadDao.narrow(definedClass).narrow(
                 String.class));
-            final JDefinedClass readDaoType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).
-                append("ReadDaoType").toString());
+            readDaoType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).append("ReadDaoType").
+                toString());
             readDaoType._extends(narrowedReadTypeLiteral);
             block.add(JExpr.invoke("bind").arg(JExpr._new(readDaoType)).invoke("to").arg(JExpr._new(commonDaoType)).
                 invoke("in").arg(singletonScope.dotclass()));
             block.add(JExpr.invoke("binder").invoke("expose").arg(JExpr._new(readDaoType)));
           }
           {
-            final JClass narrowedReadTypeLiteral = typeLiteral.narrow(extendedReadDao.narrow(definedClass).narrow(
-                String.class));
-            final JDefinedClass readDaoType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).
-                append("ExtReadDaoType").toString());
-            readDaoType._extends(narrowedReadTypeLiteral);
-            block.add(JExpr.invoke("bind").arg(JExpr._new(readDaoType)).invoke("to").arg(JExpr._new(daoImplType)).
-                invoke("in").arg(singletonScope.dotclass()));
-            block.add(JExpr.invoke("binder").invoke("expose").arg(JExpr._new(readDaoType)));
-          }
-          {
             final JClass narrowedWriteTypeLiteral = typeLiteral.narrow(commonWriteDao.narrow(definedClass));
-            final JDefinedClass writeDaoType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).
-                append("WriteDaoType").toString());
+            writeDaoType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).append("WriteDaoType").
+                toString());
             writeDaoType._extends(narrowedWriteTypeLiteral);
             block.add(JExpr.invoke("bind").arg(JExpr._new(writeDaoType)).invoke("to").arg(JExpr._new(commonDaoType)).
                 invoke("in").arg(singletonScope.dotclass()));
             block.add(JExpr.invoke("binder").invoke("expose").arg(JExpr._new(writeDaoType)));
+          }
+          {
+            final JClass narrowedDaoImplTypeLiteral = typeLiteral.narrow(commonDaoImpl.narrow(definedClass));
+            final JClass narrowedCommonTxDaoTypeLiteral = typeLiteral.narrow(commonTxDao.narrow(definedClass));
+            final JClass beanClass = classRef.narrow(definedClass);
+            JDefinedClass classType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).append(
+                "ClassType").toString());
+            classType._extends(typeLiteral.narrow(beanClass));
+            daoImplType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).append("DaoImplType").
+                toString());
+            daoImplType._extends(narrowedDaoImplTypeLiteral);
+            txDaoImplType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).append(
+                "CommonTxDaoType").toString());
+            txDaoImplType._extends(narrowedCommonTxDaoTypeLiteral);
+            block.add(JExpr.invoke("bind").arg(JExpr._new(classType)).invoke("toInstance").arg(definedClass.dotclass()));
+            if (transactionEnabled) {
+              block.add(JExpr.invoke("bind").arg(JExpr._new(commonDaoType)).invoke("to").arg(JExpr._new(txDaoImplType)));
+              block.add(JExpr.invoke("bind").arg(JExpr._new(readDaoType)).invoke("annotatedWith").arg(transactionableAnn.
+                  dotclass()).invoke("to").arg(JExpr._new(daoImplType)));
+              block.add(JExpr.invoke("bind").arg(JExpr._new(writeDaoType)).invoke("annotatedWith").arg(transactionableAnn.
+                  dotclass()).invoke("to").arg(JExpr._new(daoImplType)));
+            }
+            else {
+              block.add(JExpr.invoke("bind").arg(JExpr._new(commonDaoType)).invoke("to").arg(JExpr._new(daoImplType)));
+            }
+            block.add(JExpr.invoke("binder").invoke("expose").arg(JExpr._new(commonDaoType)));
+          }
+          {
+            final JClass narrowedReadTypeLiteral = typeLiteral.narrow(extendedReadDao.narrow(definedClass).narrow(
+                String.class));
+            final JDefinedClass extReadDaoType = moduleClass._class(new StringBuilder(type.getContentTypeID().getName()).
+                append("ExtReadDaoType").toString());
+            extReadDaoType._extends(narrowedReadTypeLiteral);
+            block.add(JExpr.invoke("bind").arg(JExpr._new(extReadDaoType)).invoke("to").arg(JExpr._new(daoImplType)).
+                invoke("in").arg(singletonScope.dotclass()));
+            block.add(JExpr.invoke("binder").invoke("expose").arg(JExpr._new(extReadDaoType)));
           }
           {
             JClass lGenericAdapter = genericAdapter.narrow(definedClass);
@@ -1411,9 +1444,9 @@ public class PojoGeneratorMojo extends AbstractMojo {
     moduleClass._extends(codeModel.ref(AbstractModule.class));
     JMethod configureMethod = moduleClass.method(JMod.PUBLIC, JCodeModel.boxToPrimitive.get(Void.class),
                                                  "configure");
+    JClass namesClass = codeModel.ref(Names.class);
     JBlock block = configureMethod.body();
     if (typeFiles != null && !typeFiles.isEmpty()) {
-      JClass namesClass = codeModel.ref(Names.class);
       final JClass stringClassType = codeModel.ref(String.class);
       final JClass systemClass = codeModel.ref(System.class);
       JExpression stringClass = stringClassType.dotclass();
@@ -1447,6 +1480,15 @@ public class PojoGeneratorMojo extends AbstractMojo {
     }
     for (JDefinedClass clazz : modules.values()) {
       block.invoke("install").arg(JExpr._new(clazz));
+    }
+    if (transactionEnabled) {
+      JClass booleanClass = codeModel.ref(Boolean.class);
+      JClass bigBoolClass = codeModel.ref(Boolean.class);
+      JClass txImplModuleClass = codeModel.ref(TransactionImplModule.class);
+      block.add(JExpr.invoke("bind").arg(booleanClass.dotclass()).invoke("annotatedWith").arg(namesClass.staticInvoke(
+          "named").arg("nonIsolatedLookupEnabled")).invoke("toInstance").arg(bigBoolClass.staticInvoke("parseBoolean").
+          arg(String.valueOf(nonIsolatedTransactionAllowed))));
+      block.invoke("install").arg(JExpr._new(txImplModuleClass));
     }
   }
 

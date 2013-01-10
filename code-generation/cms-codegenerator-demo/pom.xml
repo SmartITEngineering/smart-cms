@@ -132,6 +132,7 @@
               <typeFiles>
                 <typeFile>content-type-example.xml</typeFile>
               </typeFiles>
+              <transactionEnabled>true</transactionEnabled>
             </configuration>
           </execution>
           <execution>
