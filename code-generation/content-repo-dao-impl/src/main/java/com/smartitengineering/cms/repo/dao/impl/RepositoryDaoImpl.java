@@ -1,6 +1,7 @@
 package com.smartitengineering.cms.repo.dao.impl;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.smartitengineering.cms.api.common.SearchResult;
 import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author imyousuf
  */
+@Singleton
 public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends PersistentDTO>>
     implements CommonDao<T, String>, ExtendedReadDao<T, String> {
 
@@ -59,13 +61,13 @@ public class RepositoryDaoImpl<T extends AbstractRepositoryDomain<? extends Pers
   private WorkspaceId defaultContainerWorkspace;
   @Inject
   private GenericAdapter<Content, T> adapter;
-  protected final Class<? extends T> beanClass;
+  protected final Class<T> beanClass;
   private ContentTypeId contentTypeId;
   protected transient final Logger logger = LoggerFactory.getLogger(getClass());
   private static final String SOLR_DATE_FORMAT = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern() + "'Z'";
 
   @Inject
-  public RepositoryDaoImpl(Class<? extends T> entityClass) {
+  public RepositoryDaoImpl(Class<T> entityClass) {
     beanClass = entityClass;
   }
 

@@ -1,6 +1,7 @@
 package com.smartitengineering.cms.repo.dao.impl.tx;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.smartitengineering.cms.repo.dao.impl.AbstractRepositoryDomain;
 import com.smartitengineering.cms.repo.dao.tx.Transaction;
 import com.smartitengineering.cms.repo.dao.tx.TransactionManager;
@@ -18,6 +19,7 @@ import java.util.Set;
  * Implements the Common CMS Content Repo Trasnactionable DAO.
  * @author imyousuf
  */
+@Singleton
 public class CommonTxDao<T extends AbstractRepositoryDomain<? extends PersistentDTO>> implements CommonDao<T, String> {
 
   private final CommonReadDao<T, String> readDao;
