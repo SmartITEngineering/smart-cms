@@ -287,9 +287,6 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent, Con
       if (workspace == null) {
         throw new IOException("Non existance workspace Id " + contentId.getWorkspaceId());
       }
-      else {
-        throw new IOException("Invalid workspace null");
-      }
     }
     if (contentId == null && contentDef != null && contentDef.getContentTypeID() != null) {
       createContentId(contentDef.getContentTypeID().getWorkspace());
