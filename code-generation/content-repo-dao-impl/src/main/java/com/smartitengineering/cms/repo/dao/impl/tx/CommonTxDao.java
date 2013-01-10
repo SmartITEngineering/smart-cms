@@ -69,7 +69,7 @@ public class CommonTxDao<T extends AbstractRepositoryDomain<? extends Persistent
         return this.readDao.getById(id);
       }
       else {
-        txDto = pair.getValue().getCurrentState();
+        txDto = pair.getValue().<T>getCurrentState();
         return txDto;
       }
     }
