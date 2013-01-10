@@ -279,16 +279,13 @@ public class ContentImpl extends AbstractPersistableDomain<WriteableContent, Con
 
   @Override
   protected void create() throws IOException {
-    System.out.println("Inside create method");
     if (contentId != null) {
       if (contentId.getWorkspaceId() == null && contentId.getId() == null) {
         throw new IOException("Workspace Id and Id is null though Content Id is not null");
       }
-      if (contentId.getWorkspaceId() != null) {
-        Workspace workspace = SmartContentAPI.getInstance().getWorkspaceApi().getWorkspace(contentId.getWorkspaceId());
-        if (workspace == null) {
-          throw new IOException("Non existance workspace Id " + contentId.getWorkspaceId());
-        }
+      Workspace workspace = SmartContentAPI.getInstance().getWorkspaceApi().getWorkspace(contentId.getWorkspaceId());
+      if (workspace == null) {
+        throw new IOException("Non existance workspace Id " + contentId.getWorkspaceId());
       }
       else {
         throw new IOException("Invalid workspace null");

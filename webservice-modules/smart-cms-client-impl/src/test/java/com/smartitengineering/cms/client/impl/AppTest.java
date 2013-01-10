@@ -1531,13 +1531,13 @@ public class AppTest {
 
     WorkspaceId workspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId("atest2", "additional");
 
-    WorkspaceId workspaceId1 = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId("invalidws",
-                                                                                                 "invalidws");
+    WorkspaceId invalidWorkspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId("invalidws",
+                                                                                                       "invalidws");
 
-    String NAME_SPACE = "com.smartitengineering.smart-shopping.content";
+    String nameSpace = "com.smartitengineering.smart-shopping.content";
     String name = "Publisher";
     ContentTypeId contentTypeId = SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(workspaceId,
-                                                                                                           NAME_SPACE,
+                                                                                                           nameSpace,
                                                                                                            name);
     ContentType contentType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(contentTypeId);
 
@@ -1546,7 +1546,7 @@ public class AppTest {
 
     final WriteableContent writeableContent;
 
-    MutableContent mutableContent = new ContentImpl();
+    MutableContent mutableContent = SmartContentAPI.getInstance().getContentLoader().createContent(contentType);
     mutableContent.setContentDefinition(contentType);
     mutableContent.setPrivate(false);
     mutableContent.setStatus(contentStatus);
@@ -1559,7 +1559,7 @@ public class AppTest {
     mutableContent.setField(mutableField);
     //Create new content
     writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(mutableContent);
-    writeableContent.createContentId(workspaceId1);
+    writeableContent.createContentId(invalidWorkspaceId);
 
 
     try {
