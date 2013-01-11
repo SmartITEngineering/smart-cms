@@ -20,26 +20,24 @@ package com.smartitengineering.cms.client.impl;
 
 import com.google.inject.AbstractModule;
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.content.MutableContent;
+import com.smartitengineering.cms.api.content.MutableField;
+import com.smartitengineering.cms.api.content.MutableFieldValue;
 import com.smartitengineering.cms.api.event.Event;
 import com.smartitengineering.cms.api.event.Event.EventType;
 import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.factory.content.ContentLoader;
+import com.smartitengineering.cms.api.factory.content.WriteableContent;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
+import com.smartitengineering.cms.api.impl.content.ContentImpl;
+import com.smartitengineering.cms.api.impl.type.ContentStatusImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
-import com.smartitengineering.cms.api.type.CollectionDataType;
-import com.smartitengineering.cms.api.type.CompositeDataType;
-import com.smartitengineering.cms.api.type.ContentCoProcessorDef;
-import com.smartitengineering.cms.api.type.ContentStatus;
-import com.smartitengineering.cms.api.type.ContentType;
+import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
+import com.smartitengineering.cms.api.type.*;
 import com.smartitengineering.cms.api.type.ContentType.ContentProcessingPhase;
-import com.smartitengineering.cms.api.type.ContentTypeId;
-import com.smartitengineering.cms.api.type.EnumDataType;
-import com.smartitengineering.cms.api.type.FieldDef;
-import com.smartitengineering.cms.api.type.FieldValueType;
-import com.smartitengineering.cms.api.type.RepresentationDef;
-import com.smartitengineering.cms.api.type.ValidatorType;
-import com.smartitengineering.cms.api.type.VariationDef;
 import com.smartitengineering.cms.api.workspace.Sequence;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.binder.guice.Initializer;
@@ -66,6 +64,7 @@ import com.smartitengineering.cms.client.api.WorkspaceValidatorResource;
 import com.smartitengineering.cms.client.api.WorkspaceValidatorsResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationsResource;
+import com.smartitengineering.cms.spi.impl.content.ContentAdapterHelper;
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldDef;
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldValue;
 import com.smartitengineering.cms.ws.common.domains.CompositeFieldDef;
@@ -84,6 +83,8 @@ import com.smartitengineering.cms.ws.common.providers.JacksonJsonProvider;
 import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
 import com.smartitengineering.dao.hbase.ddl.HBaseTableGenerator;
 import com.smartitengineering.dao.hbase.ddl.config.json.ConfigurationJsonParser;
+import com.smartitengineering.util.bean.adapter.GenericAdapter;
+import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
 import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ClientUtil;
@@ -116,6 +117,7 @@ import java.util.Set;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Feed;
 import org.apache.commons.codec.binary.Base64;
@@ -1521,6 +1523,53 @@ public class AppTest {
     Assert.assertEquals(1, containerResource.getContainerContents().size());
     Assert.assertEquals(contentResource.getUri().toASCIIString(), containerResource.getContainerContents().iterator().
         next().getUri().toASCIIString());
+  }
+
+  @Test
+  public void testCreateContentWithInvalidWorkspace() throws Exception {
+    LOGGER.info(":::::::::::::: CREATE CONTENT WITH INVALID WORKSPACE ::::::::::::::");
+
+    WorkspaceId workspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId("atest2", "additional");
+
+    WorkspaceId invalidWorkspaceId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspaceId("invalidws",
+                                                                                                       "invalidws");
+
+    String nameSpace = "com.smartitengineering.smart-shopping.content";
+    String name = "Publisher";
+    ContentTypeId contentTypeId = SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(workspaceId,
+                                                                                                           nameSpace,
+                                                                                                           name);
+    ContentType contentType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(contentTypeId);
+
+    String statusKey = contentType.getStatuses().keySet().iterator().next();
+    ContentStatus contentStatus = contentType.getStatuses().get(statusKey);
+
+    final WriteableContent writeableContent;
+
+    MutableContent mutableContent = SmartContentAPI.getInstance().getContentLoader().createContent(contentType);
+    mutableContent.setContentDefinition(contentType);
+    mutableContent.setPrivate(false);
+    mutableContent.setStatus(contentStatus);
+    MutableField mutableField = new com.smartitengineering.cms.api.impl.content.FieldImpl();
+    mutableField.setName("name");
+    MutableFieldValue<String> mutableFieldValue =
+                              new com.smartitengineering.cms.api.impl.content.FieldValueImpl<String>();
+    mutableFieldValue.setValue("russel");
+    mutableField.setValue(mutableFieldValue);
+    mutableContent.setField(mutableField);
+    //Create new content
+    writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(mutableContent);
+    writeableContent.createContentId(invalidWorkspaceId);
+
+
+    try {
+      //Save or update the content, will be decided by writeable content implementation
+      writeableContent.put();
+      Assert.fail();
+    }
+    catch (IOException ex) {
+      LOGGER.info("Should fail", ex);
+    }
   }
 
   @Test
