@@ -247,8 +247,6 @@ public class PojoGeneratorMojo extends AbstractMojo {
     JClass genericAdapterImpl = codeModel.ref(GenericAdapterImpl.class).narrow(Content.class);
     JClass abstractHelper = codeModel.ref(AbstractAdapterHelper.class).narrow(Content.class);
     JClass singletonScope = codeModel.ref(Singleton.class);
-    JClass workspaceIdClass = codeModel.ref(WorkspaceId.class);
-    JClass apiClass = codeModel.ref(SmartContentAPI.class);
     String[] wId = workspaceId.split(":");
     for (MutableContentType type : types) {
       if (type.getDefinitionType().equals(DefinitionType.CONCRETE_TYPE)) {
@@ -352,10 +350,7 @@ public class PojoGeneratorMojo extends AbstractMojo {
                 adapterImplType)).invoke("in").arg(singletonScope.dotclass()));
             block.add(JExpr.invoke("bind").arg(JExpr._new(abstractHelperType)).invoke("to").arg(JExpr._new(helperType)).
                 invoke("in").arg(singletonScope.dotclass()));
-            final JInvocation workspaceApiInvocation = apiClass.staticInvoke("getInstance").invoke("getWorkspaceApi").
-                invoke("createWorkspaceId");
-            final JInvocation _new = workspaceApiInvocation.arg(wId[0]).arg(wId[1]);
-            block.add(JExpr.invoke("bind").arg(workspaceIdClass.dotclass()).invoke("toInstance").arg(_new));
+
           }
           //String TypeLiteral
           final JDefinedClass stringType;
@@ -1446,19 +1441,19 @@ public class PojoGeneratorMojo extends AbstractMojo {
                                                  "configure");
     JClass namesClass = codeModel.ref(Names.class);
     JBlock block = configureMethod.body();
-    if (typeFiles != null && !typeFiles.isEmpty()) {
-      final JClass stringClassType = codeModel.ref(String.class);
-      final JClass systemClass = codeModel.ref(System.class);
-      JExpression stringClass = stringClassType.dotclass();
-      JVar workspaceNamespace = block.decl(stringClassType, "workspaceNamespace",
-                                           systemClass.staticInvoke("getProperty").arg(
-          "com.smartitengineering.cms.repo.workspace.namespace").arg(wId[0]));
-      JVar workspaceName = block.decl(stringClassType, "workspaceName", systemClass.staticInvoke("getProperty").arg(
-          "com.smartitengineering.cms.repo.workspace.name").arg(wId[1]));
-      block.add(JExpr.invoke("bind").arg(stringClass).invoke("annotatedWith").arg(namesClass.staticInvoke("named").
-          arg("cmsWorkspaceNamespace")).invoke("toInstance").arg(workspaceNamespace));
-      block.add(JExpr.invoke("bind").arg(stringClass).invoke("annotatedWith").arg(namesClass.staticInvoke("named").
-          arg("cmsWorkspaceName")).invoke("toInstance").arg(workspaceName));
+    final JClass systemClass = codeModel.ref(System.class);
+    final JClass stringClassType = codeModel.ref(String.class);
+    JExpression stringClass = stringClassType.dotclass();
+    JVar workspaceNamespace = block.decl(stringClassType, "workspaceNamespace",
+                                         systemClass.staticInvoke("getProperty").arg(
+        "com.smartitengineering.cms.repo.workspace.namespace").arg(wId[0]));
+    JVar workspaceName = block.decl(stringClassType, "workspaceName", systemClass.staticInvoke("getProperty").arg(
+        "com.smartitengineering.cms.repo.workspace.name").arg(wId[1]));
+    block.add(JExpr.invoke("bind").arg(stringClass).invoke("annotatedWith").arg(namesClass.staticInvoke("named").
+        arg("cmsWorkspaceNamespace")).invoke("toInstance").arg(workspaceNamespace));
+    block.add(JExpr.invoke("bind").arg(stringClass).invoke("annotatedWith").arg(namesClass.staticInvoke("named").
+        arg("cmsWorkspaceName")).invoke("toInstance").arg(workspaceName));
+    if (typeFiles != null && !typeFiles.isEmpty()) {      
       {
         JClass typeLiteral = codeModel.ref(TypeLiteral.class);
         final JClass narrowedTypesLiteral = typeLiteral.narrow(codeModel.ref(List.class).narrow(String.class));
@@ -1478,6 +1473,12 @@ public class PojoGeneratorMojo extends AbstractMojo {
         block.add(initVar.invoke("init"));
       }
     }
+    JClass workspaceIdClass = codeModel.ref(WorkspaceId.class);
+    JClass apiClass = codeModel.ref(SmartContentAPI.class);
+    final JInvocation workspaceApiInvocation = apiClass.staticInvoke("getInstance").invoke("getWorkspaceApi").
+        invoke("createWorkspaceId");
+    final JInvocation _new = workspaceApiInvocation.arg(workspaceNamespace).arg(workspaceName);
+    block.add(JExpr.invoke("bind").arg(workspaceIdClass.dotclass()).invoke("toInstance").arg(_new));
     for (JDefinedClass clazz : modules.values()) {
       block.invoke("install").arg(JExpr._new(clazz));
     }
