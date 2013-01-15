@@ -20,7 +20,6 @@ package com.smartitengineering.cms.client.impl;
 
 import com.google.inject.AbstractModule;
 import com.smartitengineering.cms.api.common.TemplateType;
-import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.content.MutableContent;
 import com.smartitengineering.cms.api.content.MutableField;
 import com.smartitengineering.cms.api.content.MutableFieldValue;
@@ -28,14 +27,11 @@ import com.smartitengineering.cms.api.event.Event;
 import com.smartitengineering.cms.api.event.Event.EventType;
 import com.smartitengineering.cms.api.event.EventListener;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
-import com.smartitengineering.cms.api.factory.content.ContentLoader;
 import com.smartitengineering.cms.api.factory.content.WriteableContent;
+import com.smartitengineering.cms.api.factory.type.ContentTypeLoader;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
-import com.smartitengineering.cms.api.impl.content.ContentImpl;
-import com.smartitengineering.cms.api.impl.type.ContentStatusImpl;
 import com.smartitengineering.cms.api.impl.type.ContentTypeIdImpl;
-import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
 import com.smartitengineering.cms.api.type.*;
 import com.smartitengineering.cms.api.type.ContentType.ContentProcessingPhase;
 import com.smartitengineering.cms.api.workspace.Sequence;
@@ -64,7 +60,6 @@ import com.smartitengineering.cms.client.api.WorkspaceValidatorResource;
 import com.smartitengineering.cms.client.api.WorkspaceValidatorsResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationResource;
 import com.smartitengineering.cms.client.api.WorkspaceVariationsResource;
-import com.smartitengineering.cms.spi.impl.content.ContentAdapterHelper;
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldDef;
 import com.smartitengineering.cms.ws.common.domains.CollectionFieldValue;
 import com.smartitengineering.cms.ws.common.domains.CompositeFieldDef;
@@ -83,8 +78,6 @@ import com.smartitengineering.cms.ws.common.providers.JacksonJsonProvider;
 import com.smartitengineering.cms.ws.common.providers.TextURIListProvider;
 import com.smartitengineering.dao.hbase.ddl.HBaseTableGenerator;
 import com.smartitengineering.dao.hbase.ddl.config.json.ConfigurationJsonParser;
-import com.smartitengineering.util.bean.adapter.GenericAdapter;
-import com.smartitengineering.util.bean.adapter.GenericAdapterImpl;
 import com.smartitengineering.util.bean.guice.GuiceUtil;
 import com.smartitengineering.util.rest.client.ApplicationWideClientFactoryImpl;
 import com.smartitengineering.util.rest.client.ClientUtil;
@@ -117,7 +110,6 @@ import java.util.Set;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Feed;
 import org.apache.commons.codec.binary.Base64;
@@ -3157,6 +3149,116 @@ public class AppTest {
       //Expected
     }
     sleep();
+  }
+
+  @Test
+  public void testDeleteWorkspace() {
+    LOGGER.info("::::::::::::::::::::: TEST DELETE WORKSPACE ::::::::::::::::::::::");
+
+    // create a workspace for delete
+    WorkspaceId workspaceForDeleteId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspace("wsfordelete");
+    //SmartContentAPI.getInstance().getWorkspaceApi().createWorkspace(workspaceForDeleteId);
+    com.smartitengineering.cms.api.workspace.Workspace workSpaceForDelete = SmartContentAPI.getInstance().
+        getWorkspaceApi().getWorkspace(workspaceForDeleteId);
+    Assert.assertNotNull(workSpaceForDelete);
+
+    // create content type    
+    InputStream stream = getClass().getClassLoader().getResourceAsStream("content-type-for-delete.xml");
+
+    try {
+      final ContentTypeLoader contentTypeLoader = SmartContentAPI.getInstance().getContentTypeLoader();
+      final Collection<WritableContentType> types;
+      types = contentTypeLoader.parseContentTypes(workSpaceForDelete.getId(), stream,
+                                                  com.smartitengineering.cms.api.common.MediaType.APPLICATION_XML);
+      for (WritableContentType type : types) {
+        type.put();
+      }
+    }
+    catch (Exception ex) {
+      LOGGER.info("Can not create ContentType for delete", ex);
+      Assert.fail();
+    }
+    ContentTypeId contentTypeId = SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(
+        workspaceForDeleteId, "com.smartitengineering.smart-shopping.content", "ContentTypeForDelete");
+
+
+    ContentType contentType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(contentTypeId);
+    Assert.assertNotNull(contentType);
+
+    // create content
+    String statusKey = contentType.getStatuses().keySet().iterator().next();
+    ContentStatus contentStatus = contentType.getStatuses().get(statusKey);
+
+    final WriteableContent writeableContent;
+
+    MutableContent mutableContent = SmartContentAPI.getInstance().getContentLoader().createContent(contentType);
+    mutableContent.setContentDefinition(contentType);
+    mutableContent.setPrivate(false);
+    mutableContent.setStatus(contentStatus);
+    MutableField mutableField = new com.smartitengineering.cms.api.impl.content.FieldImpl();
+    mutableField.setName("name");
+    MutableFieldValue<String> mutableFieldValue =
+                              new com.smartitengineering.cms.api.impl.content.FieldValueImpl<String>();
+    mutableFieldValue.setValue("russel");
+    mutableField.setValue(mutableFieldValue);
+    mutableContent.setField(mutableField);
+    //Create new content
+    writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(mutableContent);
+    writeableContent.createContentId(workspaceForDeleteId);
+
+
+    try {
+      //Save or update the content, will be decided by writeable content implementation
+      writeableContent.put();
+    }
+    catch (IOException ex) {
+      LOGGER.error(ex.getMessage(), ex);
+      Assert.fail();
+    }
+
+    SmartContentAPI.getInstance().getWorkspaceApi().deleteWorkspace(workspaceForDeleteId);
+    com.smartitengineering.cms.api.workspace.Workspace fetchedWorkspace = SmartContentAPI.getInstance().getWorkspaceApi().
+        getWorkspace(workspaceForDeleteId);
+    if (fetchedWorkspace == null) {
+      LOGGER.info("Fetched workspace null");
+    }
+    Assert.assertNull(fetchedWorkspace);
+
+    contentType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(contentTypeId);
+    Assert.assertNull(contentType);
+
+
+
+    final WriteableContent writeableContentForDeleteTest;
+    mutableContent = SmartContentAPI.getInstance().getContentLoader().createContent(contentType);
+    mutableContent.setContentDefinition(contentType);
+    mutableContent.setPrivate(false);
+    mutableContent.setStatus(contentStatus);
+    mutableField = new com.smartitengineering.cms.api.impl.content.FieldImpl();
+    mutableField.setName("name");
+    mutableFieldValue = new com.smartitengineering.cms.api.impl.content.FieldValueImpl<String>();
+    mutableFieldValue.setValue("russel");
+    mutableField.setValue(mutableFieldValue);
+    mutableContent.setField(mutableField);
+    //Create new content
+    writeableContentForDeleteTest = SmartContentAPI.getInstance().getContentLoader().getWritableContent(mutableContent);
+    writeableContentForDeleteTest.createContentId(workspaceForDeleteId);
+
+
+    try {
+      //Save or update the content, will be decided by writeable content implementation
+      writeableContentForDeleteTest.put();
+      Assert.fail();
+    }
+    catch (IOException ex) {
+      LOGGER.info("should fail");
+
+    }
+
+  }
+
+  @Test
+  public void testDeleteWorkspaceViaWebservice() {
   }
 
   protected void sleep() {
