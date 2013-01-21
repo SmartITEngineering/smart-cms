@@ -3217,6 +3217,7 @@ public class AppTest {
     }
 
     SmartContentAPI.getInstance().getWorkspaceApi().deleteWorkspace(workspaceForDeleteId);
+    sleep();
     com.smartitengineering.cms.api.workspace.Workspace fetchedWorkspace = SmartContentAPI.getInstance().getWorkspaceApi().
         getWorkspace(workspaceForDeleteId);
     if (fetchedWorkspace == null) {
