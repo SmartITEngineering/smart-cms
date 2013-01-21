@@ -21,8 +21,11 @@ package com.smartitengineering.cms.api.impl.workspace;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.common.CacheableResource;
+import com.smartitengineering.cms.api.common.SearchResult;
 import com.smartitengineering.cms.api.common.TemplateType;
+import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
+import com.smartitengineering.cms.api.content.Filter;
 import com.smartitengineering.cms.api.content.template.ContentCoProcessor;
 import com.smartitengineering.cms.api.content.template.FieldValidator;
 import com.smartitengineering.cms.api.content.template.RepresentationGenerator;
@@ -34,6 +37,7 @@ import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
 import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
+import com.smartitengineering.cms.api.impl.content.FilterImpl;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.*;
@@ -51,6 +55,8 @@ import java.io.InputStream;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -889,37 +895,53 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
     SmartContentSPI.getInstance().getWorkspaceService().reIndex(seqId);
   }
 
-  public void deleteWorkspace(WorkspaceId workspaceId) {
-    Workspace workspace = SmartContentAPI.getInstance().getWorkspaceApi().getWorkspace(workspaceId);
+  public void deleteWorkspace(final WorkspaceId workspaceId) {
+    final Workspace workspace = SmartContentAPI.getInstance().getWorkspaceApi().getWorkspace(workspaceId);
     if (workspace == null) {
       throw new RuntimeException("Workspace not found");
     }
 
-    Collection<ContentType> contentTypes = workspace.getContentDefintions();
-    for (ContentType contentType : contentTypes) {
-      WritableContentType writableContentType = SmartContentAPI.getInstance().getContentTypeLoader().
-          getWritableContentType(contentType);
-      try {
-        writableContentType.delete();
-      }
-      catch (Exception ex) {
-        logger.error(ex.getMessage(), ex);
-      }
-    }
-
-    SmartContentAPI.getInstance().getWorkspaceApi().removeAllContentCoProcessorTemplates(workspaceId);
-    SmartContentAPI.getInstance().getWorkspaceApi().removeAllFriendlies(workspaceId);
-    SmartContentAPI.getInstance().getWorkspaceApi().removeAllRepresentationTemplates(workspaceId);
-    SmartContentAPI.getInstance().getWorkspaceApi().removeAllRootContents(workspaceId);
-    SmartContentAPI.getInstance().getWorkspaceApi().removeAllValidatorTemplates(workspaceId);
-    SmartContentAPI.getInstance().getWorkspaceApi().removeAllVariationTemplates(workspaceId);
-
-    Collection<ContentId> contentIds = workspace.getRootContents();
-    for (ContentId contentId : contentIds) {
-      SmartContentAPI.getInstance().getWorkspaceApi().removeRootContent(workspaceId, contentId);
-    }
     logger.info("Deleting workspace from persister");
     SmartContentSPI.getInstance().getWorkspaceService().delete(workspaceId);
+
+    ExecutorService threadExecutor = Executors.newCachedThreadPool();
+    threadExecutor.execute(new Runnable() {
+
+      public void run() {
+        Collection<ContentType> contentTypes = workspace.getContentDefintions();
+        for (ContentType contentType : contentTypes) {
+          WritableContentType writableContentType = SmartContentAPI.getInstance().getContentTypeLoader().
+              getWritableContentType(contentType);
+          try {
+            writableContentType.delete();
+          }
+          catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+          }
+        }
+
+        SmartContentAPI.getInstance().getWorkspaceApi().removeAllContentCoProcessorTemplates(workspaceId);
+        SmartContentAPI.getInstance().getWorkspaceApi().removeAllFriendlies(workspaceId);
+        SmartContentAPI.getInstance().getWorkspaceApi().removeAllRepresentationTemplates(workspaceId);
+        SmartContentAPI.getInstance().getWorkspaceApi().removeAllRootContents(workspaceId);
+        SmartContentAPI.getInstance().getWorkspaceApi().removeAllValidatorTemplates(workspaceId);
+        SmartContentAPI.getInstance().getWorkspaceApi().removeAllVariationTemplates(workspaceId);
+
+        Filter filter = new FilterImpl();
+        filter.setWorkspaceId(workspaceId);
+
+        SearchResult<Content> contents = SmartContentAPI.getInstance().getContentLoader().search(filter);
+
+        for (Content content : contents.getResult()) {
+          try {
+            SmartContentAPI.getInstance().getContentLoader().getWritableContent(content).delete();
+          }
+          catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+          }
+        }
+      }
+    });
   }
 
   public interface Lookup<T> {
