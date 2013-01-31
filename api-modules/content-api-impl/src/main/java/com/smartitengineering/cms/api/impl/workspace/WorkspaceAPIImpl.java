@@ -21,11 +21,8 @@ package com.smartitengineering.cms.api.impl.workspace;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.smartitengineering.cms.api.common.CacheableResource;
-import com.smartitengineering.cms.api.common.SearchResult;
 import com.smartitengineering.cms.api.common.TemplateType;
-import com.smartitengineering.cms.api.content.Content;
 import com.smartitengineering.cms.api.content.ContentId;
-import com.smartitengineering.cms.api.content.Filter;
 import com.smartitengineering.cms.api.content.template.ContentCoProcessor;
 import com.smartitengineering.cms.api.content.template.FieldValidator;
 import com.smartitengineering.cms.api.content.template.RepresentationGenerator;
@@ -35,31 +32,37 @@ import com.smartitengineering.cms.api.event.Event.EventType;
 import com.smartitengineering.cms.api.event.Event.Type;
 import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
-import com.smartitengineering.cms.api.factory.content.WriteableContent;
-import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
-import com.smartitengineering.cms.api.impl.content.FilterImpl;
-import com.smartitengineering.cms.api.impl.type.ContentTypeImpl;
-import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.type.ValidatorType;
-import com.smartitengineering.cms.api.workspace.*;
+import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
+import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.ResourceTemplate;
+import com.smartitengineering.cms.api.workspace.Sequence;
+import com.smartitengineering.cms.api.workspace.SequenceId;
+import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
+import com.smartitengineering.cms.api.workspace.VariationTemplate;
+import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
 import com.smartitengineering.cms.spi.content.template.ContentCoProcessorGenerator;
 import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
 import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
-import com.smartitengineering.cms.spi.persistence.PersistentService;
 import com.smartitengineering.dao.common.cache.CacheServiceProvider;
 import com.smartitengineering.dao.common.cache.Lock;
 import com.smartitengineering.dao.common.cache.Mutex;
 import com.smartitengineering.dao.common.cache.impl.CacheAPIFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -901,7 +904,7 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
   public void deleteWorkspace(final WorkspaceId workspaceId) {
     SmartContentSPI.getInstance().getWorkspaceService().deleteWorkspaceWithDependencies(workspaceId);
   }
-  
+
   public interface Lookup<T> {
 
     T get();

@@ -25,7 +25,15 @@ import com.smartitengineering.cms.api.content.template.FieldValidator;
 import com.smartitengineering.cms.api.content.template.RepresentationGenerator;
 import com.smartitengineering.cms.api.content.template.VariationGenerator;
 import com.smartitengineering.cms.api.type.ValidatorType;
-import com.smartitengineering.cms.api.workspace.*;
+import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
+import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
+import com.smartitengineering.cms.api.workspace.ResourceTemplate;
+import com.smartitengineering.cms.api.workspace.Sequence;
+import com.smartitengineering.cms.api.workspace.SequenceId;
+import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
+import com.smartitengineering.cms.api.workspace.VariationTemplate;
+import com.smartitengineering.cms.api.workspace.Workspace;
+import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -136,8 +144,7 @@ public interface WorkspaceAPI {
   enum ResourceSortCriteria {
 
     BY_NAME,
-    BY_DATE,
-  }
+    BY_DATE,}
 
   public Collection<String> getRepresentationNames(WorkspaceId id);
 
