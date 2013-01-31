@@ -293,4 +293,8 @@ public class WorkspaceServiceCacheImpl implements WorkspaceService {
   public void reIndex(SequenceId seqId) {
     primaryWorkspaceService.reIndex(seqId);
   }
+
+  public void deleteWorkspaceWithDependencies(WorkspaceId workspaceId) {
+    primaryWorkspaceService.deleteWorkspaceWithDependencies(workspaceId);
+  }
 }

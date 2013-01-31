@@ -22,6 +22,8 @@ import com.google.inject.Inject;
 import com.smartitengineering.cms.api.common.TemplateType;
 import com.smartitengineering.cms.api.content.ContentId;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.factory.content.WriteableContent;
+import com.smartitengineering.cms.api.factory.type.WritableContentType;
 import com.smartitengineering.cms.api.type.ContentType;
 import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
@@ -35,6 +37,10 @@ import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.SequenceId;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
+import com.smartitengineering.cms.spi.impl.content.ContentPersistentService;
+import com.smartitengineering.cms.spi.impl.content.PersistentContent;
+import com.smartitengineering.cms.spi.impl.type.ContentTypePersistentService;
+import com.smartitengineering.cms.spi.impl.type.PersistentContentType;
 import com.smartitengineering.cms.spi.type.PersistentContentTypeReader;
 import com.smartitengineering.cms.spi.workspace.PersistableContentCoProcessorTemplate;
 import com.smartitengineering.cms.spi.workspace.PersistableRepresentationTemplate;
@@ -48,16 +54,13 @@ import com.smartitengineering.cms.spi.workspace.WorkspaceService;
 import com.smartitengineering.dao.common.CommonReadDao;
 import com.smartitengineering.dao.common.CommonWriteDao;
 import com.smartitengineering.dao.common.queryparam.MatchMode;
+import com.smartitengineering.dao.common.queryparam.Order;
 import com.smartitengineering.dao.common.queryparam.QueryParameter;
 import com.smartitengineering.dao.common.queryparam.QueryParameterFactory;
 import com.smartitengineering.dao.impl.hbase.spi.RowCellIncrementor;
 import com.smartitengineering.util.bean.adapter.GenericAdapter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +83,8 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
   protected SequenceSearcher sequenceSearcher;
   @Inject
   private GenericAdapter<Sequence, PersistentSequence> sequenceAdapter;
-
+  @Inject
+  private ExecutorService executorService;
   private static final Comparator<ResourceTemplate> TEMPLATE_DATE_COMPARATOR = new Comparator<ResourceTemplate>() {
 
     @Override
@@ -137,6 +141,55 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
     }
     commonWriteDao.delete(adapter.convert(workspace));
     return workspace;
+  }
+
+  @Override
+  public void deleteWorkspaceWithDependencies(final WorkspaceId workspaceId) {
+    // first collect sequences before workspace delete
+    final Collection<Sequence> sequences = SmartContentAPI.getInstance().getWorkspaceApi().getSequencesForWorkspace(
+        workspaceId);
+    // delete it from persistent storage
+    delete(workspaceId);
+    executorService.submit(new Runnable() {
+
+      public void run() {
+        ContentPersistentService contentPersistentService = (ContentPersistentService) SmartContentSPI.getInstance().
+            getPersistentService(WriteableContent.class);
+        String lastId = "";
+        List<QueryParameter> qps = new ArrayList<QueryParameter>();
+        qps.add(QueryParameterFactory.getStringLikePropertyParam("id", workspaceId.toString(), MatchMode.START));
+        qps.add(QueryParameterFactory.getMaxResultsParam(100));
+
+        qps.add(QueryParameterFactory.getOrderByParam("id", Order.ASC));
+        List<PersistentContent> contents = new ArrayList<PersistentContent>();
+        do {
+          logger.info("Last ID: " + lastId);
+          qps.add(QueryParameterFactory.getGreaterThanPropertyParam("id", lastId));
+          contents = contentPersistentService.getCommonReadDao().getList(qps);
+          logger.info("Contents size : " + contents.size());
+          if (!contents.isEmpty()) {
+            lastId = contents.get(contents.size() - 1).getId().toString();
+          }
+          for (PersistentContent persistentContent : contents) {
+            contentPersistentService.getCommonWriteDao().delete(persistentContent);
+          }
+        }
+        while (!contents.isEmpty());
+
+        ContentTypePersistentService contentTypePersistentService = (ContentTypePersistentService) SmartContentSPI.
+            getInstance().getPersistentService(WritableContentType.class);
+
+        Set<PersistentContentType> persistentContentTypes = contentTypePersistentService.getCommonReadDao().getAll();
+        for (PersistentContentType persistentContentType : persistentContentTypes) {
+          contentTypePersistentService.getCommonWriteDao().delete(persistentContentType);
+        }
+
+        // delete sequence 
+        for (Sequence sequence : sequences) {
+          commonSeqWriteDao.delete(sequenceAdapter.convert(sequence));
+        }
+      }
+    });
   }
 
   @Override

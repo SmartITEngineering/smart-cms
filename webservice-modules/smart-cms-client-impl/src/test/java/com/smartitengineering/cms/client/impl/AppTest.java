@@ -120,6 +120,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.mutable.MutableInt;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.jetty.server.Handler;
@@ -1200,6 +1205,8 @@ public class AppTest {
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
+
+
     try {
       feedResource.getContents().createContentResource(content);
       Assert.fail("Should not be able to create!");
@@ -1223,27 +1230,37 @@ public class AppTest {
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
     FieldValueImpl value = new FieldValueImpl();
-    value.setType("content");
+
+    value.setType(
+        "content");
     value.setValue(contentResourceTest.getUri().toASCIIString());
     FieldImpl authorField = new FieldImpl();
-    authorField.setName("Authors");
-    authorField.setValue(value);
 
+    authorField.setName(
+        "Authors");
+    authorField.setValue(value);
     String valueString = "otherValue";
     byte[] otherValue = valueString.getBytes();
     OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
-    otherFieldValueImpl.setMimeType("jpeg/image");
-    otherFieldValueImpl.setType("other");
+
+    otherFieldValueImpl.setMimeType(
+        "jpeg/image");
+    otherFieldValueImpl.setType(
+        "other");
     otherFieldValueImpl.setValue(Base64.encodeBase64String(otherValue));
 
     FieldImpl valueImpl = new FieldImpl();
-    valueImpl.setName("b");
+
+    valueImpl.setName(
+        "b");
     valueImpl.setValue(otherFieldValueImpl);
 
     sleep();
+
     sleep();
 
-    LOGGER.info(":::::::::::::: CREATE CONTENT RESOURCE TEST ::::::::::::::");
+    LOGGER.info(
+        ":::::::::::::: CREATE CONTENT RESOURCE TEST ::::::::::::::");
     ObjectMapper mapper = new ObjectMapper();
     String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
     InputStream stream = IOUtils.toInputStream(JSON);
@@ -1252,14 +1269,15 @@ public class AppTest {
     content.getFields().add(valueImpl);
     content.getFields().add(authorField);
     Assert.assertNotNull(content);
-
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
     ContentResource contentResource = feedResource.getContents().createContentResource(content);
     Content content1 = contentResource.get();
+
     Assert.assertNotNull(content1);
+
     Assert.assertEquals(content.getParentContentUri(), content1.getParentContentUri());
     Assert.assertEquals(content.getStatus(), content1.getStatus());
     Assert.assertEquals(content.getFields().size(), content1.getFields().size());
@@ -1268,9 +1286,10 @@ public class AppTest {
       LOGGER.debug("Status : " + content1.getStatus());
       LOGGER.debug("Number of Fields : " + content1.getFields().size());
     }
-
     Collection<Field> fields = content.getFields();
-    Collections.reverse((List<Field>) fields);
+
+    Collections.reverse(
+        (List<Field>) fields);
     Iterator<Field> iterator1 = fields.iterator();
     Field field = iterator1.next();
     final Iterator<Field> iterator2 = content1.getFields().iterator();
@@ -1284,54 +1303,62 @@ public class AppTest {
 
     field = iterator1.next();
     field1 = iterator2.next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
 
     field = iterator1.next();
     field1 = iterator2.next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
 
     CollectionFieldValue collectionFieldValue = (CollectionFieldValue) field.getValue();
     CollectionFieldValue collectionFieldValue1 = (CollectionFieldValue) field1.getValue();
+
     Assert.assertEquals(collectionFieldValue.getType().toUpperCase(), collectionFieldValue1.getType());
     Assert.assertEquals(collectionFieldValue.getValues().size(), collectionFieldValue1.getValues().size());
     Iterator<FieldValue> collectionIterator1 = collectionFieldValue.getValues().iterator();
     Iterator<FieldValue> collectionIterator2 = collectionFieldValue1.getValues().iterator();
+
     while (collectionIterator1.hasNext()) {
       String value1 = collectionIterator1.next().getValue();
       String value2 = collectionIterator2.next().getValue();
       Assert.assertEquals(value1, value2);
     }
-
     field = iterator1.next();
     field1 = iterator2.next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
 
     field = iterator1.next();
     field1 = iterator2.next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
 
     field = iterator1.next();
     field1 = iterator2.next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
 
     field = iterator1.next();
     field1 = iterator2.next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
 
     field = iterator1.next();
     field1 = iterator2.next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
@@ -1408,20 +1435,29 @@ public class AppTest {
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource authorResource = feedResourceTest.getContents().createContentResource(contentTest);
     FieldValueImpl value = new FieldValueImpl();
-    value.setType("content");
+
+    value.setType(
+        "content");
     value.setValue(authorResource.getUri().toASCIIString());
     FieldImpl authorField = new FieldImpl();
-    authorField.setName("Authors");
+
+    authorField.setName(
+        "Authors");
     authorField.setValue(value);
     String valueString = "otherValue";
     byte[] otherValue = valueString.getBytes();
     OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
-    otherFieldValueImpl.setMimeType("jpeg/image");
-    otherFieldValueImpl.setType("other");
+
+    otherFieldValueImpl.setMimeType(
+        "jpeg/image");
+    otherFieldValueImpl.setType(
+        "other");
     otherFieldValueImpl.setValue(Base64.encodeBase64String(otherValue));
 
     FieldImpl valueImpl = new FieldImpl();
-    valueImpl.setName("b");
+
+    valueImpl.setName(
+        "b");
     valueImpl.setValue(otherFieldValueImpl);
     ObjectMapper mapper = new ObjectMapper();
     String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
@@ -1431,20 +1467,28 @@ public class AppTest {
     content.getFields().add(valueImpl);
     content.getFields().add(authorField);
     Assert.assertNotNull(content);
-
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
+
     sleep();
     ContentResource contentResource = feedResource.getContents().createContentResource(content);
-    Assert.assertEquals(2, createCount.intValue());
+
+    Assert.assertEquals(
+        2, createCount.intValue());
     contentResource.update(content);
-    Assert.assertEquals(1, updateCount.intValue());
+
+    Assert.assertEquals(
+        1, updateCount.intValue());
     authorResource.delete();
+
     contentResource.get();
+
     contentResource.delete();
-    Assert.assertEquals(2, deleteCount.intValue());
+
+    Assert.assertEquals(
+        2, deleteCount.intValue());
     sleep();
   }
 
@@ -1462,26 +1506,33 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    sleep();
 
+    sleep();
     FieldValueImpl value = new FieldValueImpl();
-    value.setType("content");
+
+    value.setType(
+        "content");
     value.setValue(contentResourceTest.getUri().toASCIIString());
     FieldImpl authorField = new FieldImpl();
-    authorField.setName("Authors");
-    authorField.setValue(value);
 
+    authorField.setName(
+        "Authors");
+    authorField.setValue(value);
     String valueString = "otherValue";
     byte[] otherValue = valueString.getBytes();
     OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
-    otherFieldValueImpl.setMimeType("jpeg/image");
-    otherFieldValueImpl.setType("other");
+
+    otherFieldValueImpl.setMimeType(
+        "jpeg/image");
+    otherFieldValueImpl.setType(
+        "other");
     otherFieldValueImpl.setValue(Base64.encodeBase64String(otherValue));
 
     FieldImpl valueImpl = new FieldImpl();
-    valueImpl.setName("b");
-    valueImpl.setValue(otherFieldValueImpl);
 
+    valueImpl.setName(
+        "b");
+    valueImpl.setValue(otherFieldValueImpl);
     ObjectMapper mapper = new ObjectMapper();
     String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Update-Content.json"));
     InputStream stream = IOUtils.toInputStream(JSON);
@@ -1497,22 +1548,29 @@ public class AppTest {
     WorkspaceFeedResource feedResource = iterator.next();
     ContentResource contentResource = feedResource.getContents().createContentResource(content);
     Content content1 = contentResource.get();
+
     Assert.assertNotNull(content1);
+
     Assert.assertEquals(content.getParentContentUri(), content1.getParentContentUri());
     Assert.assertEquals(content.getStatus(), content1.getStatus());
     Assert.assertEquals(content.getFields().size(), content1.getFields().size());
     Collection<Field> fields = content.getFields();
-    Collections.reverse((List<Field>) fields);
+
+    Collections.reverse(
+        (List<Field>) fields);
     final Field field = fields.iterator().next();
     final Field field1 = content1.getFields().iterator().next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType(), field.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field.getValue().getValue());
 
     feedResource.get();
     ContainerResource containerResource = feedResource.getContents().getContainer().iterator().next();
+
     containerResource.createContainer(contentResource.getUri());
-    Assert.assertEquals(1, containerResource.getContainerContents().size());
+    Assert.assertEquals(
+        1, containerResource.getContainerContents().size());
     Assert.assertEquals(contentResource.getUri().toASCIIString(), containerResource.getContainerContents().iterator().
         next().getUri().toASCIIString());
   }
@@ -1578,31 +1636,39 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    sleep();
 
+    sleep();
     FieldValueImpl value = new FieldValueImpl();
-    value.setType("content");
+
+    value.setType(
+        "content");
     value.setValue(contentResourceTest.getUri().toASCIIString());
     FieldImpl authorField = new FieldImpl();
-    authorField.setName("Authors");
-    authorField.setValue(value);
 
+    authorField.setName(
+        "Authors");
+    authorField.setValue(value);
     String valueString = "otherValue";
     byte[] otherValue = valueString.getBytes();
     OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
-    otherFieldValueImpl.setMimeType("jpeg/image");
-    otherFieldValueImpl.setType("other");
+
+    otherFieldValueImpl.setMimeType(
+        "jpeg/image");
+    otherFieldValueImpl.setType(
+        "other");
     otherFieldValueImpl.setValue(Base64.encodeBase64String(otherValue));
 
     FieldImpl valueImpl = new FieldImpl();
-    valueImpl.setName("b");
-    valueImpl.setValue(otherFieldValueImpl);
 
+    valueImpl.setName(
+        "b");
+    valueImpl.setValue(otherFieldValueImpl);
     Collection<URI> contentUri = new ArrayList<URI>();
     ObjectMapper mapper = new ObjectMapper();
     String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
     InputStream stream = IOUtils.toInputStream(JSON);
     Content content = mapper.readValue(stream, Content.class);
+
     content.getFields().add(valueImpl);
     content.getFields().add(authorField);
     Assert.assertNotNull(content);
@@ -1611,11 +1677,15 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
     ContentResource contentResource = feedResource.getContents().createContentResource(content);
+
     feedResource.get();
     ContainerResource containerResource = feedResource.getContents().getContainer().iterator().next();
+
     contentUri.add(contentResource.getUri());
     containerResource.updateContainer(contentUri);
-    Assert.assertEquals(1, containerResource.getContainerContents().size());
+
+    Assert.assertEquals(
+        1, containerResource.getContainerContents().size());
     Assert.assertEquals(contentResource.getUri().toASCIIString(), containerResource.getContainerContents().iterator().
         next().getUri().toASCIIString());
   }
@@ -1649,25 +1719,31 @@ public class AppTest {
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
 
     sleep();
-
     FieldValueImpl value = new FieldValueImpl();
-    value.setType("content");
+
+    value.setType(
+        "content");
     value.setValue(contentResourceTest.getUri().toASCIIString());
     FieldImpl authorField = new FieldImpl();
-    authorField.setName("Authors");
-    authorField.setValue(value);
 
+    authorField.setName(
+        "Authors");
+    authorField.setValue(value);
     String valueString = "otherValue";
     byte[] otherValue = valueString.getBytes();
     OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
-    otherFieldValueImpl.setMimeType("jpeg/image");
-    otherFieldValueImpl.setType("other");
+
+    otherFieldValueImpl.setMimeType(
+        "jpeg/image");
+    otherFieldValueImpl.setType(
+        "other");
     otherFieldValueImpl.setValue(Base64.encodeBase64String(otherValue));
 
     FieldImpl valueImpl = new FieldImpl();
-    valueImpl.setName("b");
-    valueImpl.setValue(otherFieldValueImpl);
 
+    valueImpl.setName(
+        "b");
+    valueImpl.setValue(otherFieldValueImpl);
     ObjectMapper mapper = new ObjectMapper();
     String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
     InputStream stream = IOUtils.toInputStream(JSON);
@@ -1676,36 +1752,43 @@ public class AppTest {
     content.getFields().add(valueImpl);
     content.getFields().add(authorField);
     Assert.assertNotNull(content);
-
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
-
     ContentResource contentResource = feedResource.getContents().createContentResource(content);
     Content content1 = contentResource.get();
+
     Assert.assertNotNull(content1);
+
     Assert.assertEquals(content.getParentContentUri(), content1.getParentContentUri());
     Assert.assertEquals(content.getStatus(), content1.getStatus());
     Assert.assertEquals(content.getFields().size(), content1.getFields().size());
 
-    LOGGER.info("::: TEST SEARCHING FROM WORKSPACE RESOURCE");
+    LOGGER.info(
+        "::: TEST SEARCHING FROM WORKSPACE RESOURCE");
     ContentSearcherResource contentSearcherResource = feedResource.searchContent("count=3");
-    Assert.assertEquals(3, contentSearcherResource.get().getEntries().size());
 
-    LOGGER.info("::: TEST SEARCHING FROM CONTENT RESOURCE");
+    Assert.assertEquals(
+        3, contentSearcherResource.get().getEntries().size());
+
+    LOGGER.info(
+        "::: TEST SEARCHING FROM CONTENT RESOURCE");
     ContentsResource contentsResource = feedResource.getContents();
     ContentSearcherResource contentSearcherResource1 = contentsResource.searchContent("count=6");
-    Assert.assertEquals(6, contentSearcherResource1.get().getEntries().size());
+
+    Assert.assertEquals(
+        6, contentSearcherResource1.get().getEntries().size());
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Parent Container Uri : " + content1.getParentContentUri());
       LOGGER.debug("Status : " + content1.getStatus());
       LOGGER.debug("Number of Fields : " + content1.getFields().size());
     }
-
     Collection<Field> fields = content.getFields();
-    Collections.reverse((List<Field>) fields);
+
+    Collections.reverse(
+        (List<Field>) fields);
     Iterator<Field> iterator1 = fields.iterator();
     Field field = iterator1.next();
     final Iterator<Field> iterator2 = content1.getFields().iterator();
@@ -1719,59 +1802,68 @@ public class AppTest {
 
     field = iterator1.next();
     field1 = iterator2.next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
 
     field = iterator1.next();
     field1 = iterator2.next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
 
     CollectionFieldValue collectionFieldValue = (CollectionFieldValue) field.getValue();
     CollectionFieldValue collectionFieldValue1 = (CollectionFieldValue) field1.getValue();
+
     Assert.assertEquals(collectionFieldValue.getType().toUpperCase(), collectionFieldValue1.getType());
     Assert.assertEquals(collectionFieldValue.getValues().size(), collectionFieldValue1.getValues().size());
     Iterator<FieldValue> collectionIterator1 = collectionFieldValue.getValues().iterator();
     Iterator<FieldValue> collectionIterator2 = collectionFieldValue1.getValues().iterator();
+
     while (collectionIterator1.hasNext()) {
       String value1 = collectionIterator1.next().getValue();
       String value2 = collectionIterator2.next().getValue();
       Assert.assertEquals(value1, value2);
     }
-
     field = iterator1.next();
     field1 = iterator2.next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
 
     field = iterator1.next();
     field1 = iterator2.next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
 
     field = iterator1.next();
     field1 = iterator2.next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
 
     field = iterator1.next();
     field1 = iterator2.next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
 
     field = iterator1.next();
     field1 = iterator2.next();
+
     Assert.assertEquals(field.getName(), field1.getName());
     Assert.assertEquals(field.getValue().getType().toUpperCase(), field1.getValue().getType());
     Assert.assertEquals(field.getValue().getValue(), field1.getValue().getValue());
 
-    LOGGER.info(":::::::::::::: Updating Content Resource ::::::::::::::");
+    LOGGER.info(
+        ":::::::::::::: Updating Content Resource ::::::::::::::");
 
     ObjectMapper updateMapper = new ObjectMapper();
     String updateJSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Update-Content.json"));
@@ -1781,15 +1873,15 @@ public class AppTest {
     updateContent.getFields().add(valueImpl);
     updateContent.getFields().add(authorField);
     Assert.assertNotNull(updateContent);
-
     RootResource updateResource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     Collection<WorkspaceFeedResource> updateWorkspaceFeedResources = updateResource.getWorkspaceFeeds();
     Iterator<WorkspaceFeedResource> updateIterator = updateWorkspaceFeedResources.iterator();
     WorkspaceFeedResource updateFeedResource = updateIterator.next();
-
     ContentResource updateContentResource = updateFeedResource.getContents().createContentResource(updateContent);
     Content updateContent1 = updateContentResource.get();
+
     Assert.assertNotNull(updateContent1);
+
     Assert.assertEquals(updateContent.getParentContentUri(), updateContent1.getParentContentUri());
     Assert.assertEquals(updateContent.getStatus(), updateContent1.getStatus());
     Assert.assertEquals(updateContent.getFields().size(), updateContent1.getFields().size());
@@ -1799,9 +1891,10 @@ public class AppTest {
       LOGGER.debug("Status : " + updateContent1.getStatus());
       LOGGER.debug("Number of Fields : " + updateContent1.getFields().size());
     }
-
     Collection<Field> updateFields = updateContent.getFields();
-    Collections.reverse((List<Field>) updateFields);
+
+    Collections.reverse(
+        (List<Field>) updateFields);
     Iterator<Field> updateIterator1 = updateFields.iterator();
     Field updateField = updateIterator1.next();
     final Iterator<Field> updateIterator2 = updateContent1.getFields().iterator();
@@ -1815,54 +1908,62 @@ public class AppTest {
 
     updateField = updateIterator1.next();
     updateField1 = updateIterator2.next();
+
     Assert.assertEquals(updateField.getName(), updateField1.getName());
     Assert.assertEquals(updateField.getValue().getType().toUpperCase(), updateField1.getValue().getType());
     Assert.assertEquals(updateField.getValue().getValue(), updateField1.getValue().getValue());
 
     updateField = updateIterator1.next();
     updateField1 = updateIterator2.next();
+
     Assert.assertEquals(updateField.getName(), updateField1.getName());
     Assert.assertEquals(updateField.getValue().getType().toUpperCase(), updateField1.getValue().getType());
     Assert.assertEquals(updateField.getValue().getValue(), updateField1.getValue().getValue());
 
     CollectionFieldValue updateCollectionFieldValue = (CollectionFieldValue) updateField.getValue();
     CollectionFieldValue updateCollectionFieldValue1 = (CollectionFieldValue) updateField1.getValue();
+
     Assert.assertEquals(updateCollectionFieldValue.getType().toUpperCase(), updateCollectionFieldValue1.getType());
     Assert.assertEquals(updateCollectionFieldValue.getValues().size(), updateCollectionFieldValue1.getValues().size());
     Iterator<FieldValue> updateCollectionIterator1 = updateCollectionFieldValue.getValues().iterator();
     Iterator<FieldValue> updateCollectionIterator2 = updateCollectionFieldValue1.getValues().iterator();
+
     while (updateCollectionIterator1.hasNext()) {
       String value1 = updateCollectionIterator1.next().getValue();
       String value2 = updateCollectionIterator2.next().getValue();
       Assert.assertEquals(value1, value2);
     }
-
     updateField = updateIterator1.next();
     updateField1 = updateIterator2.next();
+
     Assert.assertEquals(updateField.getName(), updateField1.getName());
     Assert.assertEquals(updateField.getValue().getType().toUpperCase(), updateField1.getValue().getType());
     Assert.assertEquals(updateField.getValue().getValue(), updateField1.getValue().getValue());
 
     updateField = updateIterator1.next();
     updateField1 = updateIterator2.next();
+
     Assert.assertEquals(updateField.getName(), updateField1.getName());
     Assert.assertEquals(updateField.getValue().getType().toUpperCase(), updateField1.getValue().getType());
     Assert.assertEquals(updateField.getValue().getValue(), updateField1.getValue().getValue());
 
     updateField = updateIterator1.next();
     updateField1 = updateIterator2.next();
+
     Assert.assertEquals(updateField.getName(), updateField1.getName());
     Assert.assertEquals(updateField.getValue().getType().toUpperCase(), updateField1.getValue().getType());
     Assert.assertEquals(updateField.getValue().getValue(), updateField1.getValue().getValue());
 
     updateField = updateIterator1.next();
     updateField1 = updateIterator2.next();
+
     Assert.assertEquals(updateField.getName(), updateField1.getName());
     Assert.assertEquals(updateField.getValue().getType().toUpperCase(), updateField1.getValue().getType());
     Assert.assertEquals(updateField.getValue().getValue(), updateField1.getValue().getValue());
 
     updateField = updateIterator1.next();
     updateField1 = updateIterator2.next();
+
     Assert.assertEquals(updateField.getName(), updateField1.getName());
     Assert.assertEquals(updateField.getValue().getType().toUpperCase(), updateField1.getValue().getType());
     Assert.assertEquals(updateField.getValue().getValue(), updateField1.getValue().getValue());
@@ -1883,27 +1984,35 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    LOGGER.info("Author for representation created!");
-    sleep();
 
+    LOGGER.info(
+        "Author for representation created!");
+    sleep();
     FieldValueImpl value = new FieldValueImpl();
-    value.setType("content");
+
+    value.setType(
+        "content");
     value.setValue(contentResourceTest.getUri().toASCIIString());
     FieldImpl authorField = new FieldImpl();
-    authorField.setName("Authors");
-    authorField.setValue(value);
 
+    authorField.setName(
+        "Authors");
+    authorField.setValue(value);
     String valueString = "otherValue";
     byte[] otherValue = valueString.getBytes();
     OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
-    otherFieldValueImpl.setMimeType("jpeg/image");
-    otherFieldValueImpl.setType("other");
+
+    otherFieldValueImpl.setMimeType(
+        "jpeg/image");
+    otherFieldValueImpl.setType(
+        "other");
     otherFieldValueImpl.setValue(Base64.encodeBase64String(otherValue));
 
     FieldImpl valueImpl = new FieldImpl();
-    valueImpl.setName("b");
-    valueImpl.setValue(otherFieldValueImpl);
 
+    valueImpl.setName(
+        "b");
+    valueImpl.setValue(otherFieldValueImpl);
     ObjectMapper mapper = new ObjectMapper();
     String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
     InputStream stream = IOUtils.toInputStream(JSON);
@@ -1912,21 +2021,20 @@ public class AppTest {
     content.getFields().add(valueImpl);
     content.getFields().add(authorField);
     Assert.assertNotNull(content);
-
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
-
     ContentResource contentResource = feedResource.getContents().createContentResource(content);
-
     Collection<String> urls = contentResource.getRepresentationUrls();
     Iterator<String> iterator1 = urls.iterator();
+
     while (iterator1.hasNext()) {
       String next = iterator1.next();
       String type = contentResource.getRepresentation(next);
       Assert.assertEquals("some/type", type);
     }
+
     sleep();
   }
 
@@ -1942,26 +2050,33 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    sleep();
 
+    sleep();
     FieldValueImpl value = new FieldValueImpl();
-    value.setType("content");
+
+    value.setType(
+        "content");
     value.setValue(contentResourceTest.getUri().toASCIIString());
     FieldImpl authorField = new FieldImpl();
-    authorField.setName("Authors");
-    authorField.setValue(value);
 
+    authorField.setName(
+        "Authors");
+    authorField.setValue(value);
     String valueString = "otherValue";
     byte[] otherValue = valueString.getBytes();
     OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
-    otherFieldValueImpl.setMimeType("jpeg/image");
-    otherFieldValueImpl.setType("other");
+
+    otherFieldValueImpl.setMimeType(
+        "jpeg/image");
+    otherFieldValueImpl.setType(
+        "other");
     otherFieldValueImpl.setValue(Base64.encodeBase64String(otherValue));
 
     FieldImpl valueImpl = new FieldImpl();
-    valueImpl.setName("b");
-    valueImpl.setValue(otherFieldValueImpl);
 
+    valueImpl.setName(
+        "b");
+    valueImpl.setValue(otherFieldValueImpl);
     ObjectMapper mapper = new ObjectMapper();
     String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
     InputStream stream = IOUtils.toInputStream(JSON);
@@ -1970,14 +2085,13 @@ public class AppTest {
     content.getFields().add(valueImpl);
     content.getFields().add(authorField);
     Assert.assertNotNull(content);
-
     RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
-
     ContentResource contentResource = feedResource.getContents().createContentResource(content);
     Iterator<FieldResource> iterator2 = contentResource.getFields().iterator();
+
     while (iterator2.hasNext()) {
       FieldResource next = iterator2.next();
       Collection<String> variations = next.getVariationUrls();
@@ -2021,30 +2135,38 @@ public class AppTest {
     Iterator<WorkspaceFeedResource> iteratorTest = workspaceFeedResources1.iterator();
     WorkspaceFeedResource feedResourceTest = iteratorTest.next();
     ContentResource contentResourceTest = feedResourceTest.getContents().createContentResource(contentTest);
-    sleep();
 
+    sleep();
     FieldValueImpl value = new FieldValueImpl();
-    value.setType("content");
+
+    value.setType(
+        "content");
     value.setValue(contentResourceTest.getUri().toASCIIString());
     FieldImpl authorField = new FieldImpl();
-    authorField.setName("Authors");
-    authorField.setValue(value);
 
+    authorField.setName(
+        "Authors");
+    authorField.setValue(value);
     String valueString = "otherValue";
     byte[] otherValue = valueString.getBytes();
     OtherFieldValueImpl otherFieldValueImpl = new OtherFieldValueImpl();
-    otherFieldValueImpl.setMimeType("jpeg/image");
-    otherFieldValueImpl.setType("other");
+
+    otherFieldValueImpl.setMimeType(
+        "jpeg/image");
+    otherFieldValueImpl.setType(
+        "other");
     otherFieldValueImpl.setValue(Base64.encodeBase64String(otherValue));
 
     FieldImpl valueImpl = new FieldImpl();
-    valueImpl.setName("b");
-    valueImpl.setValue(otherFieldValueImpl);
 
+    valueImpl.setName(
+        "b");
+    valueImpl.setValue(otherFieldValueImpl);
     ObjectMapper mapper = new ObjectMapper();
     String JSON = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("Content.json"));
     InputStream stream = IOUtils.toInputStream(JSON);
     Content content = mapper.readValue(stream, Content.class);
+
     content.getFields().add(valueImpl);
     content.getFields().add(authorField);
     Assert.assertNotNull(content);
@@ -2052,9 +2174,12 @@ public class AppTest {
     Collection<WorkspaceFeedResource> workspaceFeedResources = resource.getWorkspaceFeeds();
     Iterator<WorkspaceFeedResource> iterator = workspaceFeedResources.iterator();
     WorkspaceFeedResource feedResource = iterator.next();
+
     feedResource.getContents().createContentResource(content).delete(ClientResponse.Status.OK);
     feedResource.get();
-    Assert.assertEquals(0, feedResource.getContents().getContentResources().size());
+
+    Assert.assertEquals(
+        0, feedResource.getContents().getContentResources().size());
   }
 
   @Test
@@ -2113,6 +2238,8 @@ public class AppTest {
     Content contentTest = mapper1.readValue(
         getClass().getClassLoader().getResourceAsStream("testtemplates/Content.json"), Content.class);
     ContentResource contentResource = feedResource.getContents().createContentResource(contentTest);
+
+
     try {
       contentTest = mapper1.readValue(getClass().getClassLoader().getResourceAsStream(
           "testtemplates/Content_invalid_max.json"), Content.class);
@@ -2144,7 +2271,9 @@ public class AppTest {
     com.smartitengineering.util.rest.client.HttpClient client = contentResource.getClientFactory().getHttpClient();
     WebResource varResource = client.getWebResource(URI.create(variationUri));
     String variation = varResource.get(String.class);
-    Assert.assertEquals("Nothing ", variation);
+
+    Assert.assertEquals(
+        "Nothing ", variation);
     contentResource.delete(ClientResponse.Status.ACCEPTED, ClientResponse.Status.OK);
   }
 
@@ -2159,11 +2288,15 @@ public class AppTest {
     com.smartitengineering.util.rest.client.HttpClient client = contentResource.getClientFactory().getHttpClient();
     WebResource repResource = client.getWebResource(URI.create(representationUri));
     String representation = repResource.get(String.class);
-    Assert.assertEquals("Nothing", representation);
+
+    Assert.assertEquals(
+        "Nothing", representation);
     representationUri = contentResource.getLastReadStateOfEntity().getRepresentationsByName().get("arep2");
     repResource = client.getWebResource(URI.create(representationUri));
     representation = repResource.get(String.class);
-    Assert.assertEquals("Nothing I", representation);
+
+    Assert.assertEquals(
+        "Nothing I", representation);
     contentResource.delete(ClientResponse.Status.ACCEPTED, ClientResponse.Status.OK);
   }
 
@@ -2905,6 +3038,7 @@ public class AppTest {
     config.getClasses().add(TextURIListProvider.class);
     config.getClasses().add(FeedProvider.class);
     Client client = Client.create(config);
+
     {
       final Properties properties = new Properties();
       properties.load(getClass().getClassLoader().getResourceAsStream(
@@ -2932,6 +3066,7 @@ public class AppTest {
           header("Pragma", "no-cache").get(Content.class);
       Assert.assertEquals(dynaField, reReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue());
     }
+
     {
       final Properties properties = new Properties();
       properties.load(getClass().getClassLoader().getResourceAsStream(
@@ -2959,6 +3094,7 @@ public class AppTest {
           header("Pragma", "no-cache").get(Content.class);
       Assert.assertFalse(dynaField.equals(reReadStateOfEntity.getFieldsMap().get("dynaField").getValue().getValue()));
     }
+
     sleep();
   }
 
@@ -2979,8 +3115,8 @@ public class AppTest {
         final WorkspaceIdImpl workspaceId = new WorkspaceIdImpl("test", "sequences");
         if (feedResource == null) {
           Workspace workspace = resource.createWorkspace(workspaceId);
-          feedResource = resource.getTemplates().getWorkspaceResource(workspace.getId().getGlobalNamespace(), workspace.
-              getId().getName());
+          feedResource = resource.getTemplates().getWorkspaceResource(workspace.getId().getGlobalNamespace(),
+                                                                      workspace.getId().getName());
         }
         valid = true;
       }
@@ -3157,12 +3293,41 @@ public class AppTest {
 
     // create a workspace for delete
     WorkspaceId workspaceForDeleteId = SmartContentAPI.getInstance().getWorkspaceApi().createWorkspace("wsfordelete");
+
+    LOGGER.info("<<<<<<<<<<<<<<<<<<BEFORE INSERTING DELETE WORKSPACE CONTENT>>>>>>>>>>>>>>>>>>");
+
+    ResultScanner rs = null;
+
+    try {
+      HTable table = new HTable(TEST_UTIL.getConfiguration(), "cms_content");
+      Scan s = new Scan();
+      s.addColumn(Bytes.toBytes("self"), Bytes.toBytes("contentType"));
+      rs = table.getScanner(s);
+      LOGGER.info("WorkspaceForDelete Id: " + workspaceForDeleteId.toString());
+      for (Result rr = rs.next(); rr != null; rr = rs.next()) {
+        String rowId = Bytes.toString(rr.getRow());
+        if (rowId.contains(workspaceForDeleteId.toString())) {
+          LOGGER.info(rowId);
+          Assert.fail();
+        }
+        LOGGER.info(rowId);
+      }
+
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    finally {
+      rs.close();
+    }
+
+
     //SmartContentAPI.getInstance().getWorkspaceApi().createWorkspace(workspaceForDeleteId);
     com.smartitengineering.cms.api.workspace.Workspace workSpaceForDelete = SmartContentAPI.getInstance().
         getWorkspaceApi().getWorkspace(workspaceForDeleteId);
     Assert.assertNotNull(workSpaceForDelete);
 
-    // create content type    
+    // create content type
     InputStream stream = getClass().getClassLoader().getResourceAsStream("content-type-for-delete.xml");
 
     try {
@@ -3189,8 +3354,102 @@ public class AppTest {
     String statusKey = contentType.getStatuses().keySet().iterator().next();
     ContentStatus contentStatus = contentType.getStatuses().get(statusKey);
 
-    final WriteableContent writeableContent;
+    WriteableContent writeableContent;
+    for (int i = 0; i < 150; i++) {
 
+      MutableContent mutableContent = SmartContentAPI.getInstance().getContentLoader().createContent(contentType);
+      mutableContent.setContentDefinition(contentType);
+      mutableContent.setPrivate(false);
+      mutableContent.setStatus(contentStatus);
+      MutableField mutableField = new com.smartitengineering.cms.api.impl.content.FieldImpl();
+      mutableField.setName("name");
+      MutableFieldValue<String> mutableFieldValue =
+                                new com.smartitengineering.cms.api.impl.content.FieldValueImpl<String>();
+      mutableFieldValue.setValue("russel");
+      mutableField.setValue(mutableFieldValue);
+      mutableContent.setField(mutableField);
+      //Create new content
+      writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(mutableContent);
+      writeableContent.createContentId(workspaceForDeleteId);
+
+
+      try {
+        //Save or update the content, will be decided by writeable content implementation
+        writeableContent.put();
+      }
+      catch (IOException ex) {
+        LOGGER.error(ex.getMessage(), ex);
+        Assert.fail();
+      }
+    }
+    sleep();
+
+    SmartContentAPI.getInstance().getWorkspaceApi().deleteWorkspace(workspaceForDeleteId);
+    sleep();
+    try {
+      Thread.sleep(50000);
+    }
+    catch (Exception ex) {
+    }
+    com.smartitengineering.cms.api.workspace.Workspace fetchedWorkspace = SmartContentAPI.getInstance().
+        getWorkspaceApi().
+        getWorkspace(workspaceForDeleteId);
+    if (fetchedWorkspace == null) {
+      LOGGER.info("Fetched workspace null");
+    }
+    Assert.assertNull(fetchedWorkspace);
+
+    contentType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(contentTypeId);
+    Assert.assertNull(contentType);
+
+    // test contents exists or not
+
+    try {
+      HTable table = new HTable(TEST_UTIL.getConfiguration(), "cms_content");
+      Scan s = new Scan();
+      s.addColumn(Bytes.toBytes("self"), Bytes.toBytes("contentType"));
+      rs = table.getScanner(s);
+      LOGGER.info("WorkspaceForDelete Id: " + workspaceForDeleteId.toString());
+      for (Result rr = rs.next(); rr != null; rr = rs.next()) {
+        String rowId = Bytes.toString(rr.getRow());
+        if (rowId.contains(workspaceForDeleteId.toString())) {
+          LOGGER.info(rowId);
+          Assert.fail();
+        }
+      }
+
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    finally {
+      rs.close();
+    }
+
+    // test fields exists or not
+    try {
+      HTable table = new HTable(TEST_UTIL.getConfiguration(), "cms_fields");
+      Scan s = new Scan();
+      s.addColumn(Bytes.toBytes("self"), Bytes.toBytes("id"));
+      rs = table.getScanner(s);
+      LOGGER.info("WorkspaceForDelete Id: " + workspaceForDeleteId.toString());
+      for (Result rr = rs.next(); rr != null; rr = rs.next()) {
+        String rowId = Bytes.toString(rr.getRow());
+        LOGGER.info("Fields: " + rowId);
+        if (rowId.contains(workspaceForDeleteId.toString())) {
+          LOGGER.info(rowId);
+          Assert.fail();
+        }
+      }
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    finally {
+      rs.close();
+    }
+
+    final WriteableContent writeableContentForDeleteTest;
     MutableContent mutableContent = SmartContentAPI.getInstance().getContentLoader().createContent(contentType);
     mutableContent.setContentDefinition(contentType);
     mutableContent.setPrivate(false);
@@ -3203,46 +3462,8 @@ public class AppTest {
     mutableField.setValue(mutableFieldValue);
     mutableContent.setField(mutableField);
     //Create new content
-    writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(mutableContent);
-    writeableContent.createContentId(workspaceForDeleteId);
-
-
-    try {
-      //Save or update the content, will be decided by writeable content implementation
-      writeableContent.put();
-    }
-    catch (IOException ex) {
-      LOGGER.error(ex.getMessage(), ex);
-      Assert.fail();
-    }
-
-    SmartContentAPI.getInstance().getWorkspaceApi().deleteWorkspace(workspaceForDeleteId);
-    sleep();
-    com.smartitengineering.cms.api.workspace.Workspace fetchedWorkspace = SmartContentAPI.getInstance().getWorkspaceApi().
-        getWorkspace(workspaceForDeleteId);
-    if (fetchedWorkspace == null) {
-      LOGGER.info("Fetched workspace null");
-    }
-    Assert.assertNull(fetchedWorkspace);
-
-    contentType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(contentTypeId);
-    Assert.assertNull(contentType);
-
-
-
-    final WriteableContent writeableContentForDeleteTest;
-    mutableContent = SmartContentAPI.getInstance().getContentLoader().createContent(contentType);
-    mutableContent.setContentDefinition(contentType);
-    mutableContent.setPrivate(false);
-    mutableContent.setStatus(contentStatus);
-    mutableField = new com.smartitengineering.cms.api.impl.content.FieldImpl();
-    mutableField.setName("name");
-    mutableFieldValue = new com.smartitengineering.cms.api.impl.content.FieldValueImpl<String>();
-    mutableFieldValue.setValue("russel");
-    mutableField.setValue(mutableFieldValue);
-    mutableContent.setField(mutableField);
-    //Create new content
-    writeableContentForDeleteTest = SmartContentAPI.getInstance().getContentLoader().getWritableContent(mutableContent);
+    writeableContentForDeleteTest =
+    SmartContentAPI.getInstance().getContentLoader().getWritableContent(mutableContent);
     writeableContentForDeleteTest.createContentId(workspaceForDeleteId);
 
 
