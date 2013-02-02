@@ -163,10 +163,16 @@ public class WorkspaceServiceImpl extends AbstractWorkspaceService implements Wo
         qps.add(QueryParameterFactory.getOrderByParam("id", Order.ASC));
         List<PersistentContent> contents = new ArrayList<PersistentContent>();
         do {
-          logger.info("Last ID: " + lastId);
-          qps.add(QueryParameterFactory.getGreaterThanPropertyParam("id", lastId));
+          if (logger.isDebugEnabled()) {
+            logger.debug("Last ID: " + lastId);
+          }
+          if (StringUtils.isNotBlank(lastId)) {
+            qps.add(QueryParameterFactory.getGreaterThanPropertyParam("id", lastId));
+          }
           contents = contentPersistentService.getCommonReadDao().getList(qps);
-          logger.info("Contents size : " + contents.size());
+          if (logger.isDebugEnabled()) {
+            logger.debug("Contents size : " + contents.size());
+          }
           if (!contents.isEmpty()) {
             lastId = contents.get(contents.size() - 1).getId().toString();
           }
