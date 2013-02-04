@@ -3599,6 +3599,194 @@ public class AppTest {
 
   @Test
   public void testDeleteWorkspaceViaWebservice() {
+    LOGGER.info("::::::::::::::::::::: TEST DELETE WORKSPACE FROM WEBSERVICE ::::::::::::::::::::::");
+    
+    final String WSForDeleteWith300plusContent = "wsfordeletewith350content";
+    WorkspaceIdImpl workspaceId = new WorkspaceIdImpl();
+    workspaceId.setName(WSForDeleteWith300plusContent);
+    workspaceId.setGlobalNamespace(WSForDeleteWith300plusContent);
+    WorkspaceContentResouce workspaceContentResourceForDelete = null;
+    try {
+      RootResource resource = RootResourceImpl.getRoot(new URI(ROOT_URI_STRING));
+      int size = resource.getWorkspaces().size();
+      Workspace workspace = resource.createWorkspace(workspaceId);
+      Assert.assertNotNull(workspace);
+      resource.get();
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Workspace size: " + resource.getWorkspaces().size());
+      }
+      for (WorkspaceContentResouce workspaceContentResource : resource.getWorkspaces()) {
+        if (workspaceContentResource.get().getId().getName().equals(WSForDeleteWith300plusContent)) {
+          workspaceContentResourceForDelete = workspaceContentResource;
+        }
+      }
+    }
+    catch (Exception ex) {
+      LOGGER.error(ex.getMessage(), ex);
+    }
+
+    ResultScanner rs = null;
+    com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl workspaceForDeleteWith300PlusContentId =
+                                                                  new com.smartitengineering.cms.api.impl.workspace.WorkspaceIdImpl();
+    workspaceForDeleteWith300PlusContentId.setName(WSForDeleteWith300plusContent);
+    workspaceForDeleteWith300PlusContentId.setGlobalNamespace(WSForDeleteWith300plusContent);
+    com.smartitengineering.cms.api.workspace.Workspace workSpaceForDeleteWith300PlusContent = SmartContentAPI.
+        getInstance().getWorkspaceApi().getWorkspace(workspaceForDeleteWith300PlusContentId);
+    Assert.assertNotNull(workSpaceForDeleteWith300PlusContent);
+
+    // create content type
+    InputStream stream = getClass().getClassLoader().getResourceAsStream("content-type-for-delete.xml");
+
+    try {
+      final ContentTypeLoader contentTypeLoader = SmartContentAPI.getInstance().getContentTypeLoader();
+      final Collection<WritableContentType> types;
+      types = contentTypeLoader.parseContentTypes(workSpaceForDeleteWith300PlusContent.getId(), stream,
+                                                  com.smartitengineering.cms.api.common.MediaType.APPLICATION_XML);
+      for (WritableContentType type : types) {
+        type.put();
+      }
+      stream.close();
+    }
+    catch (Exception ex) {
+      LOGGER.info("Can not create ContentType for delete", ex);
+      Assert.fail();
+    }
+    ContentTypeId contentTypeId = SmartContentAPI.getInstance().getContentTypeLoader().createContentTypeId(
+        workspaceForDeleteWith300PlusContentId, "com.smartitengineering.smart-shopping.content", "ContentTypeForDelete");
+
+
+    ContentType contentType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(contentTypeId);
+    Assert.assertNotNull(contentType);
+
+    // create content
+    String statusKey = contentType.getStatuses().keySet().iterator().next();
+    ContentStatus contentStatus = contentType.getStatuses().get(statusKey);
+
+    for (int i = 0; i < 350; i++) {
+      MutableContent mutableContent = SmartContentAPI.getInstance().getContentLoader().createContent(contentType);
+      mutableContent.setContentDefinition(contentType);
+      mutableContent.setPrivate(false);
+      mutableContent.setStatus(contentStatus);
+      MutableField mutableField = new com.smartitengineering.cms.api.impl.content.FieldImpl();
+      mutableField.setName("name");
+      MutableFieldValue<String> mutableFieldValue =
+                                new com.smartitengineering.cms.api.impl.content.FieldValueImpl<String>();
+      mutableFieldValue.setValue("russel");
+      mutableField.setValue(mutableFieldValue);
+      mutableContent.setField(mutableField);
+      //Create new content
+      WriteableContent writeableContent = SmartContentAPI.getInstance().getContentLoader().getWritableContent(
+          mutableContent);
+      writeableContent.createContentId(workspaceForDeleteWith300PlusContentId);
+
+      try {
+        //Save or update the content, will be decided by writeable content implementation
+        writeableContent.put();
+      }
+      catch (IOException ex) {
+        LOGGER.error(ex.getMessage(), ex);
+        Assert.fail();
+      }
+    }
+    sleep();
+
+    // delete workspace via web service
+    LOGGER.info("");
+    workspaceContentResourceForDelete.delete();
+
+
+    sleep();
+    try {
+      Thread.sleep(50000);
+    }
+    catch (Exception ex) {
+    }
+    com.smartitengineering.cms.api.workspace.Workspace fetchedWorkspace = SmartContentAPI.getInstance().
+        getWorkspaceApi().
+        getWorkspace(workspaceForDeleteWith300PlusContentId);
+    if (fetchedWorkspace == null) {
+      LOGGER.info("Fetched workspace null");
+    }
+    Assert.assertNull(fetchedWorkspace);
+
+    contentType = SmartContentAPI.getInstance().getContentTypeLoader().loadContentType(contentTypeId);
+    Assert.assertNull(contentType);
+
+    // test contents exists or not
+
+    try {
+      HTable table = new HTable(TEST_UTIL.getConfiguration(), "cms_content");
+      Scan s = new Scan();
+      s.addColumn(Bytes.toBytes("self"), Bytes.toBytes("contentType"));
+      rs = table.getScanner(s);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("WorkspaceForDelete Id: " + workspaceForDeleteWith300PlusContentId.toString());
+      }
+      for (Result rr = rs.next(); rr != null; rr = rs.next()) {
+        String rowId = Bytes.toString(rr.getRow());
+        if (rowId.contains(workspaceForDeleteWith300PlusContentId.toString())) {
+          LOGGER.info(rowId);
+          Assert.fail();
+        }
+      }
+
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    finally {
+      rs.close();
+    }
+
+    // test fields exists or not
+    try {
+      HTable table = new HTable(TEST_UTIL.getConfiguration(), "cms_fields");
+      Scan s = new Scan();
+      s.addColumn(Bytes.toBytes("self"), Bytes.toBytes("id"));
+      rs = table.getScanner(s);
+      LOGGER.info("WorkspaceForDelete Id: " + workspaceForDeleteWith300PlusContentId.toString());
+      for (Result rr = rs.next(); rr != null; rr = rs.next()) {
+        String rowId = Bytes.toString(rr.getRow());
+        LOGGER.info("Fields: " + rowId);
+        if (rowId.contains(workspaceForDeleteWith300PlusContentId.toString())) {
+          LOGGER.info(rowId);
+          Assert.fail();
+        }
+      }
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    finally {
+      rs.close();
+    }
+
+    final WriteableContent writeableContentForDeleteTest;
+    MutableContent mutableContent = SmartContentAPI.getInstance().getContentLoader().createContent(contentType);
+    mutableContent.setContentDefinition(contentType);
+    mutableContent.setPrivate(false);
+    mutableContent.setStatus(contentStatus);
+    MutableField mutableField = new com.smartitengineering.cms.api.impl.content.FieldImpl();
+    mutableField.setName("name");
+    MutableFieldValue<String> mutableFieldValue =
+                              new com.smartitengineering.cms.api.impl.content.FieldValueImpl<String>();
+    mutableFieldValue.setValue("russel");
+    mutableField.setValue(mutableFieldValue);
+    mutableContent.setField(mutableField);
+    //Create new content
+    writeableContentForDeleteTest =
+    SmartContentAPI.getInstance().getContentLoader().getWritableContent(mutableContent);
+    writeableContentForDeleteTest.createContentId(workspaceForDeleteWith300PlusContentId);
+
+    try {
+      //Save or update the content, will be decided by writeable content implementation
+      writeableContentForDeleteTest.put();
+      Assert.fail();
+    }
+    catch (IOException ex) {
+      LOGGER.info("should fail");
+
+    }
   }
 
   protected void sleep() {

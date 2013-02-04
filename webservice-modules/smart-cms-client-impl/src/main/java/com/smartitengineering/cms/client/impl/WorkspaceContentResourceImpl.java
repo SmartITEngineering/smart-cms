@@ -23,6 +23,7 @@ import com.smartitengineering.cms.ws.common.domains.Workspace;
 import com.smartitengineering.util.rest.client.AbstractClientResource;
 import com.smartitengineering.util.rest.client.Resource;
 import com.smartitengineering.util.rest.client.ResourceLink;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.config.ClientConfig;
 
@@ -55,5 +56,9 @@ public class WorkspaceContentResourceImpl extends AbstractClientResource<Workspa
   @Override
   protected ResourceLink getPreviousUri() {
     return null;
+  }
+
+  public void delete() {
+    delete(ClientResponse.Status.OK);
   }
 }

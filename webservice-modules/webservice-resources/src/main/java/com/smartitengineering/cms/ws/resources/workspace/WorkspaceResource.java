@@ -33,6 +33,7 @@ import java.net.URI;
 import java.util.Date;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -117,6 +118,16 @@ public class WorkspaceResource extends AbstractResource {
     else {
       return Response.status(Response.Status.NOT_MODIFIED).build();
     }
+  }
+
+  @DELETE
+  public Response deleteWorkspace() {
+    ResponseBuilder responseBuilder = Response.status(Response.Status.OK);
+    if (workspace == null) {
+      return responseBuilder.status(Response.Status.NOT_FOUND).build();
+    }
+    SmartContentAPI.getInstance().getWorkspaceApi().deleteWorkspace(workspace.getId());
+    return responseBuilder.build();
   }
 
   @Path(PATH_SEARCH)
