@@ -220,4 +220,6 @@ public interface WorkspaceAPI {
   public void reIndex(SequenceId seqId);
 
   public SequenceId createSequenceId(WorkspaceId workspaceId, String name);
+
+  public void deleteWorkspace(WorkspaceId workspaceId);
 }

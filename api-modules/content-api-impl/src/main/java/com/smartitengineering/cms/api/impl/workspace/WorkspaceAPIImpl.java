@@ -27,24 +27,24 @@ import com.smartitengineering.cms.api.content.template.ContentCoProcessor;
 import com.smartitengineering.cms.api.content.template.FieldValidator;
 import com.smartitengineering.cms.api.content.template.RepresentationGenerator;
 import com.smartitengineering.cms.api.content.template.VariationGenerator;
-import com.smartitengineering.cms.api.exception.InvalidTemplateException;
-import com.smartitengineering.cms.api.workspace.Sequence;
-import com.smartitengineering.cms.api.workspace.SequenceId;
-import com.smartitengineering.cms.spi.content.template.ContentCoProcessorGenerator;
 import com.smartitengineering.cms.api.event.Event;
 import com.smartitengineering.cms.api.event.Event.EventType;
 import com.smartitengineering.cms.api.event.Event.Type;
+import com.smartitengineering.cms.api.exception.InvalidTemplateException;
 import com.smartitengineering.cms.api.factory.SmartContentAPI;
+import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
+import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.ContentCoProcessorTemplate;
 import com.smartitengineering.cms.api.workspace.RepresentationTemplate;
 import com.smartitengineering.cms.api.workspace.ResourceTemplate;
+import com.smartitengineering.cms.api.workspace.Sequence;
+import com.smartitengineering.cms.api.workspace.SequenceId;
 import com.smartitengineering.cms.api.workspace.ValidatorTemplate;
 import com.smartitengineering.cms.api.workspace.VariationTemplate;
 import com.smartitengineering.cms.api.workspace.Workspace;
-import com.smartitengineering.cms.api.factory.workspace.WorkspaceAPI;
-import com.smartitengineering.cms.api.type.ValidatorType;
 import com.smartitengineering.cms.api.workspace.WorkspaceId;
 import com.smartitengineering.cms.spi.SmartContentSPI;
+import com.smartitengineering.cms.spi.content.template.ContentCoProcessorGenerator;
 import com.smartitengineering.cms.spi.content.template.TypeFieldValidator;
 import com.smartitengineering.cms.spi.content.template.TypeRepresentationGenerator;
 import com.smartitengineering.cms.spi.content.template.TypeVariationGenerator;
@@ -54,7 +54,6 @@ import com.smartitengineering.dao.common.cache.Mutex;
 import com.smartitengineering.dao.common.cache.impl.CacheAPIFactory;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -62,6 +61,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -899,6 +899,10 @@ public class WorkspaceAPIImpl implements WorkspaceAPI {
 
   public void reIndex(SequenceId seqId) {
     SmartContentSPI.getInstance().getWorkspaceService().reIndex(seqId);
+  }
+
+  public void deleteWorkspace(final WorkspaceId workspaceId) {
+    SmartContentSPI.getInstance().getWorkspaceService().deleteWorkspaceWithDependencies(workspaceId);
   }
 
   public interface Lookup<T> {

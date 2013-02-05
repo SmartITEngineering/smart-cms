@@ -45,6 +45,8 @@ public interface WorkspaceService {
 
   public Workspace delete(WorkspaceId workspaceId);
 
+  public void deleteWorkspaceWithDependencies(WorkspaceId workspaceId);
+
   public Collection<Workspace> getWorkspaces();
 
   public Collection<ContentType> getContentDefintions(WorkspaceId workspaceId);

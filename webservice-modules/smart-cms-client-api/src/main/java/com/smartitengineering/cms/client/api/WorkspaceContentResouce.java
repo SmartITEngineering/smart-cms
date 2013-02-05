@@ -28,4 +28,6 @@ import com.smartitengineering.util.rest.client.Resource;
 public interface WorkspaceContentResouce extends Resource<Workspace> {
 
   String WORKSPACE_CONTENT = "workspaceContent";
+
+  public void delete();
 }
