@@ -21,6 +21,7 @@ package com.smartitengineering.cms.client.api;
 import com.smartitengineering.cms.ws.common.domains.FieldDef;
 import com.smartitengineering.util.rest.client.Resource;
 import java.util.List;
+import java.util.Map;
 import org.apache.abdera.model.Feed;
 
 /**
@@ -32,6 +33,8 @@ public interface ContentTypeFeedResource extends Resource<Feed> {
   ContentTypeResource getContentTypeResource();
 
   List<FieldDef> getFieldDefs();
+
+  Map<String, FieldDef> getFieldDefsMap();
   
   List<String> getStatuses();
 

@@ -32,7 +32,9 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
@@ -85,6 +87,15 @@ public class ContentTypeFeedResourceImpl extends AbstractFeedClientResource<Reso
       }
     }
     return defs;
+  }
+
+  public Map<String, FieldDef> getFieldDefsMap() {
+    List<FieldDef> defs = getFieldDefs();
+    final Map<String, FieldDef> result = new LinkedHashMap<String, FieldDef>();
+    for (FieldDef def : defs) {
+      result.put(def.getName(), def);
+    }
+    return result;
   }
 
   @Override
